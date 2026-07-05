@@ -1,0 +1,65 @@
+{
+  "blocked_moves": [
+    "treating FEAS-ZEN-080 as activation authority",
+    "substituting planning artifact for execution authority",
+    "relaxing policy exact-match requirement",
+    "escalating to COMPILER without attempting repair",
+    "introducing new source_ids",
+    "altering verification_verdict from ALLOW",
+    "changing binding class from SOURCE_BOUNDARY_CLOSED"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "No upstream artifacts required. Source bindings intact. Only token-count repair needed."
+  ],
+  "diagnosis": {
+    "claim_support_verdict": "CORRECT - AUTH-ZEN-080 supplies precise activation authority matching site Z-12, protocol P7.2, consent C11, activation date 2026-06-28, and enrollment authority before enrollment per STD-ZEN-080-P.",
+    "correct_elements_preserved": [
+      "AUTH-ZEN-080 exactly matches all required elements per policy",
+      "FEAS-ZEN-080 correctly excluded as non-authority",
+      "action boundary correctly identified",
+      "verification_verdict ALLOW correct",
+      "binding class SOURCE_BOUNDARY_CLOSED correct"
+    ],
+    "gate_failure": "word_band_final_answer (23 and 24 words detected, required band not met)",
+    "source_binding_verdict": "CORRECT - AUTH-ZEN-080 is the sole controlling source fact"
+  },
+  "final_answer_template": "AUTH-ZEN-080 provides precise activation authority matching site Z-12, protocol P7.2, consent C11, activation date 2026-06-28, and enrollment authority before enrollment per STD-ZEN-080-P. Clinical operations may activate the trial site.",
+  "final_compiler_allowed": false,
+  "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton.",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "AUTH-ZEN-080 as sole activation authority",
+    "FEAS-ZEN-080 as non-authority (startup planning only)",
+    "STD-ZEN-080-P exact-match requirement",
+    "verification_verdict ALLOW",
+    "binding class SOURCE_BOUNDARY_CLOSED",
+    "action boundary 'May clinical operations activate the trial site?'",
+    "cited evidence AUTH-ZEN-080 and STD-ZEN-080-P only"
+  ],
+  "must_repair": [
+    "word_band_final_answer count must fall within required band (target 22 words)",
+    "final answer string must be reworded to meet band specification"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Adversarial challenge of word-band compliance while maintaining correct source-boundary closure determination.",
+    "monotonic_preservation": [
+      "AUTH-ZEN-080 supplies precise activation authority",
+      "All policy elements (site Z-12, protocol P7.2, consent C11, activation date 2026-06-28, enrollment authority before enrollment) matched",
+      "FEAS-ZEN-080 explicitly not activation authority",
+      "Clinical operations may activate trial site"
+    ],
+    "objective": "Provide corrected final answer meeting deterministic word_band gate requirement while preserving all correct source bindings and verification logic.",
+    "required_repairs": [
+      "Reword final_answer to meet exact word_band requirement (target 22 words)",
+      "Preserve 'AUTH-ZEN-080' as controlling source fact",
+      "Preserve 'STD-ZEN-080-P' as controlling policy reference",
+      "Preserve verification_verdict ALLOW",
+      "Preserve binding class SOURCE_BOUNDARY_CLOSED",
+      "Maintain exclusion of FEAS-ZEN-080 from authority"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "All source elements correct. Gate failure is mechanical (word_band_final_answer). Repair word count only. Preserve all correctness.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

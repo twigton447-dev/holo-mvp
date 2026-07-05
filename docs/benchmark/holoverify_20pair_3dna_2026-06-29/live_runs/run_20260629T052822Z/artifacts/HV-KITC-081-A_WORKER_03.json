@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement execute the controlled-solvent purchase?",
+    "allow_rule_assessment": "REL-AST-081 execution release matches material (AS-44), quantity band (0-20L covers 18L), facility (Facility R9), PO reference (PO-AST-081), and hazard controls (active cabinet/handler) before PO execution per STD-AST-081-P policy requirements.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "REL-AST-081 directly covers AS-44, 0-20L band, Facility R9, PO-AST-081, and active cabinet/handler controls, satisfying STD-AST-081-P exact boundary requirements before execution.",
+    "escalate_rule_assessment": "N/A",
+    "timing_scope_authority_dependency_check": "Execution release precedes PO execution temporally; scope covers all five required matching elements; REL-AST-081 is the controlling execution authority, not WARN-AST-081 (which is a generic warning, not a execution-blocker)."
+  },
+  "cited_evidence": [
+    "PO-AST-081",
+    "REL-AST-081",
+    "STD-AST-081-P"
+  ],
+  "critical_features_preserved": [
+    "Exact material match (AS-44)",
+    "Quantity band coverage (0-20L covers 18L)",
+    "Facility match (Facility R9)",
+    "PO reference match (PO-AST-081)",
+    "Hazard-control status (active cabinet/handler)"
+  ],
+  "final_answer": "Allow. REL-AST-081 execution release directly satisfies STD-AST-081-P policy: it covers AS-44 solvent, 0-20 liter band (encompassing the 18 liters in PO-AST-081), Facility R9, PO-AST-081, and active cabinet/handler controls before execution. All five required matching elements are present and current. WARN-AST-081 is a generic warning, not an execution-blocker. The action boundary is closed by exact source evidence.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

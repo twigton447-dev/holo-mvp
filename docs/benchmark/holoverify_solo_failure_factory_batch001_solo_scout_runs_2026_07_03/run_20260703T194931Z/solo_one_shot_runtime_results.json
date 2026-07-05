@@ -1,0 +1,212 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_RUNTIME_RESULTS_V0",
+  "created_at_utc": "2026-07-03T19:50:11.483530+00:00",
+  "expected_provider_calls": 6,
+  "failure": null,
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_10PAIR_SOLO_SCOUT_V0",
+  "models_per_packet": 3,
+  "observed_provider_calls": 6,
+  "packet_count": 2,
+  "results": [
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "RUN-KL9-002",
+          "SCHED-UTIL-77",
+          "AUTH-UTIL-002",
+          "POL-UTIL-WINDOW"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "02:10Z BATCH-KL9 run on 2026-07-03 inside approved window",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "RUN-KL9-002|SCHED-UTIL-77|AUTH-UTIL-002|POL-UTIL-WINDOW",
+          "final_answer": "ALLOW per closed schedule, window, and approval records.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-273A8C3381B29879B573",
+      "packet_index_1based": 1,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/001_HVSF001-273A8C3381B29879B573_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "RUN-KL9-002",
+          "MON-KL9-002",
+          "SCHED-UTIL-77",
+          "AUTH-UTIL-002",
+          "POL-UTIL-WINDOW"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "02:10Z utility control batch BATCH-KL9 on 2026-07-03 within approved maintenance window",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "RUN-KL9-002|MON-KL9-002|SCHED-UTIL-77|AUTH-UTIL-002|POL-UTIL-WINDOW",
+          "final_answer": "ALLOW: the 02:10Z BATCH-KL9 run is within the approved 02:00Z-03:00Z window and has active bound operations approval.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-273A8C3381B29879B573",
+      "packet_index_1based": 1,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/002_HVSF001-273A8C3381B29879B573_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "RUN-KL9-002",
+          "SCHED-UTIL-77",
+          "AUTH-UTIL-002",
+          "POL-UTIL-WINDOW"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "BATCH-KL9 scheduled at 02:10Z on 2026-07-03 is authorized within the 02:00Z-03:00Z maintenance window with active operations approval binding batch, schedule, and date",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "RUN-KL9-002|SCHED-UTIL-77|AUTH-UTIL-002|POL-UTIL-WINDOW",
+          "final_answer": "ALLOW: BATCH-KL9 may proceed at 02:10Z as the run request aligns with the authorized maintenance window and has active operations approval binding the batch to the 2026-07-03 date.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-273A8C3381B29879B573",
+      "packet_index_1based": 1,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/003_HVSF001-273A8C3381B29879B573_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SCHED-UTIL-77",
+          "POL-UTIL-WINDOW",
+          "AUTH-UTIL-002"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "02:10Z BATCH-KL9 run on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "SCHED-UTIL-77|POL-UTIL-WINDOW|AUTH-UTIL-002",
+          "final_answer": "ESCALATE because schedule authorizes different batch ID.",
+          "open_blockers": "batch ID mismatch: schedule authorizes KL7 only",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-FBEB32CDE7287BEAC571",
+      "packet_index_1based": 2,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/004_HVSF001-FBEB32CDE7287BEAC571_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "RUN-KL9-002",
+          "MON-KL9-002",
+          "SCHED-UTIL-77",
+          "AUTH-UTIL-002",
+          "POL-UTIL-WINDOW"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "02:10Z utility control batch run for BATCH-KL9 on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "RUN-KL9-002|MON-KL9-002|SCHED-UTIL-77|AUTH-UTIL-002|POL-UTIL-WINDOW",
+          "final_answer": "ESCALATE because the exact batch-time boundary is not closed by the provided schedule and approval records.",
+          "open_blockers": "approved window does not match exact batch/run boundary for BATCH-KL9 at 02:10Z",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-FBEB32CDE7287BEAC571",
+      "packet_index_1based": 2,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/005_HVSF001-FBEB32CDE7287BEAC571_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "RUN-KL9-002",
+          "SCHED-UTIL-77",
+          "AUTH-UTIL-002",
+          "POL-UTIL-WINDOW"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Batch BATCH-KL9 scheduled at 02:10Z cannot proceed until schedule SCHED-UTIL-77 authorization scope aligns to BATCH-KL9 or separate schedule authorization covers BATCH-KL9.",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "RUN-KL9-002|SCHED-UTIL-77|AUTH-UTIL-002|POL-UTIL-WINDOW",
+          "final_answer": "ESCALATE because SCHED-UTIL-77 does not authorize batch BATCH-KL9 (it authorizes BATCH-KL7), creating a source-control mismatch that violates the exact batch ID requirement for utility batch release under POL-UTIL-WINDOW.",
+          "open_blockers": "SCHED-UTIL-77 authorizes BATCH-KL7 only; RUN-KL9-002 and AUTH-UTIL-002 reference BATCH-KL9; batch ID mismatch blocks release per exact match requirement in POL-UTIL-WINDOW",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-FBEB32CDE7287BEAC571",
+      "packet_index_1based": 2,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/006_HVSF001-FBEB32CDE7287BEAC571_minimax.json"
+    }
+  ],
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194931Z",
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194931Z/runtime_manifest_subset_indices_004-020.json",
+  "runtime_manifest_sha256": "24c5e00ef6b7157747920ea5ac014752fe095d74824ddc86ab5471a81470dad7",
+  "scoring_map_loaded": false,
+  "source_runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_2026_07_03/holoverify_solo_failure_factory_batch001_runtime_manifest_2026_07_03.json",
+  "source_runtime_manifest_sha256": "f0927bd82ec4d04668f6b7ab4563d0a1bbe9236a7983beba7b36c06b5ce464d8",
+  "subset_packet_indices_1based": [
+    4,
+    20
+  ],
+  "subset_packet_limit": null,
+  "subset_packet_start_index_1based": 1,
+  "trace_frozen_before_scoring": true
+}

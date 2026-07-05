@@ -1,0 +1,38 @@
+{
+  "activation_dependency_binding": {
+    "activation_device_group": "DG-41B",
+    "activation_id": "ACT-ACR-2026-8022",
+    "activation_site": "Site 18-P",
+    "binding_class": "SITE_AND_USE_CLASS_MISMATCH",
+    "calibration_device_group": "DG-41B",
+    "calibration_id": "CAL-ACR-022",
+    "calibration_site": "Site 18-L",
+    "controlling_source_fact": "STD-ACR-022-P: shared naming prefixes not sufficient; exact match of device group, site, release condition, and timing required",
+    "dependency_alert_id": "ALERT-ACR-DEP-022",
+    "release_condition": "RC-7",
+    "timing_match": "RC-7 requires calibration before activation; timing relationship exists only for matched calibration evidence, which is absent for Site 18-P production units"
+  },
+  "cited_evidence": [
+    "ACT-ACR-022: activation for DG-41B production telemetry at Site 18-P",
+    "CAL-ACR-022: calibration for DG-41B lab telemetry at Site 18-L for RC-7",
+    "STD-ACR-022-P: shared naming prefixes not sufficient by themselves",
+    "NOTE-ACR-022: lab and production devices share DG-41B naming prefix"
+  ],
+  "critical_features_preserved": [
+    "device_group_prefix DG-41B shared across calibration and activation",
+    "site binding: CAL-ACR-022 at Site 18-L vs activation at Site 18-P",
+    "use_class: CAL-ACR-022 lab vs activation production",
+    "release_condition RC-7 tied to calibration packet requirement"
+  ],
+  "final_answer": "CAL-ACR-022 does not satisfy activation dependency for ACT-ACR-2026-8022. No abstract field is genuinely open; each is either concretely mismatched or only operationally satisfied. The device_group field is concretely matched (DG-41B both sides) but per STD-ACR-022-P this alone is insufficient. The site field is concretely mismatched (Site 18-L vs Site 18-P). The use_class field is concretely mismatched (lab vs production). The release_condition field is only operationally satisfied\u2014RC-7 exists for both records but CAL-ACR-022 covers lab units for Site 18-L, not production units for Site 18-P. The timing field is not genuinely open; calibration must precede activation for the SAME device group at the SAME site. NOTE-ACR-022 warns about the shared prefix to prevent exactly this conflation. The prior artifact correctly identified the binding class and preserved all four critical features. The activation dependency remains open; platform operations may not activate until calibration evidence matching Site 18-P production units is attached.",
+  "open_blockers": [
+    "CAL-ACR-022 covers Site 18-L lab units; activation requires Site 18-P production units",
+    "site field concretely mismatched: Site 18-L vs Site 18-P",
+    "use_class field concretely mismatched: lab vs production",
+    "release_condition RC-7 is satisfied but applies to mismatched calibration evidence",
+    "timing relationship requires calibration of same-site production units, which does not exist"
+  ],
+  "verification_verdict": "ESCALATE",
+  "warning_or_prelim_artifact_handling": "NOTE-ACR-022 is a reference note warning that lab and production devices share the DG-41B naming prefix. This warning exists precisely to prevent treating shared prefixes as sufficient evidence. The prior artifact correctly identified this warning must not be used to circumvent the mismatch when calibration evidence is for lab units and activation targets production units. The warning supports the ESCALATE verdict rather than undermining it.",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 48200,
+    "business_ref": "HV-KITC-033-B",
+    "currency": "USD",
+    "description": "May AP release a payment after a sanctions near-match alert?",
+    "type": "payment_release",
+    "vendor": "Veyra Medical GmbH"
+  },
+  "context": {
+    "action_boundary": "May AP release a payment after a sanctions near-match alert?",
+    "anomaly_observed": "A sanctions near-match alert remains visible for a similar vendor name.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Payment request PAY-VEY-2026-033 releases USD 48,200 to Veyra Medical GmbH, Germany, tax ID DE-8841, account ending 7712.",
+        "doc_id": "PAY-VEY-033",
+        "type": "source_record"
+      },
+      {
+        "content": "Sanctions near-match alert references Veyra Medical GmbH, Germany, but lacks tax ID and account resolution.",
+        "doc_id": "ALERT-VEY-033",
+        "type": "source_record"
+      },
+      {
+        "content": "Compliance clearance CLR-VEY-033 covers Veyra Medical GmbH, Germany, tax ID DE-8841, account ending 1198, not the requested account ending 7712.",
+        "doc_id": "CLR-VEY-033",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "A sanctions near-match is closed only when clearance matches legal name, registration country, tax ID, and counterparty account before release.",
+        "doc_id": "STD-VEY-033-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

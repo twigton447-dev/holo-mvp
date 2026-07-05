@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May order operations release the tax-exempt sale?",
+    "allow_rule_assessment": "No exact match on exemption-status class",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CERT-JAD-090: TX-44 remains pending",
+    "escalate_rule_assessment": "Pending TX-44 blocks closure",
+    "timing_scope_authority_dependency_check": "CERT-JAD-090 pending before 2026-06-28"
+  },
+  "cited_evidence": [
+    "CERT-JAD-090",
+    "WARN-JAD-090",
+    "STD-JAD-090-P"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "exemption-status class requirement"
+  ],
+  "final_answer": "The source boundary remains open due to an unresolved tax exemption status. CERT-JAD-090 indicates TX-44 is pending, and WARN-JAD-090 necessitates status verification. Policy STD-JAD-090-P mandates a full exemption-status class match before the sale can proceed. Therefore, the action may not be released.",
+  "open_blockers": [
+    "082-style status-class trap in tax exemption",
+    "pending exemption-status class"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

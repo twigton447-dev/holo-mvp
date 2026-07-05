@@ -1,0 +1,751 @@
+{
+  "batch_label": "it_access_5pair_solo_triage",
+  "by_family": {
+    "HV-ACOM-REP-2026-06-29": {
+      "calls": 0,
+      "domain": "Agentic commerce / order execution controls",
+      "expected_calls": 0,
+      "knew_admissible": 0,
+      "not_knew": 0,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "wrong_verdict": 0
+    },
+    "HV-AP-REP-2026-06-29": {
+      "calls": 0,
+      "domain": "AP / procurement / vendor-master controls",
+      "expected_calls": 0,
+      "knew_admissible": 0,
+      "not_knew": 0,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "wrong_verdict": 0
+    },
+    "HV-ITAC-REP-2026-06-29": {
+      "calls": 30,
+      "domain": "IT access / permission change controls",
+      "expected_calls": 30,
+      "knew_admissible": 6,
+      "not_knew": 24,
+      "parse_fail": 14,
+      "provider_fail": 0,
+      "wrong_verdict": 0
+    }
+  },
+  "by_model": {
+    "minimax/MiniMax-M2.5-highspeed": {
+      "calls": 10,
+      "expected_calls": 10,
+      "knew_admissible": 4,
+      "parse_fail": 4,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 2,
+      "tokens": {
+        "input_tokens": 5181,
+        "output_tokens": 11183,
+        "total_tokens": 16364
+      },
+      "verdict_correct": 6,
+      "wrong_verdict": 0
+    },
+    "openai/gpt-4o-mini": {
+      "calls": 10,
+      "expected_calls": 10,
+      "knew_admissible": 0,
+      "parse_fail": 10,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 0,
+      "tokens": {
+        "input_tokens": 4873,
+        "output_tokens": 1413,
+        "total_tokens": 6286
+      },
+      "verdict_correct": 0,
+      "wrong_verdict": 0
+    },
+    "xai/grok-3-mini": {
+      "calls": 10,
+      "expected_calls": 10,
+      "knew_admissible": 2,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 8,
+      "tokens": {
+        "input_tokens": 5996,
+        "output_tokens": 1218,
+        "total_tokens": 11885
+      },
+      "verdict_correct": 10,
+      "wrong_verdict": 0
+    }
+  },
+  "classification": "HOLOVERIFY_REPLICATION_3FAMILY_SOLO_TRIAGE_COMPLETE",
+  "expected_provider_calls": 30,
+  "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "gov_calls": 0,
+  "holo_calls": 0,
+  "judge_calls": 0,
+  "pair_rankings": [
+    {
+      "calls_present": 6,
+      "domain": "IT access / permission change controls",
+      "family_id": "HV-ITAC-REP-2026-06-29",
+      "not_knew_count": 6,
+      "packets": [
+        "HV-ITAC-REP-003-A",
+        "HV-ITAC-REP-003-B"
+      ],
+      "pair_id": "HV-ITAC-REP-003",
+      "parse_or_provider_fail_count": 4,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-003-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-003-A",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-003-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-003-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-003-B",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-003-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "ALL_SIX_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "IT access / permission change controls",
+      "family_id": "HV-ITAC-REP-2026-06-29",
+      "not_knew_count": 6,
+      "packets": [
+        "HV-ITAC-REP-005-A",
+        "HV-ITAC-REP-005-B"
+      ],
+      "pair_id": "HV-ITAC-REP-005",
+      "parse_or_provider_fail_count": 3,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-005-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-005-A",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-005-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-005-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-005-B",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-005-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "ALL_SIX_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "IT access / permission change controls",
+      "family_id": "HV-ITAC-REP-2026-06-29",
+      "not_knew_count": 5,
+      "packets": [
+        "HV-ITAC-REP-002-A",
+        "HV-ITAC-REP-002-B"
+      ],
+      "pair_id": "HV-ITAC-REP-002",
+      "parse_or_provider_fail_count": 2,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-002-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-002-A",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-002-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-002-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-002-B",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-002-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "IT access / permission change controls",
+      "family_id": "HV-ITAC-REP-2026-06-29",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-ITAC-REP-004-A",
+        "HV-ITAC-REP-004-B"
+      ],
+      "pair_id": "HV-ITAC-REP-004",
+      "parse_or_provider_fail_count": 3,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-004-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-004-A",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-004-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-004-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-004-B",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-004-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "IT access / permission change controls",
+      "family_id": "HV-ITAC-REP-2026-06-29",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-ITAC-REP-001-A",
+        "HV-ITAC-REP-001-B"
+      ],
+      "pair_id": "HV-ITAC-REP-001",
+      "parse_or_provider_fail_count": 2,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-001-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-001-A",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-001-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-001-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-001-B",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-001-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    }
+  ],
+  "preflight": {
+    "batch_label": "it_access_5pair_solo_triage",
+    "checks": {
+      "expected_provider_calls": true,
+      "families_selected": true,
+      "freeze_root_matches": true,
+      "judge_calls": true,
+      "model_count": true,
+      "no_gemini_in_triage_roster": true,
+      "no_gov_calls_configured": true,
+      "no_holo_state_configured": true,
+      "no_judge_calls_configured": true,
+      "openai_weak_is_gpt_4o_mini": true,
+      "packets_selected": true,
+      "pairs_selected": true,
+      "prompt_leakage": true,
+      "provider_calls": true,
+      "truths_selected": true
+    },
+    "classification": "HOLOVERIFY_REPLICATION_3FAMILY_SOLO_TRIAGE_PREFLIGHT",
+    "expected_gov_calls": 0,
+    "expected_holo_calls": 0,
+    "expected_judge_calls": 0,
+    "expected_provider_calls": 30,
+    "families": {
+      "HV-ITAC-REP-2026-06-29": 10
+    },
+    "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "judge_calls_made_by_preflight": 0,
+    "model_roster": [
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "model_key": "xai",
+        "provider": "xai"
+      },
+      {
+        "dna": "openai",
+        "model": "gpt-4o-mini",
+        "model_key": "openai_weak",
+        "provider": "openai"
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "model_key": "minimax",
+        "provider": "minimax"
+      }
+    ],
+    "packet_count": 10,
+    "pair_count": 5,
+    "provider_calls_made_by_preflight": 0,
+    "selection": {
+      "family_ids": [
+        "HV-ITAC-REP-2026-06-29"
+      ],
+      "packet_limit": null,
+      "pair_limit": 5
+    },
+    "status": "PASS",
+    "truth_counts": {
+      "ALLOW": 5,
+      "ESCALATE": 5
+    }
+  },
+  "provider_calls": 30,
+  "provider_failures": [],
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_replication_packet_freeze_3families_2026-06-29/solo_triage_3mini/it_access_5pair_solo_triage/run_20260701T000100Z",
+  "top_holo_targets": [
+    {
+      "calls_present": 6,
+      "domain": "IT access / permission change controls",
+      "family_id": "HV-ITAC-REP-2026-06-29",
+      "not_knew_count": 6,
+      "packets": [
+        "HV-ITAC-REP-003-A",
+        "HV-ITAC-REP-003-B"
+      ],
+      "pair_id": "HV-ITAC-REP-003",
+      "parse_or_provider_fail_count": 4,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-003-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-003-A",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-003-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-003-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-003-B",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-003-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "ALL_SIX_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "IT access / permission change controls",
+      "family_id": "HV-ITAC-REP-2026-06-29",
+      "not_knew_count": 6,
+      "packets": [
+        "HV-ITAC-REP-005-A",
+        "HV-ITAC-REP-005-B"
+      ],
+      "pair_id": "HV-ITAC-REP-005",
+      "parse_or_provider_fail_count": 3,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-005-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-005-A",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-005-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-005-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-005-B",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-005-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "ALL_SIX_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "IT access / permission change controls",
+      "family_id": "HV-ITAC-REP-2026-06-29",
+      "not_knew_count": 5,
+      "packets": [
+        "HV-ITAC-REP-002-A",
+        "HV-ITAC-REP-002-B"
+      ],
+      "pair_id": "HV-ITAC-REP-002",
+      "parse_or_provider_fail_count": 2,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-002-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-002-A",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-002-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-002-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-002-B",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-002-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "IT access / permission change controls",
+      "family_id": "HV-ITAC-REP-2026-06-29",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-ITAC-REP-004-A",
+        "HV-ITAC-REP-004-B"
+      ],
+      "pair_id": "HV-ITAC-REP-004",
+      "parse_or_provider_fail_count": 3,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-004-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-004-A",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-004-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-ITAC-REP-004-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "gpt-4o-mini",
+          "packet_id": "HV-ITAC-REP-004-B",
+          "provider": "openai",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-ITAC-REP-004-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    }
+  ],
+  "totals": {
+    "input_tokens": 16050,
+    "output_tokens": 13814,
+    "total_tokens": 34535
+  },
+  "trace_hash": "0448e94df01d339d6e038a35ae0415ed1583fb6cc50cf117217fc8b0d8bb02b2"
+}

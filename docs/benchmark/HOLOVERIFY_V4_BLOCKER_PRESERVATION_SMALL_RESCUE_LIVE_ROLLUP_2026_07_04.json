@@ -1,0 +1,96 @@
+{
+  "classification": "HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_LIVE_ROLLUP_V0",
+  "created_at_utc": "2026-07-04T05:22:15Z",
+  "status": "PRESERVED_PATCH_VALIDATION_DIAGNOSTIC_FAILURE",
+  "lane_id": "HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_PATCH_VALIDATION_V0",
+  "claim_boundary": {
+    "patch_validation_only": true,
+    "not_benchmark_evidence": true,
+    "not_public_claim_material": true,
+    "does_not_change_batch016_score": true,
+    "does_not_support_public_error_rate_claim": true
+  },
+  "head": "03911ce45dbcd3891c1d0774d5428c44ae98b7e5",
+  "run_dir": "docs/benchmark/holoverify_v4_blocker_preservation_small_rescue_2026_07_04/live_runs/run_20260704T051943Z",
+  "runtime_manifest": "docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json",
+  "runtime_manifest_sha256": "4f8ec7a398b4b98be98695882ee90554884b2ffd939c6af2a1db41efc2553f60",
+  "execution_integrity": {
+    "expected_provider_calls": 25,
+    "observed_provider_calls": 25,
+    "provider_failures": 0,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "mixed_registration_json_loaded_before_trace_freeze": false,
+    "trace_frozen_before_scoring": true,
+    "runtime_firewall_passed": true,
+    "posthoc_scoring_loaded_after_trace_hash_binding": true
+  },
+  "architecture": {
+    "selector_policy_version": "SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04",
+    "selector_policy_sha256": "3ed2a01eb16a8ea84bd096e6c1cfd352e6b0f8f9eb7565a5327680f77fa7affe",
+    "worker_contract_version": "WORKER_CONTRACT_V3_BLOCKER_PRESERVATION_2026_07_04",
+    "worker_contract_sha256": "00b692a07b1036f70b0756e16458e811c7aee3afb62c1351893a4722aab9ad5a"
+  },
+  "posthoc_score": {
+    "packet_count": 5,
+    "correct_count": 1,
+    "incorrect_count": 4,
+    "correct_packet": "HVSF-FACTORY16-004-B",
+    "incorrect_packets": [
+      "HVSF-FACTORY16-001-B",
+      "HVSF-FACTORY16-008-B",
+      "HVSF-FACTORY16-010-B",
+      "HVSF-FACTORY16-020-B"
+    ],
+    "score_file": "docs/benchmark/holoverify_v4_blocker_preservation_small_rescue_2026_07_04/live_runs/run_20260704T051943Z/solo_failure_factory_batch016_hard_authority_rescue_posthoc_score_trace_bound_v1.json"
+  },
+  "failure_taxonomy": [
+    {
+      "packet": "HVSF-FACTORY16-001-B",
+      "final_verdict": "ALLOW",
+      "diagnosis": "All three live workers returned ALLOW, so no blocker entered the V4 ledger."
+    },
+    {
+      "packet": "HVSF-FACTORY16-004-B",
+      "final_verdict": "ESCALATE",
+      "diagnosis": "V4 preserved the source-grounded blocker and selected ESCALATE."
+    },
+    {
+      "packet": "HVSF-FACTORY16-008-B",
+      "final_verdict": "ALLOW",
+      "diagnosis": "All three live workers returned ALLOW, so no blocker entered the V4 ledger."
+    },
+    {
+      "packet": "HVSF-FACTORY16-010-B",
+      "final_verdict": "ALLOW",
+      "diagnosis": "Early workers found blockers, but the final worker explicitly claimed to close them with source citations. V4 accepted the closure."
+    },
+    {
+      "packet": "HVSF-FACTORY16-020-B",
+      "final_verdict": "ALLOW",
+      "diagnosis": "W1 found a blocker, then W2 explicitly claimed to close it with source citations. V4 accepted the closure."
+    }
+  ],
+  "hardening_conclusion": {
+    "what_v4_fixed": "It prevents silent blocker drops when a later ALLOW omits blocker_resolution.",
+    "what_v4_did_not_fix": "It does not determine whether a model's claimed blocker_resolution actually closes the legal or operational boundary.",
+    "next_required_architecture": "Add deterministic blocker-closure validation over blocker_resolution claims before selector eligibility."
+  },
+  "token_totals": {
+    "input_tokens": 19007,
+    "output_tokens": 6820,
+    "total_tokens": 29183
+  },
+  "trace_hashes": {
+    "trace_calls_sha256": "e71f712729a0d33e67c573665c04e8581819c1bebb28ab044e546866f5170735",
+    "trace_provider_calls_sha256": "915bd6c4e93e6253f5c70851160fe2ce09cabf46cdeee1ffaf3a24bcce1333e9",
+    "runtime_results_sha256": "628c6a4bb9eb77ab79bb02f1035e0abbbea7fd43a9e9e50e446aa5641bc73a16",
+    "blind_live_summary_sha256": "769c7818c20fcd94ef0083df049954f2e9732f8692387b4d77c26fbf10559432",
+    "wrapper_live_summary_sha256": "f633910463b7de3d279e3dd6492cd5f681e5eb036515b5b914a9b04d519ba3c1",
+    "posthoc_score_sha256": "e51bba7b95d9415764cdbc86bc5cc11261d5973cd914841273be991d76abf486"
+  },
+  "preserved_preflights": [
+    "docs/benchmark/holoverify_v4_blocker_preservation_small_rescue_2026_07_04/live_runs/preflight_20260704T051234Z",
+    "docs/benchmark/holoverify_v4_blocker_preservation_small_rescue_2026_07_04/live_runs/preflight_20260704T051915Z"
+  ]
+}

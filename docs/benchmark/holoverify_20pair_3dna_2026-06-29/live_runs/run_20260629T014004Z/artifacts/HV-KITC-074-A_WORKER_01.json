@@ -1,0 +1,23 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "allow_rule_assessment": "CLR-TES-074 exactly matches legal name, country, tax ID, account and monitor-only no-block disposition, satisfying STD-TES-074-P for release",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "CLR-TES-074 disposition monitor-only no-block permits release on exact match per STD-TES-074-P",
+    "escalate_rule_assessment": "FLAG-TES-074 is non-matching entity and does not open boundary",
+    "timing_scope_authority_dependency_check": "Clearance and policy match present before execution; no open dependency"
+  },
+  "cited_evidence": [
+    "CLR-TES-074",
+    "PAY-TES-074",
+    "STD-TES-074-P"
+  ],
+  "critical_features_preserved": [
+    "exact name/country/taxID/account match",
+    "monitor-only disposition authority"
+  ],
+  "final_answer": "Payment release is permitted. CLR-TES-074 supplies exact counterparty match (Tessa Medical GmbH, DE-4481, account 7205) with monitor-only no-block disposition. Policy STD-TES-074-P authorizes release on this closed boundary. FLAG-TES-074 references unrelated Belarus entity and does not affect the match.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

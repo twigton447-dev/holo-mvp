@@ -1,0 +1,95 @@
+{
+  "classification": "AP_FULL_HOLO_GOV_RUNTIME_MISMATCH_AUTOPSY",
+  "created_at": "2026-06-29",
+  "status": "PATCHED_NO_PROVIDER_VALIDATION_REQUIRED",
+  "failed_full_family_run": {
+    "path": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_live_runs_openai_w2/run_20260629T172157Z",
+    "preserved_as_emitted": true,
+    "provider_calls": 2,
+    "expected_holo_calls": 200,
+    "failing_turn": "HV-AP-REP-001-A_G1",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "provider_call_ok": true,
+    "finish_reason": "length",
+    "parse_ok": false,
+    "error": "ValueError: gov_finish_reason_length_incomplete_baton",
+    "transport_attempted_call_count": 0,
+    "transport_recovered_call_count": 0,
+    "no_leakage": "PASS",
+    "readiness_passed": false,
+    "visible_text": "verdict=CONTINUE\ndep=GATE\nfocus=GATE_REPAIR\nobjective=REPAIR_GATE",
+    "output_tokens": 384
+  },
+  "successful_canary_run": {
+    "path": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2/run_20260629T164305Z",
+    "turn": "HV-AP-REP-001-A_G1",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "provider_call_ok": true,
+    "finish_reason": "stop",
+    "parse_ok": true,
+    "visible_text": "verdict=CONTINUE\ndep=GATE\nfocus=GATE_REPAIR\nobjective=REPAIR_GATE\npreserve=CLOSED\nrepair=VERDICT_BINDING\nblock=FINAL_ON_FAIL",
+    "output_tokens": 230
+  },
+  "runtime_comparison": {
+    "gov_prompt_shape_same": true,
+    "gov_prompt_system_line": "HoloGov-V micro-router v2. Return gov_micro_baton_v2 only.",
+    "canary_selected_baton_lines": [
+      "verdict=CONTINUE",
+      "dep=GATE",
+      "focus=GATE_REPAIR",
+      "objective=REPAIR_GATE",
+      "preserve=CLOSED",
+      "repair=VERDICT_BINDING",
+      "block=FINAL_ON_FAIL"
+    ],
+    "failed_full_selected_baton_lines": [
+      "verdict=CONTINUE",
+      "dep=GATE",
+      "focus=GATE_REPAIR",
+      "objective=REPAIR_GATE",
+      "preserve=OPEN",
+      "repair=VERDICT_BINDING",
+      "block=FINAL_ON_FAIL"
+    ],
+    "selected_baton_line_difference": "preserve value differed because worker/gate state differed; both CLOSED and OPEN are allowed concrete gov_micro_baton_v2 values",
+    "stale_prompt_phrase_detected": false,
+    "placeholder_hits_detected": false,
+    "transport_failure": false,
+    "verdict_failure": false
+  },
+  "root_cause": {
+    "class": "GOV_RUNTIME_OUTPUT_BUDGET_TRUNCATION",
+    "base_runner_gov_max_tokens_before_patch": 384,
+    "failure_observed_at_output_tokens": 384,
+    "reason": "The canary proved prompt/parser shape but not enough output-budget margin. The full-family MiniMax Gov call exhausted the old 384-token cap before emitting all seven required baton lines."
+  },
+  "patch": {
+    "runtime_file": "docs/benchmark/run_ap_replication_holoverify_3dna_2026_06_29.py",
+    "ap_openai_w2_gov_max_tokens": 1024,
+    "strict_parser_preserved": true,
+    "fail_closed_on_empty_gov_text": true,
+    "fail_closed_on_finish_reason_length_incomplete_baton": true,
+    "packet_edits": false,
+    "prompt_edits": false,
+    "truth_edits": false,
+    "transport_policy_changed": false
+  },
+  "no_provider_proof": {
+    "script": "docs/benchmark/test_ap_full_holo_gov_runtime_path_2026_06_29.py",
+    "asserts_freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "asserts_packet_count": 40,
+    "asserts_pair_count": 20,
+    "asserts_w2_model": "gpt-5.4-mini",
+    "asserts_no_gemini_active": true,
+    "asserts_worker_contract": "compact_key_value_v1",
+    "asserts_gov_contract": "gov_micro_baton_v2",
+    "asserts_gov_max_tokens": 1024,
+    "asserts_selected_baton_parses": true,
+    "asserts_canary_and_full_wrappers_use_run_packet": true,
+    "provider_calls": 0,
+    "judge_calls": 0
+  },
+  "next_allowed_step": "Stop after commit. Do not run providers until explicitly approved."
+}

@@ -1,0 +1,72 @@
+{
+  "classification": "FABLE_BLIND_120_LIVE_WRAPPER_REVIEW_HANDOFF",
+  "created_at_utc": "2026-07-03T02:00:00Z",
+  "status": "READY_FOR_READ_ONLY_REVIEW",
+  "scope": {
+    "provider_execution_approved": false,
+    "solo_runs_approved": false,
+    "judge_runs_approved": false,
+    "posthoc_scoring_approved_before_trace_freeze": false,
+    "public_claims_approved": false,
+    "purpose": "no-provider review of 120-packet blind live wrapper"
+  },
+  "committed_bank": {
+    "freeze_package_commit": "b225ec7567dcee984541c4184d492e0eefcc287f",
+    "freeze_root_sha256": "63cc81e5fd5d9dcc56e054ec5b55e5981d1a3b1d88b90e61e4cf68bb9c5c33ba",
+    "runtime_manifest_sha256": "c3a2bbe2ff2b4b4a3d2e4da0112489b3ba19d41147c5eff45cc0f36c5ca940a1",
+    "scoring_map_sha256": "b5f3c219c473aa2821540aca7cf84e5fc8d2441f977f69d9df226aad550ed166",
+    "packets": 120,
+    "pairs": 60,
+    "allow_truths": 60,
+    "escalate_truths": 60
+  },
+  "live_wrapper": {
+    "lane_label": "HOLOVERIFY_BLIND_120_RUNTIME_FIREWALL_V0",
+    "wrapper_path": "docs/benchmark/run_holoverify_blind_120_live_2026_07_03.py",
+    "posthoc_scorer_path": "docs/benchmark/score_holoverify_blind_120_posthoc_2026_07_03.py",
+    "shared_runtime_path": "docs/benchmark/run_holoverify_blind_canary_live_2026_07_02.py",
+    "runtime_manifest": "docs/benchmark/holoverify_blind_120_bank_2026_07_03/holoverify_blind_120_runtime_manifest_2026_07_03.json",
+    "scoring_map": "docs/benchmark/holoverify_blind_120_bank_2026_07_03/holoverify_blind_120_scoring_map_2026_07_03.json",
+    "expected_provider_calls": 600,
+    "expected_packets": 120,
+    "call_sequence": [
+      "W1",
+      "G1",
+      "W2",
+      "G2",
+      "W3"
+    ],
+    "roster": {
+      "W1": "xai/grok-3-mini",
+      "G1": "minimax/MiniMax-M2.5-highspeed",
+      "W2": "openai/gpt-5.4-mini",
+      "G2": "minimax/MiniMax-M2.5-highspeed",
+      "W3": "minimax/MiniMax-M2.5-highspeed"
+    },
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "substitutions_allowed": false
+  },
+  "local_validation": {
+    "py_compile": "PASS",
+    "wrapper_tests": {
+      "command": "python3 -m pytest tests/test_holoverify_blind_120_live_wrapper.py tests/test_holoverify_blind_canary_live_wrapper.py -q",
+      "result": "31 passed"
+    },
+    "blind_suite_plus_wrapper_tests": {
+      "command": "python3 -m pytest tests/test_blind_lane*.py tests/test_holoverify_blind_120_live_wrapper.py tests/test_holoverify_blind_canary_live_wrapper.py -q",
+      "result": "50 passed, 12 skipped"
+    },
+    "provider_calls": 0,
+    "judge_calls": 0
+  },
+  "review_questions": [
+    "Does the 120 live wrapper truly pin to the committed blind-120 runtime manifest and freeze root?",
+    "Does the live wrapper have any scoring-map path, answer-key path, or truth-reachability path?",
+    "Does the post-hoc scorer remain separate and trace-hash-bound?",
+    "Are the approval string, packet count, and 600-call scope sufficiently locked?",
+    "Are there any remaining ways for the live process to read the scoring map before trace freeze?",
+    "Is this ready for an explicit provider-approval gate, or should another no-provider patch happen first?"
+  ],
+  "allowed_clean_conclusion": "The 120-packet blind live wrapper has no detected answer-key channel under the current no-provider firewall tests and is ready for explicit provider-approval consideration."
+}

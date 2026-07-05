@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment under standing PO within tolerance",
+    "allow_rule_assessment": "CTL record confirms exact match to actor, scope, date, and system boundary",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-4F8A27165A64-CTL closes the exact action boundary before execution",
+    "escalate_rule_assessment": "No open defect in source records",
+    "timing_scope_authority_dependency_check": "CTL confirms PO window current, tolerance band active, actor authorized"
+  },
+  "cited_evidence": [
+    "SRC-4F8A27165A64-CTL",
+    "SRC-4F8A27165A64-POL",
+    "SRC-4F8A27165A64-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "standing PO window and tolerance band",
+    "SRC-4F8A27165A64-CTL"
+  ],
+  "final_answer": "Source records definitively close the action boundary. The control record (SRC-4F8A27165A64-CTL) confirms the standing PO window and tolerance band are current and precisely align with the requested action. As per policy, execution is permitted when source records establish an exact boundary closure. Anomalous tone or urgency in the request does not override this determination.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

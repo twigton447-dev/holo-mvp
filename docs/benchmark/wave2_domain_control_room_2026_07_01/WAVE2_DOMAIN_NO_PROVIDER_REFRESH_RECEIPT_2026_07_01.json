@@ -1,0 +1,511 @@
+{
+  "artifact_checks": {
+    "batch004_approval_packet_preserved": true,
+    "completion_audit_hash_valid": true,
+    "completion_audit_not_complete_claim": true,
+    "completion_audit_pass": true,
+    "control_room_hash_valid": true,
+    "control_room_pass": true,
+    "control_room_validation_hash_valid": true,
+    "control_room_validation_pass": true,
+    "metrics_no_provider": true,
+    "operator_handoff_hash_valid": true,
+    "operator_handoff_no_provider": true,
+    "operator_handoff_pass": true,
+    "ordering_pass": true,
+    "preservation_manifest_hash_valid": true,
+    "preservation_manifest_other_dirty_paths_reported": true,
+    "preservation_manifest_pass": true,
+    "readiness_pass": true,
+    "selective_staging_plan_hash_valid": true,
+    "selective_staging_plan_pass": true,
+    "selective_staging_plan_path_count_matches_preservation": true,
+    "statistical_claim_guardrail_hash_valid": true,
+    "statistical_claim_guardrail_pass": true,
+    "statistical_claim_guardrail_selected_target_only": true,
+    "workbook_exists": true
+  },
+  "classification": "WAVE2_DOMAIN_NO_PROVIDER_REFRESH_RECEIPT_2026_07_01",
+  "created_at_utc": "2026-07-01T14:05:50.185952+00:00",
+  "final_artifacts": {
+    "batch004_approval_packet": {
+      "approval_granted_by_packet": false,
+      "package_sha256": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
+      "status": "NOT_READY"
+    },
+    "completion_audit": {
+      "completion_claim": "NOT_COMPLETE_PROVIDER_APPROVAL_REQUIRED",
+      "package_hash_valid": true,
+      "package_sha256": "b97950895d9161e9c4b82cecafa0bb1ab81098a26a8a7ffb20d4789efeb612f2",
+      "provider_calls_made": 0,
+      "status": "PASS"
+    },
+    "control_room": {
+      "checks_failed": 0,
+      "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_005",
+      "package_hash_valid": true,
+      "package_sha256": "18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116",
+      "status": "PASS"
+    },
+    "control_room_validation": {
+      "package_hash_valid": true,
+      "package_sha256": "241bedcce162595db3fce2760e84364ac3353eb8253dd2a8caa13dd05eb04a24",
+      "provider_calls_made": 0,
+      "status": "PASS"
+    },
+    "metrics_package": {
+      "generated_without_provider_calls": true,
+      "metric_summary_count": 128,
+      "source_audit_count": 40
+    },
+    "operator_handoff": {
+      "package_hash_valid": true,
+      "package_sha256": "33a369b9c33265fd8f0189f2884d6ced69db8df3f97bcdec84b9ff17215851e3",
+      "provider_calls_made": 0,
+      "status": "PASS"
+    },
+    "ordering": {
+      "package_sha256": "091aaafaf70ca6413614a54497ddb794be58552aae608635794bbe504abcee2b",
+      "status": "PASS"
+    },
+    "preservation_manifest": {
+      "other_dirty_path_count": 1,
+      "package_hash_valid": true,
+      "package_sha256": "fb5b364a87f8479c62ab588a9323eb409d9d3373c7fe72574fcbd464990a4387",
+      "status": "PASS",
+      "tracked_or_untracked_path_count": 64
+    },
+    "readiness": {
+      "checks_failed": 0,
+      "package_sha256": "f58e2474d38183addad8b2e93a6c133f4020d584488631333670cadcf10e292f",
+      "status": "PASS"
+    },
+    "selective_staging_plan": {
+      "package_hash_valid": true,
+      "package_sha256": "c0c1bab57dba1b8914e98cfa5e5bb11671207490a4a7cef0fd4c411c327d041b",
+      "path_count": 64,
+      "provider_calls_made": 0,
+      "status": "PASS"
+    },
+    "statistical_claim_guardrail": {
+      "current_claim": "SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF",
+      "package_hash_valid": true,
+      "package_sha256": "f1234a344da2aedd428a022a2a2190ba77172c6e4a7ffdf06f7c7082ec450474",
+      "provider_calls_made": 0,
+      "status": "PASS"
+    },
+    "workbook": {
+      "exists": true,
+      "path": "outputs/holoverify_holobuild_metrics_2026_07_01/HoloVerify_HoloBuild_HashLocked_Metrics_2026_07_01.xlsx"
+    }
+  },
+  "generated_without_provider_calls": true,
+  "package_sha256": "29d1fc372e5bc24a608fce23614202d4acafca1853486fb6260cdf4cb5b238b3",
+  "provider_calls_made_by_refresh": 0,
+  "status": "PASS",
+  "steps": [
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "py_compile",
+        "docs/benchmark/run_wave2_domain_no_provider_refresh_2026_07_01.py",
+        "docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py",
+        "docs/benchmark/build_wave2_holo_target_combined_evidence_2026_07_01.py",
+        "docs/benchmark/compile_holoverify_holobuild_metrics_2026_07_01.py",
+        "docs/benchmark/build_holoverify_domain_consolidation_ledger_2026_07_01.py",
+        "docs/benchmark/verify_wave2_domain_ordering_2026_07_01.py",
+        "docs/benchmark/build_wave2_domain_completion_readiness_2026_07_01.py",
+        "docs/benchmark/build_wave2_domain_completion_audit_2026_07_01.py",
+        "docs/benchmark/build_wave2_batch004_provider_approval_packet_2026_07_01.py",
+        "docs/benchmark/build_wave2_domain_control_room_2026_07_01.py",
+        "docs/benchmark/build_wave2_domain_operator_handoff_2026_07_01.py",
+        "docs/benchmark/build_wave2_domain_preservation_manifest_2026_07_01.py",
+        "docs/benchmark/build_wave2_domain_selective_staging_plan_2026_07_01.py",
+        "docs/benchmark/build_wave2_statistical_claim_guardrail_2026_07_01.py",
+        "docs/benchmark/test_wave2_batch004_provider_approval_gate_2026_07_01.py",
+        "docs/benchmark/test_wave2_batch005_full_family_lock_2026_07_01.py",
+        "docs/benchmark/test_wave2_domain_completion_audit_2026_07_01.py",
+        "docs/benchmark/test_wave2_domain_control_room_2026_07_01.py",
+        "docs/benchmark/test_wave2_domain_operator_handoff_2026_07_01.py",
+        "docs/benchmark/test_wave2_domain_preservation_manifest_2026_07_01.py",
+        "docs/benchmark/test_wave2_domain_selective_staging_plan_2026_07_01.py",
+        "docs/benchmark/test_wave2_statistical_claim_guardrail_2026_07_01.py",
+        "docs/benchmark/test_wave2_timestamp_insensitive_hashes_2026_07_01.py",
+        "docs/benchmark/validate_wave2_no_provider_control_room_2026_07_01.py"
+      ],
+      "duration_seconds": 0.16,
+      "ended_at_utc": "2026-07-01T14:05:31.756388+00:00",
+      "name": "compile_python_refresh_scripts",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:31.596454+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/build_wave2_holo_target_combined_evidence_2026_07_01.py",
+        "--batches",
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "duration_seconds": 0.162,
+      "ended_at_utc": "2026-07-01T14:05:31.918656+00:00",
+      "name": "combined_evidence_batches_001_004",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:31.756425+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"status\": \"PASS\",\n  \"json\": \"docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json\",\n  \"md\": \"docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.md\",\n  \"package_sha256\": \"d4ad201b4c177154741ec8b3ee7b4929c3db764451a2ef8862e3148d44b0198d\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/compile_holoverify_holobuild_metrics_2026_07_01.py"
+      ],
+      "duration_seconds": 0.312,
+      "ended_at_utc": "2026-07-01T14:05:32.230413+00:00",
+      "name": "compile_metrics_package",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:31.918692+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"classification\": \"HOLOVERIFY_HOLOBUILD_HASH_LOCKED_METRICS_COMPILE\",\n  \"packet_row_count\": 1013,\n  \"metric_summary_count\": 128,\n  \"run_summary_count\": 23,\n  \"holobuild_result_count\": 5,\n  \"source_audit_count\": 40,\n  \"outputs\": {\n    \"packet_rows_csv\": \"docs/benchmark/compiled_holoverify_holobuild_metrics_2026_07_01/holoverify_packet_rows.csv\",\n    \"metric_summary_csv\": \"docs/benchmark/compiled_holoverify_holobuild_metrics_2026_07_01/holoverify_metric_summary.csv\",\n    \"run_summaries_csv\": \"docs/benchmark/compiled_holoverify_holobuild_metrics_2026_07_01/holoverify_run_summaries.csv\",\n    \"holobuild_results_csv\": \"docs/benchmark/compiled_holoverify_holobuild_metrics_2026_07_01/holobuild_results.csv\",\n    \"source_audit_csv\": \"docs/benchmark/compiled_holoverify_holobuild_metrics_2026_07_01/source_audit.csv\",\n    \"lock_inventory_csv\": \"docs/benchmark/compiled_holoverify_holobuild_metrics_2026_07_01/lock_inventory.csv\",\n    \"significance_planner_csv\": \"docs/benchmark/compiled_holoverify_holobuild_metrics_2026_07_01/significance_planner.csv\"\n  }\n}\n"
+    },
+    {
+      "argv": [
+        "node",
+        "docs/benchmark/build_holoverify_holobuild_metrics_workbook_2026_07_01.mjs"
+      ],
+      "duration_seconds": 14.95,
+      "ended_at_utc": "2026-07-01T14:05:47.180518+00:00",
+      "name": "build_metrics_workbook",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:32.230502+00:00",
+      "status": "PASS",
+      "stderr_tail": "2026-07-01 07:05:32.702 node[7097:21858777] XType: Using static font registry.\n",
+      "stdout_tail": "Inspect result written to file: /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/outputs/holoverify_holobuild_metrics_2026_07_01/HoloVerify_HoloBuild_HashLocked_Metrics_2026_07_01.xlsx.inspect.ndjson\n{\n  \"classification\": \"HOLOVERIFY_HOLOBUILD_METRICS_WORKBOOK\",\n  \"workbook_path\": \"outputs/holoverify_holobuild_metrics_2026_07_01/HoloVerify_HoloBuild_HashLocked_Metrics_2026_07_01.xlsx\",\n  \"dashboard_preview_path\": \"outputs/holoverify_holobuild_metrics_2026_07_01/dashboard_preview.png\",\n  \"preview_status\": \"rendered\",\n  \"sheets\": [\n    \"Dashboard\",\n    \"HV Metrics\",\n    \"HV Packet Rows\",\n    \"HV Runs\",\n    \"HoloBuild\",\n    \"Significance\",\n    \"Source Audit\",\n    \"Lock Inventory\",\n    \"Definitions\"\n  ],\n  \"source_package\": \"docs/benchmark/compiled_holoverify_holobuild_metrics_2026_07_01/compiled_metrics_package.json\",\n  \"generated_without_provider_calls\": true,\n  \"packet_rows\": 1013,\n  \"metric_rows\": 128,\n  \"run_rows\": 23,\n  \"holobuild_rows\": 5,\n  \"source_audit_rows\": 40,\n  \"lock_inventory_rows\": 115\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/build_holoverify_domain_consolidation_ledger_2026_07_01.py"
+      ],
+      "duration_seconds": 0.15,
+      "ended_at_utc": "2026-07-01T14:05:47.330946+00:00",
+      "name": "build_domain_consolidation_ledger",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:47.180603+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"status\": \"PASS\",\n  \"json\": \"docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_2026_07_01.json\",\n  \"md\": \"docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_2026_07_01.md\",\n  \"package_sha256\": \"5532559c86db2ae04579e4edff9472f3807a2ba5a5a3866af17802d67c75c63e\",\n  \"wave2_remaining_full_family_pairs_after_selected_target_lane\": 23\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/verify_wave2_domain_ordering_2026_07_01.py"
+      ],
+      "duration_seconds": 0.057,
+      "ended_at_utc": "2026-07-01T14:05:47.387915+00:00",
+      "name": "verify_domain_ordering",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:47.330979+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"status\": \"PASS\",\n  \"json\": \"docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/WAVE2_DOMAIN_ORDERING_VERIFICATION_2026_07_01.json\",\n  \"md\": \"docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/WAVE2_DOMAIN_ORDERING_VERIFICATION_2026_07_01.md\",\n  \"package_sha256\": \"091aaafaf70ca6413614a54497ddb794be58552aae608635794bbe504abcee2b\",\n  \"next_allowed_live_batch\": \"WAVE2_HOLO_TARGET_BATCH_005\",\n  \"batch_005_gate\": \"EVIDENCE_UNLOCKED_PENDING_EXPLICIT_PROVIDER_APPROVAL\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/build_wave2_domain_completion_readiness_2026_07_01.py"
+      ],
+      "duration_seconds": 0.07,
+      "ended_at_utc": "2026-07-01T14:05:47.457474+00:00",
+      "name": "build_completion_readiness",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:47.387948+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"status\": \"PASS\",\n  \"json\": \"docs/benchmark/wave2_domain_completion_readiness_2026_07_01/WAVE2_DOMAIN_COMPLETION_READINESS_2026_07_01.json\",\n  \"md\": \"docs/benchmark/wave2_domain_completion_readiness_2026_07_01/WAVE2_DOMAIN_COMPLETION_READINESS_2026_07_01.md\",\n  \"package_sha256\": \"f58e2474d38183addad8b2e93a6c133f4020d584488631333670cadcf10e292f\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/build_wave2_domain_control_room_2026_07_01.py"
+      ],
+      "duration_seconds": 0.096,
+      "ended_at_utc": "2026-07-01T14:05:47.553865+00:00",
+      "name": "build_control_room_pre_lock_test",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:47.457499+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"checks_failed\": 0,\n  \"json\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_CONTROL_ROOM_2026_07_01.json\",\n  \"md\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_CONTROL_ROOM_2026_07_01.md\",\n  \"package_sha256\": \"18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116\",\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_batch004_provider_approval_gate_2026_07_01.py"
+      ],
+      "duration_seconds": 0.197,
+      "ended_at_utc": "2026-07-01T14:05:47.751012+00:00",
+      "name": "test_batch004_provider_approval_gate",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:47.553901+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"approval_packet_sha256\": \"a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd\",\n  \"checked_current_path\": \"retired_packet_cannot_unlock_batch004\",\n  \"checked_locked_paths\": [\n    \"missing_statement_and_hash\",\n    \"wrong_statement\",\n    \"wrong_hash\"\n  ],\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_batch005_full_family_lock_2026_07_01.py"
+      ],
+      "duration_seconds": 0.248,
+      "ended_at_utc": "2026-07-01T14:05:47.999381+00:00",
+      "name": "test_batch005_full_family_approval_lock_fail_closed",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:47.751043+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"batch_id\": \"WAVE2_HOLO_TARGET_BATCH_005\",\n  \"checked_lock\": \"provider_approval_packet_required\",\n  \"live_run_dirs_created\": 0,\n  \"provider_calls_made\": 0,\n  \"run_live_error\": \"wave2_holo_provider_approval_gate_locked:['approval_packet_exists', 'approval_packet_status_ready', 'approval_packet_does_not_self_grant', 'approval_packet_batch_matches', 'approval_packet_root_signature_matches_preflight', 'approval_packet_expected_calls_match_preflight', 'approval_statement_provided', 'approval_statement_exact_match', 'approval_packet_sha256_provided']\",\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/build_wave2_domain_control_room_2026_07_01.py"
+      ],
+      "duration_seconds": 0.083,
+      "ended_at_utc": "2026-07-01T14:05:48.082580+00:00",
+      "name": "rebuild_control_room_after_batch005_lock_test",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:47.999410+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"checks_failed\": 0,\n  \"json\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_CONTROL_ROOM_2026_07_01.json\",\n  \"md\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_CONTROL_ROOM_2026_07_01.md\",\n  \"package_sha256\": \"18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116\",\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/build_wave2_statistical_claim_guardrail_2026_07_01.py"
+      ],
+      "duration_seconds": 0.064,
+      "ended_at_utc": "2026-07-01T14:05:48.146330+00:00",
+      "name": "build_statistical_claim_guardrail",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:48.082606+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"current_claim\": \"SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF\",\n  \"json\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_STATISTICAL_CLAIM_GUARDRAIL_2026_07_01.json\",\n  \"md\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_STATISTICAL_CLAIM_GUARDRAIL_2026_07_01.md\",\n  \"package_sha256\": \"f1234a344da2aedd428a022a2a2190ba77172c6e4a7ffdf06f7c7082ec450474\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/build_wave2_domain_preservation_manifest_2026_07_01.py"
+      ],
+      "duration_seconds": 0.109,
+      "ended_at_utc": "2026-07-01T14:05:48.255522+00:00",
+      "name": "build_preservation_manifest",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:48.146356+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"json\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_PRESERVATION_MANIFEST_2026_07_01.json\",\n  \"md\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_PRESERVATION_MANIFEST_2026_07_01.md\",\n  \"other_dirty_path_count\": 1,\n  \"package_sha256\": \"fb5b364a87f8479c62ab588a9323eb409d9d3373c7fe72574fcbd464990a4387\",\n  \"status\": \"PASS\",\n  \"tracked_or_untracked_path_count\": 64\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/build_wave2_domain_selective_staging_plan_2026_07_01.py"
+      ],
+      "duration_seconds": 0.047,
+      "ended_at_utc": "2026-07-01T14:05:48.302364+00:00",
+      "name": "build_selective_staging_plan",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:48.255551+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"json\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_SELECTIVE_STAGING_PLAN_2026_07_01.json\",\n  \"md\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_SELECTIVE_STAGING_PLAN_2026_07_01.md\",\n  \"package_sha256\": \"c0c1bab57dba1b8914e98cfa5e5bb11671207490a4a7cef0fd4c411c327d041b\",\n  \"path_count\": 64,\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/build_wave2_domain_operator_handoff_2026_07_01.py"
+      ],
+      "duration_seconds": 0.048,
+      "ended_at_utc": "2026-07-01T14:05:48.350567+00:00",
+      "name": "build_operator_handoff",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:48.302398+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"current_claim\": \"SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF\",\n  \"json\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_OPERATOR_HANDOFF_2026_07_01.json\",\n  \"md\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_OPERATOR_HANDOFF_2026_07_01.md\",\n  \"package_sha256\": \"33a369b9c33265fd8f0189f2884d6ced69db8df3f97bcdec84b9ff17215851e3\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_domain_control_room_2026_07_01.py"
+      ],
+      "duration_seconds": 0.094,
+      "ended_at_utc": "2026-07-01T14:05:48.444646+00:00",
+      "name": "test_domain_control_room",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:48.350597+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"approval_packet_sha256\": \"a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd\",\n  \"batch004_expected_provider_calls\": 100,\n  \"batch005_blocked_by\": null,\n  \"control_room_package_sha256\": \"18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116\",\n  \"domain_pairs\": 60,\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_domain_preservation_manifest_2026_07_01.py"
+      ],
+      "duration_seconds": 0.096,
+      "ended_at_utc": "2026-07-01T14:05:48.540575+00:00",
+      "name": "test_preservation_manifest",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:48.444676+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"dirty_paths\": 64,\n  \"other_dirty_paths\": 1,\n  \"preservation_manifest_sha256\": \"fb5b364a87f8479c62ab588a9323eb409d9d3373c7fe72574fcbd464990a4387\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_domain_selective_staging_plan_2026_07_01.py"
+      ],
+      "duration_seconds": 0.037,
+      "ended_at_utc": "2026-07-01T14:05:48.577610+00:00",
+      "name": "test_selective_staging_plan",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:48.540610+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"path_count\": 64,\n  \"provider_calls_made\": 0,\n  \"selective_staging_plan_sha256\": \"c0c1bab57dba1b8914e98cfa5e5bb11671207490a4a7cef0fd4c411c327d041b\",\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_statistical_claim_guardrail_2026_07_01.py"
+      ],
+      "duration_seconds": 0.067,
+      "ended_at_utc": "2026-07-01T14:05:48.644867+00:00",
+      "name": "test_statistical_claim_guardrail",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:48.577635+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"current_claim\": \"SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF\",\n  \"provider_calls_made\": 0,\n  \"statistical_guardrail_sha256\": \"f1234a344da2aedd428a022a2a2190ba77172c6e4a7ffdf06f7c7082ec450474\",\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_domain_operator_handoff_2026_07_01.py"
+      ],
+      "duration_seconds": 0.051,
+      "ended_at_utc": "2026-07-01T14:05:48.695442+00:00",
+      "name": "test_operator_handoff",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:48.644895+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"current_claim\": \"SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF\",\n  \"operator_handoff_sha256\": \"33a369b9c33265fd8f0189f2884d6ced69db8df3f97bcdec84b9ff17215851e3\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_timestamp_insensitive_hashes_2026_07_01.py"
+      ],
+      "duration_seconds": 0.196,
+      "ended_at_utc": "2026-07-01T14:05:48.891728+00:00",
+      "name": "test_timestamp_insensitive_hashes",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:48.695466+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"approval_packet_sha256\": \"a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd\",\n  \"checked_artifacts\": [\n    \"approval_builder\",\n    \"runner_approval_gate\",\n    \"control_room\",\n    \"ledger\",\n    \"ordering\",\n    \"readiness\",\n    \"validation\",\n    \"preservation\",\n    \"completion_audit\",\n    \"selective_staging\",\n    \"operator_handoff\",\n    \"statistical_guardrail\"\n  ],\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/validate_wave2_no_provider_control_room_2026_07_01.py"
+      ],
+      "duration_seconds": 1.193,
+      "ended_at_utc": "2026-07-01T14:05:50.084883+00:00",
+      "name": "validate_no_provider_control_room",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:48.891765+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"approval_packet_sha256\": \"a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd\",\n  \"json\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_NO_PROVIDER_CONTROL_ROOM_VALIDATION_2026_07_01.json\",\n  \"md\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_NO_PROVIDER_CONTROL_ROOM_VALIDATION_2026_07_01.md\",\n  \"package_sha256\": \"241bedcce162595db3fce2760e84364ac3353eb8253dd2a8caa13dd05eb04a24\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/build_wave2_domain_completion_audit_2026_07_01.py"
+      ],
+      "duration_seconds": 0.05,
+      "ended_at_utc": "2026-07-01T14:05:50.134667+00:00",
+      "name": "build_completion_audit",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:50.084917+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"completion_claim\": \"NOT_COMPLETE_PROVIDER_APPROVAL_REQUIRED\",\n  \"json\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_COMPLETION_AUDIT_2026_07_01.json\",\n  \"md\": \"docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_COMPLETION_AUDIT_2026_07_01.md\",\n  \"package_sha256\": \"b97950895d9161e9c4b82cecafa0bb1ab81098a26a8a7ffb20d4789efeb612f2\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_domain_completion_audit_2026_07_01.py"
+      ],
+      "duration_seconds": 0.037,
+      "ended_at_utc": "2026-07-01T14:05:50.171328+00:00",
+      "name": "test_completion_audit",
+      "returncode": 0,
+      "started_at_utc": "2026-07-01T14:05:50.134697+00:00",
+      "status": "PASS",
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"approval_packet_sha256\": null,\n  \"completion_claim\": \"NOT_COMPLETE_PROVIDER_APPROVAL_REQUIRED\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    }
+  ],
+  "stop_rules": [
+    "This refresh never runs Batch 004 live provider calls.",
+    "This refresh never approves provider calls.",
+    "The Batch 005 run-live path is exercised only as a fail-closed approval-lock test and must create zero live run directories.",
+    "The control room is rebuilt after the Batch 005 lock test so final artifacts reflect the latest preflight roots.",
+    "The operator handoff is a no-provider runbook and does not grant live execution approval.",
+    "The selective staging plan only emits path-limited git add commands and does not stage files.",
+    "The statistical guardrail preserves selected-target evidence separately from full-family statistical proof."
+  ],
+  "summary": {
+    "failed_steps": [],
+    "provider_calls_made": 0,
+    "steps_passed": 24,
+    "steps_total": 24
+  }
+}

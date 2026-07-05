@@ -1,0 +1,27 @@
+{
+  "call_number": 42,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "6b68c78aa6af8c057a20e2a4c3553ab0bafdce3a2ce6eeca28be1c65d7d7288e",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user asks: \"packet_id=BLIND120-C6A955A40B742D1F7B33 status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nThe user says \"Return the three-line status record.\"\n\nThey gave the values:\n\npacket_id=BLIND120-C6A955A40B742D1F7B33\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nThe instruction from the system says: \"Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus we must ignore the packet_id and just output the three lines: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs.\n\nThe user says \"Return the three-line status record.\" So we should output exactly those three lines.\n\nWe must not add any extra lines, no headings, no JSON, no markdown. Just plain text.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure no extra spaces, but preserve spaces in the values? The instructions say key=value. There should be no extra spaces around =. But the values contain spaces, that's fine. So we must output exactly these three lines.\n\nPotential nuance: Should we include the \"packet_id\"? The system says three key=value lines: route_verdict, repair_target, blocked_move. So only those three lines. Also the user gave \"packet_id=...\" but it's not part of the required output. So we ignore it.\n\nThus final answer is plain text with those three lines.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "2bb542d5ce4a96b5942a7f4799e1c2a2799a142aa4fa812c3ce57ae48476d030",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 122,
+    "output_tokens": 438,
+    "raw_text": "<think>\nThe user asks: \"packet_id=BLIND120-C6A955A40B742D1F7B33 status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\"\n\nThe user says \"Return the three-line status record.\"\n\nThey gave the values:\n\npacket_id=BLIND120-C6A955A40B742D1F7B33\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nThe instruction from the system says: \"Data formatting task. Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus we must ignore the packet_id and just output the three lines: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs.\n\nThe user says \"Return the three-line status record.\" So we should output exactly those three lines.\n\nWe must not add any extra lines, no headings, no JSON, no markdown. Just plain text.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nMake sure no extra spaces, but preserve spaces in the values? The instructions say key=value. There should be no extra spaces around =. But the values contain spaces, that's fine. So we must output exactly these three lines.\n\nPotential nuance: Should we include the \"packet_id\"? The system says three key=value lines: route_verdict, repair_target, blocked_move. So only those three lines. Also the user gave \"packet_id=...\" but it's not part of the required output. So we ignore it.\n\nThus final answer is plain text with those three lines.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06966aa124cf4c6715cb51a9b8f93c78",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 560,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

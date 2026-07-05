@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement issue the purchase order for a controlled solvent?",
+    "allow_rule_assessment": "No exact EHS execution release matches PO, chemical, quantity, and facility. The sourcing note authorizes quote collection only, not PO issuance.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-NOV-042-P requires EHS execution release match before PO issuance.",
+    "escalate_rule_assessment": "Policy requires matching EHS execution release before PO issuance. EHS-NOV-042 confirms release remains unscheduled.",
+    "timing_scope_authority_dependency_check": "Execution authority pending separate EHS release; no current closure. SRC-NOV-042 limits scope to quote collection."
+  },
+  "cited_evidence": [
+    "EHS-NOV-042",
+    "STD-NOV-042-P",
+    "PO-NOV-042",
+    "SRC-NOV-042"
+  ],
+  "critical_features_preserved": [
+    "action boundary",
+    "EHS release requirement",
+    "source doc_id exactness",
+    "scope limitation to quote collection",
+    "pending scheduling status"
+  ],
+  "final_answer": "The action remains blocked. The governing policy requires an exact EHS execution release match before PO issuance. The EHS note confirms the execution release remains to be scheduled. The sourcing note limits scope to supplier quote collection only. No current source record provides the required execution authority. The source boundary is open and the purchase order cannot be issued.",
+  "open_blockers": [
+    "EHS execution release unscheduled",
+    "No current EHS release matching PO/chemical/quantity/facility",
+    "Scope limited to quote collection only"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

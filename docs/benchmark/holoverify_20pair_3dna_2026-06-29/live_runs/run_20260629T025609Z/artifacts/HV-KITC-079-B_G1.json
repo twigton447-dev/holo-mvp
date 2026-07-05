@@ -1,0 +1,43 @@
+{
+  "blocked_moves": [
+    "treating DES-YAR-079 planning approval as execution authority",
+    "assuming authority granted without explicit closure",
+    "executing export before authority documented"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "transfer authority for YAR-RISK-2 must be granted and documented",
+    "execution gated on authority closure",
+    "no substitution allowed per run_lock"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "dataset DS-19 coverage",
+    "date 2026-06-28 match",
+    "Yara Analytics recipient identification"
+  ],
+  "must_repair": [
+    "workspace YAR-RISK-2 transfer authority closure evidence",
+    "transfer release vs planning artifact distinction",
+    "pending authority status"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Authority-chain completeness and pending status",
+    "monotonic_preservation": [
+      "dataset DS-19",
+      "export date 2026-06-28",
+      "Yara Analytics recipient"
+    ],
+    "objective": "Verify authority closure or confirm pending status",
+    "required_repairs": [
+      "locate explicit authority closure document",
+      "distinguish planning vs execution artifacts",
+      "confirm no execution without authority"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Transfer authority pending; source boundary open per policy exact-match rule requiring authority before execution.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

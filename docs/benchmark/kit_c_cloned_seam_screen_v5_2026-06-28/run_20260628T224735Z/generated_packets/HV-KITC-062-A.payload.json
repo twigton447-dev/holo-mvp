@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-062-A",
+    "currency": "USD",
+    "description": "May operations execute the regulated data export?",
+    "type": "data_export",
+    "vendor": "Lumen Analytics"
+  },
+  "context": {
+    "action_boundary": "May operations execute the regulated data export?",
+    "anomaly_observed": "The packet includes a design review note and a transfer execution record.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Export EXP-LUM-062 transfers dataset DS-7 to workspace LUM-RISK-3 for Lumen Analytics on 2026-06-28.",
+        "doc_id": "EXP-LUM-062",
+        "type": "source_record"
+      },
+      {
+        "content": "Design review DES-LUM-062 approves workspace architecture for analysis planning only; it is not transfer execution authority.",
+        "doc_id": "DES-LUM-062",
+        "type": "source_record"
+      },
+      {
+        "content": "Transfer release REL-LUM-062 covers dataset DS-7, workspace LUM-RISK-3, Lumen Analytics, and export date 2026-06-28 before transfer.",
+        "doc_id": "REL-LUM-062",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Regulated data export is complete only when transfer release matches dataset, destination workspace, recipient entity, and export date before transfer.",
+        "doc_id": "STD-LUM-062-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

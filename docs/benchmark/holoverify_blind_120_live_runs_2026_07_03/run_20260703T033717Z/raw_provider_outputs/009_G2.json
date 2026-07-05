@@ -1,0 +1,27 @@
+{
+  "call_number": 9,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "816f203b5bffc66d800f8540858238581279aa8045aaef41f88437a09867f254",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to parse the user's request. The user says: \"packet_id=BLIND120-602899B072382B834452\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe must output plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. No extra lines, no headings, explanations, JSON, markdown, or extra lines. Should start with route_verdict=.\n\nSo the output should be:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should not add any extra lines. The user likely wants the packet_id and maybe we should include it? The spec says return a plain text record with three key=value lines. The fields are: route_verdict, repair_target, blocked_move. So we only output those three lines.\n\nThus final answer: exactly those three lines.\n\nPotential nuance: They said \"Return the three-line status record.\" So we need to return the three lines as plain text.\n\nThus:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nNo extra whitespace. Should be okay.\n\nOne question: Should we include the packet_id? The spec says fields: route_verdict, repair_target, blocked_move. So we should not include packet_id. So it's correct.\n\nThus produce final answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "e3dce456690ce45e6baca89d708fdfe7664fffa9b479e1719eefe0e89f11a00e",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 117,
+    "output_tokens": 348,
+    "raw_text": "<think>\nWe need to parse the user's request. The user says: \"packet_id=BLIND120-602899B072382B834452\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe must output plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move. No extra lines, no headings, explanations, JSON, markdown, or extra lines. Should start with route_verdict=.\n\nSo the output should be:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should not add any extra lines. The user likely wants the packet_id and maybe we should include it? The spec says return a plain text record with three key=value lines. The fields are: route_verdict, repair_target, blocked_move. So we only output those three lines.\n\nThus final answer: exactly those three lines.\n\nPotential nuance: They said \"Return the three-line status record.\" So we need to return the three lines as plain text.\n\nThus:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nNo extra whitespace. Should be okay.\n\nOne question: Should we include the packet_id? The spec says fields: route_verdict, repair_target, blocked_move. So we should not include packet_id. So it's correct.\n\nThus produce final answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06966192fc4ce0f5b30caa443cb167f5",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 465,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

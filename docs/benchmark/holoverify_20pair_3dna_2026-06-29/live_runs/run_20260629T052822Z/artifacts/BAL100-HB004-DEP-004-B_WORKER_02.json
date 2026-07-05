@@ -1,0 +1,38 @@
+{
+  "boundary_binding": {
+    "action_boundary": "Release only if dependency closure exactly matches requested object, scope, account, release condition, and pre-queue timestamp.",
+    "allow_rule_assessment": "No exact match on release condition.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "DEP-EHS-004 and REQ-EHS-004 differ on release condition.",
+    "escalate_rule_assessment": "RC-EHS-004 vs RC-EHS-004-S mismatch blocks closure.",
+    "timing_scope_authority_dependency_check": "DEP-EHS-004 timestamp valid but condition fails exact match per MATCH-EHS-004."
+  },
+  "cited_evidence": [
+    "DEP-EHS-004",
+    "REQ-EHS-004",
+    "MATCH-EHS-004",
+    "ENTITLE-EHS-004",
+    "MAP-EHS-004",
+    "NOTE-EHS-004",
+    "QUEUE-EHS-004",
+    "ROSTER-EHS-004"
+  ],
+  "critical_features_preserved": [
+    "exact source matching rule",
+    "DEP_CLOSURE_EXACTNESS",
+    "DEP-EHS-004",
+    "source object OBJ-EHS-004",
+    "release condition RC-EHS-004-S",
+    "account ACCT-EHS-004",
+    "EHS readiness scope 004",
+    "completed at 2026-06-17 09:05 ",
+    "ACT-DEP-EHS-004"
+  ],
+  "final_answer": "Action may not proceed due to an exact match failure on the release condition. The dependency closure (RC-EHS-004-S) does not precisely align with the requested condition (RC-EHS-004) as per MATCH-EHS-004. The source boundary remains open, necessitating escalation for defect repair before any release can occur.",
+  "open_blockers": [
+    "release condition mismatch RC-EHS-004 vs RC-EHS-004-S",
+    "DEP_CLOSURE_EXACTNESS unresolved tension"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

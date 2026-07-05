@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Banking / KYC / AML controls action now? Action: hold release while AML alert remains open. Boundary: branch request cannot release active AML hold.",
+    "allow_rule_assessment": "Exact control record closes boundary for this action.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-77301405ABEE-CTL",
+    "escalate_rule_assessment": "No narrow source-record defect remains open.",
+    "timing_scope_authority_dependency_check": "GATE satisfied by current control record."
+  },
+  "cited_evidence": [
+    "SRC-77301405ABEE-CTL",
+    "SRC-77301405ABEE-POL",
+    "SRC-77301405ABEE-BND",
+    "SRC-77301405ABEE-FBK",
+    "SRC-77301405ABEE-REQ"
+  ],
+  "critical_features_preserved": [
+    "exact current source",
+    "actor-scope-effective date match",
+    "no tone-based block",
+    "communication boundary subordinate",
+    "AML alert disposition and hold release authority match",
+    "SRC-77301405ABEE-CTL"
+  ],
+  "final_answer": "ALLOW. The current control record states the AML alert disposition and hold release authority are current, exact, and tied to this requested action. The policy says execution may proceed when current source records close the exact boundary, and communication text cannot override source-control records.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

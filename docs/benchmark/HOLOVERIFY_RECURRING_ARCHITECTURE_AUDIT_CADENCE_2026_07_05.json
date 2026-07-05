@@ -1,0 +1,340 @@
+{
+  "title": "HoloVerify Recurring Architecture Audit Cadence",
+  "callsign": "ARCHITECTURE AUDIT SUBAGENT",
+  "status": "CADENCE_DEFINED_PROVIDER_FREE",
+  "audit_label_date": "2026-07-05",
+  "scope": {
+    "providers_run": false,
+    "holo_live_run": false,
+    "solo_run": false,
+    "judges_run": false,
+    "frozen_runtime_evidence_edited": false,
+    "purpose": "Define recurring HoloVerify architecture audit cadence and gates."
+  },
+  "current_checkpoint": {
+    "commit": "f4d11dc15a85e53c15399a1ade7f57ca2b6b8602",
+    "selector": {
+      "version": "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+      "sha256": "939c1ffbba74e9a526d454979b52980513d952eae4077cc817283380e596a1ec"
+    },
+    "worker_contract": {
+      "version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+      "sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37"
+    },
+    "strict_public_denominator": "blind-120 only",
+    "tier2_internal_gate": {
+      "status": "RESTORED_AFTER_REPLACEMENT_PAIR",
+      "original_raw_packets": "13/14",
+      "original_raw_pairs": "6/7",
+      "score_valid_packet_diagnostic": "15/15",
+      "clean_internal_pair_gate": "7/7",
+      "replacement_pair": "HVSF-FACTORY14F-017R",
+      "packet_key_defect_candidate": "HVSF-FACTORY14F-017-B"
+    }
+  },
+  "cadence": {
+    "daily_during_active_benchmark_work": {
+      "required": true,
+      "checklist": [
+        "Record checkout commit and dirty/untracked state without staging or reverting unrelated work.",
+        "Confirm active selector version and hash match the current checkpoint or a separately audited replacement checkpoint.",
+        "Confirm active worker contract version and hash match the current checkpoint or a separately audited replacement checkpoint.",
+        "Confirm public denominator remains blind-120 only.",
+        "Review latest architecture audit, scoreboard rollup, denominator accounting, and defect quarantine notes.",
+        "Inspect new runtime manifests for runtime-only shape and absence of truth, expected verdict, scoring fields, answer keys, sibling key data, and mixed-registration data.",
+        "Inspect new live wrappers for absence of scoring-map access before trace freeze and absence of mixed-registration reads before trace freeze.",
+        "Confirm no solo or judge path is wired into a Holo lane.",
+        "Confirm any new preflight names exact approval sentence, runtime-only manifest hash, selector and worker versions, expected provider-call count, and claim boundary.",
+        "Review recent claim text for denominator and evidence-class precision.",
+        "Quarantine packet/key defect candidates before interpreting score.",
+        "Confirm raw prompts, raw outputs, TRACE_CALLS.jsonl, and TRACE_PROVIDER_CALLS.jsonl remain preserved for frozen runs.",
+        "Record PASS, WARN, FAIL, BLOCKED, or NOT_APPLICABLE with artifact paths."
+      ]
+    },
+    "weekly": {
+      "required": true,
+      "checklist": [
+        "Reconcile architecture audit docs, scoreboard rollup, denominator accounting docs, and defect quarantine list.",
+        "Run provider-free regression checks only for selector identity, worker contract identity, runtime-only manifest separation, trace freeze, scoring order, and blocker-closure deterministic gates.",
+        "Sample frozen runs for raw prompt count, raw output count, TRACE_CALLS rows, and TRACE_PROVIDER_CALLS rows.",
+        "Compare expected and observed provider-call counts by role and slot.",
+        "Confirm full-Holo lanes have provider-backed Gov calls and Gov sees blocker/gate state.",
+        "Scan runtime manifests, live prompts, runtime payloads, and worker inputs for forbidden leak terms.",
+        "Confirm scoring maps appear only in post-freeze scorer paths or report artifacts.",
+        "Review public claim copy for exact denominator, evidence class, and confidence-bound precision.",
+        "Review packet/key quality for missing current-cycle facts, unsupported expected verdicts, ambiguous source text, duplicate keys, and unstable sibling relationships.",
+        "Decide whether an external DNA reviewer is required."
+      ]
+    }
+  },
+  "gates": {
+    "pre_live_run": {
+      "permission_effect": "Does not grant live execution. A separate exact approval sentence is still required.",
+      "required_inputs": [
+        "exact_lane_name",
+        "exact_approval_sentence",
+        "runtime_only_manifest_path",
+        "runtime_only_manifest_sha256",
+        "selector_version",
+        "selector_sha256",
+        "worker_contract_version",
+        "worker_contract_sha256",
+        "expected_provider_call_count",
+        "expected_provider_call_slots",
+        "expected_worker_call_count",
+        "expected_gov_call_count",
+        "explicit_no_solo_boundary",
+        "explicit_no_judge_boundary",
+        "explicit_public_claim_exclusion",
+        "posthoc_scorer_path_if_scoring_is_planned"
+      ],
+      "pass_criteria": [
+        "Runtime manifest has no truth, expected verdict, scoring fields, answer keys, sibling key data, or mixed-registration data.",
+        "Live wrapper has no scoring-map path before trace freeze.",
+        "Live wrapper does not import or read mixed registration before trace freeze.",
+        "Selector and worker versions are checkpoint-matched or separately audited.",
+        "Full-Holo lanes include provider-backed Gov calls.",
+        "Deterministic blocker/gate checks are active before final selection.",
+        "Gov prompt path includes gate/blocker state when gate/blocker state exists.",
+        "Expected call count is mechanically derived from packet count and route shape.",
+        "Raw prompt and raw output preservation paths are declared.",
+        "Trace files are declared before scoring."
+      ],
+      "stop_if": [
+        "Runtime prompt path can see truth, expected verdict, scoring map, answer key, or mixed registration data.",
+        "Gov is deterministic or local in a lane claimed as full HoloGov.",
+        "Selector or worker contract versions are missing.",
+        "Expected provider-call count is not declared.",
+        "Solo or judge execution is present.",
+        "Public claim language is attached to an internal patch-validation run."
+      ]
+    },
+    "post_live_run": {
+      "required_before": [
+        "scoring_interpretation",
+        "tier_unlock",
+        "replacement_merge",
+        "claim_movement"
+      ],
+      "required_artifacts": [
+        "TRACE_CALLS.jsonl",
+        "TRACE_PROVIDER_CALLS.jsonl",
+        "raw_prompts",
+        "raw_provider_outputs",
+        "live_summary",
+        "runtime_results"
+      ],
+      "checks": [
+        "Trace files exist before post-hoc scoring.",
+        "Trace hashes are recorded before scoring-map load.",
+        "Observed provider-call total equals expected total.",
+        "Observed worker-call count equals expected worker count.",
+        "Observed Gov-call count equals expected Gov count.",
+        "Slot counts match route shape.",
+        "provider_call_ok is true for all required provider-backed calls.",
+        "No solo calls are present.",
+        "No judge calls are present.",
+        "No substitute models are present unless explicitly approved in preflight.",
+        "Runtime results stamp selector version.",
+        "Runtime results stamp worker contract version.",
+        "Per-packet outputs preserve selector criteria trace.",
+        "Gov outputs are present and provider-backed.",
+        "Gov prompt and output preserve blocker/gate state where applicable.",
+        "Scoring map loads only after trace hash binding.",
+        "Score artifacts cite trace hashes.",
+        "Invalid control runs are labeled invalid and not repaired in place.",
+        "Packet/key defects are quarantined and not counted as model-quality misses.",
+        "Frozen raw scores are not rewritten by replacement supplements."
+      ]
+    },
+    "public_claim": {
+      "current_public_denominator": "blind-120 only",
+      "allowed_bounded_claim": "HoloVerify scored 120/120 on the blind-120 packet bank, while the same three model families run alone as one-shot solo baselines produced 14 failures across 360 calls affecting 11 packets.",
+      "forbidden_without_new_public_claim_audit": [
+        "Restoring the retired 614/614 denominator.",
+        "Treating Tier 2 V5 rescue as public benchmark evidence.",
+        "Treating Tier 2 replacement-pair success as public benchmark evidence.",
+        "Claiming global false-negative reduction from blind-120.",
+        "Claiming false-positive precision from the Tier 2 FN rescue lane.",
+        "Claiming production reliability.",
+        "Claiming broad model superiority.",
+        "Claiming packet-defect replacement rewrote the frozen original score."
+      ],
+      "required_checks": [
+        "Exact denominator is named.",
+        "Exact evidence class is named.",
+        "Observed rate is separated from confidence bound.",
+        "Internal directional evidence is not mixed with public benchmark evidence.",
+        "Score-valid diagnostic counts are not described as raw trace scores.",
+        "Parse/admissibility failures remain failures.",
+        "External DNA review is complete if public posture changes."
+      ]
+    }
+  },
+  "checks": {
+    "leak_checks": {
+      "targets": [
+        "runtime_manifests",
+        "live_prompt_files",
+        "runtime_payloads",
+        "worker_inputs",
+        "gov_inputs",
+        "generated_prompt_snapshots"
+      ],
+      "forbidden_terms": [
+        "truth",
+        "expected_verdict",
+        "expected verdict",
+        "expected_action",
+        "gold",
+        "answer_key",
+        "packet_truth",
+        "scoring",
+        "score",
+        "scoring_map",
+        "legacy_truth",
+        "legacy_packet_id",
+        "mixed_registration",
+        "registration",
+        "sibling_truth",
+        "sibling_key",
+        "target_bucket",
+        "hidden_ground_truth",
+        "verdict_key"
+      ],
+      "allowed_locations": [
+        "post_freeze_scorer_files",
+        "posthoc_score_reports",
+        "architecture_audit_docs",
+        "registration_source_files_not_loaded_by_live_wrappers_before_trace_freeze"
+      ],
+      "stop_rule": "If a forbidden term is present in a runtime prompt path or runtime-only manifest with answer-key semantics, the run is blocked or invalid."
+    },
+    "scoring_map_separation": {
+      "required": [
+        "Live wrappers must not contain a scoring-map path.",
+        "Live wrappers must not load scoring maps.",
+        "Live wrappers must not read mixed-registration files before trace freeze.",
+        "Post-hoc scorers may load scoring maps only after trace files exist and trace hashes are bound.",
+        "Score artifacts must record scoring-map load order and trace hash binding."
+      ],
+      "required_evidence_fields": [
+        "trace_frozen_before_scoring=true",
+        "live_wrapper_has_scoring_map_path=false",
+        "scoring_map_loaded_after_trace_hash_binding=true",
+        "trace_calls_sha256",
+        "trace_provider_calls_sha256",
+        "runtime_only_manifest_sha256"
+      ],
+      "stop_rule": "If the scoring map is reachable before trace freeze, the lane is invalid for HoloVerify proof credit."
+    },
+    "gov_selector_version": {
+      "selector": [
+        "Active selector must be trace-visible as SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04 at this checkpoint.",
+        "Selector hash must match 939c1ffbba74e9a526d454979b52980513d952eae4077cc817283380e596a1ec.",
+        "Final selector behavior must match declared policy.",
+        "Tie-breaks must be policy-consistent and trace-explained.",
+        "Blocker-closure decisions must include criteria trace."
+      ],
+      "worker_contract": [
+        "Active worker contract must be trace-visible as WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04 at this checkpoint.",
+        "Worker contract hash must match 5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37.",
+        "Required blocker fields must be present when blocker state exists.",
+        "Worker outputs must preserve raw provider output separately from parsed decisions."
+      ],
+      "gov": [
+        "Full-Holo lanes require provider-backed Gov calls.",
+        "Gov calls must appear in TRACE_PROVIDER_CALLS.jsonl.",
+        "Gov rows must include provider identity and provider_call_ok=true.",
+        "Gov prompt path must include gate/blocker state when gate/blocker state exists.",
+        "Gov output must be preserved raw and parsed.",
+        "Deterministic/local Gov is allowed only in explicitly labeled ablation or patch-validation lanes and cannot be merged into full-HoloGov evidence."
+      ]
+    },
+    "packet_key_defects": {
+      "defect_candidates": [
+        "Runtime-visible sources do not support the expected verdict.",
+        "Current-cycle fact is missing.",
+        "Source text is stale, ambiguous, or contradicts the key.",
+        "Sibling pair has an unstable A/B relationship.",
+        "Packet asks for a decision not grounded in the provided source bundle.",
+        "Key depends on information absent from the runtime prompt.",
+        "Packet ID, domain, or pair identifier is duplicated or malformed."
+      ],
+      "handling_rule": [
+        "Preserve the raw trace-bound score.",
+        "Quarantine the packet or pair from clean internal gates.",
+        "Do not count a packet/key defect as a model-quality miss.",
+        "Do not rewrite frozen runtime evidence.",
+        "Introduce replacements only through a new runtime-only manifest, exact preflight, approved full route, frozen trace, and post-hoc score.",
+        "Merge replacements only under the current accounting rule."
+      ],
+      "current_checkpoint_example": {
+        "packet_key_defect_candidate": "HVSF-FACTORY14F-017-B",
+        "raw_tier2_packets_preserved": "13/14",
+        "raw_tier2_pairs_preserved": "6/7",
+        "replacement_pair": "HVSF-FACTORY14F-017R",
+        "clean_internal_pair_gate_after_valid_replacement": "7/7"
+      }
+    }
+  },
+  "external_dna_reviewer": {
+    "examples": [
+      "Claude Opus",
+      "Fable"
+    ],
+    "bring_in_when": [
+      "A public claim is about to move.",
+      "A public denominator is changing.",
+      "A live run result will unlock a new tier.",
+      "A selector, worker contract, Gov route, or deterministic gate changed.",
+      "A packet/key defect affected a score, gate, or replacement merge.",
+      "A claim label warning appears.",
+      "Tier 2 or Tier 3 evidence might be described outside internal directional scope.",
+      "A new family/domain bank is added to the benchmark.",
+      "The audit relies on a non-obvious accounting rule.",
+      "A reviewer can falsify the mechanism by finding a runtime prompt leak, pre-freeze scoring-map access, missing Gov call, or claim-denominator mismatch."
+    ],
+    "review_packet": [
+      "current_checkpoint_and_commit",
+      "exact_lane_and_evidence_class",
+      "runtime_only_manifest_hash",
+      "selector_and_worker_contract_versions_and_hashes",
+      "preflight_exact_approval_sentence",
+      "run_summary",
+      "TRACE_CALLS_jsonl_hash",
+      "TRACE_PROVIDER_CALLS_jsonl_hash",
+      "raw_prompt_output_samples",
+      "posthoc_score_artifact",
+      "packet_key_quarantine_notes",
+      "exact_public_or_internal_claim_under_review"
+    ],
+    "review_questions": [
+      "Can any runtime prompt path see truth, expected verdict, scoring, answer-key, or mixed-registration data?",
+      "Is scoring-map access impossible before trace freeze?",
+      "Are Gov calls present, provider-backed, and trace-visible for the claimed lane?",
+      "Does final selector behavior match the declared selector policy?",
+      "Does the claim use the correct denominator and evidence class?",
+      "Is any packet/key defect being counted as model performance?"
+    ]
+  },
+  "red_line_stop_rules": [
+    "Runtime path contains truth, expected verdict, scoring fields, answer keys, or mixed-registration data.",
+    "Scoring map is reachable before trace freeze.",
+    "Selector version is missing, stale, or not trace-visible.",
+    "Worker contract version is missing, stale, or not trace-visible.",
+    "Gov calls are absent from a full-Holo lane.",
+    "Gov calls are not provider-backed in a full-Holo lane.",
+    "Gov does not see blocker/gate state when blocker/gate state exists.",
+    "Expected and observed provider-call counts do not match.",
+    "Raw prompts or raw outputs are missing.",
+    "TRACE_CALLS.jsonl or TRACE_PROVIDER_CALLS.jsonl is missing.",
+    "Deterministic blocker/gate checks are disabled or bypassed.",
+    "Final selector behavior contradicts declared selector policy.",
+    "A packet/key defect is interpreted as a model-quality miss.",
+    "A replacement supplement rewrites the frozen original score.",
+    "Public copy uses any denominator except blind-120 without a new public-claim audit.",
+    "Tier 2 directional evidence is promoted to public benchmark evidence without external review and public-claim audit clearance."
+  ],
+  "final_cadence_finding": "At commit f4d11dc15a85e53c15399a1ade7f57ca2b6b8602, the recurring HoloVerify architecture audit cadence should run daily during active benchmark work, weekly during benchmark development, before every live run, after every live run, and before every public claim."
+}

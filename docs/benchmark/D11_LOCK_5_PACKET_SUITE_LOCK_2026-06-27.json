@@ -1,0 +1,160 @@
+{
+  "classification": "D11_LOCK_5_PACKET_SUITE_LOCK",
+  "created_date": "2026-06-27",
+    "status": "POST_LIVE_SPLIT_RUN_PARTIAL_SUITE_LOCKED",
+    "purpose": "Record the five-packet D11-lock suite attempt without changing architecture or judging rules; D10 and D11_CYBER added official Holo wins, while D12 is frozen as a word-band control-loop regression seed.",
+    "split_run_disclosure": "D10 and D11-D12 were not one uninterrupted 45-call run. D10 was rerun as a patched canary after an invalid prepatch attempt exposed harness defects. D11-D12 were then run as a continuation sibling using the patched runner.",
+  "architecture": {
+    "name": "D11-lock Holo",
+    "solo_lane": {
+      "calls": 7,
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "final_artifact_call": 7,
+      "gov_visible": false
+    },
+    "holo_lane": {
+      "calls": 7,
+      "worker_calls": 4,
+      "gov_calls": 3,
+      "gov_model": "minimax/MiniMax-M2.5-highspeed",
+      "worker_order": [
+        "xai/grok-3-mini",
+        "anthropic/claude-haiku-4-5-20251001",
+        "xai/grok-3-mini",
+        "anthropic/claude-haiku-4-5-20251001"
+      ],
+      "final_artifact_call": 7,
+      "final_gov_gate": false,
+      "required_prompting": [
+        "Gov routing lens before state",
+        "cumulative state brief",
+        "full latest Gov baton immediately before current turn command",
+        "local deterministic registry",
+        "D11-lock best-artifact preservation once admissible"
+      ]
+    }
+  },
+  "official_judge_rule": {
+    "validator": "benchmark_full_gated_judge.py",
+    "must_be_full_gated_100_point": true,
+    "required_ledgers": [
+      "deterministic_score_25",
+      "epistemic_score_25",
+      "structural_score_25",
+      "argument_score_25"
+    ],
+    "local_deterministic_audit_controls_eligibility": true,
+    "narrow_or_noncanonical_judges_are_diagnostic_only": true
+  },
+  "suite_packets": [
+    {
+      "suite_slot": 1,
+      "case_id": "D10_INFRASTRUCTURE_CONFIGURATION_CHANGE",
+      "packet_id": "d10_infrastructure_configuration_change_001",
+      "source_repo": "/Users/taylorwigton/Desktop/holo-mvp",
+      "source_commit": "4b8dbfb",
+      "packet_dir": "artifact_benchmarks/holo_factory/mini_scouts/d10_infrastructure_configuration_change_001",
+            "status": "FROZEN_OFFICIAL_COMPLETE",
+            "source_count": 9,
+            "new_provider_calls_required": 14,
+            "judge_calls_required_after_generation": 1,
+            "official_full_gated_score": {
+                "holo": 95,
+                "solo": 71,
+                "winner": "HOLO"
+            },
+            "official_judge_path": "/private/tmp/d11_lock_5packet_suite_live_20260627/d11_lock_5packet_d10_d12_live_20260627T231320Z/D10_INFRASTRUCTURE_CONFIGURATION_CHANGE/judge_gemini_full_gated_100pt_001/JUDGE_RESULT_FULL_GATED_100PT.json"
+    },
+    {
+      "suite_slot": 2,
+      "case_id": "D11_CYBER_INCIDENT_CONTRACT_NOTICE_EMERGENCY_CLOUD_ACCESS",
+      "packet_id": "d11_cyber_incident_contract_notice_emergency_cloud_access_001",
+      "source_repo": "/Users/taylorwigton/Desktop/holo-mvp",
+      "source_commit": "4b8dbfb",
+      "packet_dir": "artifact_benchmarks/holo_factory/mini_scouts/d11_cyber_incident_contract_notice_emergency_cloud_access_001",
+            "status": "FROZEN_OFFICIAL_COMPLETE",
+            "source_count": 10,
+            "new_provider_calls_required": 14,
+            "judge_calls_required_after_generation": 1,
+            "official_full_gated_score": {
+                "holo": 96,
+                "solo": 94,
+                "winner": "HOLO"
+            },
+            "official_judge_path": "/private/tmp/d11_lock_5packet_suite_live_20260627/d11_lock_5packet_d10_d12_live_20260627T232331Z/D11_CYBER_INCIDENT_CONTRACT_NOTICE_EMERGENCY_CLOUD_ACCESS/judge_gemini_full_gated_100pt_001/JUDGE_RESULT_FULL_GATED_100PT.json"
+    },
+    {
+      "suite_slot": 3,
+      "case_id": "D12_FUND_NAV_REDEMPTION_CASH_RELEASE",
+      "packet_id": "d12_fund_nav_redemption_cash_release_001",
+      "source_repo": "/Users/taylorwigton/Desktop/holo-mvp",
+      "source_commit": "4b8dbfb",
+      "packet_dir": "artifact_benchmarks/holo_factory/mini_scouts/d12_fund_nav_redemption_cash_release_001",
+            "status": "FROZEN_REGRESSION_SEED_NO_OFFICIAL_WINNER",
+            "source_count": 10,
+            "new_provider_calls_required": 14,
+            "judge_calls_required_after_generation": 0,
+            "deterministic_result": {
+                "holo_admissible": false,
+                "holo_word_count": 607,
+                "holo_failures": [
+                    "word_band"
+                ],
+                "solo_admissible": false,
+                "solo_word_count": 1307,
+                "solo_failures": [
+                    "word_band"
+                ],
+                "official_winner": null
+            },
+            "regression_lesson": "Gov correctly diagnosed under/over word-band failures, but natural-language baton pressure did not force workers to land the hard form gate. Deterministic actuation is required before rerunning D12."
+    },
+    {
+      "suite_slot": 4,
+      "case_id": "D13_TRAP_CANARY_STALE_POLICY_PAYMENT_DIVERSION",
+      "packet_id": "SYNTH_D13_TRAP_CANARY_STALE_POLICY_PAYMENT_DIVERSION",
+      "status": "FROZEN_OFFICIAL_COMPLETE",
+      "official_full_gated_score": {
+        "holo": 94,
+        "solo": 69,
+        "winner": "HOLO"
+      },
+      "official_judge_path": "/private/tmp/d11_lock_full_gated_100pt_judges_20260627/D13_FULL_GATED_100PT_GEMINI_001/JUDGE_RESULT_FULL_GATED_100PT.json",
+      "new_provider_calls_required": 0,
+      "judge_calls_required_after_generation": 0
+    },
+    {
+      "suite_slot": 5,
+      "case_id": "D14_TRADE_FINANCE_LC_DISCREPANCY_PAYMENT_RELEASE",
+      "packet_id": "D14_TRADE_FINANCE_LC_DISCREPANCY_PAYMENT_RELEASE_D11_LOCK",
+      "status": "FROZEN_OFFICIAL_COMPLETE",
+      "official_full_gated_score": {
+        "holo": 94,
+        "solo": 69,
+        "winner": "HOLO"
+      },
+      "official_judge_path": "/private/tmp/d11_lock_full_gated_100pt_judges_20260627/D14_FULL_GATED_100PT_GEMINI_001/JUDGE_RESULT_FULL_GATED_100PT.json",
+      "official_validation_path": "/private/tmp/d11_lock_full_gated_100pt_judges_20260627/D14_FULL_GATED_100PT_GEMINI_001/CANONICAL_VALIDATION.json",
+      "new_provider_calls_required": 0,
+      "judge_calls_required_after_generation": 0
+    }
+  ],
+    "executed_live_calls_for_d10_d12": {
+        "generation_calls": 42,
+        "gov_calls": 9,
+        "judge_calls": 2,
+        "total_calls": 44
+    },
+  "stop_conditions": [
+    "Any provider failure",
+    "Any model substitution",
+    "Any missing real Gov provider call",
+    "Any Holo worker missing Gov lens, state brief, or full latest Gov baton",
+    "Any Solo prompt receiving Gov baton",
+    "Any official judge missing local deterministic audit",
+    "Any official judge rejected by benchmark_full_gated_judge.py",
+    "Any posthoc artifact mutation after judge packet creation"
+  ],
+    "next_allowed_step": "Do not rerun D12 until the architecture has deterministic actuation for word-band control. Next allowed step is provider-free patch/design for exact per-section word quotas, local word-band delta computation, final-worker hard quota prompting, and fail-closed or explicitly logged deterministic form normalization.",
+    "autopsy_path": "docs/benchmark/D11_LOCK_D10_D12_AUTOPSY_2026-06-27.md"
+}

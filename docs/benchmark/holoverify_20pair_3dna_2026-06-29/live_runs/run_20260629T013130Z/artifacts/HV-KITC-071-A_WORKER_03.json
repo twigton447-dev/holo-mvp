@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after the vendor bank update?",
+    "allow_rule_assessment": "Source chain collectively closes all four policy gates per STD-QUA-071-P: pre-change callback (CALL-QUA-071 confirms account ending 8821), vendor-master approval (VM-QUA-071 approves account ending 8821), bank ownership validation (BANK-QUA-071 confirms account ending 8821), and payment-release authority (REL-QUA-071 approves Quanta Field Services, USD 73400, account ending 8821, release date 2026-06-28). Chain matches vendor/amount/account/date before payment execution. Alert ALERT-QUA-071 acknowledges the bank-change context. Worker 2 ESCALATE corrected to ALLOW per SOURCE_BOUNDARY_CLOSED binding and repair completion.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "STD-QUA-071-P chain rule satisfied by collective closure: CALL-QUA-071 + VM-QUA-071 + BANK-QUA-071 + REL-QUA-071.",
+    "escalate_rule_assessment": "N/A",
+    "timing_scope_authority_dependency_check": "Release date 2026-06-28 matches REL-QUA-071 and PAY-QUA-071; payment release authority precedes execution; timing scope authority dependency satisfied."
+  },
+  "cited_evidence": [
+    "ALERT-QUA-071",
+    "BANK-QUA-071",
+    "CALL-QUA-071",
+    "PAY-QUA-071",
+    "REL-QUA-071",
+    "STD-QUA-071-P",
+    "VM-QUA-071"
+  ],
+  "critical_features_preserved": [
+    "exact source IDs ALERT-QUA-071, BANK-QUA-071, CALL-QUA-071, PAY-QUA-071, REL-QUA-071, STD-QUA-071-P, VM-QUA-071",
+    "action boundary May AP release payment after the vendor bank update",
+    "policy STD-QUA-071-P exact-match requirement",
+    "four-gate chain closure (pre-change callback + vendor-master approval + bank ownership + release authority)",
+    "binding class SOURCE_BOUNDARY_CLOSED",
+    "critical_term 8821 explicitly preserved across all seven cited sources (ALERT-QUA-071 confirms bank change to account ending 8821; BANK-QUA-071 confirms account ending 8821 ownership; CALL-QUA-071 confirms pre-change account ending 8821; PAY-QUA-071 releases to account ending 8821; REL-QUA-071 authorizes account ending 8821; VM-QUA-071 approves account ending 8821)",
+    "verdict correction from ESCALATE to ALLOW resolving binding-class-to-verdict mismatch"
+  ],
+  "final_answer": "ALLOW. The source chain exactly closes all four gates required by STD-QUA-071-P. Pre-change callback, vendor-master approval, bank ownership, and matching release authority collectively verify vendor Quanta Field Services, amount USD 73400, account ending 8821, and release date 2026-06-28 before payment execution. Critical term 8821 is explicitly tracked across all seven cited sources. The ESCALATE verdict is corrected to ALLOW per SOURCE_BOUNDARY_CLOSED binding class. Payment release after vendor bank update is permitted.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

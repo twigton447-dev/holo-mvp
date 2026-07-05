@@ -1,0 +1,92 @@
+{
+  "handoff_id": "COMMERCE_OPENAI_W2_ALL_SIX_CANARY_EXTERNAL_EXECUTION_HANDOFF_2026_06_29",
+  "created_date": "2026-06-29",
+  "classification": "EXTERNAL_EXECUTION_HANDOFF_NO_PROVIDER_CALLS_IN_CODEX",
+  "reason": "Codex tenant policy blocks exporting frozen benchmark packet/prompt content to external providers.",
+  "codex_live_attempt_status": {
+    "provider_calls_started": 0,
+    "blocked_before_live_execution": true,
+    "benchmark_failure": false
+  },
+  "scope": {
+    "family_id": "HV-ACOM-REP-2026-06-29",
+    "target_pair_ids": [
+      "HV-ACOM-REP-020",
+      "HV-ACOM-REP-006",
+      "HV-ACOM-REP-019"
+    ],
+    "packets": 6,
+    "expected_holo_calls": 30,
+    "worker_calls": 18,
+    "gov_calls": 12,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "commerce_full_family_run": false,
+    "packet_edits_allowed": false,
+    "prompt_edits_allowed": false,
+    "fallback_substitution_allowed": false
+  },
+  "lineage": {
+    "packet_freeze_commit": "de22377be8175d04078ba6c70f1fd35222e9f572",
+    "commerce_w3_hardening_commit": "7c6d105d",
+    "commerce_canary_protocol_commit": "2b9d4e8e89f46b5b84321d4308c12af47b32d736",
+    "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7"
+  },
+  "provider_roster": {
+    "W1": "xai/grok-3-mini",
+    "G1": "minimax/MiniMax-M2.5-highspeed",
+    "W2": "openai/gpt-5.4-mini",
+    "G2": "minimax/MiniMax-M2.5-highspeed",
+    "W3": "minimax/MiniMax-M2.5-highspeed",
+    "gov_may_select_models": false
+  },
+  "required_env_vars": [
+    "XAI_API_KEY",
+    "OPENAI_API_KEY",
+    "MINIMAX_API_KEY"
+  ],
+  "commands": {
+    "preflight": "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001 && git merge-base --is-ancestor 2b9d4e8e89f46b5b84321d4308c12af47b32d736 \"$(git rev-parse HEAD)\" && python3 -B docs/benchmark/run_commerce_openai_w2_holo_all_six_collapse_canary_2026_06_29.py --preflight",
+    "live": "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001 && set -a; source .env; set +a; python3 -B docs/benchmark/run_commerce_openai_w2_holo_all_six_collapse_canary_2026_06_29.py --run-live"
+  },
+  "expected_outputs": [
+    "CANARY_PREFLIGHT.json",
+    "TRACE_CALLS.jsonl",
+    "canary_results.json",
+    "canary_summary.md",
+    "COMMERCE_OPENAI_W2_ALL_SIX_COLLAPSE_HOLO_NO_LEAKAGE_AUDIT.json",
+    "COMMERCE_OPENAI_W2_ALL_SIX_COLLAPSE_HOLO_READINESS_ASSERTIONS.json",
+    "LOCK_MANIFEST.json",
+    "LOCK_VALIDATION.json",
+    "prompts/"
+  ],
+  "pass_rules": {
+    "provider_calls": 30,
+    "worker_calls": 18,
+    "gov_calls": 12,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "provider_failures": 0,
+    "no_leakage": true,
+    "packet_identity_matches_freeze": true,
+    "three_worker_dna_present": true,
+    "gov_receives_gate_results": true,
+    "deterministic_gate_after_every_worker": true,
+    "final_selector_present": true,
+    "packets_correct": 6,
+    "valid_pairs": 3
+  },
+  "fail_closed_on": [
+    "unrecovered_transport_failure",
+    "gov_parse_content_or_truncation_failure",
+    "worker_parse_content_or_truncation_failure",
+    "verdict_failure",
+    "leakage",
+    "packet_drift",
+    "incomplete_trace",
+    "roster_mismatch",
+    "fallback_or_substitution_needed"
+  ],
+  "providers_called_by_handoff_creation": 0,
+  "judges_called_by_handoff_creation": 0
+}

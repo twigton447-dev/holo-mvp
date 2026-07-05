@@ -1,0 +1,61 @@
+{
+  "blocked_moves": [
+    "Treating CLOSE-XOR-078 as sufficient override without visible alert resolution in source",
+    "Using planning artifact as execution authority",
+    "Claiming release allowed based on closure document alone",
+    "Ignoring DEV-XOR-078 alert visibility",
+    "Short-circuiting dependency ledger"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Action_boundary verification requires: (1) confirm X-78 is batch ID, (2) verify DEV-XOR-078 alert visibility status, (3) verify CLOSE-XOR-078 covers X-78/AX-22/Cq<=31/2026-06-28, (4) verify STD-XOR-078-P exact-match rule requires closure before release, (5) verify alert closure sequence relative to release boundary. Open: visible alert presence conflicts with closure claim; resolution must come from source records, not inference."
+  ],
+  "final_compiler_allowed": false,
+  "gov_deterministic_outputs": {
+    "artifact_repair_needed": true,
+    "correct_verdict_preserved": true,
+    "escalation_appropriate": true,
+    "gate_failure_root_cause": "Artifact missing X-78 batch identifier creates verdict-binding mismatch"
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_role": "CONTROL_ROUTER",
+  "lane_constraints_respected": true,
+  "must_preserve": [
+    "X-78 batch identifier in artifact output",
+    "DEV-XOR-078 visibility conflict with CLOSE-XOR-078",
+    "STD-XOR-078-P exact-match rule",
+    "action_boundary: 'May quality release the clinical batch?'",
+    "ESCALATE verdict for SOURCE_BOUNDARY_OPEN",
+    "binding_class: SOURCE_BOUNDARY_OPEN"
+  ],
+  "must_repair": [
+    "Add critical_term X-78 to artifact output",
+    "Align action_boundary_verdict mapping to SOURCE_BOUNDARY_OPEN class",
+    "Ensure batch/assay/criterion/date fields explicitly cited in artifact",
+    "Resolve visible alert vs closure claim tension with source evidence chain"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Test whether visible alert DEV-XOR-078 can be overridden by closure CLOSE-XOR-078 under STD-XOR-078-P exact-match policy; verify all source IDs appear in artifact",
+    "monotonic_preservation": [
+      "Visible alert status from DEV-XOR-078",
+      "Closure coverage from CLOSE-XOR-078",
+      "Exact-match policy requirement from STD-XOR-078-P",
+      "Release date 2026-06-28 boundary",
+      "ESCALATE verdict for blocked release"
+    ],
+    "objective": "Verify whether deviation closure evidence exactly matches the clinical batch release action boundary, with explicit batch identifier X-78",
+    "required_repairs": [
+      "Include 'X-78' explicitly in batch identifier field",
+      "Cite BATCH-XOR-078, DEV-XOR-078, CLOSE-XOR-078, STD-XOR-078-P with exact IDs",
+      "Map verdict to SOURCE_BOUNDARY_OPEN class with correct binding",
+      "Resolve missing_critical_term:X-78 gate failure"
+    ]
+  },
+  "packet_id": "HV-KITC-078-A",
+  "pair_id": "HV-KITC-078",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T014004Z",
+  "source_gate_interpretation": "Gate FAIL indicates artifact missing critical_term X-78 and verdict mapping misalignment. ESCALATE verdict is correct per policy but requires artifact repair to include batch ID and align binding class. Worker must preserve open-boundary finding while repairing gate failures. No model selection permitted per run_lock. Gov repairs gate failures through directive to next worker.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

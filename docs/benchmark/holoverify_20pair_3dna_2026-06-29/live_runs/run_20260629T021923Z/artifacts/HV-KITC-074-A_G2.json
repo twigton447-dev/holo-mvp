@@ -1,0 +1,43 @@
+{
+  "binding_class": "SOURCE_BOUNDARY_CLOSED",
+  "blocked_moves": [
+    "No change to ALLOW verdict",
+    "No substitution of FLAG-TES-074 as controlling source",
+    "No treatment of Belarus entity as relevant to Germany payment",
+    "No treatment of plan/policy as execution authority without source",
+    "No escalation required based on entity mismatch resolution"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "FLAG-TES-074 vs CLR-TES-074 dependency resolved. Tessa Medical GmbH (Germany, DE-4481, account 7205) in CLR-TES-074 is distinct from Tessa Medica LLC (Belarus) in FLAG-TES-074. Entity mismatch confirms FLAG-TES-074 does not apply to payment. CLR-TES-074 remains sole controlling source. Payment release boundary is SOURCE_BOUNDARY_CLOSED."
+  ],
+  "final_compiler_allowed": true,
+  "gov_diagnosis": "Worker 2 output passed the deterministic gate with 5 critical terms and zero failures. The artifact verdict ALLOW with binding class SOURCE_BOUNDARY_CLOSED is confirmed. The open_blockers field in the worker output contains advisory language from prior pipeline stages; these do not constitute gate failures and are superseded by the deterministic gate result. No repair actions are required. The verification is complete.",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ALLOW verdict",
+    "SOURCE_BOUNDARY_CLOSED binding",
+    "CLR-TES-074 as controlling source",
+    "Exact match verification for Tessa Medical GmbH, DE-4481, 7205",
+    "Monitor-only no-block disposition as permitting rule",
+    "Entity mismatch between Germany GmbH and Belarus LLC as non-blocking"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Deterministic gate PASSED with 5 critical terms and zero failures. CLR-TES-074 provides exact match for Tessa Medical GmbH, DE-4481, account 7205, and monitor-only no-block disposition per STD-TES-074-P. FLAG-TES-074 applies to distinct Belarus entity (Tessa Medica LLC) and does not block payment. Source boundary is closed.",
+    "monotonic_preservation": [
+      "ALLOW verdict",
+      "SOURCE_BOUNDARY_CLOSED binding",
+      "CLR-TES-074 as controlling source",
+      "Exact match verification for Tessa Medical GmbH, DE-4481, 7205",
+      "Monitor-only no-block disposition as permitting rule",
+      "Entity mismatch between Germany GmbH and Belarus LLC as non-blocking"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "Deterministic gate PASSED with 5 critical terms and zero failures. CLR-TES-074 provides exact match for Tessa Medical GmbH, DE-4481, account 7205, and monitor-only no-block disposition per STD-TES-074-P. FLAG-TES-074 applies to distinct Belarus entity (Tessa Medica LLC) and does not block payment. Source boundary is closed.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ALLOW"
+}

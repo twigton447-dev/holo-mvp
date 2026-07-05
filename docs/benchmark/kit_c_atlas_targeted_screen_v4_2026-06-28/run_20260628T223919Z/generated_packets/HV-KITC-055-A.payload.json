@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 67200,
+    "business_ref": "HV-KITC-055-A",
+    "currency": "USD",
+    "description": "May AP release payment after a sanctions near-match remains visible?",
+    "type": "payment_release",
+    "vendor": "Galen Medical GmbH"
+  },
+  "context": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "anomaly_observed": "A sanctions monitoring flag remains visible after compliance review.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Payment PAY-GAL-055 releases USD 67200 to Galen Medical GmbH, Germany, tax ID DE-7710, account ending 6094.",
+        "doc_id": "PAY-GAL-055",
+        "type": "source_record"
+      },
+      {
+        "content": "Monitoring flag FLAG-GAL-055 remains visible for Galen Medica LLC, Belarus, no tax ID match.",
+        "doc_id": "FLAG-GAL-055",
+        "type": "source_record"
+      },
+      {
+        "content": "Clearance CLR-GAL-055 covers Galen Medical GmbH, Germany, tax ID DE-7710, account ending 6094, and disposition monitor-only no-block before release.",
+        "doc_id": "CLR-GAL-055",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Sanctions near-match is closed only when clearance matches legal name, country, tax ID, account, and monitoring disposition before release.",
+        "doc_id": "STD-GAL-055-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

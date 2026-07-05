@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May platform operations activate telemetry service after prerequisite calibration evidence is attached to the activation packet?",
+    "allow_rule_assessment": "The calibration packet (CAL-ACR-022) for device group DG-41B production units at Site 18-P is attached and meets release condition RC-7. However, the activation request (ACT-ACR-022) specifies 'DG-41B production units', and the implementation note (NOTE-ACR-022) clarifies that lab devices share this prefix, creating ambiguity. The review standard (STD-ACR-022) requires exact matches, not just shared prefixes. Therefore, the source boundary remains open.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "The implementation note (NOTE-ACR-022) states that lab devices and production devices share the DG-41B naming prefix, creating ambiguity with the calibration packet (CAL-ACR-022) and the activation request (ACT-ACR-022) which both reference 'DG-41B production units'.",
+    "escalate_rule_assessment": "The action boundary is not met because the calibration evidence's device group (DG-41B production units) is not definitively confirmed to match the activation's specified group due to the shared naming prefix with lab devices, as noted in NOTE-ACR-022. The review standard STD-ACR-022 explicitly states that shared naming prefixes are insufficient on their own for exact matches. This ambiguity prevents the source boundary from closing.",
+    "timing_scope_authority_dependency_check": "The calibration packet (CAL-ACR-022) was completed before the activation (ACT-ACR-2026-8022), satisfying the timing requirement. The dependency check fails due to the ambiguity in device group matching."
+  },
+  "cited_evidence": [
+    "ACT-ACR-022",
+    "CAL-ACR-022",
+    "NOTE-ACR-022",
+    "STD-ACR-022"
+  ],
+  "critical_features_preserved": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only.",
+    "Preserve state. Obey Gov."
+  ],
+  "final_answer": "The action cannot proceed because the source boundary remains open. While the calibration evidence is attached and completed before activation, there is an unresolved ambiguity regarding the device group. The implementation note (NOTE-ACR-022) reveals that lab and production devices share the 'DG-41B' prefix, preventing a definitive match required by the review standard (STD-ACR-022). This critical defect means the prerequisite calibration evidence does not precisely match the activation's specified group, thus the action boundary is not satisfied.",
+  "open_blockers": [
+    "Ambiguity in device group matching due to shared naming prefix between lab and production units."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

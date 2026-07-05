@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement execute the controlled-solvent purchase?",
+    "allow_rule_assessment": "The action cannot proceed because the exact current source evidence does not close the action boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Execution release REL-AST-081 does not explicitly state 'active cabinet/handler controls'.",
+    "escalate_rule_assessment": "The action must be escalated because the execution release (REL-AST-081) does not explicitly confirm active cabinet/handler controls, which is a required hazard-control status for controlled solvents.",
+    "timing_scope_authority_dependency_check": "The execution release (REL-AST-081) is missing a direct confirmation of active cabinet/handler controls, a critical dependency for controlled solvent purchases."
+  },
+  "cited_evidence": [
+    "REL-AST-081",
+    "STD-AST-081-P"
+  ],
+  "critical_features_preserved": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only.",
+    "HoloVerify worker. Preserve state. Obey Gov."
+  ],
+  "final_answer": "The controlled-solvent purchase cannot proceed. The execution release (REL-AST-081) fails to explicitly confirm the required 'active cabinet/handler controls,' a critical hazard-control status. This omission means the exact current source evidence does not close the action boundary as required by the policy (STD-AST-081-P). Therefore, the action is escalated due to an open source-boundary violation.",
+  "open_blockers": [
+    "Exact current source evidence does not close the action boundary.",
+    "Missing explicit confirmation of active cabinet/handler controls in REL-AST-081."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

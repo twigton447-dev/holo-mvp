@@ -1,0 +1,48 @@
+{
+  "blocked_moves": [
+    "Cannot convert ESCALATE to ALLOW\u2014source boundary open due to payment release approval not completed",
+    "Cannot cite planning artifacts as execution authority",
+    "Cannot treat visible HOLD-RAV-072 as resolved without closeout ledger exact match on payment release approval",
+    "Cannot reduce cited evidence below 4 source IDs (INV-RAV-072, HOLD-RAV-072, CLOSE-RAV-072, STD-RAV-072-P)",
+    "Cannot alter binding class from SOURCE_BOUNDARY_OPEN",
+    "Cannot omit payment release approval open status from final answer"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "payment_release_approval_open: CLOSE-RAV-072 shows payment release approval remains open; all other exact-match fields (invoice, vendor, amount, tax review, quality signoff) confirmed complete; action blocked until payment release approval is reflected as completed in CLOSE-RAV-072; no external dependencies required\u2014source evidence is complete and sufficient to determine ESCALATE without ambiguity."
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding class",
+    "CLOSE-RAV-072 as controlling source showing payment release approval open",
+    "STD-RAV-072-P exact-match rule requiring payment release approval completion",
+    "INV-RAV-072 and HOLD-RAV-072 as boundary-anchoring source IDs",
+    "word_band_final_answer constraint"
+  ],
+  "must_repair": [
+    "word_band_final_answer length to meet deterministic gate threshold (12 words)",
+    "final_answer field must be exactly 12 words while preserving ESCALATE meaning and payment release approval open status"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Identify whether word_band_final_answer:12 requires final_answer to be exactly 12 words or within a 12-word band (e.g., 10-12 words). Adjust final answer language to meet constraint. Verify that cited_evidence array contains exactly 4 source IDs and that all required fields (verification_verdict, boundary_binding, cited_evidence, open_blockers, critical_features_preserved, final_answer) are present with proper formatting",
+    "monotonic_preservation": [
+      "ESCALATE verdict remains immutable\u2014action cannot proceed with visible HOLD-RAV-072 and open payment release approval",
+      "SOURCE_BOUNDARY_OPEN binding class\u2014source boundary open because CLOSE-RAV-072 does not complete payment release approval",
+      "STD-RAV-072-P exact-match policy interpretation\u2014payment release approval completion is mandatory before execution",
+      "Closeout ledger CLOSE-RAV-072 as controlling source of truth for payment release approval status"
+    ],
+    "objective": "Produce a SOURCE_BOUNDARY_MAPPER verification output that passes deterministic gate by meeting exact word_band_final_answer length requirement while maintaining correct ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding",
+    "required_repairs": [
+      "Calculate final_answer word count to meet deterministic gate threshold",
+      "Ensure final_answer contains ESCALATE verdict and states payment release approval is open in exactly the required word count",
+      "Maintain all 4 source IDs in cited_evidence: INV-RAV-072, HOLD-RAV-072, CLOSE-RAV-072, STD-RAV-072-P",
+      "Retain all boundary_binding subfields without alteration"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Both workers generated correct ESCALATE verdicts with proper SOURCE_BOUNDARY_OPEN binding, but deterministic gate rejects outputs for word_band_final_answer length violations. Policy requires exact-match including payment release approval completion before execution. CLOSE-RAV-072 shows payment release approval open. Source boundary remains open. Gate failure is technical format violation, not logical content error. Correct source bindings must be preserved through repair.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

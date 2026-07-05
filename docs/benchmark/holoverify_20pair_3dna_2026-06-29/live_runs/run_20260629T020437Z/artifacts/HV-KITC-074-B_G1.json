@@ -1,0 +1,82 @@
+{
+  "blocked_moves": [
+    "ALLOW release on monitor-only no-block without exact account match",
+    "interpret CLR-TES-074 as covering account 7205 without explicit source",
+    "treat FLAG-TES-074 visibility as non-blocking based on disposition label alone",
+    "invoke timing or authority override absent from source documents",
+    "close source boundary by ignoring account field discrepancy"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "PAY-TES-074 (account 7205) depends on clearance scope resolution. CLR-TES-074 (account 7025) does not cover payment target. FLAG-TES-074 blocks release until disposition confirmed or flag cleared. All three must align before FAIL_CLOSED becomes FINAL_COMPILER eligible."
+  ],
+  "execution_guardrails": [
+    "FAIL_CLOSED remains active until source boundary closes with all blockers resolved",
+    "ALLOW verdict prohibited until exact match of name country tax ID account and disposition confirmed",
+    "CONTINUE_WORKER mandated to pursue repair before FINAL_COMPILER eligibility"
+  ],
+  "final_compiler_allowed": false,
+  "gov_command_output": {
+    "diagnosis": {
+      "critical_findings": [
+        "Account mismatch 7205 (payment target) vs 7025 (clearance scope)",
+        "FLAG-TES-074 unresolved with no disposition",
+        "STD-TES-074-P exact-match policy violated on account field"
+      ],
+      "dependency_status": "UNRESOLVED - residual compliance flag versus exact clearance",
+      "gate_failures": [],
+      "gate_status": "PASSED",
+      "known_failure_risks_encountered": [
+        "adjacent source treated as exact source (CLR-TES-074 covers different account)",
+        "status-class literalism risk (monitor-only no-block misread as automatic release)"
+      ],
+      "previous_worker_verdict": "ESCALATE",
+      "source_integrity": "PRESERVED - no hallucinated IDs, proper evidence chain",
+      "verdict_correct": true
+    },
+    "gov_mode": "CONTROL_ROUTER",
+    "gov_timestamp": "2026-06-29T02:04:52Z",
+    "source_gate_interpretation": "DETERMINISTIC_GATE_PASSED - artifact HV-KITC-074-B_WORKER_01 is authoritative, no invented IDs, exact source match rule preserved",
+    "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact source match rule for name country tax ID account and disposition",
+    "account field specificity as critical matching criterion",
+    "FLAG-TES-074 visibility and unresolved status as blocking fact",
+    "CLR-TES-074 scope limitation to account 7025 only",
+    "no invented or extrapolated document IDs"
+  ],
+  "must_repair": [
+    "account ending mismatch (PAY-TES-074 targets 7205, CLR-TES-074 clears 7025)",
+    "FLAG-TES-074 disposition (visible flag with no disposition recorded)",
+    "dependency between clearance scope and payment target account"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Adversarial repair probing: test whether account mismatch can be papered over, whether FLAG-TES-074 disposition can be manufactured, whether monitor-only no-block can be misread as automatic release authority",
+    "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+    "monotonic_preservation": [
+      "Original account ending 7205 in PAY-TES-074 must not be altered",
+      "Original account ending 7025 in CLR-TES-074 must not be altered",
+      "FLAG-TES-074 visibility status must not be suppressed",
+      "STD-TES-074-P exact-match requirement must not be waived",
+      "No substitution of source documents"
+    ],
+    "next_role": "COMPLIANCE_FIXITY_CHECKER",
+    "objective": "Investigate account mismatch and flag disposition to determine if source boundary can close or remains permanently blocked",
+    "required_repairs": [
+      "Obtain authoritative clarification whether CLR-TES-074 applies to account 7205 or only 7025",
+      "Confirm FLAG-TES-074 disposition from authoritative source or determine if flag requires escalation before any payment",
+      "If CLR-TES-074 does not cover account 7205, identify whether new clearance document is required or payment must redirect to cleared account"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "run_lock": {
+    "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+    "packet_id": "HV-KITC-074-B",
+    "pair_id": "HV-KITC-074",
+    "run_id": "run_20260629T020437Z"
+  },
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

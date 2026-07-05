@@ -1,0 +1,50 @@
+{
+  "blocked_moves": [
+    "Cannot treat post-change email confirmation (CALL-QUA-071) as satisfying pre-change callback gate",
+    "Cannot override STD-QUA-071-P with downstream approvals (VM, BANK, REL)",
+    "Cannot proceed to payment release with open gate 1"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "{'dependency': 'pre-change callback source', 'status': 'UNRESOLVED', 'blocking': 'YES', 'required_for': 'PAYMENT_RELEASE_2026-06-28', 'source_gap': 'CALL-QUA-071 confirms post-change channel used', 'repair_obligation': 'Obtain documented pre-change phone callback or confirm gate 1 cannot be satisfied'}"
+  ],
+  "final_compiler_allowed": false,
+  "gov_diagnosis": {
+    "artifact_evaluation": "Worker correctly identified SOURCE_BOUNDARY_OPEN binding. Deterministic gate passed. Artifact is structurally valid.",
+    "failure_mechanism": "Controlling source fact (CALL-QUA-071) directly contradicts policy requirement (STD-QUA-071-P gate 1). No alternative pre-change callback exists in packet.",
+    "monotonic_preservation_confirmed": [
+      "exact source IDs only",
+      "policy four-gate chain rule",
+      "action boundary match"
+    ],
+    "verdict_integrity": "ESCALATE verdict is substantiated by CALL-QUA-071 explicitly stating post-change email thread used instead of pre-change phone source. Policy gate 1 cannot be closed with current evidence."
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Challenge any attempt to substitute post-change confirmation for required pre-change validation. Verify whether any unreviewed document (e.g., CALL-QUA-071 backup record) contains pre-change phone confirmation.",
+    "monotonic_preservation": [
+      "exact source IDs only",
+      "policy four-gate chain rule",
+      "action boundary match",
+      "previous three gates (VM, BANK, REL) already satisfied"
+    ],
+    "objective": "Attempt repair of gate 1 failure by locating or generating pre-change callback source evidence. If no pre-change source exists, confirm ESCALATE with finality.",
+    "required_repairs": [
+      "041: Pre-change callback source via vendor-master phone channel required to close gate 1"
+    ]
+  },
+  "repairs_required": [
+    "Repair 041: Closure requires documented pre-change callback source via vendor-master phone channel. Post-change email thread is inadmissible per gate 1."
+  ],
+  "route_verdict": "CONTINUE_WORKER",
+  "run_lock": {
+    "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+    "packet_id": "HV-KITC-071-B",
+    "pair_id": "HV-KITC-071",
+    "run_id": "run_20260629T020437Z"
+  },
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

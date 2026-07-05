@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: callback provenance current and matched to vendor master contact.",
+    "allow_rule_assessment": "No source record closes the required callback log dependency; execution blocked.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-1027E2FDE3B4-CTL states the callback log dependency is unresolved; SRC-1027E2FDE3B4-BND and SRC-1027E2FDE3B4-POL confirm only source records, not tone or history, may close this boundary.",
+    "escalate_rule_assessment": "SRC-1027E2FDE3B4-CTL confirms callback log is missing, stale, mismatched, or scoped differently from the required action boundary.",
+    "timing_scope_authority_dependency_check": "Dependency unresolved per SRC-1027E2FDE3B4-CTL; no current source record matches callback provenance to authorized contact and action."
+  },
+  "cited_evidence": [
+    "SRC-1027E2FDE3B4-CTL",
+    "SRC-1027E2FDE3B4-BND",
+    "SRC-1027E2FDE3B4-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "callback log must match authorized contact and action",
+    "SRC-1027E2FDE3B4-CTL"
+  ],
+  "final_answer": "Source records confirm the callback log dependency is unresolved and does not match the required action boundary. SRC-1027E2FDE3B4-CTL states the record is missing, stale, mismatched, or scoped differently. Per policy and boundary rules, execution is blocked until callback provenance is verified against the vendor master contact. No tone, urgency, or history record may substitute for this source-control dependency. Escalate for resolution.",
+  "open_blockers": [
+    "callback log must match authorized contact and action"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,43 @@
+{
+  "blocked_moves": [
+    "Closing exception boundary despite literal consignee role string mismatch",
+    "Dismissing GEN-SOR-047 warning without surfacing role discrepancy",
+    "Equating 'service depot' with 'internal repair center' through functional equivalence reasoning",
+    "Issuing ALLOW verdict when source documents show unaligned role literals",
+    "Superseding literal string binding with abstract role category comparison"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "SHIP-SOR-047 (source) must maintain literal consignee role: service depot",
+    "EXC-SOR-047 (exception) must maintain literal consignee role: internal repair center",
+    "STD-SOR-047-P enforces exact-match before exception closure",
+    "GEN-SOR-047 warning satisfied by exposing mismatch, not suppressing it",
+    "All 4 critical features preserved across WORKER_02: item match, destination match, date match, control status"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "Exact item match: controlled analyzer part C-17",
+    "Exact destination match: Canada",
+    "Exact shipment date match: 2026-06-23",
+    "Item control status: controlled",
+    "Literal consignee role binding: CONSIGNEE_ROLE_MISMATCH",
+    "ESCALATE verification verdict",
+    "Source-bound verification approach (no functional equivalence reasoning)"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Enforce source document reconciliation requirement; no exception closure until consignee role literals align",
+    "monotonic_preservation": [
+      "Literal consignee role mismatch binding",
+      "ESCALATE verdict",
+      "All 4 critical feature matches",
+      "Strict source literal comparison (no role equivalence)"
+    ],
+    "objective": "Maintain ESCALATE posture; block any attempt to close exception boundary; verify that GEN-SOR-047 warning remains flagged rather than resolved",
+    "required_repairs": []
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "WORKER_SOURCE_BOUND_GATE passed correctly. Binding CONSIGNEE_ROLE_MISMATCH confirmed. Verdict ESCALATE confirmed. Source literal comparison enforced. Warning fixation blocked. No repair required; continue monitoring for reconciliation attempts.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

@@ -1,0 +1,44 @@
+{
+  "blocked_moves": [
+    "AP release of invoice while payment release approval remains open",
+    "treating partial closeout ledger match as sufficient for release",
+    "ignoring visible ERP hold despite closeout ledger presence",
+    "overriding policy STD-RAV-072-P exact match requirement",
+    "any substitution or modification of source evidence",
+    "any interpretation of CLOSE-RAV-072 that contradicts explicit 'payment release approval remains open' statement"
+  ],
+  "control_action": "FAIL_CLOSED",
+  "critical_preservations": [
+    "Exact source boundary match requirement from STD-RAV-072-P",
+    "Visible ERP hold status from HOLD-RAV-072",
+    "Payment release approval status from CLOSE-RAV-072",
+    "Invoice, vendor, amount alignment across INV-RAV-072 and CLOSE-RAV-072",
+    "Tax review and quality signoff completion from CLOSE-RAV-072"
+  ],
+  "dependency_ledger": [
+    "Open dependency: payment release approval must complete before action boundary closes. CLOSE-RAV-072 must be updated to reflect payment release approval completion. HOLD-RAV-072 must be cleared. Until then, action boundary remains open per STD-RAV-072-P."
+  ],
+  "final_compiler_allowed": true,
+  "gate_interpretation": "Deterministic gate PASSED confirms ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding. Worker 2 (gemini-2.5-flash-lite) artifact correctly preserves exact match requirement from STD-RAV-072-P and accurately cites CLOSE-RAV-072 'payment release approval remains open' as controlling blocker.",
+  "gov_action_summary": "Action boundary remains OPEN. Deterministic gate confirms ESCALATE verdict. No repair path exists until CLOSE-RAV-072 reflects payment release approval completion and HOLD-RAV-072 is cleared. All source bindings verified. Gov routes to FINAL_COMPILER with FAIL_CLOSED control action. Gov does not select models\u2014next worker baton routes based on lane configuration.",
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_verdict": "ESCALATE",
+  "monotonic_preservation": [
+    "Invoice, vendor, amount alignment is preserved. Tax review and quality signoff completion are preserved. Payment release approval status is preserved as OPEN per CLOSE-RAV-072."
+  ],
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "source-boundary verification",
+    "monotonic_preservation": [],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "required_repairs": [
+    "None available\u2014CLOSE-RAV-072 source fact 'payment release approval remains open' is immutable. No repair path exists that can satisfy STD-RAV-072-P exact match requirement until payment release approval completes."
+  ],
+  "route_to": "FINAL_COMPILER",
+  "route_verdict": "FAIL_CLOSED",
+  "source_binding_integrity": "VERIFIED",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

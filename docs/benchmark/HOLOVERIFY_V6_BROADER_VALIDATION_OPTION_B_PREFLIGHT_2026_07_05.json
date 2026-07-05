@@ -1,0 +1,108 @@
+{
+  "classification": "HOLOVERIFY_V6_BROADER_VALIDATION_OPTION_B_PREFLIGHT_REPORT_V0",
+  "date": "2026-07-05",
+  "status": "PASS",
+  "label": "HOLOVERIFY_V6_BROADER_VALIDATION_OPTION_B_V0",
+  "claim_boundary": {
+    "internal_broader_v6_validation_only": true,
+    "public_benchmark_evidence": false,
+    "global_fnr_or_fpr_claim": false,
+    "fp_precision_evidence": false,
+    "general_model_superiority": false,
+    "strict_public_denominator": "blind-120 only"
+  },
+  "runtime_binding": {
+    "runtime_only_manifest": "docs/benchmark/HOLOVERIFY_V6_BROADER_VALIDATION_OPTION_B_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+    "runtime_manifest_sha256": "a849152c6e2c86835f7108b95aa1f168242908e169ffe3fcf35274fd3b10cfd0",
+    "selector": "SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05",
+    "selector_sha256": "87c7774d37399d3d786585e1a81dff8eb61f181a0b3e1e86b3f103dd1ab22be2",
+    "worker_contract": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+    "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37",
+    "expected_provider_calls": 100,
+    "expected_route": ["W1", "G1", "W2", "G2", "W3"],
+    "expected_provider_calls_by_role": {
+      "W1": 20,
+      "G1": 20,
+      "W2": 20,
+      "G2": 20,
+      "W3": 20
+    }
+  },
+  "lane_composition": {
+    "source_field_authority_scope_fn": {
+      "pairs": 4,
+      "packets": 8,
+      "selected_pairs": [
+        "T3FN3-MINE-001",
+        "T3FN3-MINE-004",
+        "T3FN3-MINE-007",
+        "T3FN3-MINE-009"
+      ]
+    },
+    "blocker_closure": {
+      "pairs": 2,
+      "packets": 4,
+      "selected_pairs": [
+        "HVSF-FACTORY5-005",
+        "HVSF-FACTORY7X-013"
+      ]
+    },
+    "exact_boundary_fp_overblock": {
+      "pairs": 2,
+      "packets": 4,
+      "selected_pairs": [
+        "HVSF-FACTORY15FP-010",
+        "HVSF-FACTORY15FP-014"
+      ]
+    },
+    "parse_admissibility_held_out": {
+      "pairs": 1,
+      "packets": 2,
+      "selected_pairs": [
+        "HVSF-FACTORY13X-018"
+      ]
+    },
+    "packet_key_defect_quarantine": {
+      "pairs": 1,
+      "packets": 2,
+      "selected_pairs": [
+        "HVSF-FACTORY14F-017R"
+      ]
+    }
+  },
+  "canonical_preflight": {
+    "folder": "docs/benchmark/holoverify_v6_broader_validation_option_b_2026_07_05/live_runs/preflight_20260705T033518Z",
+    "preflight_json": "docs/benchmark/holoverify_v6_broader_validation_option_b_2026_07_05/live_runs/preflight_20260705T033518Z/v6_broader_validation_option_b_live_preflight.json",
+    "preflight_json_sha256": "d5045950d9520711ec485060a6e22e466f228fe2d5bd12ca8bf2e875477ee199",
+    "prompt_probe_trace": "docs/benchmark/holoverify_v6_broader_validation_option_b_2026_07_05/live_runs/preflight_20260705T033518Z/preflight_prompt_probe/TRACE_CALLS.jsonl",
+    "prompt_probe_trace_sha256": "51b042bbfa86120336ef90417fa93d2a59fa13b4907b65ae9b0331a4c5d1a5fb",
+    "prompt_probe_results": "docs/benchmark/holoverify_v6_broader_validation_option_b_2026_07_05/live_runs/preflight_20260705T033518Z/preflight_prompt_probe/blind_canary_runtime_results.json",
+    "prompt_probe_results_sha256": "d8bdad1947c349ca377848a8709757b536d884a5a3a23a83eadded558ed6d0c0"
+  },
+  "checks": {
+    "runtime_manifest_json_parse": true,
+    "runtime_manifest_packet_count": 20,
+    "runtime_manifest_truth_free": true,
+    "runtime_manifest_scoring_free": true,
+    "prompt_probe_call_count": 100,
+    "prompt_probe_packet_count": 20,
+    "prompt_probe_sequence_per_packet": ["W1", "G1", "W2", "G2", "W3"],
+    "prompt_probe_role_counts": {
+      "W1": 20,
+      "G1": 20,
+      "W2": 20,
+      "G2": 20,
+      "W3": 20
+    },
+    "selector_trace_visible": true,
+    "worker_contract_trace_visible": true,
+    "live_wrapper_scoring_map_path_before_trace_freeze": false,
+    "posthoc_scoring_trace_bound_only": true,
+    "solo_calls_disabled": true,
+    "judge_calls_disabled": true,
+    "provider_trace_created_during_package_build": false,
+    "raw_provider_outputs_created_during_package_build": false,
+    "py_compile_pass": true
+  },
+  "future_approval_sentence": "I approve live provider execution for HOLOVERIFY_V6_BROADER_VALIDATION_OPTION_B_V0 using only runtime-only manifest docs/benchmark/HOLOVERIFY_V6_BROADER_VALIDATION_OPTION_B_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json with SHA-256 a849152c6e2c86835f7108b95aa1f168242908e169ffe3fcf35274fd3b10cfd0, selector SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05 hash 87c7774d37399d3d786585e1a81dff8eb61f181a0b3e1e86b3f103dd1ab22be2, worker contract WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04 hash 5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37, and exactly 100 provider calls: W1 xai/grok-3-mini x20, G1 minimax/MiniMax-M2.5-highspeed x20, W2 openai/gpt-5.4-mini x20, G2 minimax/MiniMax-M2.5-highspeed x20, W3 minimax/MiniMax-M2.5-highspeed x20. INTERNAL BROADER V6 VALIDATION ONLY across separated source-field FN, blocker-closure, exact-boundary FP overblock, parse/admissibility held-out, and packet-key quarantine lanes; not public benchmark evidence, not a global FNR/FPR claim, not FP precision evidence, not general model superiority, and the strict public denominator remains blind-120 only. No solo, no judges, no scoring map before trace freeze, no mixed registration JSON before trace freeze, no substitutions, no public claims."
+}

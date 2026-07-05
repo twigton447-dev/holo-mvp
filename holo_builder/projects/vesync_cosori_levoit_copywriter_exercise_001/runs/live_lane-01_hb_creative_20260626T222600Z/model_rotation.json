@@ -1,0 +1,110 @@
+{
+  "event_type": "model_rotation_manifest",
+  "lane_id": "lane-01",
+  "created_at": "2026-06-26T15:26:00-07:00",
+  "status": "LOCKED_BEFORE_TURN_1_OUTPUT",
+  "rotation_policy": {
+    "type": "randomized_constrained_rotation",
+    "seed_recorded_for_audit": true,
+    "seed": 13893237436846149968,
+    "providers": [
+      "openai",
+      "anthropic",
+      "google"
+    ],
+    "no_consecutive_active_provider_repeats": true,
+    "hologov_provider_rule": "random provider from same pool excluding the active turn provider; prefer not repeating previous HoloGov provider when possible",
+    "fallback_policy": "If a provider fails before producing a valid turn output, select a fallback provider from the same pool excluding the failed provider and, when possible, excluding the previous active provider. Record fallback in canonical_thread.jsonl."
+  },
+  "model_pool": [
+    {
+      "provider": "openai",
+      "model_id": "gpt-5.4",
+      "api_key_status": "PRESENT"
+    },
+    {
+      "provider": "anthropic",
+      "model_id": "claude-sonnet-4-6",
+      "api_key_status": "PRESENT"
+    },
+    {
+      "provider": "google",
+      "model_id": "gemini-2.5-pro",
+      "api_key_status": "PRESENT"
+    }
+  ],
+  "turn_rotation": [
+    {
+      "turn": 1,
+      "role": "live_research_and_creative_strategy_builder",
+      "provider": "anthropic",
+      "model_id": "claude-sonnet-4-6",
+      "hologov_provider": "openai",
+      "hologov_model_id": "gpt-5.4",
+      "constraints_satisfied": {
+        "provider_not_same_as_previous_turn": true,
+        "hologov_not_same_provider_as_active_turn": true
+      }
+    },
+    {
+      "turn": 2,
+      "role": "evidence_claim_boundary_attacker",
+      "provider": "google",
+      "model_id": "gemini-2.5-pro",
+      "hologov_provider": "anthropic",
+      "hologov_model_id": "claude-sonnet-4-6",
+      "constraints_satisfied": {
+        "provider_not_same_as_previous_turn": true,
+        "hologov_not_same_provider_as_active_turn": true
+      }
+    },
+    {
+      "turn": 3,
+      "role": "meta_ad_builder",
+      "provider": "openai",
+      "model_id": "gpt-5.4",
+      "hologov_provider": "google",
+      "hologov_model_id": "gemini-2.5-pro",
+      "constraints_satisfied": {
+        "provider_not_same_as_previous_turn": true,
+        "hologov_not_same_provider_as_active_turn": true
+      }
+    },
+    {
+      "turn": 4,
+      "role": "website_email_builder",
+      "provider": "google",
+      "model_id": "gemini-2.5-pro",
+      "hologov_provider": "openai",
+      "hologov_model_id": "gpt-5.4",
+      "constraints_satisfied": {
+        "provider_not_same_as_previous_turn": true,
+        "hologov_not_same_provider_as_active_turn": true
+      }
+    },
+    {
+      "turn": 5,
+      "role": "brand_voice_channel_qa_attacker",
+      "provider": "anthropic",
+      "model_id": "claude-sonnet-4-6",
+      "hologov_provider": "google",
+      "hologov_model_id": "gemini-2.5-pro",
+      "constraints_satisfied": {
+        "provider_not_same_as_previous_turn": true,
+        "hologov_not_same_provider_as_active_turn": true
+      }
+    },
+    {
+      "turn": 6,
+      "role": "final_synthesis_author",
+      "provider": "openai",
+      "model_id": "gpt-5.4",
+      "hologov_provider": "anthropic",
+      "hologov_model_id": "claude-sonnet-4-6",
+      "constraints_satisfied": {
+        "provider_not_same_as_previous_turn": true,
+        "hologov_not_same_provider_as_active_turn": true
+      }
+    }
+  ]
+}

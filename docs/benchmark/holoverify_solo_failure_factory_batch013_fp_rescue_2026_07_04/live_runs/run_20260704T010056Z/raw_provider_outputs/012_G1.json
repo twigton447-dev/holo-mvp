@@ -1,0 +1,27 @@
+{
+  "call_number": 12,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "5556f84bb65df922bb7583947275491c87eabbfe92c2cf323782a2ee455cb761",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user wants a plain text record with three key=value lines. They provide:\n\npacket_id=SFF13FP-4626838747182355D9DA\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut they specifically want the three-line status record: \"route_verdict, repair_target, blocked_move\". The instructions: \"Return the three-line status record. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=\".\n\nThus we need to output three lines:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should not include any other lines. The packet_id line is not needed. Only those three lines.\n\nPotential nuance: Should we include spaces after equals? The user used \"route_verdict=CONTINUE\" with no spaces. So we should follow that format: key=value, no spaces around equals. Should we keep the exact phrase? Yes.\n\nThus final answer: exactly three lines.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "53b056548e413e92a9195708913a267a80b4bb68a598fd3647083a854554ca96",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 118,
+    "output_tokens": 258,
+    "raw_text": "<think>\nThe user wants a plain text record with three key=value lines. They provide:\n\npacket_id=SFF13FP-4626838747182355D9DA\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut they specifically want the three-line status record: \"route_verdict, repair_target, blocked_move\". The instructions: \"Return the three-line status record. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=\".\n\nThus we need to output three lines:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should not include any other lines. The packet_id line is not needed. Only those three lines.\n\nPotential nuance: Should we include spaces after equals? The user used \"route_verdict=CONTINUE\" with no spaces. So we should follow that format: key=value, no spaces around equals. Should we keep the exact phrase? Yes.\n\nThus final answer: exactly three lines.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06978e9c853e9a1506a39da107385418",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 376,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

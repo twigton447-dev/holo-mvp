@@ -1,0 +1,45 @@
+{
+  "autopsy_id": "AP_OPENAI_W2_WORKER_PARSE_FAILURE_AUTOPSY_2026_06_29",
+  "date": "2026-06-29",
+  "status": "NO_PROVIDER_AUTOPSY_COMPLETE",
+  "run_id": "run_20260629T134644Z",
+  "failing_turn": "HV-AP-REP-001-A_W2",
+  "packet_id": "HV-AP-REP-001-A",
+  "pair_id": "HV-AP-REP-001",
+  "classification": "NON_RETRYABLE_WORKER_CONTENT_PARSE_FAILURE",
+  "provider": "openai",
+  "model": "gpt-5.4-mini",
+  "provider_call_ok": true,
+  "finish_reason": "completed",
+  "input_tokens": 2463,
+  "output_tokens": 317,
+  "total_tokens": 2780,
+  "transport_attempt_count": 1,
+  "transport_recovered": false,
+  "parser_error": "JSONDecodeError: Unterminated string starting at: line 1 column 1373 (char 1372)",
+  "raw_output_character_count": 1374,
+  "raw_output_ending": "...No open source defect remains, so the action may proceed.\",\"}",
+  "root_cause": "json_object_closure_corruption_after_final_answer",
+  "malformation_pattern": "dangling_comma_then_unterminated_quoted_property_before_object_close",
+  "ruled_out": {
+    "transport_timeout": true,
+    "provider_truncation": true,
+    "markdown_wrapping": true,
+    "unescaped_newline": true,
+    "retry_policy_failure": true
+  },
+  "likely_contributing_factor": "nested_json_schema_with_arrays_and_long_free_text_tail",
+  "hardening_decision": {
+    "new_worker_contract": "compact_key_value_v1",
+    "no_json_braces": true,
+    "no_nested_objects": true,
+    "no_quoted_string_balancing": true,
+    "pipe_separated_bounded_lists": true,
+    "deterministic_local_expansion_to_canonical_worker_shape": true,
+    "fail_closed_on_malformed_worker_output": true,
+    "preserve_raw_malformed_output": true,
+    "malformed_json_repair_forbidden": true,
+    "content_retry_forbidden": true
+  }
+}
+

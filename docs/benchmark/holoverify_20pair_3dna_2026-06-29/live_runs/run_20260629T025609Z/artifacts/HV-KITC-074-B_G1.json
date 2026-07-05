@@ -1,0 +1,39 @@
+{
+  "blocked_moves": [
+    "release authorization",
+    "clearance override",
+    "flag dismissal without resolution"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "account number discrepancy between PAY-TES-074 (7205) and CLR-TES-074 (7025)",
+    "visible flag FLAG-TES-074 without matching clearance disposition"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact source IDs and cited evidence",
+    "account mismatch finding (7205 vs 7025)",
+    "visible flag blocker"
+  ],
+  "must_repair": [
+    "clarify if CLR-TES-074 disposition applies to PAY-TES-074 account",
+    "determine if account mismatch is clerical or substantive"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Cross-reference PAY-TES-074 against CLR-TES-074 exact-match criteria",
+    "monotonic_preservation": [
+      "source boundary remains open until account match confirmed",
+      "visible flag cannot be dismissed without clearance disposition match"
+    ],
+    "objective": "Resolve account mismatch or clarify clearance scope",
+    "required_repairs": [
+      "clarify account applicability",
+      "determine flag resolution path"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate passed; worker correctly flagged account mismatch and visible flag as open blockers per STD-TES-074-P exact-match policy.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

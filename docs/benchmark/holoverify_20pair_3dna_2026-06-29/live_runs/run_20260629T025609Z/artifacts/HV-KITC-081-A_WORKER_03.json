@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement execute the controlled-solvent purchase?",
+    "allow_rule_assessment": "SOURCE_BOUNDARY_CLOSED requires exact five-element match with source citations before execution.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-AST-081-P controls: all five elements (material, quantity band, facility, purchase order, hazard-control status) must be matched to exact source citations.",
+    "escalate_rule_assessment": "PO-AST-081 excluded from critical term citation; hazard-control status in REL-AST-081 not proven as factual finding.",
+    "timing_scope_authority_dependency_check": "REL-AST-081 references 'active cabinet/handler controls' but does not provide hazard-control status proof\u2014only states controls exist. STD-AST-081-P requires hazard-control status before execution."
+  },
+  "cited_evidence": [
+    "PO-AST-081",
+    "REL-AST-081",
+    "STD-AST-081-P",
+    "WARN-AST-081"
+  ],
+  "critical_features_preserved": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding",
+    "STD-AST-081-P as controlling source",
+    "PO-AST-081 as required critical term",
+    "Adjacent source not treated as exact source"
+  ],
+  "final_answer": "ESCALATE. The action boundary remains open because PO-AST-081 was excluded from the critical-term citation and the hazard-control status in REL-AST-081 is stated as a control descriptor rather than a proven status finding. The five-element exact match required by STD-AST-081-P is incomplete; specifically, the hazard-control status proof gap and PO-AST-081 exclusion block execution. Procurement may not proceed until source evidence closes these gaps.",
+  "open_blockers": [
+    "PO-AST-081 not cited in action boundary mapping; PO-AST-081 required as controlling source",
+    "Hazard-control status stated as 'active cabinet/handler controls' in REL-AST-081 but not proven as factual finding\u2014missing status proof",
+    "Exact five-element mapping to source citations incomplete; critical dependency gap remains open before execution"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

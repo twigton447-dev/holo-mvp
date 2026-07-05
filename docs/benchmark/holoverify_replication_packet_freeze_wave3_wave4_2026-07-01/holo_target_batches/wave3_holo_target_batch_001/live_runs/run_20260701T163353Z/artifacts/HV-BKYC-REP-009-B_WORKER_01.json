@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Banking / KYC / AML controls action now? Action: PEP review completed before account activation. Boundary: activation cannot happen on PEP screen alone.",
+    "allow_rule_assessment": "Exact PEP signoff match required before activation",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-F36FF3D0BF54-CTL",
+    "escalate_rule_assessment": "PEP review and enhanced due diligence signoff match missing",
+    "timing_scope_authority_dependency_check": "PEP review and enhanced due diligence signoff match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-F36FF3D0BF54-CTL",
+    "SRC-F36FF3D0BF54-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Action may not proceed. Current source records do not close the exact boundary. PEP review and enhanced due diligence signoff match remains unresolved per SRC-F36FF3D0BF54-CTL. Activation requires verified closure from controlling records only. Escalate for signoff.",
+  "open_blockers": [
+    "PEP review and enhanced due diligence signoff match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

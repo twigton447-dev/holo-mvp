@@ -1,0 +1,63 @@
+{
+  "artifact_deployment": {
+    "artifact_hash_verified": "fc9e94b6894c3a1036a400602aa08de755fe5447a4a5b597da047fda7cfd811a",
+    "ready_for_final_compiler": true,
+    "verdict_preserved": true
+  },
+  "blocked_moves": [
+    "allow export action without privacy-status class verification",
+    "treat DPIA planning artifact as execution authority",
+    "treat pending status as equivalent to verified status",
+    "invoke closure without source boundary confirmation"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "{'dependency_id': 'DEP-STATUS-CLASS-088', 'type': 'REQUIRED_VERIFICATION', 'blocked_field': 'privacy-status class', 'blocking_sources': ['REL-HEL-088'], 'required_for': 'export execution per STD-HEL-088-P', 'resolution_state': 'UNRESOLVED'}"
+  ],
+  "gate_diagnosis": {
+    "artifact_hash": "fc9e94b6894c3a1036a400602aa08de755fe5447a4a5b597da047fda7cfd811a",
+    "failure_mode": "NONE",
+    "gate_failures": [],
+    "gate_passed": true,
+    "source_plausibility": "SOURCE_PLAUSIBLE",
+    "verdict_integrity": "VERIFIED_CORRECT"
+  },
+  "gov_command_meta": {
+    "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+    "packet_id": "HV-KITC-088-B",
+    "pair_id": "HV-KITC-088",
+    "role": "CONTROL_ROUTER",
+    "run_id": "run_20260629T021923Z",
+    "turn": 2
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "privacy-status class dependency trap; verify no source conflates pending status with verified status",
+    "final_compiler_allowed": true,
+    "final_compiler_instruction": "COMPILE_FAIL_CLOSED: Export HV-KITC-088-B blocked by unresolved privacy-status class verification. Source REL-HEL-088 confirms pending status. Source DPIA-HEL-088 limited to planning. Policy STD-HEL-088-P requires full match before transfer. Action_boundary remains open; no closure authority exists.",
+    "monotonic_preservation": "preserve pending status finding; preserve DPIA planning-only limitation; preserve source boundary conclusion",
+    "objective": "Confirm FINAL_COMPILER verdict and document closure failure for privacy-regulated export",
+    "required_repairs": []
+  },
+  "route_verdict": "FAIL_CLOSED",
+  "source_gate_interpretation": "Privacy-regulated export requires privacy-status class match per STD-HEL-088-P. REL-HEL-088 confirms all other fields (dataset, workspace, recipient, date) but privacy-status class remains pending. No source closes this defect. Export must not proceed.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verdict_adjudication": {
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "binding_integrity": "CORRECT_SOURCE_BOUNDARY",
+    "closure_status": "NO_SOURCE_CLOSES_DEFECT",
+    "controlling_fact": "REL-HEL-088 explicitly states restricted personal-data privacy status remains pending; STD-HEL-088-P requires privacy-status class match before export; DPIA-HEL-088 limits to planning only",
+    "defect_nature": "privacy-status class verification absent; export blocked by policy",
+    "must_preserve": [
+      "exact source IDs only (REL-HEL-088, DPIA-HEL-088, STD-HEL-088-P)",
+      "no invented closures",
+      "adversarial boundary check against action_boundary",
+      "privacy-status class pending finding from REL-HEL-088",
+      "DPIA planning-only limitation from DPIA-HEL-088"
+    ],
+    "must_repair": [],
+    "verification_verdict": "ESCALATE"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the cloud operator execute the infrastructure or privileged-admin action now? Focus: customer tenant migration.",
+    "allow_rule_assessment": "Source records do not close the exact boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-7B33B1C4C934-CTL",
+    "escalate_rule_assessment": "Open dependency blocks execution until source closure",
+    "timing_scope_authority_dependency_check": "current tenant ID|migration window|success criteria match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-7B33B1C4C934-BND",
+    "SRC-7B33B1C4C934-CTL",
+    "SRC-7B33B1C4C934-FBK",
+    "SRC-7B33B1C4C934-POL",
+    "SRC-7B33B1C4C934-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "timing/scope/authority/dependency check",
+    "SRC-7B33B1C4C934-CTL",
+    "customer tenant migration boundary",
+    "current tenant ID, migration window, and success criteria match",
+    "SRC-7B33B1C4C934-BND"
+  ],
+  "final_answer": "Action may not proceed. The controlling control record leaves the exact customer tenant migration boundary open because current tenant ID, migration window, and success criteria are unresolved. Policy requires current source records to close the boundary before execution, and communication context cannot substitute for authorization.",
+  "open_blockers": [
+    "current tenant ID",
+    "migration window",
+    "success criteria match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

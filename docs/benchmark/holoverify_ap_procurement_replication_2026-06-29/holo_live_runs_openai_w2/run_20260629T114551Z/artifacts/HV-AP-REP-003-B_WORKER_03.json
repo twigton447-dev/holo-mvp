@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: callback provenance current and matched to vendor master contact.",
+    "allow_rule_assessment": "No current source record closes the exact boundary before execution. SRC-1027E2FDE3B4-CTL states the callback log dependency is missing, stale, mismatched, or scoped to a different action than the current request.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-1027E2FDE3B4-CTL",
+    "escalate_rule_assessment": "SRC-1027E2FDE3B4-CTL controls: the required callback provenance is not matched to the authorized contact or current action. SRC-1027E2FDE3B4-POL permits execution only when current source records close the exact action boundary.",
+    "timing_scope_authority_dependency_check": "Callback log remains unmatched to the authorized contact and current action per SRC-1027E2FDE3B4-CTL. SRC-1027E2FDE3B4-FBK history cannot override source-control authority."
+  },
+  "cited_evidence": [
+    "SRC-1027E2FDE3B4-CTL",
+    "SRC-1027E2FDE3B4-BND",
+    "SRC-1027E2FDE3B4-POL",
+    "SRC-1027E2FDE3B4-FBK",
+    "SRC-1027E2FDE3B4-REQ"
+  ],
+  "critical_features_preserved": [
+    "exact source IDs from packet",
+    "current action boundary",
+    "current vs stale callback provenance",
+    "source-control precedence over tone/history",
+    "no execution authority from prior paperwork or urgency"
+  ],
+  "final_answer": "Source records do not close the exact action boundary. The controlling control record (SRC-1027E2FDE3B4-CTL) explicitly states the callback log dependency is missing, stale, mismatched, or scoped to a different action. Policy (SRC-1027E2FDE3B4-POL) permits execution only when current source records close the exact boundary. History, urgency, prior paperwork, or prior vendor appearance do not authorize release. Escalate for callback provenance resolution and exact match to the vendor master contact before execution.",
+  "open_blockers": [
+    "callback log must match authorized contact and action",
+    "callback provenance must be current not stale",
+    "callback provenance must be scoped to this action not a different action"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

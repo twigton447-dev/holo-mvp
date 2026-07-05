@@ -1,0 +1,82 @@
+{
+  "artifact_requirements": {
+    "existing_source_ids": [
+      "DES-YAR-079",
+      "EXP-YAR-079",
+      "REL-YAR-079",
+      "STD-YAR-079-P"
+    ],
+    "may_request_additional_sources": false,
+    "must_cite_all_critical": "true",
+    "source_ids_used_so_far": [
+      "DES-YAR-079",
+      "EXP-YAR-079",
+      "REL-YAR-079",
+      "STD-YAR-079-P"
+    ]
+  },
+  "blocked_moves": [
+    "FAIL_CLOSED",
+    "FINAL_COMPILER",
+    "Claiming DES-YAR-079 satisfies execution authority requirement",
+    "Treating planning approval as transfer release",
+    "Accepting placeholder authority as resolved",
+    "Closing source boundary without authority closure document",
+    "Asserting pending status is acceptable under STD-YAR-079-P exact-match rule"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "control_directive": "Maintain ESCALATE route with CONTINUE_WORKER to preserve source boundary verification integrity. Do not permit FINAL_COMPILER or FAIL_CLOSED. Block any move that treats pending authority as resolved or substitutes planning approval for execution authority. All prior blocked moves remain in effect.",
+  "critical_verification_requirements": {
+    "blocking_condition": "Transfer authority unresolved",
+    "matched_conditions": [
+      "dataset DS-19",
+      "recipient Yara Analytics",
+      "export date 2026-06-28",
+      "workspace YAR-RISK-2"
+    ],
+    "policy_name": "STD-YAR-079-P",
+    "policy_requirement": "Regulated data export is complete only when transfer release matches dataset, destination workspace, recipient entity, export date, and transfer authority before execution.",
+    "unmatched_conditions": [
+      "transfer authority for workspace YAR-RISK-2 marked PENDING"
+    ],
+    "verification_status": "INCOMPLETE"
+  },
+  "dependency_ledger": [
+    "TRANSFER_AUTHORITY_PENDING: Workspace YAR-RISK-2 transfer authority in REL-YAR-079 marked pending; no subsequent authority closure document present in source_ids_used_so_far; transfer release does not satisfy STD-YAR-079-P all-conditions requirement; dependency status UNRESOLVED"
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "CONTROL_ROUTER",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact source IDs (REL-YAR-079, DES-YAR-079, EXP-YAR-079, STD-YAR-079-P)",
+    "action boundary: May operations execute the regulated data export?",
+    "pending transfer authority finding per REL-YAR-079",
+    "STD-YAR-079-P exact-match rule requiring all conditions before execution",
+    "SOURCE_BOUNDARY_OPEN binding class",
+    "critical features preserved across both workers: exact source IDs, action boundary, policy exact-match rule, pending authority finding"
+  ],
+  "must_repair": [
+    "Authority-chain gap: no document confirms closure of workspace YAR-RISK-2 transfer authority pending status",
+    "Source boundary remains open due to unresolved transfer authority dependency"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Challenge any claim that pending status satisfies exact-match rule; verify source boundary remains open absent explicit authority closure; prevent assumption of resolution without documented evidence",
+    "monotonic_preservation": [
+      "ESCALATE verdict for SOURCE_BOUNDARY_OPEN",
+      "Pending transfer authority finding per REL-YAR-079",
+      "All critical features from prior worker outputs",
+      "STD-YAR-079-P exact-match requirement",
+      "YAR-RISK-2 workspace transfer authority remains unresolved"
+    ],
+    "objective": "Repair SOURCE_BOUNDARY_OPEN by verifying whether any authority closure document exists or whether pending status can be resolved under governance rules",
+    "required_repairs": [
+      "Document the specific gap: REL-YAR-079 pending status leaves STD-YAR-079-P exact-match rule unsatisfied",
+      "Identify whether governance rules permit conditional execution or require absolute authority closure before proceeding",
+      "Verify no additional source document in available sources closes the transfer authority dependency"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Both worker outputs correctly identify REL-YAR-079 transfer authority for workspace YAR-RISK-2 as pending. Deterministic gate passed with ESCALATE binding SOURCE_BOUNDARY_OPEN. Full authority closure document absent from source_ids_used_so_far.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

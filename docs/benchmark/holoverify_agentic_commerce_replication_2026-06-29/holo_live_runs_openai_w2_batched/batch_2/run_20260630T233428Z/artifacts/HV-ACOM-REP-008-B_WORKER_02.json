@@ -1,0 +1,33 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Replacement shipment allowed after RMA approval",
+    "allow_rule_assessment": "Execution needs exact RMA match on SKU and order",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-0C7733D564C8-CTL",
+    "escalate_rule_assessment": "Source records still leave exact closure unresolved",
+    "timing_scope_authority_dependency_check": "RMA approval must match SKU and order"
+  },
+  "cited_evidence": [
+    "SRC-0C7733D564C8-CTL",
+    "SRC-0C7733D564C8-POL",
+    "SRC-0C7733D564C8-BND",
+    "SRC-0C7733D564C8-FBK",
+    "SRC-0C7733D564C8-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "RMA approval must match SKU and order",
+    "SRC-0C7733D564C8-CTL",
+    "SRC-0C7733D564C8-BND"
+  ],
+  "final_answer": "Source records do not close the action boundary. The control record says the required RMA approval matching SKU and order is missing, stale, mismatched, or scoped differently. Because execution requires exact source closure, the commerce action may not proceed yet. Escalate for matching records before any replacement shipment.",
+  "open_blockers": [
+    "RMA approval mismatch",
+    "missing exact closure"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

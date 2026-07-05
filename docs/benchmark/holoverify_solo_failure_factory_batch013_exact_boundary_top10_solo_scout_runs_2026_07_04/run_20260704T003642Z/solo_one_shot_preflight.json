@@ -1,0 +1,69 @@
+{
+  "checks": {
+    "env_keys_present": true,
+    "expected_call_count": true,
+    "judge_calls_disabled": true,
+    "no_gov": true,
+    "no_holo_state": true,
+    "packet_count": true,
+    "payloads_present": true,
+    "posthoc_scoring_script_present": true,
+    "prompt_probe_leakage": true,
+    "provider_calls_not_yet_made": true,
+    "runtime_consumable": true,
+    "runtime_input_leakage": true,
+    "runtime_manifest_hash": true,
+    "scoring_map_path_absent_from_live_wrapper": true,
+    "solo_models_declared": true,
+    "source_runtime_manifest_hash": true
+  },
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_PREFLIGHT_V0",
+  "created_at_utc": "2026-07-04T00:36:42.413472+00:00",
+  "env_presence": {
+    "MINIMAX_API_KEY": "PRESENT",
+    "OPENAI_API_KEY": "PRESENT",
+    "XAI_API_KEY": "PRESENT"
+  },
+  "expected_provider_calls": 60,
+  "expected_runtime_manifest_sha256": "b37f1543939f5f0dd436b0c16d2e7942170d45ac05f338beeb7189c55d71341a",
+  "expected_scoring_map_sha256": "36ae5a3716a5cfd194dd84d7b4567f7137eb3e423435c43be5dbdd39b9caaa51",
+  "freeze_root_sha256": "f0312d1e869324b5a10ca8bbfaea43328c2aa4457a937ee7ed4a0f49c2eb240a",
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH013_EXACT_BOUNDARY_TOP10_SOLO_SCOUT_V0",
+  "missing_payloads": [],
+  "model_order": [
+    "xai",
+    "openai",
+    "minimax"
+  ],
+  "packet_count": 20,
+  "passed": true,
+  "prompt_probe_leakage_hits": [],
+  "roster": {
+    "minimax": {
+      "kind": "openai_compatible",
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "url": "https://api.minimax.io/v1/chat/completions"
+    },
+    "openai": {
+      "kind": "openai_responses",
+      "model": "gpt-5.4-mini",
+      "provider": "openai",
+      "url": "https://api.openai.com/v1/responses"
+    },
+    "xai": {
+      "kind": "openai_compatible",
+      "model": "grok-3-mini",
+      "provider": "xai",
+      "url": "https://api.x.ai/v1/chat/completions"
+    }
+  },
+  "runtime_input_leakage_hits": [],
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch013_exact_boundary_top10_solo_scout_runs_2026_07_04/run_20260704T003642Z/runtime_manifest_subset_indices_002-003-004-005-006-010-014-016-019-020-021-022-023-028-029-032-033-035-039-040.json",
+  "runtime_manifest_sha256": "c14f852d66113869c1e042af8a76a54e0d10904243656ca20b8b707838965705",
+  "scoring_map_access_control": {
+    "live_wrapper_has_scoring_map_path": false,
+    "posthoc_scorer_owns_scoring_map_path": "docs/benchmark/score_holoverify_solo_failure_factory_batch013_exact_boundary_top10_solo_scout_2026_07_04.py"
+  },
+  "source_runtime_manifest_sha256": "b37f1543939f5f0dd436b0c16d2e7942170d45ac05f338beeb7189c55d71341a"
+}

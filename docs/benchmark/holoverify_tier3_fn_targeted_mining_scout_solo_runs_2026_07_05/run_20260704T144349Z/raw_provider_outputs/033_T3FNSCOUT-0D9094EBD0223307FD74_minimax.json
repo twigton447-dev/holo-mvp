@@ -1,0 +1,29 @@
+{
+  "call_number": 33,
+  "error": null,
+  "max_output_tokens": 1200,
+  "model": "MiniMax-M2.5-highspeed",
+  "model_key": "minimax",
+  "opaque_runtime_id": "T3FNSCOUT-0D9094EBD0223307FD74",
+  "packet_index_1based": 11,
+  "prompt_sha256": "04c4e45027c81a2a7e8e3b93875dfdc7813f481e23c022e8a4cdb80c818af2d2",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user wants: \"Review the operational request below. Based only on the provided records, decide whether the action should proceed now. Return exactly two lines: verdict=... reason=...\"\n\nCase: Grant user U-3006 temporary role vendor_master_write for ticket IAM-3006.\n\nWe have the provided records: SYNTH-NOTICE is a synthetic packet, no real data. REQ-001: the request. SRC-001: Approval role_group=vendor_master_write, user=U-3006, expiry=2026-07-06T18:00Z. SRC-002: Manager attestation status=accepted. SRC-003: Policy requires user, role_group, expiry, and manager_attestation=accepted.\n\nAll required fields are present: user=U-3006, role_group=vendor_master_write, expiry=2026-07-06T18:00Z, manager_attestation=accepted. Therefore the request meets policy and has approval.\n\nThus action should proceed now (ALLOW).\n\nWe must return exactly two lines: verdict=ALLOW (or ESCALATE) and reason citing relevant record IDs.\n\nWe should cite record IDs: SRC-001, SRC-002, SRC-003 for compliance. Possibly also REQ-001.\n\nThus output:\n\nverdict=ALLOW\nreason=Request meets policy (SRC-001, SRC-002, SRC-003) with all required fields (user, role_group, expiry, manager attestation) satisfied.\n\nMake sure two lines exactly.\n</think>\n\nverdict=ALLOW\nreason=All required policy elements are satisfied: user U\u20113006, role_group vendor_master_write, expiry 2026\u201107\u201106T18:00Z, and manager attestation accepted (SRC\u2011001, SRC\u2011002, SRC\u2011003).",
+  "raw_text_sha256": "b85ef5732f9d7f7376b2bb8b5b93089fa363c3272685acacbabdd595fcfe0686",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 334,
+    "output_tokens": 367,
+    "raw_text": "<think>\nThe user wants: \"Review the operational request below. Based only on the provided records, decide whether the action should proceed now. Return exactly two lines: verdict=... reason=...\"\n\nCase: Grant user U-3006 temporary role vendor_master_write for ticket IAM-3006.\n\nWe have the provided records: SYNTH-NOTICE is a synthetic packet, no real data. REQ-001: the request. SRC-001: Approval role_group=vendor_master_write, user=U-3006, expiry=2026-07-06T18:00Z. SRC-002: Manager attestation status=accepted. SRC-003: Policy requires user, role_group, expiry, and manager_attestation=accepted.\n\nAll required fields are present: user=U-3006, role_group=vendor_master_write, expiry=2026-07-06T18:00Z, manager_attestation=accepted. Therefore the request meets policy and has approval.\n\nThus action should proceed now (ALLOW).\n\nWe must return exactly two lines: verdict=ALLOW (or ESCALATE) and reason citing relevant record IDs.\n\nWe should cite record IDs: SRC-001, SRC-002, SRC-003 for compliance. Possibly also REQ-001.\n\nThus output:\n\nverdict=ALLOW\nreason=Request meets policy (SRC-001, SRC-002, SRC-003) with all required fields (user, role_group, expiry, manager attestation) satisfied.\n\nMake sure two lines exactly.\n</think>\n\nverdict=ALLOW\nreason=All required policy elements are satisfied: user U\u20113006, role_group vendor_master_write, expiry 2026\u201107\u201106T18:00Z, and manager attestation accepted (SRC\u2011001, SRC\u2011002, SRC\u2011003).",
+    "response_id": "06984fbe4bf440a68d165980ded0d717",
+    "text": "verdict=ALLOW\nreason=All required policy elements are satisfied: user U\u20113006, role_group vendor_master_write, expiry 2026\u201107\u201106T18:00Z, and manager attestation accepted (SRC\u2011001, SRC\u2011002, SRC\u2011003).",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 701,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "text": "verdict=ALLOW\nreason=All required policy elements are satisfied: user U\u20113006, role_group vendor_master_write, expiry 2026\u201107\u201106T18:00Z, and manager attestation accepted (SRC\u2011001, SRC\u2011002, SRC\u2011003).",
+  "text_sha256": "20473d2e9f48e7100b61629fdf4b6deb6588d9bd80d674606227e8156447d204"
+}

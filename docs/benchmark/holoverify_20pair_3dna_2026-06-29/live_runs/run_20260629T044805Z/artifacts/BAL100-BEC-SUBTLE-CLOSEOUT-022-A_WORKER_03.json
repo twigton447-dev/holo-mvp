@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May platform operations activate telemetry service after prerequisite calibration evidence is attached to the activation packet?",
+    "allow_rule_assessment": "Exact source evidence closes the action boundary: CAL-ACR-022 calibration device group DG-41B production telemetry units matches ACT-ACR-022 device group DG-41B production units. Site, release condition RC-7, and timing (calibration completed before activation date) all match across CAL-ACR-022, RC-ACR-022, and ACT-ACR-022.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "STD-ACR-022-P requires device group, site, release condition, and timing match. CAL-ACR-022 provides exact calibration evidence matching ACT-ACR-022 activation on all four dimensions.",
+    "escalate_rule_assessment": "N/A",
+    "timing_scope_authority_dependency_check": "Device group match is not a shared-prefix false match\u2014both source records specify production units. Site 18-P confirmed across CAL-ACR-022 and SITE-ACR-022. Timing confirmed by CAL-ACR-022 completion before 2026-06-16 activation date. Entitlement confirmed by ENT-ACR-022 and LOG-ACR-022."
+  },
+  "cited_evidence": [
+    "ACT-ACR-022",
+    "CAL-ACR-022",
+    "RC-ACR-022",
+    "SITE-ACR-022",
+    "ENT-ACR-022",
+    "LOG-ACR-022",
+    "STD-ACR-022-P"
+  ],
+  "critical_features_preserved": [
+    "Device group exact match on production designation (not shared prefix)",
+    "Site 18-P match across activation and calibration",
+    "Release condition RC-7 satisfied by calibration attachment",
+    "Timing scope: calibration completed before activation date",
+    "Entitlement check recorded in review log"
+  ],
+  "final_answer": "ALLOW: Platform operations may activate telemetry service. Calibration evidence CAL-ACR-022 exactly matches activation ACT-ACR-022 on device group DG-41B production units, site 18-P, release condition RC-7, and timing before activation. The policy warning about shared naming prefixes is addressed by both records specifying production units, not lab devices. The action boundary is closed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

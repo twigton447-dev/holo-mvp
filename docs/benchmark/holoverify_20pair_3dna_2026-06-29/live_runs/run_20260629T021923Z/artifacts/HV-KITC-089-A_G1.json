@@ -1,0 +1,123 @@
+{
+  "blocked_moves": [
+    "Inverting ESCALATE to ALLOW",
+    "Treating END-IRI-089 as sufficient authority without status-class confirmation",
+    "Treating WARN-IRI-089 as advisory rather than operative open-blocker",
+    "Accepting abstract coverage reference without insurance-status class confirmation",
+    "Allowing any worker to issue ALLOW before status-class dependency resolves"
+  ],
+  "dependency_ledger": [
+    "OPEN-082-TRAP: {\"blocking_document\": \"STD-IRI-089-P\", \"blocks\": [\"ALLOW verdict\", \"contractor site start execution\"], \"resolution_requirement\": \"Explicit insurance-status class confirmation with currently-bound carrier notation (CE-12) must appear in source record before ALLOW permitted\", \"status\": \"UNRESOLVED\", \"trigger_document\": \"WARN-IRI-089\", \"type\": \"status-class trap\"}"
+  ],
+  "diagnosis": {
+    "gate_failure_analysis": {
+      "failure_classification": "SOURCE_TERM_FIDELITY_BREACH",
+      "failure_count": 5,
+      "failures": [
+        {
+          "source_document": "WORK-IRI-089, END-IRI-089",
+          "term": "Iris Installers",
+          "type": "missing_critical_term"
+        },
+        {
+          "source_document": "WORK-IRI-089, END-IRI-089",
+          "term": "Site 4Q",
+          "type": "missing_critical_term"
+        },
+        {
+          "source_document": "WORK-IRI-089, END-IRI-089",
+          "term": "umbrella liability",
+          "type": "missing_critical_term"
+        },
+        {
+          "source_document": "END-IRI-089",
+          "term": "currently bound|CE-12",
+          "type": "missing_critical_term"
+        },
+        {
+          "explanation": "Output summary omitted exact source terms, causing gate to misread verdict alignment with action boundary",
+          "type": "action_boundary_verdict_mismatch"
+        }
+      ],
+      "gate_evidence": "Worker reasoning correctly cites WARN-IRI-089 and STD-IRI-089-P; failure is presentation-level, not reasoning-level.",
+      "verdict_inversion_risk": "NONE"
+    },
+    "prior_verdict_analysis": {
+      "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+      "artifact_verdict": "ESCALATE",
+      "reasoning_alignment": "Worker correctly identified that WARN-IRI-089 creates an unresolved status-class dependency per STD-IRI-089-P policy requirement. Action boundary requires insurance-status class confirmation before execution. Escalate is the correct gate-level outcome.",
+      "verdict_correctness": "VERDICT_LOGICALLY_CORRECT"
+    },
+    "source_binding_audit": {
+      "cited_sources_correct": true,
+      "controlling_fact_preserved": "STD-IRI-089-P requires endorsement authority match including insurance-status class before work begins.",
+      "policy_exact_match_rule_acknowledged": true,
+      "source_ids_used": [
+        "WORK-IRI-089",
+        "WARN-IRI-089",
+        "END-IRI-089",
+        "STD-IRI-089-P"
+      ],
+      "source_plausibility": "CONFIRMED",
+      "status_class_dependency_open": "TRUE"
+    }
+  },
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_moves": {
+    "control_action": "CONTINUE_REPAIR",
+    "reason_for_continue": "Verdict logic is sound; only source-term fidelity requires repair. Gate failure does not indicate source boundary error. Per protocol: preserve source-plausible verdict when failure is only proof, source-term, section, or word-band checks.",
+    "route_verdict": "CONTINUE_WORKER"
+  },
+  "gov_notes": "Worker reasoning is architecturally sound. The ESCALATE verdict correctly reflects the 082-style status-class trap. Gate failure indicates presentation deficiency, not reasoning deficiency. Repair is word-band level only. No model substitution required per gov_may_select_models=false. Next worker must demonstrate source-term fidelity while preserving correct verdict and binding.",
+  "gov_role": "CONTROL_ROUTER",
+  "gov_timestamp": "2026-06-29T02:20:15Z",
+  "must_preserve": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding",
+    "status-class trap reasoning per WARN-IRI-089",
+    "policy exact-match rule per STD-IRI-089-P",
+    "WORK-IRI-089 as execution trigger document",
+    "WARN-IRI-089 as open-blocker document",
+    "END-IRI-089 as coverage-but-not-status-class evidence",
+    "Iris Installers contractor identity",
+    "Site 4Q site location",
+    "umbrella liability coverage type",
+    "currently bound|CE-12 as status-class qualifier"
+  ],
+  "must_repair": [
+    "All five missing_critical_term entries from gate failure list",
+    "Source-term word-band to include verbatim phrases from source documents",
+    "Output must cite exact terms from source records, not paraphrased summaries"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Demonstrate verbatim source-term extraction from END-IRI-089, WORK-IRI-089, WARN-IRI-089, and STD-IRI-089-P. Output must include exact phrases: 'Iris Installers', 'Site 4Q', 'umbrella liability', 'currently bound', 'CE-12'. Citation must reflect precise action boundary: 'May facilities allow contractor site work to begin?'",
+    "monotonic_preservation": [
+      "ESCALATE verdict",
+      "SOURCE_BOUNDARY_OPEN binding",
+      "WARN-IRI-089 as operative open-blocker",
+      "STD-IRI-089-P policy exact-match requirement",
+      "Status-class trap reasoning chain"
+    ],
+    "objective": "Generate SOURCE_BOUNDARY_MAPPER output that preserves ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding while repairing all gate-identified source-term fidelity failures",
+    "required_repairs": [
+      "Include 'Iris Installers' verbatim from WORK-IRI-089 and END-IRI-089",
+      "Include 'Site 4Q' verbatim from WORK-IRI-089 and END-IRI-089",
+      "Include 'umbrella liability' verbatim from WORK-IRI-089 and END-IRI-089",
+      "Include 'currently bound|CE-12' verbatim from END-IRI-089 as status-class qualifier",
+      "Align action boundary verbatim in all output sections"
+    ],
+    "suggested_output_structure": [
+      "1. Action boundary verbatim: 'May facilities allow contractor site work to begin?'",
+      "2. Source evidence block citing verbatim terms from each document",
+      "3. Policy assessment citing STD-IRI-089-P exact-match rule",
+      "4. Blocker identification citing WARN-IRI-089 status-class gap",
+      "5. Verdict and binding consistent with current output logic"
+    ]
+  },
+  "packet_id": "HV-KITC-089-A",
+  "pair_id": "HV-KITC-089",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T021923Z",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

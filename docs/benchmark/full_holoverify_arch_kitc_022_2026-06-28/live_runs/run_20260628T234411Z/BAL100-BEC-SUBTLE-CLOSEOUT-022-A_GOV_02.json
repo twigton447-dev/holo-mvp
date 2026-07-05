@@ -1,0 +1,54 @@
+{
+  "blocked_moves": [
+    "Treating the invented_site_18l gate failure as substantive evidence rather than a spurious constraint check",
+    "Allowing the NOTE-ACR-022 prefix warning to override explicit production-site calibration evidence",
+    "Accepting worker ALLOW verdict as final without verifying source-level consistency",
+    "Inferring Site 18-L existence from the gate failure label rather than from source documents",
+    "Treating the gate failure as evidence that must be satisfied rather than a warning to investigate"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "ACT-ACR-022 establishes activation at Site 18-P for DG-41B",
+    "CAL-ACR-022 establishes calibration at Site 18-P for DG-41B production units",
+    "RC-ACR-022 establishes release condition RC-7 requiring calibration attachment",
+    "SITE-ACR-022 confirms DG-41B production telemetry at Site 18-P",
+    "NOTE-ACR-022 warns about shared DG-41B prefix between lab and production but does not assert Site 18-L applies here",
+    "STD-ACR-022-P requires exact match on device group, site, release condition, and timing",
+    "The packet_022a_invented_site_18l gate failure references a Site 18-L that appears nowhere in source documents; the gate label is a constraint artifact, not source evidence",
+    "ALERT-ACR-DEP-022 confirms dependency evidence attachment matches activation group"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ACT-ACR-022 activation site Site 18-P with DG-41B",
+    "CAL-ACR-022 calibration site Site 18-P with DG-41B production units",
+    "RC-ACR-022 release condition RC-7 requiring calibration",
+    "Exact match on device group, site, release condition, and timing per STD-ACR-022-P",
+    "Binding class EXACT_ACTIVATION_DEPENDENCY_CLOSED with source-grounded evidence only"
+  ],
+  "must_repair": [
+    "The gate failure packet_022a_invented_site_18l has no corresponding source evidence; source documents (CAL-ACR-022, ACT-ACR-022, SITE-ACR-022) all reference Site 18-P exclusively",
+    "Worker 02 remediation is correct: explicit source specification (Site 18-P production units in CAL-ACR-022) overrides generic prefix warning in NOTE-ACR-022",
+    "Gate constraint checking for invented Site 18-L must be flagged as spurious when no source document references Site 18-L in the activation dependency context"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Confirm that no source document substantiates Site 18-L existence in this activation dependency chain; verify gate failure label is constraint artifact, not source evidence; validate that CAL-ACR-022 Site 18-P production unit specification is the binding source.",
+    "monotonic_preservation": [
+      "Device group DG-41B exact match across all sources",
+      "Site 18-P as activation and calibration site",
+      "Release condition RC-7 from RC-ACR-022",
+      "Timing calibration completed before activation ACT-ACR-2026-8022",
+      "Production unit specification in CAL-ACR-022 distinguishing from lab units"
+    ],
+    "objective": "Confirm source-grounded verification that EXACT_ACTIVATION_DEPENDENCY_CLOSED binding is substantively satisfied; document that packet_022a_invented_site_18l gate failure is a constraint artifact with no source corroboration; prepare for FINAL_COMPILER if all source-based requirements are met.",
+    "required_repairs": [
+      "Cite source evidence demonstrating Site 18-P is the only site referenced in activation dependency sources (ACT-ACR-022, CAL-ACR-022, SITE-ACR-022)",
+      "Document that packet_022a_invented_site_18l gate failure references a Site 18-L that does not appear in any source document; the failure is spurious when evaluated against actual source evidence",
+      "Confirm CAL-ACR-022 explicitly identifies production telemetry units at Site 18-P, not lab units, satisfying the site-specific boundary requirement",
+      "Validate that NOTE-ACR-022 prefix warning is neutralized by explicit production-site specification in CAL-ACR-022 per STD-ACR-022-P policy"
+    ]
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "The packet_022a_invented_site_18l gate failure represents a constraint-level check for Site 18-L that has no corroborating source evidence. Source documents (ACT-ACR-022, CAL-ACR-022, SITE-ACR-022, RC-ACR-022) consistently reference Site 18-P for activation, calibration, and release condition. The gate failure label appears to be an invented constraint artifact rather than a substantive source-grounded finding. Per STD-ACR-022-P, exact boundaries must be matched in source; source documents match on Site 18-P without reference to Site 18-L. The worker remediation is correct: explicit production-unit specification in CAL-ACR-022 satisfies the site-specific boundary requirement and overrides generic prefix warning in NOTE-ACR-022.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

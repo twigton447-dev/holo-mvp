@@ -1,0 +1,28 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the commerce agent execute fulfillment exception allowed by current carrier exception code",
+    "allow_rule_assessment": "Exact current source records close the action boundary before execution",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-6F49E82DEE8B-CTL confirms exception code matches order and date is current, exact, tied to requested action",
+    "escalate_rule_assessment": "N/A \u2013 no source-record defect remains open before execution",
+    "timing_scope_authority_dependency_check": "GATE resolved \u2013 source boundary closed by SRC-6F49E82DEE8B-CTL evidence"
+  },
+  "cited_evidence": [
+    "SRC-6F49E82DEE8B-CTL",
+    "SRC-6F49E82DEE8B-FBK",
+    "SRC-6F49E82DEE8B-BND",
+    "SRC-6F49E82DEE8B-POL"
+  ],
+  "critical_features_preserved": [
+    "exception_code_match",
+    "exact_action_boundary",
+    "current_date_alignment",
+    "source_authority",
+    "commerce_workflow_policy_compliance"
+  ],
+  "final_answer": "The source records for CASE-6F49E82DEE8B close the exact requested action boundary. SRC-6F49E82DEE8B-CTL provides the controlling evidence: exception code must match order and date is current, exact, and tied to fulfillment exception. SRC-6F49E82DEE8B-FBK explicitly notes current source records can close the boundary. SRC-6F49E82DEE8B-BND confirms the commerce agent decides from source-control records. SRC-6F49E82DEE8B-POL establishes execution may proceed when current source records close the exact boundary. No open blockers remain. The commerce agent may execute the fulfillment exception.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

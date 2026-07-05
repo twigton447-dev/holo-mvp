@@ -1,0 +1,57 @@
+{
+  "blocked_moves": [
+    "changing verification verdict from ALLOW",
+    "treating HOLD-RAV-072 as controlling blocker",
+    "reclassifying binding as SOURCE_BOUNDARY_OPEN",
+    "substituting different source IDs",
+    "introducing new source_ids not in artifact_registry"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "No unresolved dependencies. All source records present. CLOSE-RAV-072 completes dependency chain for STD-RAV-072-P policy requirements."
+  ],
+  "final_compiler_allowed": false,
+  "gov_diagnosis": {
+    "escalation_appropriateness": "No escalation warranted. The source evidence supports ALLOW; repair is achievable through output completeness, not through changing the correct factual determination.",
+    "gate_failure_root_cause": "Worker output contained correct source binding logic but failed gate constraints: (1) critical_term USD 51600 was omitted from final_answer text, violating completeness requirement; (2) final_answer word_band fell outside required range.",
+    "source_binding_integrity": "The SOURCE_BOUNDARY_CLOSED binding and ALLOW verdict are substantively correct. CLOSE-RAV-072 exactly satisfies STD-RAV-072-P conditions for INV-RAV-072. No binding corruption detected."
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_preservation_mandate": {
+    "must_preserve": [
+      "CLOSE-RAV-072 as controlling source fact",
+      "SOURCE_BOUNDARY_CLOSED binding class",
+      "ALLOW verification verdict",
+      "STD-RAV-072-P policy as authority",
+      "exact-match reasoning for tax-review/quality-signoff/payment-release-approval"
+    ]
+  },
+  "gov_repair_mandate": {
+    "must_repair": [
+      "final_answer must explicitly include critical_term: 51600",
+      "final_answer word_band must meet required length constraint",
+      "cited_evidence must remain 4 source IDs: INV-RAV-072, HOLD-RAV-072, CLOSE-RAV-072, STD-RAV-072-P"
+    ]
+  },
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Ensure final_answer includes the critical term 51600 and meets word_band constraint; preserve source ID citations; do not alter correct ALLOW verdict",
+    "monotonic_preservation": [
+      "CLOSE-RAV-072 exact-match satisfaction of STD-RAV-072-P",
+      "CLOSE-RAV-072 completed tax review, quality signoff, and payment release approval before payment",
+      "No open source-record defects",
+      "ALLOW verdict remains correct"
+    ],
+    "objective": "Compile final_answer that passes HOLOVERIFY_WORKER_DETERMINISTIC_GATE while preserving correct SOURCE_BOUNDARY_CLOSED binding",
+    "required_repairs": [
+      "Include exact amount USD 51600 in final_answer",
+      "Adjust final_answer word_band to pass gate length validation",
+      "Maintain cited_evidence with all 4 source IDs",
+      "Preserve SOURCE_BOUNDARY_CLOSED binding class in final output structure"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Worker reasoning is correct; gate failures are output-completeness issues, not source-binding errors. Next worker must preserve ALLOW verdict while fixing final_answer completeness and word_band.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

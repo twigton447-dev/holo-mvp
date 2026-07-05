@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May quality release the clinical batch?",
+    "allow_rule_assessment": "No exact match; acceptance status pending blocks closure",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CLOSE-FJO-086 pending retest; STD-FJO-086 requires assay-acceptance status",
+    "escalate_rule_assessment": "CLOSE-FJO-086 shows pending retest; policy requires full assay-acceptance status",
+    "timing_scope_authority_dependency_check": "Release date 2026-06-28 met but abstract acceptance unresolved per DEV-FJO-086 and CLOSE-FJO-086"
+  },
+  "cited_evidence": [
+    "CLOSE-FJO-086",
+    "DEV-FJO-086",
+    "STD-FJO-086-P"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "ESCALATE. CLOSE-FJO-086 states accepted retest result remains pending for assay AX-41. Policy STD-FJO-086 requires exact match on assay-acceptance status before shipment. Boundary remains open; action may not proceed.",
+  "open_blockers": [
+    "047-style abstract-field trap: assay acceptance pending"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

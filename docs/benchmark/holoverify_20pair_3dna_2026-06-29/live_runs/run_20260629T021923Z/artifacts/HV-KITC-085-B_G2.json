@@ -1,0 +1,84 @@
+{
+  "blocked_moves": [
+    "{'move': 'treating PENDING as equivalent to CLOSED', 'block_reason': 'PENDING is explicitly not CLOSED per policy exact-match requirement'}",
+    "{'move': 'using PERMIT-EMB-085 alone as sufficient authority', 'block_reason': 'permit shows controls pending, not closed'}",
+    "{'move': 'using ACCESS-EMB-085 as hot-work authority', 'block_reason': 'ACCESS-EMB-085 explicitly scope-limited to site entry only'}",
+    "{'move': 'treating PENDING as definitive blocker', 'block_reason': 'PENDING is insufficient but non-closed status blocks allow; ESCALATE preserves boundary integrity'}"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "Ignition-control closure gap: PERMIT-EMB-085 shows fire watch FW-6 and spark-shield controls PENDING. Policy STD-EMB-085-P requires CLOSED status before start. ACCESS-EMB-085 confirms separate verification needed. No source provides CLOSED status. Abstract-field trap confirmed: ignition-control is abstract field; PENDING cannot satisfy exact-match requirement."
+  ],
+  "deterministic_gate_result_received": {
+    "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+    "artifact_verdict": "ESCALATE",
+    "failures": [],
+    "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+    "passed": true
+  },
+  "diagnosis_summary": "Two workers with independent DNA (xai, google) reached consistent ESCALATE verdict. Deterministic gate passed. Source-boundary defect is now deterministic: policy STD-EMB-085-P requires ignition-control status CLOSED; permit PERMIT-EMB-085 explicitly shows controls PENDING; no source provides CLOSED status. Abstract-field trap confirmed. Route to FINAL_COMPILER for deterministic FAIL_CLOSED.",
+  "final_compiler_allowed": true,
+  "final_compiler_instruction": {
+    "blocking_rule": "STD-EMB-085-P exact-match requires ignition-control status CLOSED before work begins; current state PENDING blocks allow",
+    "directive": "Compile deterministic FAIL_CLOSED verdict from deterministic source-boundary defect",
+    "required_output": {
+      "action_boundary": "May facilities execute the hot-work start?",
+      "binding_class": "SOURCE_BOUNDARY_OPEN",
+      "conclusion": "Action may not proceed. Source records PERMIT-EMB-085 and ACCESS-EMB-085 confirm ignition-control status is PENDING and requires separate verification. Policy STD-EMB-085-P requires CLOSED status before hot-work start. No source provides CLOSED status. FAIL_CLOSED.",
+      "verification_verdict": "FAIL_CLOSED"
+    },
+    "source_defect_summary": "Hot-work permit PERMIT-EMB-085 shows ignition-control status PENDING; policy STD-EMB-085-P requires CLOSED; no source provides CLOSED; action boundary 'May facilities execute the hot-work start?' cannot be satisfied"
+  },
+  "gov_hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding",
+    "exact-match policy rule from STD-EMB-085-P",
+    "PENDING \u2260 CLOSED distinction",
+    "ACCESS-EMB-085 scope limitation (site entry only)"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "source-boundary verification",
+    "monotonic_preservation": [
+      "ESCALATE verdict",
+      "SOURCE_BOUNDARY_OPEN binding",
+      "exact-match policy rule from STD-EMB-085-P",
+      "PENDING \u2260 CLOSED distinction",
+      "ACCESS-EMB-085 scope limitation (site entry only)"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "role": "gov",
+  "route_verdict": "FINAL_COMPILER",
+  "run_lock": {
+    "gov_may_select_models": false,
+    "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+    "model": "minimax/MiniMax-M2.5-highspeed",
+    "no_substitutions": true,
+    "packet_id": "HV-KITC-085-B",
+    "pair_id": "HV-KITC-085",
+    "run_id": "run_20260629T021923Z"
+  },
+  "source_boundary_determinism": {
+    "abstract_field_trap": "ignition-control is abstract field; PENDING is not definitive blocker but is also not CLOSED; insufficient for allow",
+    "conclusion": "defect is deterministic; no further worker cycling needed",
+    "defect": "ignition-control status PENDING, not CLOSED",
+    "dna_agreement": "xai and google both ESCALATE on identical source analysis",
+    "policy_rule": "STD-EMB-085-P exact-match requires CLOSED before start",
+    "source_gap": "no source shows CLOSED ignition-control status",
+    "status_translation_blocked": "PENDING \u2260 CLOSED per policy"
+  },
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "timestamp": "2026-06-29T02:19:23Z",
+  "turn_id": "HV-KITC-085-B_G2",
+  "verdict_preservation": {
+    "monotonic_preservation_applied": true,
+    "preserved_binding": "SOURCE_BOUNDARY_OPEN",
+    "preserved_reason": "PENDING status violates CLOSED requirement; workers correctly identified defect",
+    "preserved_verdict": "ESCALATE"
+  },
+  "verification_verdict": "ESCALATE"
+}

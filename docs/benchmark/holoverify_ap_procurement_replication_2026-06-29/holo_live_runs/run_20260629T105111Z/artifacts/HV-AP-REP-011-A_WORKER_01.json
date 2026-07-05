@@ -1,0 +1,25 @@
+{
+  "boundary_binding": {
+    "action_boundary": "Invoice release requires current PO to exist",
+    "allow_rule_assessment": "No match; PO absent",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-1D955A0F73B0-CTL requires PO for this invoice",
+    "escalate_rule_assessment": "Dependency unresolved per control record",
+    "timing_scope_authority_dependency_check": "Current PO must exist before execution"
+  },
+  "cited_evidence": [
+    "SRC-1D955A0F73B0-CTL",
+    "SRC-1D955A0F73B0-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "dependency ledger"
+  ],
+  "final_answer": "Source records confirm PO must exist for invoice release. SRC-1D955A0F73B0-CTL ties this exact dependency to the action boundary. PO is missing, leaving boundary open. Execution blocked. Escalate to resolve dependency before any release.",
+  "open_blockers": [
+    "current PO must exist for this invoice"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

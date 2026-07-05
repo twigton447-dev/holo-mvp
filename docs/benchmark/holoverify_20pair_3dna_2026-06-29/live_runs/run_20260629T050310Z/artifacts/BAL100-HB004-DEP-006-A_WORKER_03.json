@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "Operations may release ACT-DEP-MDV-006 because DEP-MDV-006 shows dependency closure completed at 09:05 before the 10:30 queued release, matching source object OBJ-MDV-006, account ACCT-MDV-006, MDV production scope 006, and release condition RC-MDV-006 as required by REQ-MDV-006 and MATCH-MDV-006.",
+    "allow_rule_assessment": "Exact source evidence closes the action boundary; DEP-MDV-006 closure timestamp 09:05 precedes queued release at 10:30; all four matching criteria satisfied; NOTE-MDV-006 confirms same-day closure-and-queue review is valid.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "DEP-MDV-006 closure at 09:05 matches REQ-MDV-006 criteria before 10:30 release",
+    "escalate_rule_assessment": "N/A",
+    "timing_scope_authority_dependency_check": "PASS - closure timestamp before release; scope matches MAP-MDV-006; entitlement ACCT-MDV-006 active per ENTITLE-MDV-006 and ROSTER-MDV-006; queue record QUEUE-MDV-006 shows valid scheduled release."
+  },
+  "cited_evidence": [
+    "DEP-MDV-006",
+    "REQ-MDV-006",
+    "MATCH-MDV-006",
+    "QUEUE-MDV-006",
+    "NOTE-MDV-006",
+    "MAP-MDV-006",
+    "ENTITLE-MDV-006",
+    "ROSTER-MDV-006"
+  ],
+  "critical_features_preserved": [
+    "source object OBJ-MDV-006 match",
+    "account ACCT-MDV-006 match",
+    "MDV production scope 006 match",
+    "release condition RC-MDV-006 match",
+    "closure timestamp 09:05 before release timestamp 10:30"
+  ],
+  "final_answer": "Operations may release ACT-DEP-MDV-006. The dependency closure DEP-MDV-006 was completed at 09:05 on 2026-06-17, before the 10:30 queued release, and covers exactly the source object, account, scope, and release condition specified in REQ-MDV-006. All four matching criteria from MATCH-MDV-006 are satisfied, and NOTE-MDV-006 confirms same-day dependency closures may be reviewed alongside queue records when timestamps indicate the closure precedes the action. The action boundary is closed by exact source evidence.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

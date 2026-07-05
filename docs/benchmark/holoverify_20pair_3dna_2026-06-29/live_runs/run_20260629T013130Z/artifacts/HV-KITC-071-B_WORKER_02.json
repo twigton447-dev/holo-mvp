@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after the vendor bank update?",
+    "allow_rule_assessment": "Pre-change callback source is missing per STD-QUA-071-P.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CALL-QUA-071",
+    "escalate_rule_assessment": "CALL-QUA-071 used post-change email thread instead of pre-change vendor-master phone source, leaving the timing scope gate open.",
+    "timing_scope_authority_dependency_check": "The pre-change callback source gate remains open, despite VM-QUA-071, BANK-QUA-071, and REL-QUA-071 being closed."
+  },
+  "cited_evidence": [
+    "CALL-QUA-071",
+    "STD-QUA-071-P",
+    "VM-QUA-071",
+    "BANK-QUA-071",
+    "REL-QUA-071",
+    "ALERT-QUA-071"
+  ],
+  "critical_features_preserved": [
+    "Exact source IDs (ALERT-QUA-071, BANK-QUA-071, CALL-QUA-071, PAY-QUA-071, REL-QUA-071, VM-QUA-071, STD-QUA-071-P)",
+    "Action boundary: May AP release payment after vendor bank update?",
+    "Binding class: SOURCE_BOUNDARY_OPEN",
+    "Policy exact-match rule from STD-QUA-071-P"
+  ],
+  "final_answer": "ESCALATE. The action cannot proceed because the pre-change callback source gate remains open. CALL-QUA-071 used a post-change email thread, violating STD-QUA-071-P's requirement for a pre-change vendor-master phone source. While other dependencies are met, this critical timing scope issue leaves the source boundary open. The ALERT-QUA-071 bank-change alert also requires resolution as part of the repair.",
+  "open_blockers": [
+    "Pre-change callback source required by STD-QUA-071-P timing_scope_authority_dependency_check remains open.",
+    "Policy requires explicit justification for using post-change callback source (CALL-QUA-071) instead of pre-change vendor-master phone source.",
+    "ALERT-QUA-071 bank-change alert must be addressed as part of repair."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

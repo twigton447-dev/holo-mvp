@@ -1,0 +1,27 @@
+{
+  "call_number": 29,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "caa3eae2849e72ec4c143942382ccfb39192e590dc47077b6b86074bcf262329",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user says: \"packet_id=SFF15FN-44C25E55BAD4F1F02B4B\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThey want a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. No headings, no explanations, no extra lines. So output should be exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut note that we have the packet_id as well. However the instructions say \"Return the three-line status record.\" The fields: route_verdict, repair_target, blocked_move. So we output those three lines.\n\nCheck for any hidden instructions. The user gave a packet_id and status values. They want a three-line status record. So we return exactly those lines.\n\nPotential nuance: \"preserve source-grounded reasoning\" includes a hyphen; we just replicate exactly. \"do not invent source IDs\" all lower case.\n\nMake sure no extra whitespace, no trailing spaces, no extra newline after third line? Usually they want a final newline is okay? They said \"three-line status record.\" Probably just those three lines.\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nLet's produce that.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "876627d4ff8ae2030d3a364d7e5f9087884436e32f6160af57796bea64620ddb",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 123,
+    "output_tokens": 337,
+    "raw_text": "<think>\nThe user says: \"packet_id=SFF15FN-44C25E55BAD4F1F02B4B\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThey want a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. No headings, no explanations, no extra lines. So output should be exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut note that we have the packet_id as well. However the instructions say \"Return the three-line status record.\" The fields: route_verdict, repair_target, blocked_move. So we output those three lines.\n\nCheck for any hidden instructions. The user gave a packet_id and status values. They want a three-line status record. So we return exactly those lines.\n\nPotential nuance: \"preserve source-grounded reasoning\" includes a hyphen; we just replicate exactly. \"do not invent source IDs\" all lower case.\n\nMake sure no extra whitespace, no trailing spaces, no extra newline after third line? Usually they want a final newline is okay? They said \"three-line status record.\" Probably just those three lines.\n\nThus answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nLet's produce that.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0697a4348b1e8865b726b333547b8cfd",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 460,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "AP may execute the requested payment, invoice release, or vendor-master action for CASE-92653D31DA6D.",
+    "allow_rule_assessment": "SRC-92653D31DA6D-CTL states the duplicate review disposition is current, exact, tied, and matches invoice and vendor; policy permits execution only after exact source closure.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-92653D31DA6D-CTL confirms the controlling duplicate review disposition.",
+    "escalate_rule_assessment": "No narrow source-record defect remains open in the controlling records provided.",
+    "timing_scope_authority_dependency_check": "Current control record matches actor, scope, effective date, and system boundary for the action boundary."
+  },
+  "cited_evidence": [
+    "SRC-92653D31DA6D-CTL",
+    "SRC-92653D31DA6D-BND",
+    "SRC-92653D31DA6D-FBK",
+    "SRC-92653D31DA6D-POL",
+    "SRC-92653D31DA6D-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "exact-match rule",
+    "current control record",
+    "policy closure requirement",
+    "duplicate review disposition must match invoice and vendor",
+    "SRC-92653D31DA6D-CTL",
+    "SRC-92653D31DA6D-BND"
+  ],
+  "final_answer": "The source boundary is closed. The controlling control record confirms the duplicate review disposition is current, exact, and tied to the requested action, and it matches the invoice and vendor. Under the frozen AP policy, that is sufficient for execution. No open source-record defect remains in the packet, so the action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

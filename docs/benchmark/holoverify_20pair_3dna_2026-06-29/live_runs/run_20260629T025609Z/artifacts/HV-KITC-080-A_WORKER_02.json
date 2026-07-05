@@ -1,0 +1,25 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May clinical operations activate the trial site?",
+    "allow_rule_assessment": "AUTH-ZEN-080 exactly matches site, protocol, consent, date, and enrollment authority",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "AUTH-ZEN-080 provides exact activation authority",
+    "escalate_rule_assessment": "FEAS-ZEN-080 is planning only and does not represent execution authority.",
+    "timing_scope_authority_dependency_check": "All elements closed on 2026-06-28"
+  },
+  "cited_evidence": [
+    "AUTH-ZEN-080"
+  ],
+  "critical_features_preserved": [
+    "exact source match",
+    "enrollment authority present",
+    "STD-ZEN-080-P compliance"
+  ],
+  "final_answer": "The action may proceed. AUTH-ZEN-080 precisely matches the required activation authority for site Z-12, protocol P7.2, consent C11, and the activation date of 2026-06-28, including enrollment authority. FEAS-ZEN-080 is confirmed as a planning artifact, not execution authority. The source boundary is closed per STD-ZEN-080-P.",
+  "open_blockers": [
+    "FEAS-ZEN-080 scope distinction preserved",
+    "planning artifact vs execution authority boundary intact"
+  ],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

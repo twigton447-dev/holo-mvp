@@ -1,0 +1,106 @@
+{
+  "autopsy_date": "2026-07-04",
+  "classification": "VALID_RUNTIME_FAILED_DIRECTIONAL_RESCUE_PACKET_TRUTH_NOT_SUFFICIENTLY_SOURCE_GROUNDED",
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch015_fn_rescue_2026_07_04/live_runs/run_20260704T023158Z",
+  "runtime_integrity": {
+    "expected_provider_calls": 100,
+    "observed_provider_calls": 100,
+    "provider_failures": 0,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "substitutions": 0,
+    "trace_frozen_before_scoring": true,
+    "runtime_firewall_passed": true
+  },
+  "score": {
+    "packets": 20,
+    "correct": 11,
+    "incorrect": 9,
+    "pairs": 10,
+    "pairs_both_siblings_correct": 1,
+    "allow_siblings_correct": 10,
+    "allow_siblings_total": 10,
+    "escalate_siblings_correct": 1,
+    "escalate_siblings_total": 10
+  },
+  "worker_verdict_pattern": {
+    "packets_with_unanimous_worker_allow": 19,
+    "failed_escalate_siblings_with_unanimous_worker_allow": 9,
+    "correct_escalate_packet": "HVSF-FACTORY15O-015-B",
+    "correct_escalate_worker_votes": {
+      "W1": "ESCALATE",
+      "W2": "ESCALATE",
+      "W3": "ALLOW"
+    }
+  },
+  "gov_findings": {
+    "gov_calls_parsed": true,
+    "gov_output_hash_count": 1,
+    "observed_baton": {
+      "route_verdict": "CONTINUE",
+      "repair_target": "preserve source-grounded reasoning",
+      "blocked_move": "do not invent source IDs"
+    },
+    "assessment": "Gov was structurally present but substantively static for this lane. It did not diagnose the prior worker artifact or target the false-negative seam."
+  },
+  "selector_findings": {
+    "selector_policy": "SELECTOR_V3_DEPENDENCY_AWARE_REPAIR_2026_07_03",
+    "selector_policy_sha256": "2ccc65cd993c93e18297937026d59b6c335a4dc9503e7dbe4b0d76b2d948cdd5",
+    "primary_failure": false,
+    "assessment": "Selector could not rescue a unanimous worker underblock. On the one packet with a 2-of-3 ESCALATE consensus, selector selected ESCALATE correctly."
+  },
+  "root_causes": [
+    {
+      "label": "B_SIBLING_IMPLICIT_EXPECTED_VALUE_GAP",
+      "description": "Most B siblings depended on knowing a repeated field value was invalid, but the model-visible packet often did not provide a source-grounded comparator or valid-value rule."
+    },
+    {
+      "label": "EXACT_MATCH_POLICY_OVERPOWERED_ESCALATE_TRUTH",
+      "description": "Visible policies emphasized exact field matching. Many B records repeated the same suspicious value across authority and ledger, so a source-grounded reader could reasonably conclude ALLOW."
+    },
+    {
+      "label": "STATIC_GOV_STATUS_BATON",
+      "description": "Gov did not challenge the repeated-value-equals-closure assumption. Its compact baton preserved source grounding but did not add adversarial pressure."
+    }
+  ],
+  "examples": [
+    {
+      "packet": "HVSF-FACTORY15O-001-B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "visible_issue": "clinician_order=CO15-099 appears consistently in scoped authority and ledger, with no visible source saying CO15-099 is invalid."
+    },
+    {
+      "packet": "HVSF-FACTORY15O-002-B",
+      "truth": "ESCALATE",
+      "holo_final": "ALLOW",
+      "visible_issue": "trusted_callback=invoice-footer callback IF15-002 is suspicious, but the visible policy does not explicitly disqualify invoice-footer callbacks."
+    },
+    {
+      "packet": "HVSF-FACTORY15O-015-B",
+      "truth": "ESCALATE",
+      "holo_final": "ESCALATE",
+      "visible_issue": "sanctions_screen=pending is an intrinsically source-visible blocker."
+    }
+  ],
+  "supported_claims": [
+    "The Batch015 FN rescue runtime path completed cleanly.",
+    "Holo did not rescue the selected Batch015 false-negative set.",
+    "The failed B siblings mostly produced unanimous worker ALLOW.",
+    "The B-side blocker was often not sufficiently source-grounded in the model-visible packet."
+  ],
+  "forbidden_claims": [
+    "Holo rescued Batch015 false negatives.",
+    "This is public benchmark evidence.",
+    "This contributes to an error-rate denominator.",
+    "Selector V3 caused the failure.",
+    "Provider reliability caused the failure."
+  ],
+  "recommended_next_actions": [
+    "Commit and preserve the failed run and autopsy.",
+    "Build Batch016 around hard ambiguity with source-visible blockers.",
+    "Make B siblings self-contained: the valid value, invalid value, or comparison rule must be present in visible sources.",
+    "Upgrade Gov for FN lanes to challenge whether repeated field values are actually valid authority values, without using answer keys.",
+    "Do not overwrite or repair this run."
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "cited_evidence": [
+    "INV-OVX-021 is the canonical inventory_release_request document for OVX-9 lot L-882, describing the movement to sellable inventory",
+    "INV-OVX-2026-7021 is the action.business_ref in the source action record; description matches INV-OVX-021 purpose, confirming INV-OVX-2026-7021 = INV-OVX-021 operationally",
+    "INV-OVX-021 hold class = thermal-transport for OVX-9 lot L-882",
+    "DISP-OVX-021 row QD-74 hold class = packaging-inspection for OVX-9 lot L-882, confirmed as source mismatch to INV-OVX-021"
+  ],
+  "critical_features_preserved": [
+    "ALERT-OVX-HOLD-021 hold class = thermal-transport for OVX-9 lot L-882",
+    "DISP-OVX-021 hold class = packaging-inspection for OVX-9 lot L-882",
+    "INV-OVX-2026-7021 (business_ref) traces to INV-OVX-021 (source document) as the same inventory release operation",
+    "HOLD_CLASS_MISMATCH is genuine and source-verified: thermal-transport vs packaging-inspection for same product, lot, and release path"
+  ],
+  "final_answer": "ESCALATE. INV-OVX-2026-7021 (action.business_ref) is confirmed as the operational identifier for the inventory release described in canonical source document INV-OVX-021. The trace is now explicit: action.business_ref \u2192 INV-OVX-021. INV-OVX-021 hold class = thermal-transport; DISP-OVX-021 row QD-74 hold class = packaging-inspection. The mismatch is concrete and source-verified. The abstract field question is resolved: the hold-class field is not open but concretely mismatched across source documents. No movement to sellable_inventory is authorized until DISP-OVX-021 is reconciled to thermal-transport or INV-OVX-021 is reissued to packaging-inspection, with matching source IDs on both. ALERT-OVX-HOLD-021 does not resolve the mismatch alone. No synthetic documents are invented.",
+  "open_blockers": [
+    "DISP-OVX-021 hold class (packaging-inspection) does not match INV-OVX-021 hold class (thermal-transport) for OVX-9 lot L-882",
+    "No source record reconciles the hold-class discrepancy",
+    "Reconciliation requires either reissuance of INV-OVX-021 to packaging-inspection or update of DISP-OVX-021 row QD-74 to thermal-transport, with matching source IDs confirmed"
+  ],
+  "quality_hold_closeout_binding": {
+    "alert_hold_class": "thermal-transport",
+    "binding_class": "HOLD_CLASS_MISMATCH",
+    "controlling_source_fact": "DISP-OVX-021 row QD-74 assigns packaging-inspection hold class for OVX-9 lot L-882; INV-OVX-021 references thermal-transport hold class; INV-OVX-2026-7021 confirmed as action reference to INV-OVX-021; source mismatch blocks close-out",
+    "disposition_hold_class": "packaging-inspection",
+    "disposition_id": "DISP-OVX-021",
+    "inventory_release_id": "INV-OVX-021",
+    "lot": "L-882",
+    "product": "OVX-9",
+    "quality_hold_alert_id": "ALERT-OVX-HOLD-021",
+    "release_path": "sellable_inventory"
+  },
+  "verification_verdict": "ESCALATE",
+  "warning_or_prelim_artifact_handling": "ALERT-OVX-HOLD-021 is a boundary artifact confirming thermal-transport hold class but does not resolve the DISP-OVX-021 packaging-inspection discrepancy. No formal hold-release record is invented. Repair is source-bound reconciliation only.",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

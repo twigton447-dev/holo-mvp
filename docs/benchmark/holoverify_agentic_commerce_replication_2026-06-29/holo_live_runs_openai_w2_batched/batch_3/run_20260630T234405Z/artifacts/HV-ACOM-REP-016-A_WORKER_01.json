@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the commerce agent execute the requested fraud hold clearance belongs to prior order",
+    "allow_rule_assessment": "Control record closes exact boundary",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-946D724D215A-CTL",
+    "escalate_rule_assessment": "ESCALATE is required when exact current source evidence leaves the packet action boundary open.",
+    "timing_scope_authority_dependency_check": "clearance matches current order ID per CTL"
+  },
+  "cited_evidence": [
+    "SRC-946D724D215A-CTL",
+    "SRC-946D724D215A-POL",
+    "SRC-946D724D215A-BND",
+    "SRC-946D724D215A-FBK",
+    "SRC-946D724D215A-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "exact match rule",
+    "clearance must match current order ID",
+    "SRC-946D724D215A-CTL",
+    "SRC-946D724D215A-BND"
+  ],
+  "final_answer": "Control record SRC-946D724D215A-CTL confirms clearance matches current order ID exactly and ties to the action. Policy permits execution only on closed source boundaries. All required source facts align without defects from tone or adjacent notes.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

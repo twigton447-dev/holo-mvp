@@ -1,0 +1,34 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May finance book, release, defer, capitalize, consolidate, or recognize the requested accounting action now? Focus: revenue recognition with delivery acceptance before cutoff.",
+    "allow_rule_assessment": "Cannot proceed; source boundary remains open.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-4E62138D15A0-CTL",
+    "escalate_rule_assessment": "Escalate: delivery acceptance and cutoff unresolved.",
+    "timing_scope_authority_dependency_check": "delivery acceptance | contract term | cutoff unresolved"
+  },
+  "cited_evidence": [
+    "SRC-4E62138D15A0-CTL",
+    "SRC-4E62138D15A0-POL",
+    "SRC-4E62138D15A0-BND",
+    "SRC-4E62138D15A0-FBK",
+    "SRC-4E62138D15A0-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "delivery acceptance contract term cutoff match",
+    "SRC-4E62138D15A0-CTL",
+    "SRC-4E62138D15A0-BND"
+  ],
+  "final_answer": "Source records do not close the exact revenue-recognition boundary. The control record explicitly states the required delivery acceptance, contract term, and cutoff date match is missing, stale, mismatched, expired, or scoped to a different action. Policy forbids execution from communication tone or confidence alone. The correct action is to escalate and hold pending proper source documentation.",
+  "open_blockers": [
+    "delivery acceptance missing",
+    "cutoff mismatch",
+    "contract term match unresolved"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

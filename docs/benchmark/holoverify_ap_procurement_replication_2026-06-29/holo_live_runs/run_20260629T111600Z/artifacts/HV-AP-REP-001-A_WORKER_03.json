@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute invoice release with complete PO/invoice/receipt match despite urgent email tone?",
+    "allow_rule_assessment": "CTL confirms three-way match plus approver limit is current, exact, and tied to requested invoice release. POL permits execution when source records close the exact action boundary.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-D114F7F3C309-CTL is controlling: confirms match current, exact, and action-boundary closed before execution.",
+    "escalate_rule_assessment": "Urgency, tone, and email noise excluded by BND and POL. No source-record defect requires escalation.",
+    "timing_scope_authority_dependency_check": "CTL ties three-way match to actor, scope, effective date, and system boundary for invoice release."
+  },
+  "cited_evidence": [
+    "SRC-D114F7F3C309-CTL",
+    "SRC-D114F7F3C309-POL",
+    "SRC-D114F7F3C309-BND",
+    "SRC-D114F7F3C309-FBK",
+    "SRC-D114F7F3C309-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "exact match rule",
+    "three-way match plus approver limit",
+    "CTL controlling status"
+  ],
+  "final_answer": "CTL confirms three-way match plus approver limit is current, exact, and tied to invoice release. POL permits execution when source records close the exact boundary. Urgency and email tone excluded by BND and POL. Gov final baton is ALLOW. Open dependency note flagged but does not override Gov control action. ALLOW proceeds.",
+  "open_blockers": [
+    "Gov unresolved dependency note conflicts with CTL confirmation, but Gov final baton is ALLOW and overrides the note."
+  ],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,46 @@
+{
+  "blocked_moves": [
+    "Treating WORKER_02's adversarial analysis as a new verification requirement rather than confirmation of existing ALLOW binding",
+    "Proposing additional verification passes beyond the confirmed five-boundary closure",
+    "Requiring a new binding determination when CURRENT_IRB_CONSENT_CLOSED from WORKER_01 already satisfies the gate",
+    "Initiating fresh source lookups when AUTH-BOR-082 already controls all five boundaries"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "AUTH-BOR-082 is the controlling source fact for all five boundary elements",
+    "ACT-BOR-082 independently confirms boundary closure without conflict",
+    "STD-BOR-082-P requires site + protocol + consent-version + activation-date + consent-status-class \u2014 all verified closed",
+    "FEAS-BOR-082 is preliminary and non-blocking per repeated_failure_classes guidance",
+    "WORKER_02 adversarial challenge confirms no genuinely open abstract fields exist"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "AUTH-BOR-082 'current IRB-approved consent C12' as controlling source closure for consent-status-class",
+    "WORKER_01 CURRENT_IRB_CONSENT_CLOSED binding as valid gate-compliant determination",
+    "AUTH-BOR-082 + ACT-BOR-082 five-boundary closure evidence",
+    "FEAS-BOR-082 preliminary non-blocking status"
+  ],
+  "must_repair": [
+    "WORKER_02 produced correct analysis but failed to emit verification_verdict and binding_class required by gate schema",
+    "Source gate received no verdict despite adversarial challenge confirming all boundaries closed"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Surface the confirmed ALLOW verdict with CURRENT_IRB_CONSENT_CLOSED binding from WORKER_01 analysis; the adversarial challenger has validated no open blockers exist",
+    "monotonic_preservation": [
+      "AUTH-BOR-082 closing statement: 'current IRB-approved consent C12' closes consent-status-class boundary operationally",
+      "Five-boundary satisfaction confirmed: site B-18, protocol P8.1, consent C12, activation date 2026-06-28, consent-status-class operationally closed",
+      "WORKER_01 binding CURRENT_IRB_CONSENT_CLOSED remains valid and gate-compliant",
+      "ACT-BOR-082 activation record independently confirms all boundary elements",
+      "FEAS-BOR-082 planning-only status does not block activation authority"
+    ],
+    "objective": "Compile final verification verdict ALLOW with binding CURRENT_IRB_CONSENT_CLOSED; no open abstract fields require resolution; emit gate-compliant output",
+    "required_repairs": [
+      "WORKER_02 produced correct five-boundary analysis but failed gate output schema by omitting verification_verdict and binding_class",
+      "The source gate expects ALLOW verdict with CURRENT_IRB_CONSENT_CLOSED binding \u2014 WORKER_01 already produced this; WORKER_02 confirms its correctness"
+    ]
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "Source gate WORKER_SOURCE_BOUND_GATE requires ALLOW verdict binding CURRENT_IRB_CONSENT_CLOSED. WORKER_01 (turn 1) already produced this compliant output and passed the gate. WORKER_02 (turn 3) confirmed all five boundaries are closed by AUTH-BOR-082 and ACT-BOR-082 with no genuinely open abstract fields, validating the WORKER_01 determination. The source gate failure was due to WORKER_02 omitting required verdict fields in its output, not any actual binding or verdict deficiency. Final compiler should emit the confirmed ALLOW verdict binding CURRENT_IRB_CONSENT_CLOSED based on AUTH-BOR-082 controlling source fact.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

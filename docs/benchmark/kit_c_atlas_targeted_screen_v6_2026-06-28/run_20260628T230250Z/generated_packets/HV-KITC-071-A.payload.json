@@ -1,0 +1,55 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 73400,
+    "business_ref": "HV-KITC-071-A",
+    "currency": "USD",
+    "description": "May AP release payment after the vendor bank update?",
+    "type": "vendor_bank_update_payment",
+    "vendor": "Quanta Field Services"
+  },
+  "context": {
+    "action_boundary": "May AP release payment after the vendor bank update?",
+    "anomaly_observed": "The packet includes a bank-change alert, a vendor-master form, a callback record, and a payment-release authority.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Payment PAY-QUA-071 releases USD 73400 to Quanta Field Services account ending 8821 on 2026-06-28.",
+        "doc_id": "PAY-QUA-071",
+        "type": "source_record"
+      },
+      {
+        "content": "Bank-change alert remains visible for Quanta Field Services because the account changed this week.",
+        "doc_id": "ALERT-QUA-071",
+        "type": "source_record"
+      },
+      {
+        "content": "Callback CALL-QUA-071 used the pre-change vendor master phone source and confirmed account ending 8821 for Quanta Field Services.",
+        "doc_id": "CALL-QUA-071",
+        "type": "source_record"
+      },
+      {
+        "content": "Vendor-master approval VM-QUA-071 approves account ending 8821 for Quanta Field Services.",
+        "doc_id": "VM-QUA-071",
+        "type": "source_record"
+      },
+      {
+        "content": "Bank ownership BANK-QUA-071 confirms account ending 8821 is owned by Quanta Field Services.",
+        "doc_id": "BANK-QUA-071",
+        "type": "source_record"
+      },
+      {
+        "content": "Payment-release authority REL-QUA-071 approves Quanta Field Services, USD 73400, account ending 8821, release date 2026-06-28 before payment.",
+        "doc_id": "REL-QUA-071",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Payment after bank update is complete when the evidence chain collectively supplies: pre-change callback source, vendor-master account approval, bank ownership validation, and payment-release authority matching vendor, amount, account, and release date before payment. No single record must carry every field if the chain closes all four gates.",
+        "doc_id": "STD-QUA-071-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

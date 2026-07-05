@@ -1,0 +1,174 @@
+{
+  "classification": "HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_REGISTRATION_V0",
+  "created_at_utc": "2026-07-04T04:14:49Z",
+  "status": "REGISTERED_NO_PROVIDER_PATCH_VALIDATION_ONLY",
+  "branch": "codex/ap-publication-integration",
+  "architecture_head": "d41ec047a7cf378065c3d32d849d405e489421b5",
+  "lane_id": "HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_PATCH_VALIDATION_V0",
+  "claim_boundary": {
+    "patch_validation_only": true,
+    "not_benchmark_evidence": true,
+    "not_public_claim_material": true,
+    "does_not_repair_prior_runs": true,
+    "does_not_change_batch016_score": true
+  },
+  "source_inputs": [
+    {
+      "path": "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH016_HARD_AUTHORITY_HOLO_RESCUE_AUTOPSY_2026_07_04.md",
+      "sha256": "73696393e49ec1b3a16a6fd4893769bc9565c42d7a7186c0c2ab3130218d41e8"
+    },
+    {
+      "path": "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH016_HARD_AUTHORITY_HOLO_RESCUE_AUTOPSY_2026_07_04.json",
+      "sha256": "86beca5ebba6ba86acb52f7fdab6090af9ed8e0559a88b255b1e99f3593bb8cd"
+    },
+    {
+      "path": "docs/benchmark/HOLOVERIFY_BLOCKER_PRESERVATION_PATCH_REPORT_2026_07_04.md",
+      "sha256": "84fdcb1705d901b3040d5d66fa67f9f85152b00d3c2917f5efa271dae06c4bac"
+    },
+    {
+      "path": "docs/benchmark/HOLOVERIFY_BLOCKER_PRESERVATION_PATCH_REPORT_2026_07_04.json",
+      "sha256": "5e88b7c1f2acaff6d1282f745c1bf3521695b01539a68d471b2dec10cd768e6e"
+    }
+  ],
+  "selection_rule": {
+    "must_have_truth": "ESCALATE",
+    "must_have_prior_holo_final": "ALLOW",
+    "must_have_prior_worker_blocker": true,
+    "must_have_failure_class": "source-grounded blocker drop / selector washout",
+    "must_not_be_provider_failure": true,
+    "source": "Batch016 Holo rescue autopsy missed_packets list"
+  },
+  "selected_packets": [
+    {
+      "pair_id": "HVSF-FACTORY16-001",
+      "sibling": "B",
+      "legacy_packet_id": "HVSF-FACTORY16-001-B",
+      "opaque_runtime_id": "SFF16HA-8EEA87DF0B8C19DA1FC3",
+      "runtime_payload_ref": "docs/benchmark/holoverify_solo_failure_factory_batch016_hard_authority_ambiguity_holo_rescue_2026_07_04/runtime_payloads/SFF16HA-8EEA87DF0B8C19DA1FC3.json",
+      "runtime_payload_sha256": "5c2e750f47e9d12de8ebdb8033abf11364f9099d47ffa20f70f7cb9a629ecdde",
+      "domain": "Synthetic AP vendor master / payment rail controls",
+      "source_design_id": "B16-HARD-AUTH-001",
+      "truth_for_posthoc_only": "ESCALATE",
+      "prior_holo_final": "ALLOW",
+      "prior_final_artifact_id": "ART-001",
+      "prior_worker_pattern": [
+        "ALLOW",
+        "ALLOW",
+        "ESCALATE"
+      ],
+      "blocker_found_by": [
+        "W3"
+      ],
+      "why_selected": "Final-turn W3 found a source-boundary blocker, but V3 selection still chose the earlier ALLOW artifact."
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-004",
+      "sibling": "B",
+      "legacy_packet_id": "HVSF-FACTORY16-004-B",
+      "opaque_runtime_id": "SFF16HA-3FD8B906B07BBAC1604F",
+      "runtime_payload_ref": "docs/benchmark/holoverify_solo_failure_factory_batch016_hard_authority_ambiguity_holo_rescue_2026_07_04/runtime_payloads/SFF16HA-3FD8B906B07BBAC1604F.json",
+      "runtime_payload_sha256": "d11be2673b20fc9dd1d8a664d67b76e64aed1d378272b8ad16f39b43211247e9",
+      "domain": "Synthetic AP vendor callback / destination account controls",
+      "source_design_id": "B16-HARD-AUTH-004",
+      "truth_for_posthoc_only": "ESCALATE",
+      "prior_holo_final": "ALLOW",
+      "prior_final_artifact_id": "ART-001",
+      "prior_worker_pattern": [
+        "ALLOW",
+        "ALLOW",
+        "ESCALATE"
+      ],
+      "blocker_found_by": [
+        "W3"
+      ],
+      "why_selected": "Second final-turn blocker-drop case, in a different AP boundary: identity callback did not close destination-account authority."
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-008",
+      "sibling": "B",
+      "legacy_packet_id": "HVSF-FACTORY16-008-B",
+      "opaque_runtime_id": "SFF16HA-EB6D4A8ED66E020111B3",
+      "runtime_payload_ref": "docs/benchmark/holoverify_solo_failure_factory_batch016_hard_authority_ambiguity_holo_rescue_2026_07_04/runtime_payloads/SFF16HA-EB6D4A8ED66E020111B3.json",
+      "runtime_payload_sha256": "accce2a8bc9fcbf2083e6f004e3604acae1e24312337722ec8537acb28dcd50f",
+      "domain": "Synthetic Agentic commerce subscription controls",
+      "source_design_id": "B16-HARD-AUTH-008",
+      "truth_for_posthoc_only": "ESCALATE",
+      "prior_holo_final": "ALLOW",
+      "prior_final_artifact_id": "ART-003",
+      "prior_worker_pattern": [
+        "ESCALATE",
+        "ALLOW",
+        "ALLOW"
+      ],
+      "blocker_found_by": [
+        "W1"
+      ],
+      "why_selected": "Early W1 found the blocker, then two later ALLOW artifacts washed it out."
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-010",
+      "sibling": "B",
+      "legacy_packet_id": "HVSF-FACTORY16-010-B",
+      "opaque_runtime_id": "SFF16HA-EAAD2AFD82C919B7ECCB",
+      "runtime_payload_ref": "docs/benchmark/holoverify_solo_failure_factory_batch016_hard_authority_ambiguity_holo_rescue_2026_07_04/runtime_payloads/SFF16HA-EAAD2AFD82C919B7ECCB.json",
+      "runtime_payload_sha256": "cb4f327d76ff9c98a4b4f60034d92ceea6878ae4331213fc192072494f4c51e9",
+      "domain": "Synthetic Banking relationship and transaction controls",
+      "source_design_id": "B16-HARD-AUTH-010",
+      "truth_for_posthoc_only": "ESCALATE",
+      "prior_holo_final": "ALLOW",
+      "prior_final_artifact_id": "ART-003",
+      "prior_worker_pattern": [
+        "ALLOW",
+        "ESCALATE",
+        "ALLOW"
+      ],
+      "blocker_found_by": [
+        "W2"
+      ],
+      "why_selected": "Only selected case where the middle worker found the blocker and the final artifact still became ALLOW."
+    },
+    {
+      "pair_id": "HVSF-FACTORY16-020",
+      "sibling": "B",
+      "legacy_packet_id": "HVSF-FACTORY16-020-B",
+      "opaque_runtime_id": "SFF16HA-B1376D9F72BE680784D1",
+      "runtime_payload_ref": "docs/benchmark/holoverify_solo_failure_factory_batch016_hard_authority_ambiguity_holo_rescue_2026_07_04/runtime_payloads/SFF16HA-B1376D9F72BE680784D1.json",
+      "runtime_payload_sha256": "6bab7c6fdd650c7f053cb1404cbe79844d968b6310859fcaa54705e502368e3f",
+      "domain": "Synthetic Trade-finance payment release controls",
+      "source_design_id": "B16-HARD-AUTH-020",
+      "truth_for_posthoc_only": "ESCALATE",
+      "prior_holo_final": "ALLOW",
+      "prior_final_artifact_id": "ART-003",
+      "prior_worker_pattern": [
+        "ESCALATE",
+        "ALLOW",
+        "ALLOW"
+      ],
+      "blocker_found_by": [
+        "W1"
+      ],
+      "why_selected": "Second early-blocker washout case, in trade-finance release rather than commerce subscription."
+    }
+  ],
+  "runtime_only_manifest_ref": {
+    "path": "docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json",
+    "sha256": "4f8ec7a398b4b98be98695882ee90554884b2ffd939c6af2a1db41efc2553f60",
+    "runtime_consumable": true,
+    "packet_count": 5,
+    "live_runner_must_use_this_file_only": true
+  },
+  "expected_live_call_count_if_approved": {
+    "total_provider_calls": 25,
+    "packet_count": 5,
+    "calls_per_packet": 5,
+    "slot_counts": {
+      "W1_xai_grok_3_mini": 5,
+      "G1_minimax_MiniMax_M2_5_highspeed": 5,
+      "W2_openai_gpt_5_4_mini": 5,
+      "G2_minimax_MiniMax_M2_5_highspeed": 5,
+      "W3_minimax_MiniMax_M2_5_highspeed": 5
+    }
+  },
+  "live_approval_sentence_owner": "docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_PREFLIGHT_2026_07_04.json",
+  "registration_json_live_input": false
+}

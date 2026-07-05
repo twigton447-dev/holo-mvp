@@ -1,0 +1,112 @@
+{
+  "classification": "HOLOVERIFY_ATLAS_5FAIL_MAJORITY_ENSEMBLE_ABLATION_RESULT_2026_07_03",
+  "status": "COMPLETE_TRACE_BOUND_ABLATION_RESULT",
+  "created_at_utc": "2026-07-03T18:31:00Z",
+  "lane_label": "HOLOVERIFY_ATLAS_5FAIL_3MODEL_MAJORITY_ENSEMBLE_ABLATION_V0",
+  "run_dir": "docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/run_20260703T182625Z",
+  "posthoc_score": "docs/benchmark/holoverify_atlas_5fail_majority_ensemble_ablation_runs_2026_07_03/run_20260703T182625Z/majority_ensemble_posthoc_score_trace_bound_v1.json",
+  "runtime": {
+    "packet_count": 10,
+    "pair_count": 5,
+    "expected_provider_calls": 30,
+    "observed_provider_calls": 30,
+    "provider_failures": 0,
+    "gov_calls": 0,
+    "continuity": false,
+    "judge_calls": 0,
+    "aggregation_rule": "MAJORITY_OF_ADMISSIBLE_VOTES",
+    "scoring_map_loaded_before_trace_freeze": false
+  },
+  "score": {
+    "packets_correct": 10,
+    "packet_count": 10,
+    "packets_incorrect": 0,
+    "pairs_both_siblings_correct": 5,
+    "pair_count": 5,
+    "packet_failure_class_counts": {
+      "KNEW_ADMISSIBLE_MAJORITY": 10
+    },
+    "individual_vote_failure_class_counts": {
+      "KNEW_ADMISSIBLE_VOTE": 27,
+      "FALSE_POSITIVE_ESCALATE_ON_ALLOW": 2,
+      "PARSE_OR_ADMISSIBILITY_FAILURE": 1
+    },
+    "token_totals": {
+      "input_tokens": 16515,
+      "output_tokens": 9673,
+      "total_tokens": 31456
+    }
+  },
+  "individual_vote_failures": [
+    {
+      "packet_id": "HV-ATLAS-DISC-020-A",
+      "truth": "ALLOW",
+      "failed_model": "xai/grok-3-mini",
+      "failed_vote": "ESCALATE",
+      "majority_result": "ALLOW",
+      "ensemble_correct": true
+    },
+    {
+      "packet_id": "HV-ATLAS-DISC-033-A",
+      "truth": "ALLOW",
+      "failed_model": "openai/gpt-5.4-mini",
+      "failed_vote": "ESCALATE",
+      "majority_result": "ALLOW",
+      "ensemble_correct": true
+    },
+    {
+      "packet_id": "HV-ATLAS-DISC-035-A",
+      "truth": "ALLOW",
+      "failed_model": "minimax/MiniMax-M2.5-highspeed",
+      "failed_vote": "UNKNOWN_INADMISSIBLE",
+      "majority_result": "ALLOW",
+      "ensemble_correct": true
+    }
+  ],
+  "comparison": {
+    "solo_side": {
+      "ref": "docs/benchmark/HOLOVERIFY_ATLAS_5_SOLO_FAILURES_ESTABLISHED_2026_07_03.json",
+      "summary": "At least one same-model solo one-shot failed on each primary target packet."
+    },
+    "workers_only_side": {
+      "ref": "docs/benchmark/HOLOVERIFY_ATLAS_5FAIL_WORKERS_ONLY_ABLATION_RESULT_2026_07_03.json",
+      "packets_correct": 7,
+      "packet_count": 10,
+      "pairs_correct": 2,
+      "pair_count": 5,
+      "summary": "Sequential continuity without Gov/selector failed because last-worker regression and inadmissibility can lose prior correct work."
+    },
+    "majority_ensemble_side": {
+      "packets_correct": 10,
+      "packet_count": 10,
+      "pairs_correct": 5,
+      "pair_count": 5,
+      "summary": "Independent majority voting cleared this selected set because failures were not correlated across at least two models."
+    },
+    "full_holo_side": {
+      "ref": "docs/benchmark/HOLOVERIFY_ATLAS_SELECTOR_W3_PATCH_VALIDATION_RESULT_2026_07_03.json",
+      "packets_correct": 12,
+      "packet_count": 12,
+      "scope": "same-six replay including these five primary pairs plus spare HV-ATLAS-DISC-036"
+    }
+  },
+  "interpretation": {
+    "separates_holo_from_solo": true,
+    "separates_holo_from_workers_only_chain": true,
+    "separates_holo_from_independent_majority_ensemble": false,
+    "primary_takeaway": "This five-pair set is a solo-brittleness and workers-only-regression set, not a Holo-vs-majority proof set.",
+    "next_seam_target": [
+      "two-of-three or three-of-three shared false ESCALATE",
+      "shared false ALLOW",
+      "parse/admissibility fragility that prevents a valid majority",
+      "risk-reflex cases where majority voting overblocks"
+    ]
+  },
+  "claim_boundary": {
+    "allowed_internal_language": "On the Atlas five-failure target set, independent three-model majority voting scored 10/10 packets and 5/5 pairs, despite 3/30 individual vote failures. This target set does not separate Full Holo from ordinary majority voting.",
+    "public_claims_allowed": false,
+    "benchmark_rate_allowed": false,
+    "confidence_interval_allowed": false,
+    "universal_superiority_claim_allowed": false
+  }
+}

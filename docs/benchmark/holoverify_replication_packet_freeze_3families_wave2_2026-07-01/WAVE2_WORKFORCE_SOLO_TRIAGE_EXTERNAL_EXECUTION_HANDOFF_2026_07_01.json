@@ -1,0 +1,65 @@
+{
+  "classification": "WAVE2_WORKFORCE_SOLO_TRIAGE_EXTERNAL_EXECUTION_HANDOFF",
+  "purpose": "Run Wave 2 Workforce solo one-shot triage outside Codex in an authorized local shell because Codex cannot export frozen benchmark prompts to external providers.",
+  "family_id": "HV-HRWF-REP-2026-07-01",
+  "domain": "HR / payroll / workforce controls",
+  "packet_freeze_commit": "c03114ed",
+  "freeze_root_hash": "80d8106d7efe72bee44d2c05648b71814204c08e1f96934afefd3d75d242845f",
+  "runner": "docs/benchmark/run_replication_3family_wave2_solo_triage_2026_07_01.py",
+  "scope": {
+    "packets": 40,
+    "pairs": 20,
+    "expected_provider_calls": 120,
+    "gov_calls": 0,
+    "holo_calls": 0,
+    "judge_calls": 0,
+    "packet_edits_allowed": false,
+    "prompt_edits_allowed": false,
+    "model_substitution_allowed": false
+  },
+  "required_env": [
+    "XAI_API_KEY",
+    "OPENAI_API_KEY",
+    "MINIMAX_API_KEY"
+  ],
+  "model_roster": [
+    "xai/grok-3-mini",
+    "openai/gpt-5.4-mini",
+    "minimax/MiniMax-M2.5-highspeed"
+  ],
+  "preflight_command": "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001 && python3 -m py_compile docs/benchmark/run_replication_3family_wave2_solo_triage_2026_07_01.py && python3 -B docs/benchmark/run_replication_3family_wave2_solo_triage_2026_07_01.py --preflight --family HV-HRWF-REP-2026-07-01 --batch-label wave2_workforce_solo_triage",
+  "live_command": "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001 && set -a; source .env; set +a; python3 -B docs/benchmark/run_replication_3family_wave2_solo_triage_2026_07_01.py --run-live --family HV-HRWF-REP-2026-07-01 --batch-label wave2_workforce_solo_triage",
+  "expected_output_dir_pattern": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/solo_triage_3mini/wave2_workforce_solo_triage/run_YYYYMMDDTHHMMSSZ/",
+  "expected_outputs": [
+    "SOLO_TRIAGE_PREFLIGHT.json",
+    "SOLO_TRIAGE_TRACE.jsonl",
+    "solo_triage_results.json",
+    "solo_triage_summary.md",
+    "SOLO_TRIAGE_LOCK_MANIFEST.json",
+    "SOLO_TRIAGE_LOCK_VALIDATION.json",
+    "prompts/*.prompt.txt"
+  ],
+  "pass_conditions": [
+    "provider_calls_120_of_120",
+    "provider_failures_none",
+    "gov_calls_0",
+    "holo_calls_0",
+    "judge_calls_0",
+    "family_only_HV_HRWF_REP_2026_07_01",
+    "packet_identity_matches_wave2_freeze",
+    "prompt_leakage_rows_none",
+    "openai_model_is_gpt_5_4_mini",
+    "gpt_4o_mini_absent"
+  ],
+  "fail_conditions": [
+    "provider_failure",
+    "model_substitution",
+    "packet_hash_mismatch",
+    "prompt_hash_mismatch",
+    "gov_call_present",
+    "holo_call_present",
+    "judge_call_present",
+    "prompt_leakage_hit",
+    "openai_gpt_4o_mini_used"
+  ]
+}

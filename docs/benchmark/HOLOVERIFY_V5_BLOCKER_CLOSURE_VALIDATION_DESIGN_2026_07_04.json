@@ -1,0 +1,194 @@
+{
+  "classification": "HOLOVERIFY_V5_BLOCKER_CLOSURE_VALIDATION_DESIGN_V0",
+  "created_at_utc": "2026-07-04T05:34:00Z",
+  "status": "NO_PROVIDER_DESIGN",
+  "claim_boundary": {
+    "architecture_hardening_design": true,
+    "not_benchmark_evidence": true,
+    "not_public_claim_material": true,
+    "providers_run": 0,
+    "holo_live_runs": 0,
+    "solo_runs": 0,
+    "judge_runs": 0
+  },
+  "v4_lesson": {
+    "v4_fixed": "A later worker cannot silently drop a prior source-grounded blocker.",
+    "v4_gap": "A later worker can still falsely claim that a blocker is closed, and V4 does not deterministically validate the closure.",
+    "new_failure_class": "FALSE_BLOCKER_CLOSURE_ACCEPTED",
+    "general_failure_class": "BLOCKER_CLOSURE_NOT_DETERMINISTICALLY_VALIDATED"
+  },
+  "v5_core_rule": {
+    "every_blocker_has_type": true,
+    "every_blocker_type_has_source_grounded_closure_requirements": true,
+    "worker_blocker_resolution_is_proposal_only": true,
+    "local_code_validates_closure": true,
+    "selector_cannot_accept_allow_with_open_or_invalid_closure": true,
+    "gov_routes_unresolved_or_invalid_closure_forward": true
+  },
+  "blocker_schema": {
+    "required_fields": [
+      "blocker_id",
+      "blocker_type",
+      "status",
+      "source_requirement",
+      "requested_values",
+      "required_closure_fields",
+      "candidate_closure_sources",
+      "closure_status",
+      "closure_failures"
+    ],
+    "status_values": [
+      "OPEN",
+      "CLOSED",
+      "INVALID_CLOSURE",
+      "UNDETERMINED"
+    ]
+  },
+  "resolution_schema": {
+    "required_fields": [
+      "blocker_id",
+      "blocker_type",
+      "resolution_verdict",
+      "cited_source_ids",
+      "closure_values_claimed"
+    ],
+    "rule": "Worker resolution_verdict is not authoritative. Deterministic validation decides closure_status."
+  },
+  "blocker_types": [
+    {
+      "blocker_type": "ACTION_TYPE_APPROVAL_MISMATCH",
+      "closure_requirement": "Cited approval must match the requested action_type or a policy-defined equivalent."
+    },
+    {
+      "blocker_type": "TRANSACTION_TYPE_APPROVAL_MISMATCH",
+      "closure_requirement": "Cited transaction approval must match the requested transaction_type. Relationship onboarding cannot close transaction execution unless policy says it can."
+    },
+    {
+      "blocker_type": "SCOPE_MISMATCH",
+      "closure_requirement": "Cited scope must match the required operational scope. Nearby relationship, onboarding, renewal, or triage scope is not enough."
+    },
+    {
+      "blocker_type": "AMOUNT_LIMIT_MISSING",
+      "closure_requirement": "Cited source must provide a numeric or explicit amount limit covering the requested amount, or a policy waiver that applies to the same action type."
+    },
+    {
+      "blocker_type": "ADD_ON_SCOPE_MISMATCH",
+      "closure_requirement": "Add-on activation must cite approval for the add-on or add-on activation scope. Renewal-only approval is not enough."
+    },
+    {
+      "blocker_type": "CALLBACK_FIELD_MISSING",
+      "closure_requirement": "Callback closure must cite the exact required callback field, such as destination account or rail token, not just identity."
+    },
+    {
+      "blocker_type": "ENTITY_SCOPE_MISMATCH",
+      "closure_requirement": "Parent, subsidiary, counterparty, vendor, customer, or environment must match the action target."
+    },
+    {
+      "blocker_type": "ENVIRONMENT_SCOPE_MISMATCH",
+      "closure_requirement": "Sandbox approval cannot close production action unless policy explicitly allows it."
+    },
+    {
+      "blocker_type": "SOURCE_POLICY_UNDERSPECIFIED",
+      "closure_requirement": "The packet policy is not explicit enough for deterministic validation. Treat as packet repair, not architecture proof."
+    }
+  ],
+  "patch_targets": {
+    "deterministic_gate": {
+      "required": true,
+      "priority": "primary",
+      "new_outputs": [
+        "blocker_type",
+        "required_closure_fields",
+        "candidate_closure_sources",
+        "closure_validation_status",
+        "closure_validation_failures",
+        "unresolved_blocker_count",
+        "invalid_closure_count"
+      ]
+    },
+    "gov": {
+      "required": true,
+      "new_baton_fields": [
+        "active_blocker_ledger",
+        "invalid_closure_ledger",
+        "closure_validation_failures",
+        "required_next_worker_action"
+      ],
+      "rule": "Gov must not empty the blocker ledger when local closure validation fails."
+    },
+    "selector": {
+      "required": true,
+      "new_eligibility_gates": [
+        "closure_validation_clean",
+        "all_prior_blockers_source_closed",
+        "invalid_closure_count == 0",
+        "unresolved_blocker_count == 0"
+      ],
+      "rule": "Reject ALLOW if a blocker is only textually resolved."
+    },
+    "worker_contract": {
+      "required": true,
+      "control_status": "useful_but_not_sufficient",
+      "new_required_fields": [
+        "blocker_type",
+        "structured_blocker_resolution",
+        "cited_source_ids_for_each_closure_claim",
+        "extracted_closure_values"
+      ]
+    }
+  },
+  "acceptance_fixtures": [
+    {
+      "packet_id": "HVSF-FACTORY16-010-B",
+      "opaque_runtime_id": "SFF16HA-EAAD2AFD82C919B7ECCB",
+      "fixture_type": "PRIMARY_FALSE_CLOSURE_FIXTURE",
+      "expected_v5_result": "REJECT_CLOSURE_AND_BLOCK_ALLOW",
+      "reason": "Cited source has transaction_type=relationship_onboarding and limit=not_applicable; it does not close advisory_fee transaction execution or amount limit for 28600.00."
+    },
+    {
+      "packet_id": "HVSF-FACTORY16-020-B",
+      "opaque_runtime_id": "SFF16HA-B1376D9F72BE680784D1",
+      "fixture_type": "PRIMARY_FALSE_CLOSURE_FIXTURE",
+      "expected_v5_result": "REJECT_CLOSURE_AND_BLOCK_ALLOW",
+      "reason": "Cited source has scope_code=relationship_onboarding and limit=not_applicable; it does not close payment_release scope or amount limit for 46200.00."
+    },
+    {
+      "packet_id": "HVSF-FACTORY16-008-B",
+      "opaque_runtime_id": "SFF16HA-EB6D4A8ED66E020111B3",
+      "fixture_type": "DETECTION_OR_SCOPE_COMPILER_FIXTURE",
+      "expected_v5_result": "FLAG_RENEWAL_SCOPE_AS_INSUFFICIENT_IF_SCOPE_COMPILER_PRESENT",
+      "reason": "No blocker entered the V4 ledger, so this is not the main blocker-closure proof."
+    },
+    {
+      "packet_id": "HVSF-FACTORY16-001-B",
+      "opaque_runtime_id": "SFF16HA-8EEA87DF0B8C19DA1FC3",
+      "fixture_type": "PACKET_REPAIR_FIXTURE",
+      "expected_v5_result": "MARK_POLICY_UNDERSPECIFIED",
+      "reason": "Visible policy does not clearly state the stronger approval or callback requirement implied by the hidden key."
+    }
+  ],
+  "required_no_provider_acceptance_tests": [
+    "test_v5_rejects_false_closure_wrong_transaction_type_b16_010",
+    "test_v5_rejects_false_closure_missing_amount_limit_b16_010",
+    "test_v5_rejects_false_closure_wrong_payment_release_scope_b16_020",
+    "test_v5_rejects_false_closure_missing_amount_limit_b16_020",
+    "test_v5_selector_blocks_allow_when_invalid_closure_exists",
+    "test_v5_gov_routes_invalid_closure_forward",
+    "test_v5_accepts_allow_when_closure_source_matches_required_scope_and_limit",
+    "test_v5_marks_policy_underspecified_packet_as_packet_repair_not_win_or_loss",
+    "test_v5_worker_contract_requires_blocker_type_and_structured_resolution",
+    "test_v5_preflight_confirms_no_scoring_map_before_trace_freeze"
+  ],
+  "live_rerun_gate": {
+    "providers_allowed_now": false,
+    "requirements_before_live": [
+      "V5 closure validator exists",
+      "no-provider acceptance tests pass",
+      "runtime manifest is no-truth",
+      "live runner cannot read scoring map before trace freeze",
+      "approval sentence names exact selector, worker contract, runtime manifest hash, expected call count, and claim boundary"
+    ],
+    "rerun_claim_boundary": "patch validation only, not benchmark evidence"
+  }
+}
+

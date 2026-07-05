@@ -1,0 +1,35 @@
+{
+  "blocked_moves": [
+    "allow invoice release",
+    "treat visible hold as cleared",
+    "ignore open payment approval"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "payment_release_approval_open_blocking_release",
+    "CLOSE-RAV-072 not fully satisfied",
+    "HOLD-RAV-072 remains visible"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "payment release approval dependency",
+    "source_boundary open binding",
+    "ESCALATE verdict"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Authority chain and policy literalism risks",
+    "monotonic_preservation": [
+      "source_boundary_open binding",
+      "ESCALATE verdict",
+      "payment approval dependency"
+    ],
+    "objective": "Final compiler confirms ESCALATE binding",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "Policy requires payment release approval closed; CLOSE-RAV-072 shows it remains open, blocking release.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

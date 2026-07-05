@@ -1,0 +1,69 @@
+{
+  "checks": {
+    "env_keys_present": true,
+    "expected_call_count": true,
+    "judge_calls_disabled": true,
+    "no_gov": true,
+    "no_holo_state": true,
+    "packet_count": true,
+    "payloads_present": true,
+    "posthoc_scoring_script_present": true,
+    "prompt_probe_leakage": true,
+    "provider_calls_not_yet_made": true,
+    "runtime_consumable": true,
+    "runtime_input_leakage": true,
+    "runtime_manifest_hash": true,
+    "scoring_map_path_absent_from_live_wrapper": true,
+    "solo_models_declared": true,
+    "source_runtime_manifest_hash": true
+  },
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_PREFLIGHT_V0",
+  "created_at_utc": "2026-07-03T22:50:54.671310+00:00",
+  "env_presence": {
+    "MINIMAX_API_KEY": "PRESENT",
+    "OPENAI_API_KEY": "PRESENT",
+    "XAI_API_KEY": "PRESENT"
+  },
+  "expected_provider_calls": 120,
+  "expected_runtime_manifest_sha256": "3a1bc9aba2dc76ff10322c08a77e0da9f0de2c870102a6fc647973b346fca97b",
+  "expected_scoring_map_sha256": "ae82e994ae6cb76fe9c912bed80750ce3bfedd91078bb6d45ccc392840fd5943",
+  "freeze_root_sha256": "27cae249c7d84328b0a22fcc9b150b1d85c9bde6199e679c38077cb451e4df73",
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH008_STACKED_20PAIR_SOLO_SCOUT_V0",
+  "missing_payloads": [],
+  "model_order": [
+    "xai",
+    "openai",
+    "minimax"
+  ],
+  "packet_count": 40,
+  "passed": true,
+  "prompt_probe_leakage_hits": [],
+  "roster": {
+    "minimax": {
+      "kind": "openai_compatible",
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "url": "https://api.minimax.io/v1/chat/completions"
+    },
+    "openai": {
+      "kind": "openai_responses",
+      "model": "gpt-5.4-mini",
+      "provider": "openai",
+      "url": "https://api.openai.com/v1/responses"
+    },
+    "xai": {
+      "kind": "openai_compatible",
+      "model": "grok-3-mini",
+      "provider": "xai",
+      "url": "https://api.x.ai/v1/chat/completions"
+    }
+  },
+  "runtime_input_leakage_hits": [],
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch008_stacked_2026_07_03/holoverify_solo_failure_factory_batch008_stacked_runtime_manifest_2026_07_03.json",
+  "runtime_manifest_sha256": "3a1bc9aba2dc76ff10322c08a77e0da9f0de2c870102a6fc647973b346fca97b",
+  "scoring_map_access_control": {
+    "live_wrapper_has_scoring_map_path": false,
+    "posthoc_scorer_owns_scoring_map_path": "docs/benchmark/score_holoverify_solo_failure_factory_batch008_stacked_solo_scout_2026_07_03.py"
+  },
+  "source_runtime_manifest_sha256": "3a1bc9aba2dc76ff10322c08a77e0da9f0de2c870102a6fc647973b346fca97b"
+}

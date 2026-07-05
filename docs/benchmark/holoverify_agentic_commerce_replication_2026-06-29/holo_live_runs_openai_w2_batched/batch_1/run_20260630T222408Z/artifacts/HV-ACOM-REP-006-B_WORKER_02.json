@@ -1,0 +1,36 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "irreversible order release after fraud hold cleared",
+    "allow_rule_assessment": "Source records do not close exact boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-E76484FAFB3A-CTL",
+    "escalate_rule_assessment": "Clearance must predate release; record missing or stale",
+    "timing_scope_authority_dependency_check": "fraud hold clearance not proven before release"
+  },
+  "cited_evidence": [
+    "SRC-E76484FAFB3A-CTL",
+    "SRC-E76484FAFB3A-POL",
+    "SRC-E76484FAFB3A-BND",
+    "SRC-E76484FAFB3A-FBK",
+    "SRC-E76484FAFB3A-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "timing dependency",
+    "controlling source fact",
+    "open boundary",
+    "fraud hold clearance must predate release",
+    "SRC-E76484FAFB3A-CTL",
+    "SRC-E76484FAFB3A-BND"
+  ],
+  "final_answer": "Action may not proceed. The source records do not close the exact release boundary, and the required fraud-hold clearance must predate execution. The controlling control record says the dependency is missing, stale, mismatched, or scoped differently. Escalate for exact clearance verification before any irreversible order release.",
+  "open_blockers": [
+    "fraud hold clearance missing",
+    "exact boundary not closed"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

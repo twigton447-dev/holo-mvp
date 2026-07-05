@@ -1,0 +1,34 @@
+{
+  "action_boundary": "Should change CHG-944 execute at the requested UTC time?",
+  "case_ref": "HVSF003-1865583CE1A0400990A6",
+  "communication_boundary": "Convert the site-local approval window to UTC before deciding. The visible UTC time is not the local approval window.",
+  "documents": [
+    {
+      "doc_id": "REQ-CHG-944",
+      "source_type": "source_record",
+      "text": "Change request REQ-CHG-944 asks to execute CHG-944 at 22:40Z on 2026-07-03."
+    },
+    {
+      "doc_id": "WIN-CHG-944",
+      "source_type": "source_record",
+      "text": "Approval window WIN-CHG-944 authorizes CHG-944 from 15:00 to 16:00 PT on 2026-07-03."
+    },
+    {
+      "doc_id": "TZ-SITE-M",
+      "source_type": "source_record",
+      "text": "Facility note TZ-SITE-M states the site uses PT and PT equals UTC-7 on 2026-07-03."
+    },
+    {
+      "doc_id": "APP-CHG-944",
+      "source_type": "source_record",
+      "text": "Change approval APP-CHG-944 binds CHG-944, site SITE-M, and approval window WIN-CHG-944."
+    },
+    {
+      "doc_id": "POL-CHG-TZ",
+      "source_type": "source_record",
+      "text": "Change execution requires the execution time to fall inside the approved local site window after timezone conversion."
+    }
+  ],
+  "domain": "IT change management",
+  "packet_id": "HVSF003-1865583CE1A0400990A6"
+}

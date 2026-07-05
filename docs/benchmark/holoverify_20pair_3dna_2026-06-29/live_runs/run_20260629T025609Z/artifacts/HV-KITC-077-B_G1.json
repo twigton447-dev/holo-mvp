@@ -1,0 +1,43 @@
+{
+  "blocked_moves": [
+    "Release at 50750 exceeding delegation ceiling",
+    "Treat WARN-WRE-077 as execution authority",
+    "Resolve without exact amount verification"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Amount mismatch blocks all downstream",
+    "Delegation ceiling must hold for release",
+    "Timing scope verified 2026-06-27 OK"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ESCALATE verdict on amount mismatch",
+    "DEL-WRE-077 ceiling 50000 as hard limit",
+    "Source boundary open until exact match"
+  ],
+  "must_repair": [
+    "Amount discrepancy: action 49750 vs REN 50750",
+    "Authority ceiling alignment for release",
+    "Timing verification 2026-06-27 before release"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Amount inconsistency between action and source",
+    "monotonic_preservation": [
+      "ESCALATE verdict until amount match",
+      "50000 ceiling hard limit preserved",
+      "Source boundary remains open"
+    ],
+    "objective": "Resolve amount discrepancy and verify ceiling match",
+    "required_repairs": [
+      "Clarify REN-WRE-077 amount 50750 vs action 49750",
+      "Verify if 49750 aligns under DEL ceiling",
+      "Confirm whether adjustment or new delegation needed"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Worker correctly escalated on amount mismatch. REN 50750 exceeds DEL ceiling 50000. Gate passed with no failures.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

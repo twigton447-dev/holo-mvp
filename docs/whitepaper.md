@@ -409,7 +409,7 @@ The whitepaper makes the broader point: this is the kind of testing required if 
 
 The benchmark evidence is still internally built. It is not a universal claim. It is not third-party validation. It should not be treated as unconstrained production reliability.
 
-But the pattern is now large enough to describe precisely.
+But the current public claim is no longer the old 614-packet framing. The public denominator is the stricter blind-120 lane.
 
 First, the terms:
 
@@ -423,145 +423,46 @@ A **false positive** means Holo says ESCALATE when the action was actually allow
 
 A **false negative** means Holo says ALLOW when the action should have escalated. That is usually the dangerous miss.
 
-The current clean HoloVerify counted sample contains 614 frozen action-boundary packets across 307 sibling pairs: 307 ALLOW truths and 307 ESCALATE truths.
+The current strict public HoloVerify evidence package contains 120 blind action-boundary packets: 60 ALLOW truths and 60 ESCALATE truths. HoloVerify scored 120/120 on that lane, with zero observed false positives and zero observed false negatives.
 
-HoloVerify produced zero counted false positives and zero counted false negatives across those 614 packets in the governed-runtime lane. This is a counted-lane result, not yet a fully blind production error-rate claim, because the current deterministic gate can use packet truth for repair and final selection. The statistical upper bounds below describe that counted lane pending blind-gate replication.
+The older 614-packet result remains historical/internal. It is not combined with blind-120 for public FPR/FNR or Wilson claims.
 
-The exact one-sided 95% upper bound on overall packet error is 0.487%. The Wilson 95% upper bound is 0.622%. The side-specific upper bounds on false positives and false negatives are 0.971% exact and 1.236% Wilson, because each side currently has 307 examples.
+The V5/V6 repair runs remain useful architecture and debugging evidence, but they are internal hardening evidence. They do not create public statistical risk bounds.
 
-That phrase sounds more complicated than it is. It means:
+The current sanctioned claim is:
 
-> Given this many counted tests and zero counted errors, this is the highest counted-lane error rate that still remains statistically plausible at the 95% confidence level.
+> On the current strict blind-120 public denominator, HoloVerify produced zero observed false positives and zero observed false negatives across 120 action-boundary packets. The 614-packet result is historical/internal and is not the current public denominator.
 
-Plainly:
+The blind-gate inclusion rule remains:
 
-> We saw zero counted errors in 614 counted packets under the governed-runtime harness. That does not prove zero risk, and it does not yet replace a blind-gate replication.
-
-Plain English: this moved the benchmark from roughly under 0.68% packet-level Wilson risk to roughly under 0.62% packet-level Wilson risk.
-
-That is why the benchmark reports confidence bands, not only the observed score.
-
-The observed score says what happened in the sample.
-
-The upper bound says how much uncertainty remains.
-
-We use an exact binomial upper bound as the headline risk number because it is a conservative one-sided bound for zero-error runs. We also report Wilson score intervals in the benchmark page because Wilson is a standard way to put a confidence band around a proportion without pretending the sample percentage is the whole story.
-
-The reason for a one-sided upper bound is simple: for a safety system, the question is not whether the error rate could be lower. The question is how high it could still plausibly be.
-
-That is also why false positives and false negatives are separated. A false ESCALATE creates friction. A false ALLOW can let a bad action proceed. They are different business risks and should not be hidden inside one blended accuracy number.
-
-The confusion matrix is simple:
-
-| Actual / predicted | ESCALATE | ALLOW |
-| --- | ---: | ---: |
-| Actual ESCALATE | Correctly escalated = 307 | Missed escalation = 0 |
-| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 307 |
-
-That is the clean headline:
-
-> Zero counted false-positive or false-negative errors across 614 frozen action-boundary packets in the governed-runtime lane, with blind-gate replication still required.
+- runtime packet IDs must be opaque
+- Gov must not see answer truth
+- deterministic gates must not know ALLOW or ESCALATE truth
+- final selection must not use the answer key
+- wrong final answers must count as false positives or false negatives after the trace is frozen
+- statistical bounds come only from clean blind lanes with trace-bound post-hoc scoring
 
 ### The same models alone
 
 The most important comparison is not Holo against a weaker hidden baseline.
 
-The matched solo baselines used the same mini-model families that were used inside HoloVerify. The difference was architecture.
+The internal baselines used the same mini-model families that were used inside HoloVerify. The difference was architecture.
 
-The solo models received the same frozen packets, but they did not receive Gov, shared state, deterministic gates, artifact memory, best-answer preservation, or a final selector.
+The solo models received frozen packets, but they did not receive Gov, shared state, deterministic gates, artifact memory, best-answer preservation, or a final selector.
 
-Each solo model received exactly one independent call per packet. HoloVerify used those same model families inside a governed multi-turn architecture.
+That comparison remains useful internal evidence. The Solo Failure Factory now gives a better way to show the problem: a square matrix of packets and domains, where mostly green solo dots are interrupted by red wrong-verdict dots, amber parse/admissibility failures, and gray quarantines.
 
-A solo output only counted as KNEW/admissible if it gave the right verdict and produced a source-bound, machine-checkable explanation.
+The safe lesson is narrower:
 
-In plain English, KNEW/admissible means:
+> Solo agents can be mostly right and still fail at high-stakes action boundaries. HoloVerify is being tested on whether it covers those failures without creating new ones.
 
-> The model did not just guess the right answer. It showed its work in a way the system could audit.
+### Internal replication notes
 
-| Evidence slice | HoloVerify | Same models alone, one-shot | Meaning |
-| --- | ---: | ---: | --- |
-| Clinical Activation Boundary Controls | 40/40 packets | 6/120 KNEW/admissible | Broad solo collapse; Holo solved both siblings across 20 pairs |
-| Vendor-Master Payment Controls | 40/40 packets | 53/120 KNEW/admissible | Solo sometimes succeeded, but every pair still had strict one-shot failures |
-| Wave3/Wave4 focused slice | 54/54 packets | 54/162 KNEW/admissible | 27/27 strong solo-collapse pairs in the focused expansion |
-| Wave2B5 + Wave3/Wave4 matched expansion | 100/100 packets | 116/300 KNEW/admissible | Larger matched slice with same-model solo instability preserved |
+The internal packet bank includes clinical activation, AP / vendor-master payment controls, agentic commerce, IT access, HR, privacy, finance, public-sector controls, treasury, legal, cloud infrastructure, security operations, and operational technology.
 
-This is not a claim that every solo model always fails.
+Those traces remain preserved as engineering evidence. They are not being erased. The public claim is simply separated from the internal hardening ledger.
 
-It is a narrower and more useful claim:
-
-> The same model families that were brittle as isolated one-shot decision makers became reliable when placed inside the governed HoloVerify architecture.
-
-That is the architecture result.
-
-### Kit A: Accounts Payable and BEC
-
-In one AP case, a payment looked ready to release. The vendor was real. The payment controls looked clean. The workflow referenced a purchase order.
-
-But the purchase order was missing.
-
-That missing PO mattered because it was the proof of spending authority.
-
-Non-Holo configurations approved the payment. Holo escalated.
-
-The model did not fail because it lacked facts. It saw enough to know the PO was missing. It failed because it did not treat that missing proof as a stop condition.
-
-That is the action-boundary problem in plain sight.
-
-### Kit B: Agentic Commerce
-
-In an agentic commerce case, an AI purchasing agent prepared an order that looked routine. The vendor was approved. The amount was low. The checklist said there were no blockers.
-
-But the item required a safety review.
-
-In one packet, the policy language was vague. In another, the approval was stale. In a third, the current approval was valid.
-
-That mix matters.
-
-A serious trust layer must escalate the first two and allow the third.
-
-Holo did that.
-
-Several non-Holo configurations either let unsafe orders through or overblocked the valid one.
-
-### Replication Family: Vendor-Master Payment Controls
-
-Then we asked a harder question: does the pattern hold in a larger AP / procurement family where solo models sometimes do fine?
-
-We built 20 sibling pairs, or 40 frozen packets. Each pair had one case where payment could proceed and one case where it had to stop. The difference was narrow: vendor-master authority, approval chain, callback provenance, duplicate-payment risk, or an emergency exception.
-
-HoloVerify solved 40/40 packets and 20/20 sibling pairs. The matching solo baseline used the same three mini-model families. Each solo model got one chance at each packet, without Gov, shared state, artifact memory, or a final selector. Across those 120 solo calls, 53 produced an audit-grade answer: the right verdict with reasoning clean enough to rely on.
-
-That means AP was not a story of total solo collapse. It was a story of instability. In every AP pair, at least two of the six solo attempts failed the strict standard, while Holo solved both siblings. One pair showed complete six-of-six solo collapse.
-
-The cost was higher than the first 20-pair HoloVerify family. Holo used 414,016 tokens versus 146,061 for the solo one-shot baseline, or about 2.84x the solo budget. That cost delta is part of the finding: governed verification buys reliability by spending more work at the action boundary.
-
-Across the two committed internal HoloVerify families, Holo solved 80/80 frozen action-boundary packets and 40/40 sibling pairs. The two families had different solo-baseline behavior: the clinical activation family produced broad clean solo collapse, while AP produced mixed solo behavior with strict failures present in every pair.
-
-### Replication Canary: Agentic Commerce All-Six Collapse
-
-The next Commerce result is smaller, but still useful.
-
-In a later Agentic Commerce canary, we selected three frozen sibling pairs where all six same-family solo one-shots had failed in triage. HoloVerify then ran those six packets through the governed architecture.
-
-Holo solved all 6 packets and all 3 sibling pairs. The run completed 30/30 provider calls, including 18 worker calls and 12 Gov calls, with no solo calls and no judges. The canary is lock-root validated with root signature `a19bd1e5e47411597ccf5fd941f1a24ba4269215a2fb72a4c2aabe68dc001948`.
-
-This is not a completed 20-pair Commerce family. It should be read as locked canary evidence: the failure pattern reappeared in Commerce, and the governed architecture held on the selected all-six-collapse pairs.
-
-### Statistical milestone
-
-Wave5 is complete: seven domains, 140 sibling pairs, and 280 packets. The domains include clinical medication activation, treasury wire movement, legal and regulatory filing, cloud destructive admin controls, security operations, public sector citizen records, and industrial / utility safety controls.
-
-That moved the benchmark-grade denominator to 614 packets. The side-specific ALLOW and ESCALATE counts are now 307 each.
-
-That lowers the exact 95% upper bound on packet-level error to about 0.487%, and lowers the side-specific false-positive and false-negative upper bound to about 0.971%.
-
-That clears the prior public threshold:
-
-> Below 0.5% packet-level upper risk and below 1.0% false-positive / false-negative upper risk.
-
-The next serious milestone is below 0.5% side-specific false-positive and false-negative risk. With zero observed errors, that requires about 598 ALLOW examples and 598 ESCALATE examples, or 1,196 total balanced packets. From the current denominator, that means roughly 582 additional balanced packets.
-
-The 0.1% tier is different. That requires thousands of balanced examples plus external review and ongoing monitoring. It should be treated as production-scale validation, not as the next public benchmark step.
+The next proof is not a bigger headline. It is a cleaner, broader lane.
 
 ### HoloBuild and stronger baselines
 

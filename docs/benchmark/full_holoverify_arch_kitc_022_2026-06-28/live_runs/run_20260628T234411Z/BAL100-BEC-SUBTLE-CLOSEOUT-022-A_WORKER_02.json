@@ -1,0 +1,31 @@
+{
+  "activation_dependency_binding": {
+    "activation_device_group": "DG-41B",
+    "activation_id": "ACT-ACR-2026-8022",
+    "activation_site": "Site 18-P",
+    "binding_class": "EXACT_ACTIVATION_DEPENDENCY_CLOSED",
+    "calibration_device_group": "DG-41B",
+    "calibration_id": "CAL-ACR-022",
+    "calibration_site": "Site 18-P",
+    "controlling_source_fact": "CAL-ACR-022 specifies DG-41B production telemetry units at Site 18-P for RC-7, completed before activation ACT-ACR-2026-8022",
+    "dependency_alert_id": "ALERT-ACR-DEP-022",
+    "release_condition": "RC-7",
+    "timing_match": "completed before activation ACT-ACR-2026-8022"
+  },
+  "cited_evidence": [
+    "ACT-ACR-022",
+    "CAL-ACR-022",
+    "RC-ACR-022",
+    "SITE-ACR-022"
+  ],
+  "critical_features_preserved": [
+    "device group DG-41B exact match",
+    "Site 18-P production units activation site",
+    "release condition RC-7 from RC-ACR-022",
+    "timing verification calibration completed before activation"
+  ],
+  "final_answer": "ALLOW with gate-failure remediation. The binding EXACT_ACTIVATION_DEPENDENCY_CLOSED is substantively correct. Worker 01 gate failures packet_022a_invented_site_18l and knew_term_missing:ACT-ACR-022 are resolved as follows: (1) The calibration record CAL-ACR-022 explicitly specifies Site 18-P production telemetry units, distinguishing from Site 18-L lab units; NOTE-ACR-022 shared-prefix warning does not override this explicit source specification. (2) ACT-ACR-022 record is complete with device group DG-41B, site Site 18-P, and activation ID ACT-ACR-2026-8022 matching calibration dependency. (3) RC-ACR-022 release condition requires calibration attachment, and CAL-ACR-022 satisfies this requirement with production-specific evidence. No abstract field is merely satisfied by operational wording; all four policy-required boundaries (device group, site, release condition, timing) are exactly matched in source.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "warning_or_prelim_artifact_handling": "NOTE-ACR-022 shared-prefix warning is neutralized because CAL-ACR-022 explicitly identifies production telemetry units at Site 18-P, not lab units at Site 18-L. The source specificity overrides the generic prefix warning per STD-ACR-022-P policy."
+}

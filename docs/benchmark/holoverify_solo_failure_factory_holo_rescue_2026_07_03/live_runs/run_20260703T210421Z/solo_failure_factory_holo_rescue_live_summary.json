@@ -1,0 +1,71 @@
+{
+  "attempt_budget_policy": {
+    "content_failures_are_not_retried": true,
+    "manual_rerun_requires_new_approval_and_preserved_invalid_trace": true,
+    "max_content_contract_attempts_per_packet": 1,
+    "max_live_run_attempts_per_packet": 1,
+    "transport_retries_per_call": 2,
+    "version": "BLIND_RUNTIME_ATTEMPT_BUDGET_V1_2026_07_03"
+  },
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_HOLO_RESCUE_LIVE_RUN_SUMMARY_V0",
+  "created_at_utc": "2026-07-03T21:16:36.765384+00:00",
+  "current_head": "f762fbbc71387a6afa01981ec54bf85237cde8e4",
+  "directional_evidence_only": true,
+  "evidence_scope": "FRESH DIRECTIONAL HOLO RESCUE SIGNAL ONLY for selected Batch001-Batch004 solo-failure pairs; not public benchmark evidence and not an error-rate denominator.",
+  "expected_provider_calls": 130,
+  "failure": null,
+  "final_verdicts_valid": true,
+  "freeze_root_sha256": "7e99326f6d0af0b41ba88c08bd81b3147c5485a96923152fc1849db699dad9ba",
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_HOLO_RESCUE_13PAIR_RUNTIME_FIREWALL_V0",
+  "observed_provider_calls": 130,
+  "packet_index": null,
+  "packet_limit": null,
+  "passed_runtime_firewall": true,
+  "posthoc_score_ref": null,
+  "posthoc_scoring_command": "python3 -B docs/benchmark/score_holoverify_solo_failure_factory_holo_rescue_posthoc_2026_07_03.py --run-dir docs/benchmark/holoverify_solo_failure_factory_holo_rescue_2026_07_03/live_runs/run_20260703T210421Z",
+  "posthoc_scoring_required_after_trace_freeze": true,
+  "provider_failures": [],
+  "provider_trace_ref": "TRACE_PROVIDER_CALLS.jsonl",
+  "rescue_falsifier": "If post-freeze scoring shows any selected pair missing one or both sibling verdicts, the lane does not support Holo rescue evidence for that pair.",
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_holo_rescue_2026_07_03/live_runs/run_20260703T210421Z",
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_holo_rescue_2026_07_03/holoverify_solo_failure_factory_holo_rescue_runtime_manifest_2026_07_03.json",
+  "runtime_manifest_sha256": "20a614b9de95c7cb7953fd70d5d820ccf1135dea2f738edd0ab859b12ae1c346",
+  "runtime_result_ref": "blind_canary_runtime_results.json",
+  "scoring_map_access_control": {
+    "live_wrapper_has_scoring_map_path": false,
+    "live_wrapper_scoring_split_enforced_by": "manual_no_provider_preflight:solo_failure_factory_rescue_live_wrapper_does_not_keep_scoring_map_path",
+    "posthoc_scorer_owns_scoring_map_path": "docs/benchmark/score_holoverify_solo_failure_factory_holo_rescue_posthoc_2026_07_03.py",
+    "preflight_read_guard_enforced_by": "manual_no_provider_preflight:solo_failure_factory_rescue_live_wrapper_does_not_read_scoring_map_bytes"
+  },
+  "selector_policy": {
+    "selector_criteria": [
+      "gate_passed",
+      "parse_valid",
+      "source_ids_valid",
+      "required_sections_present",
+      "contradiction_free",
+      "verdict_consensus_count",
+      "final_turn_consensus_repair",
+      "sections_present",
+      "cited_evidence_count",
+      "earliest_turn"
+    ],
+    "selector_policy_decision": "Truth-blind structural selector. Among structurally valid artifacts, verdict consensus outranks citation volume. A final-turn artifact receives a repair bonus only when it agrees with a prior structurally valid artifact after an intervening contradiction. A lone final-turn dissenter does not override a two-of-three structurally valid consensus. Within the same consensus/repair tier, citation count and section completeness remain secondary structural tie-breaks.",
+    "selector_policy_sha256": "32663f8cd92298468ce3648ec57d9491f76ecf9a9ecb526eaf4bb0c8275118f6",
+    "selector_policy_version": "SELECTOR_V2_CONSENSUS_REPAIR_2026_07_03"
+  },
+  "source_runtime_manifest_sha256": "20a614b9de95c7cb7953fd70d5d820ccf1135dea2f738edd0ab859b12ae1c346",
+  "trace_frozen_before_scoring": true,
+  "worker_contract": {
+    "w3_artifact_first_guard": [
+      "W3 ARTIFACT-FIRST CONTRACT V2.",
+      "Start immediately with worker_role=W3 before any reasoning.",
+      "Never output <think>, hidden reasoning, analysis, or deliberation.",
+      "If the source seam is ambiguous, encode that only in verification_verdict, binding_class, open_blockers, and final_answer.",
+      "Do not debate competing interpretations outside the key=value fields.",
+      "Emit exactly the required key=value artifact lines, then stop."
+    ],
+    "worker_contract_sha256": "d5fdea3133f2bcdea0a9c16f1261081a8fe5ca8264f2a2f0a7e43d41c69a0320",
+    "worker_contract_version": "WORKER_CONTRACT_V2_ARTIFACT_FIRST_2026_07_03"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "allow_rule_assessment": "CLR-TES-074 exactly matches PAY-TES-074 on legal name, country, tax ID DE-4481, account ending 7205 with monitor-only no-block disposition; STD-TES-074-P permits release on exact match",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "CLR-TES-074 and STD-TES-074-P together close the boundary",
+    "escalate_rule_assessment": "FLAG-TES-074 does not match counterparty details so does not block",
+    "timing_scope_authority_dependency_check": "Clearance and policy both predate release; no open dependency on flag"
+  },
+  "cited_evidence": [
+    "PAY-TES-074",
+    "CLR-TES-074",
+    "STD-TES-074-P"
+  ],
+  "critical_features_preserved": [
+    "exact name/country/taxID/account match",
+    "monitor-only no-block disposition"
+  ],
+  "final_answer": "Payment release is permitted. CLR-TES-074 matches PAY-TES-074 exactly on all required fields and carries monitor-only no-block disposition. STD-TES-074-P authorizes release under these conditions. The visible FLAG-TES-074 applies to a non-matching Belarus entity and does not affect the closed boundary.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

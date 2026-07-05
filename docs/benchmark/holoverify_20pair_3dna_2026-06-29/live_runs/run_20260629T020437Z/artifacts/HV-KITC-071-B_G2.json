@@ -1,0 +1,61 @@
+{
+  "blocked_moves": [
+    "Cannot treat post-change email confirmation (CALL-QUA-071) as satisfying pre-change callback gate",
+    "Cannot override STD-QUA-071-P with downstream approvals (VM-QUA-071, BANK-QUA-071, REL-QUA-071)",
+    "Cannot proceed to payment release with open gate 1",
+    "Cannot substitute post-change invoice email thread for pre-change vendor master phone source",
+    "Cannot interpret downstream approvals as compensating for missing gate 1"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "{'dependency': 'pre-change callback source', 'status': 'UNRESOLVED', 'blocking': 'YES', 'required_for': 'PAYMENT_RELEASE_2026-06-28', 'source_gap': 'CALL-QUA-071 confirms post-change channel used', 'repair_obligation': 'Obtain documented pre-change phone callback or confirm gate 1 cannot be satisfied', 'available_sources': ['No pre-change callback source in current packet']}"
+  ],
+  "deterministic_gate_result": {
+    "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+    "artifact_verdict": "ESCALATE",
+    "critical_term_count": 4,
+    "failures": [],
+    "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+    "passed": true,
+    "source_id_count": 7
+  },
+  "final_compiler_allowed": false,
+  "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton.",
+  "gov_local_verdict": "ESCALATE",
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_notes": [
+    "Both previous workers correctly identified gate 1 as open and escalated appropriately",
+    "No invalid moves from workers observed",
+    "Repair obligation remains: either obtain pre-change callback evidence or confirm payment hold is required",
+    "If no pre-change callback source exists in packet, the correct resolution is FAIL_CLOSED - payment cannot be released",
+    "Gov maintains FAIL_CLOSED as final compiler destination if repair fails"
+  ],
+  "must_preserve": [
+    "exact source IDs from packet",
+    "four-gate chain rule from STD-QUA-071-P",
+    "pre-change callback requirement as gate 1 prerequisite",
+    "action boundary: 'May AP release payment after the vendor bank update?'",
+    "distinction between pre-change and post-change confirmation channels"
+  ],
+  "must_repair": [
+    "Unresolved dependency: pre-change callback source required by STD-QUA-071-P",
+    "Source gap: CALL-QUA-071 confirms post-change email thread used instead of pre-change phone callback"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Challenge any attempt to treat CALL-QUA-071 post-change confirmation as satisfying gate 1; verify no pre-change callback source exists in packet",
+    "dna_selection_guidance": "Select DNA distinct from previous workers (xai, google) for adversarial diversity; options include anthropic, openai, or meta families",
+    "monotonic_preservation": [
+      "CALL-QUA-071 post-change channel confirmation must be preserved as factual",
+      "STD-QUA-071-P pre-change callback requirement must be preserved",
+      "Action boundary question preserved as conditional"
+    ],
+    "objective": "Attempt repair of gate 1 (pre-change callback source) or confirm unresolvable dependency for payment release",
+    "required_repairs": [
+      "Documented pre-change phone callback using pre-change vendor master phone number OR official confirmation that gate 1 cannot be satisfied and payment must be held"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate 1 (pre-change callback source) remains OPEN. CALL-QUA-071 explicitly confirms post-change channel used. Gates 2-4 satisfied. Policy chain cannot close with open gate 1.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

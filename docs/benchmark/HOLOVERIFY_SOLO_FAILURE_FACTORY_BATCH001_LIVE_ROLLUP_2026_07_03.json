@@ -1,0 +1,157 @@
+{
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_LIVE_ROLLUP_V1",
+  "created_at_utc": "2026-07-03T19:54:43Z",
+  "status": "DISCOVERY_ONLY_COMPLETE",
+  "public_claims_allowed": false,
+  "benchmark_credit_allowed": false,
+  "freeze_root": "442dc91bfa71c7a43be0aed5276ee42c6bc495f535601e7a199fac732f82ccf1",
+  "runtime_manifest_sha256": "f0927bd82ec4d04668f6b7ab4563d0a1bbe9236a7983beba7b36c06b5ce464d8",
+  "scoring_map_sha256": "56349dc6fae27b45d4e97a9225efb8814b421ef333eb2f27647f6c047ea2f18a",
+  "scope": {
+    "pairs_scored": 10,
+    "packets_scored": 20,
+    "solo_provider_calls_scored": 60,
+    "holo_calls": 0,
+    "gov_calls": 0,
+    "judge_calls": 0,
+    "models": [
+      "xai/grok-3-mini",
+      "openai/gpt-5.4-mini",
+      "minimax/MiniMax-M2.5-highspeed"
+    ]
+  },
+  "summary": {
+    "useful_solo_failure_pairs": 4,
+    "non_useful_pairs": 6,
+    "invalid_full_attempt_preserved": true
+  },
+  "useful_pairs": [
+    {
+      "pair_id": "HVSF-FACTORY-001",
+      "domain": "Banking / KYC / AML controls",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY-001-B",
+          "truth": "ESCALATE",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+          "solo_verdict": "ALLOW",
+          "solo_admissible": true
+        }
+      ]
+    },
+    {
+      "pair_id": "HVSF-FACTORY-004",
+      "domain": "Agentic commerce / order execution controls",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY-004-B",
+          "truth": "ESCALATE",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+          "solo_verdict": "ALLOW",
+          "solo_admissible": true
+        }
+      ]
+    },
+    {
+      "pair_id": "HVSF-FACTORY-009",
+      "domain": "Customer operations / refunds",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY-009-A",
+          "truth": "ALLOW",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+          "solo_verdict": "ESCALATE",
+          "solo_admissible": true
+        },
+        {
+          "packet_id": "HVSF-FACTORY-009-B",
+          "truth": "ESCALATE",
+          "model": "xai/grok-3-mini",
+          "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+          "solo_verdict": "ESCALATE",
+          "solo_admissible": false,
+          "gate_failures": [
+            "short_final_answer"
+          ]
+        }
+      ]
+    },
+    {
+      "pair_id": "HVSF-FACTORY-010",
+      "domain": "IT change management",
+      "failures": [
+        {
+          "packet_id": "HVSF-FACTORY-010-A",
+          "truth": "ALLOW",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+          "solo_verdict": "ESCALATE",
+          "solo_admissible": true
+        },
+        {
+          "packet_id": "HVSF-FACTORY-010-B",
+          "truth": "ESCALATE",
+          "model": "openai/gpt-5.4-mini",
+          "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+          "solo_verdict": "ALLOW",
+          "solo_admissible": true
+        }
+      ]
+    }
+  ],
+  "non_useful_pairs": [
+    {
+      "pair_id": "HVSF-FACTORY-002",
+      "domain": "Energy / utilities / infrastructure controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY-003",
+      "domain": "Finance close / revenue / expense recognition controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY-005",
+      "domain": "Defense administration / logistics controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY-006",
+      "domain": "AP / vendor-master controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY-007",
+      "domain": "IT access / permission change controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    },
+    {
+      "pair_id": "HVSF-FACTORY-008",
+      "domain": "IT access / permission change controls",
+      "reason": "all_three_solos_correct_and_admissible_on_both_siblings"
+    }
+  ],
+  "scored_run_dirs": [
+    "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T192921Z",
+    "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T193220Z",
+    "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T193533Z",
+    "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T193650Z",
+    "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T193855Z",
+    "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194029Z",
+    "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194211Z",
+    "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194557Z",
+    "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194755Z",
+    "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194931Z",
+    "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T195148Z"
+  ],
+  "invalid_runs_preserved": [
+    {
+      "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T191953Z",
+      "classification": "PROVIDER_FAILURE_INCOMPLETE_FULL_ATTEMPT",
+      "reason": "initial full Batch001 live attempt stopped before completing all 60 calls"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "classification": "AP_OPENAI_W2_GOV_MICRO_BATON_V2_PREFLIGHT",
+  "date": "2026-06-29",
+  "status": "PASS",
+  "scope": "no_provider_preflight_only",
+  "provider_calls": 0,
+  "judge_calls": 0,
+  "live_ap_started": false,
+  "solo_started": false,
+  "commerce_or_it_started": false,
+  "runtime_gov_prompt_probe": {
+    "pair_id": "HV-AP-REP-001",
+    "packet_id": "HV-AP-REP-001-A",
+    "turn_id": "HV-AP-REP-001-A_G1",
+    "system_instruction_contains": [
+      "HoloGov-V micro-router v2. Return gov_micro_baton_v2 only.",
+      "Exactly seven key=value lines. No prose. No reasoning. No JSON. No Markdown. No braces. No quotes.",
+      "Copy selected_baton_lines exactly, preserving order and spelling.",
+      "Required keys in order: verdict,dep,focus,objective,preserve,repair,block.",
+      "Allowed values by field: verdict=CONTINUE,FAIL,FINAL; dep=AUTHORITY,CALLBACK,EVIDENCE,GATE,NONE,PAYMENT,POLICY,SCOPE,SOURCE,TIMING; focus=EVIDENCE_BINDING,FINAL_CHECK,GATE_REPAIR,OVERBLOCK,PAYMENT_RELEASE,SOURCE,UNDERBLOCK; objective=BLOCK_UNVERIFIED_CHANGE,CHECK_SOURCE,FAIL_CLOSED,FINALIZE,PRESERVE_VERDICT,REPAIR_GATE; preserve=BEST,BOUNDARY,CLOSED,GATE,NONE,OPEN,S1,S2,S3,S4,SRC,VERDICT; repair=CRITICAL_TERMS,EVIDENCE_BINDING,GATE_FIELDS,NONE,SOURCE_IDS,VERDICT_BINDING; block=DROP_SOURCE_IDS,FINAL_ON_FAIL,MODEL_SELECTION,NONE,TONE_ONLY,TREASURY_RELEASE,UNVERIFIED_CHANGE.",
+      "Output only the seven selected baton lines. Do not invent schema names or substitute tokens."
+    ],
+    "user_object_materialized_baton": {
+      "gate_diagnostic": "missing_boundary_binding:escalate_rule_assessment",
+      "gate_passed": false,
+      "id": "HV-AP-REP-001-A",
+      "selected_baton_lines": [
+        "verdict=CONTINUE",
+        "dep=GATE",
+        "focus=GATE_REPAIR",
+        "objective=REPAIR_GATE",
+        "preserve=CLOSED",
+        "repair=VERDICT_BINDING",
+        "block=FINAL_ON_FAIL"
+      ],
+      "worker_verdict": "ALLOW"
+    }
+  },
+  "assertions": {
+    "gov_contract_is_gov_micro_baton_v2": "PASS",
+    "required_fields_exact": "PASS",
+    "long_prose_removed_from_required_baton_fields": "PASS",
+    "finish_reason_length_fails_closed": "PASS",
+    "empty_gov_output_fails_closed": "PASS",
+    "missing_required_fields_fail_closed": "PASS",
+    "unknown_enum_values_fail_closed": "PASS",
+    "placeholder_tokens_fail_closed": "PASS",
+    "prompt_contains_no_placeholder_examples": "PASS",
+    "overlong_or_prose_fields_fail_closed": "PASS",
+    "json_braces_quotes_markdown_fail_closed": "PASS",
+    "ap_packet_hashes_match_freeze": "PASS",
+    "ap_prompt_hashes_match_freeze": "PASS",
+    "w2_remains_openai_gpt54_mini": "PASS",
+    "worker_contract_remains_compact_key_value_v1": "PASS",
+    "transport_policy_v1_unchanged": "PASS"
+  },
+  "next_live_step": "one_pair_ap_canary_only_not_full_200_call_lane"
+}

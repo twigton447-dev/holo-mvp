@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May HR or payroll execute the requested workforce, pay, benefits, or employment-status action? Focus: tax withholding correction using stale unsigned draft form.",
+    "allow_rule_assessment": "No current source closes withholding dependency",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-57B34DB26759-CTL",
+    "escalate_rule_assessment": "Stale unsigned form blocks execution",
+    "timing_scope_authority_dependency_check": "current withholding form and employee identity verification match"
+  },
+  "cited_evidence": [
+    "SRC-57B34DB26759-CTL",
+    "SRC-57B34DB26759-POL",
+    "SRC-57B34DB26759-BND",
+    "SRC-57B34DB26759-FBK",
+    "SRC-57B34DB26759-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "current withholding form and employee identity verification match",
+    "SRC-57B34DB26759-CTL",
+    "SRC-57B34DB26759-BND"
+  ],
+  "final_answer": "Source records show missing current withholding form match. Execution requires closed boundary per policy. Escalate for verification of employee identity and signed form before any tax correction.",
+  "open_blockers": [
+    "current withholding form and employee identity verification match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

@@ -1,0 +1,49 @@
+{
+  "artifact_hash_selected": "77a350d8ac48a2ffabb61d355904b1a5945d2dda4e72ed10a9bb7c8e7b4db1be",
+  "artifact_selected_for_compilation": "HV-KITC-074-B_WORKER_02",
+  "blocked_moves": [
+    "ALLOW release despite account mismatch",
+    "interpret CLR-TES-074 as covering account 7205",
+    "treat FLAG-TES-074 as non-blocking",
+    "invoke timing or authority override absent from sources",
+    "ignore account field discrepancy",
+    "continue worker loop producing identical ESCALATE verdicts"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "PAY-TES-074: {\"depends_on\": [\"CLR-TES-074\"], \"reason\": \"Account 7205 not covered by CLR-TES-074\", \"status\": \"BLOCKED\"}",
+    "CLR-TES-074: {\"covers_target\": false, \"reason\": \"Covers account 7025, not payment target 7205\", \"status\": \"INSUFFICIENT\"}",
+    "FLAG-TES-074: {\"blocks_release\": true, \"reason\": \"Visible with no disposition confirmed\", \"status\": \"UNRESOLVED\"}"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_role": "CONTROL_ROUTER",
+  "gov_turn": "G2",
+  "gov_verdict": "ESCALATE",
+  "monotonic_preservation_analysis": "Workers 1 and 2 preserved exact-match rule, account field specificity, flag visibility, and clearance scope limitation. These facts are source-grounded and immutable within the current document set. No repair mechanism can alter source facts. Additional worker turns would monotonically preserve these same conclusions.",
+  "must_preserve": [
+    "Account field specificity as binding criterion (7205 vs 7025)",
+    "FLAG-TES-074 visibility and unresolved status as open blocker",
+    "CLR-TES-074 scope limitation to account 7025 as insufficient coverage",
+    "Exact match rule for account under STD-TES-074-P monitor-only no-block disposition"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Both workers independently reached ESCALATE verdict with SOURCE_BOUNDARY_OPEN binding. Deterministic gate passed for both artifacts. Cross-DNA adversarial scope challenger (Worker 2) preserved all 4 critical features. No new source evidence can resolve the account mismatch (7205 vs 7025) or the unresolved FLAG-TES-074 within the current source boundary. Continuation would produce identical verdicts.",
+    "monotonic_preservation": [
+      "Account field specificity as binding criterion (7205 vs 7025)",
+      "FLAG-TES-074 visibility and unresolved status as open blocker",
+      "CLR-TES-074 scope limitation to account 7025 as insufficient coverage",
+      "Exact match rule for account under STD-TES-074-P monitor-only no-block disposition"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "packet_id": "HV-KITC-074-B",
+  "pair_id": "HV-KITC-074",
+  "rationale_for_final_compiler": "The source boundary is permanently open under current source conditions. PAY-TES-074 targets account 7205; CLR-TES-074 covers only account 7025. STD-TES-074-P requires exact account match for monitor-only no-block release. FLAG-TES-074 remains visible with no disposition confirmation. Two independent cross-DNA workers (xai and google) both ESCALATED with identical source-bound findings. Deterministic gates passed. No repair action can close the source boundary without new source documents that do not exist. FAIL_CLOSED is the only defensible outcome.",
+  "route_verdict": "FINAL_COMPILER",
+  "run_id": "run_20260629T020437Z",
+  "source_gate_interpretation": "Both workers independently reached ESCALATE verdict with SOURCE_BOUNDARY_OPEN binding. Deterministic gate passed for both artifacts. Cross-DNA adversarial scope challenger (Worker 2) preserved all 4 critical features. No new source evidence can resolve the account mismatch (7205 vs 7025) or the unresolved FLAG-TES-074 within the current source boundary. Continuation would produce identical verdicts.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

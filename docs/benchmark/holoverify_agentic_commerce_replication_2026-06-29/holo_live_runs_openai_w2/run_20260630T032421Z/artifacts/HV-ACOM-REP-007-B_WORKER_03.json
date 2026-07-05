@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "customer authorization boundary closed by signed mandate",
+    "allow_rule_assessment": "Not permitted; mandate signature missing or mismatched",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-9871B6C2B58F-CTL",
+    "escalate_rule_assessment": "Mandate signature must match account and action",
+    "timing_scope_authority_dependency_check": "Mandate signature must match account and action"
+  },
+  "cited_evidence": [
+    "SRC-9871B6C2B58F-CTL",
+    "SRC-9871B6C2B58F-POL",
+    "SRC-9871B6C2B58F-BND",
+    "SRC-9871B6C2B58F-REQ",
+    "SRC-9871B6C2B58F-FBK"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "mandate signature must match account and action",
+    "SRC-9871B6C2B58F-CTL",
+    "SRC-9871B6C2B58F-BND"
+  ],
+  "final_answer": "Action may not proceed. The controlling control record (SRC-9871B6C2B58F-CTL) confirms the mandate signature is missing, stale, mismatched, or scoped to a different action. The exact customer authorization boundary is not closed. Policy requires exact source-record closure before execution. Escalate to resolve the signature and account/action match.",
+  "open_blockers": [
+    "mandate signature mismatch"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,43 @@
+{
+  "binding_class": "SOURCE_BOUNDARY_CLOSED",
+  "blocked_moves": [
+    "DES-YAR-079 elevation to execution authority",
+    "EXP-YAR-079 substitution for transfer release",
+    "Any new source substitution",
+    "Reopening resolved dependencies",
+    "Attempting ESCALATE route when deterministic gate PASSED"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "DES-YAR-079 planning scope clarification: RESOLVED (planning-only, non-blocking). EXP-YAR-079 descriptive role confirmation: RESOLVED (descriptive only, not execution authority). REL-YAR-079 execution authority validation: RESOLVED (exact match per STD-YAR-079-P). STD-YAR-079-P exact match verification: RESOLVED (all 5 fields satisfied). Closure status: ALL_DEPENDENCIES_RESOLVED."
+  ],
+  "final_compiler_allowed": true,
+  "final_compiler_artifact_ref": "artifacts/HV-KITC-079-A_WORKER_02.json",
+  "gate_passed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_rationale": "Deterministic gate PASSED with artifact_verdict ALLOW and binding SOURCE_BOUNDARY_CLOSED. All 4 source IDs verified, all 5 critical terms preserved. Worker 2 correctly identified that REL-YAR-079 exactly satisfies STD-YAR-079-P by covering dataset DS-19, workspace YAR-RISK-2, Yara Analytics, export date 2026-06-28, and transfer authority before execution. DES-YAR-079 planning-only limitation correctly recognized as non-blocking. No gate failures exist. Dependency ledger shows ALL_DEPENDENCIES_RESOLVED. gov_may_select_models=false enforced. Gov does not call FINAL_COMPILER ready; worker baton is returned for final compilation invocation.",
+  "gov_route": "FINAL_COMPILER",
+  "gov_verdict": "ALLOW",
+  "must_preserve": [
+    "REL-YAR-079 exact match per STD-YAR-079-P",
+    "SOURCE_BOUNDARY_CLOSED binding class",
+    "DES-YAR-079 planning-only non-blocking status",
+    "EXP-YAR-079 descriptive-only role",
+    "All monotonic source bindings from previous turns"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "source-boundary verification",
+    "monotonic_preservation": [
+      "REL-YAR-079 exact match per STD-YAR-079-P",
+      "SOURCE_BOUNDARY_CLOSED binding class",
+      "DES-YAR-079 planning-only non-blocking status",
+      "EXP-YAR-079 descriptive-only role",
+      "All monotonic source bindings from previous turns"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

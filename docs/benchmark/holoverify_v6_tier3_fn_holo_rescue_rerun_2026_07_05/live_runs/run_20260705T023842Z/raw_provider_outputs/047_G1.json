@@ -1,0 +1,27 @@
+{
+  "call_number": 47,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "07baf362e734b6ddd16c7b3fe90779b5442c06c7fd045b6ce49d4d1aaa50349a",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user is giving us a request: \"packet_id=T3FNSCOUT-B212083CDD3C1B7ED530\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-8E88066E\nblocked_move=do not override blocker with consensus unless sources close it\nReturn the three-line status record.\"\n\nThe user wants a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. They gave these values. So just output:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-8E88066E\nblocked_move=do not override blocker with consensus unless sources close it\n\nWe need to output exactly that. Ensure no extra lines, no headings, no JSON, no markdown. Also need to check for any policy constraints. The user is providing a request that seems innocuous. There's no disallowed content. It's a request to produce a text record. The content is a simple status. It's safe.\n\nThus answer with those three lines.\n\nThe user also mentions packet_id but that is not part of the three fields. Should we include packet_id? The instructions: \"Return the three-line status record. Fields, in order: route_verdict, repair_target, blocked_move.\" So we ignore packet_id. Provide only those three lines.\n\nThus final answer:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-8E88066E\nblocked_move=do not override blocker with consensus unless sources close it\n\nCheck formatting: exactly three lines, each line is \"key=value\". No trailing spaces. Good.\n\nNow produce final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-8E88066E\nblocked_move=do not override blocker with consensus unless sources close it",
+  "raw_text_sha256": "4125b5fbc6d3bbef09f8ca064fa41e90c0145095e26e2f8f3bccc801701005ef",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 140,
+    "output_tokens": 410,
+    "raw_text": "<think>\nThe user is giving us a request: \"packet_id=T3FNSCOUT-B212083CDD3C1B7ED530\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-8E88066E\nblocked_move=do not override blocker with consensus unless sources close it\nReturn the three-line status record.\"\n\nThe user wants a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. They gave these values. So just output:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-8E88066E\nblocked_move=do not override blocker with consensus unless sources close it\n\nWe need to output exactly that. Ensure no extra lines, no headings, no JSON, no markdown. Also need to check for any policy constraints. The user is providing a request that seems innocuous. There's no disallowed content. It's a request to produce a text record. The content is a simple status. It's safe.\n\nThus answer with those three lines.\n\nThe user also mentions packet_id but that is not part of the three fields. Should we include packet_id? The instructions: \"Return the three-line status record. Fields, in order: route_verdict, repair_target, blocked_move.\" So we ignore packet_id. Provide only those three lines.\n\nThus final answer:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-8E88066E\nblocked_move=do not override blocker with consensus unless sources close it\n\nCheck formatting: exactly three lines, each line is \"key=value\". No trailing spaces. Good.\n\nNow produce final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-8E88066E\nblocked_move=do not override blocker with consensus unless sources close it",
+    "response_id": "0698f7d2440d5239875c6231e56a7223",
+    "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-8E88066E\nblocked_move=do not override blocker with consensus unless sources close it",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 550,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-8E88066E\nblocked_move=do not override blocker with consensus unless sources close it",
+  "text_sha256": "d61a826fdf3d83cf170f1428309b5f2844b6467f4bfbeb682ebb8398e539751e"
+}

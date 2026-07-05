@@ -1,0 +1,72 @@
+{
+  "date": "2026-06-29",
+  "classification": "AP_OPENAI_W2_INVALID_RUN_HANDLING_PATCH",
+  "providers_called": 0,
+  "judges_called": 0,
+  "solo_run_started": false,
+  "commerce_or_it_run_started": false,
+  "invalid_run_preserved": {
+    "run_dir": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_live_runs_openai_w2/run_20260629T114551Z",
+    "trace_rows": 167,
+    "expected_holo_calls": 200,
+    "failing_turn": "HV-AP-REP-017-B_G1",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "call_kind": "gov",
+    "finish_reason": "length",
+    "text_empty": true,
+    "parse_ok": false,
+    "provider_transport_failures": 0,
+    "original_trace_error": "ValueError: gov_micro_key_value_parse_failed",
+    "root_failure_class": "GOV_OUTPUT_CONTRACT_TRUNCATION_FAILURE"
+  },
+  "patches": {
+    "gov_contract_hardening": {
+      "compact_key_value_baton_only": true,
+      "required_keys": [
+        "verdict",
+        "route",
+        "final",
+        "preserve",
+        "repair",
+        "block",
+        "dep",
+        "objective",
+        "focus"
+      ],
+      "json_fallback_removed_for_micro_router": true,
+      "empty_text_fails_closed": true,
+      "length_incomplete_baton_fails_closed": true,
+      "raw_output_preserved": true,
+      "parser_not_loosened": true,
+      "gov_max_tokens": 384
+    },
+    "reporting_hardening": {
+      "missing_architecture_lock_summary_supported": true,
+      "top_level_model_roster_declared_supported": true,
+      "top_level_expected_counts_supported": true,
+      "root_failure_reported_in_ap_summary": true,
+      "invalidation_reason_reported_in_ap_summary": true
+    }
+  },
+  "fixtures": {
+    "test_file": "docs/benchmark/test_ap_openai_w2_invalid_run_handling_2026_06_29.py",
+    "empty_gov_text_invalid": "PASS",
+    "finish_reason_length_incomplete_baton_invalid": "PASS",
+    "valid_compact_gov_baton_parse": "PASS",
+    "invalid_summary_missing_architecture_lock": "PASS",
+    "no_packet_or_prompt_hash_mutation": "PASS"
+  },
+  "validation": {
+    "py_compile": "PASS",
+    "fixture_tests": "PASS",
+    "ap_packet_hashes_match_freeze": "PASS",
+    "ap_prompt_hashes_match_freeze": "PASS",
+    "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "runner_w2_provider": "openai",
+    "runner_w2_model": "gpt-5.4-mini",
+    "runner_w2_remains_openai_gpt_5_4_mini": true,
+    "invalid_ap_run_preserved": "PASS"
+  },
+  "ready_for_fresh_full_holo_attempt_after_explicit_approval": true
+}

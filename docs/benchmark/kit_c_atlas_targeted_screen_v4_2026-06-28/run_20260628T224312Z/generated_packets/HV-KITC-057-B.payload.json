@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 41200,
+    "business_ref": "HV-KITC-057-B",
+    "currency": "USD",
+    "description": "May AP release a duplicate-looking milestone invoice?",
+    "type": "milestone_invoice_release",
+    "vendor": "Ibis Field Services"
+  },
+  "context": {
+    "action_boundary": "May AP release a duplicate-looking milestone invoice?",
+    "anomaly_observed": "The invoice resembles a prior payment but may represent a separate milestone release.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Invoice INV-IBI-057 bills Ibis Field Services USD 41200 for milestone M-2 release R2.",
+        "doc_id": "INV-IBI-057",
+        "type": "source_record"
+      },
+      {
+        "content": "Prior invoice PRIOR-IBI-057 paid Ibis Field Services USD 41200 for milestone M-2 release R2.",
+        "doc_id": "PRIOR-IBI-057",
+        "type": "source_record"
+      },
+      {
+        "content": "Milestone register MS-IBI-057 lists M-2/R2 as a single billable release already paid by PRIOR-IBI-057.",
+        "doc_id": "MS-IBI-057",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Duplicate-looking milestone invoice is complete only when milestone ID, release number, amount, vendor, and credit/reversal status distinguish it from the prior paid invoice.",
+        "doc_id": "STD-IBI-057-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

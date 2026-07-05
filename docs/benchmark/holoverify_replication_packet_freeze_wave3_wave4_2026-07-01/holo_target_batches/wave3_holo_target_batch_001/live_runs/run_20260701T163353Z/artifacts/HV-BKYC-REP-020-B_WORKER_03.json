@@ -1,0 +1,34 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Banking / KYC / AML controls action now? Action: SAR no-file closure without required approver. Boundary: case note cannot close alert without approval.",
+    "allow_rule_assessment": "Source records do not close boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-9A1B2CEEF022-CTL",
+    "escalate_rule_assessment": "Missing approver and rationale remain open",
+    "timing_scope_authority_dependency_check": "no-file rationale|alert ID|approver match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-9A1B2CEEF022-CTL",
+    "SRC-9A1B2CEEF022-BND",
+    "SRC-9A1B2CEEF022-FBK",
+    "SRC-9A1B2CEEF022-POL",
+    "SRC-9A1B2CEEF022-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "no-file rationale, alert ID, and approver match",
+    "SRC-9A1B2CEEF022-CTL",
+    "SRC-9A1B2CEEF022-BND"
+  ],
+  "final_answer": "Source records do not authorize SAR no-file closure. The controlling control record says the required dependency is still missing, stale, mismatched, expired, unsigned, unapproved, or scoped to a different action. The boundary also says the case note cannot close the alert without approval, so the correct decision is ESCALATE.",
+  "open_blockers": [
+    "no-file rationale",
+    "alert ID",
+    "approver match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

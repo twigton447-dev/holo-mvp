@@ -1,0 +1,46 @@
+{
+  "blocked_moves": [
+    "CONTINUE_WORKER with allow verdict\u2014closure evidence covers wrong batch, no monotonic path exists",
+    "CONTINUE_REPAIR targeting batch field in CLOSE-XOR-078 without new authoritative source evidence",
+    "FINAL_COMPILER with ALLOW verdict\u2014batch identity mismatch violates policy hard requirement",
+    "treating CLOSE-XOR-078 as if it covers X-78 when content explicitly names X-79",
+    "substituting adjacent batch closure record as if it satisfies target batch release"
+  ],
+  "control_action": "FAIL_CLOSED",
+  "dependency_ledger": [
+    "Unresolved dependency: Deviation closure for batch X-78 with visible assay alert DEV-XOR-078. CLOSE-XOR-078 covers batch X-79 only. No authoritative source evidence closes deviation for X-78. Status: BLOCKED."
+  ],
+  "final_compiler_allowed": false,
+  "gov_annotations": {
+    "authority_chain_complete": false,
+    "escalation_preserved": true,
+    "failure_class": "SOURCE_BOUNDARY_IDENTITY_MISMATCH",
+    "primary_blocker": "CLOSE-XOR-078 documents batch X-79; action requires X-78. Policy requires exact match. Source identity gap is non-negotiable.",
+    "repair_viable": false,
+    "scope_of_break": "Batch identity (not field content error)"
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_rationale": "Worker verdict ESCALATE with binding SOURCE_BOUNDARY_OPEN is correct. Gate passed. CLOSE-XOR-078 covers batch X-79 while action requires batch X-78. Policy STD-XOR-078-P demands exact batch match. Open blocker is NOT repairable field data\u2014it is a source-boundary identity mismatch: wrong batch in closure evidence. No monotonic preservation can bridge a batch-identity gap.",
+  "gov_verdict": "FAIL_CLOSED",
+  "must_preserve": [
+    "exact batch-identity match requirement per STD-XOR-078-P",
+    "ESCALATE verdict from source-boundary analysis",
+    "SOURCE_BOUNDARY_OPEN binding class",
+    "worker critical_features_preserved array"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Gate passed; worker correctly identified source boundary violation (batch X-79 in closure vs X-78 required for release). Verdict ESCALATE with binding SOURCE_BOUNDARY_OPEN preserved. No repairable field failure\u2014batch identity mismatch is fatal to execution.",
+    "monotonic_preservation": [
+      "exact batch-identity match requirement per STD-XOR-078-P",
+      "ESCALATE verdict from source-boundary analysis",
+      "SOURCE_BOUNDARY_OPEN binding class",
+      "worker critical_features_preserved array"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "route_verdict": "FAIL_CLOSED",
+  "source_gate_interpretation": "Gate passed; worker correctly identified source boundary violation (batch X-79 in closure vs X-78 required for release). Verdict ESCALATE with binding SOURCE_BOUNDARY_OPEN preserved. No repairable field failure\u2014batch identity mismatch is fatal to execution.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

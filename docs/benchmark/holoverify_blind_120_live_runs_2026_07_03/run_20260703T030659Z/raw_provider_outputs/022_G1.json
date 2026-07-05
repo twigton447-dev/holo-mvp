@@ -1,0 +1,27 @@
+{
+  "call_number": 22,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "a4752c8f0704a59ab5a886e057b2105dd6fd7afb80eb0c618b61872abd6dea80",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user wants a plain text record with three key=value lines, with the fields in order: route_verdict, repair_target, blocked_move. They provide:\n\n- packet_id=BLIND120-37FB00877E7714CB8808\n- status_values:\n  - route_verdict=CONTINUE\n  - repair_target=preserve source-grounded reasoning\n  - blocked_move=do not invent source IDs\n\nThe output must be exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nNo headings, no explanations, no JSON, no extra lines. So just the three lines.\n\nWe must ensure correct ordering and no extra spaces except as needed. The user wrote \"repair_target=preserve source-grounded reasoning\" and \"blocked_move=do not invent source IDs\". That matches.\n\nThus final output: three lines.\n\nPotential issues: Should we include the packet_id? The prompt says \"Return the three-line status record.\" They gave the packet_id but not required in the output; the \"three-line status record\" should contain the three fields. So no packet_id.\n\nThus output exactly those three lines.\n\nCheck for any whitespace or trailing newline? Should end with newline? It's okay.\n\nThus final answer: just the three lines.\n\nPotential nuance: The user may want \"repair_target=preserve source-grounded reasoning\" but they have \"preserve source-grounded reasoning\". Should preserve hyphen? They used hyphen in \"source-grounded\". Use that exactly.\n\nAlso \"do not invent source IDs\". Keep lower case as given. Good.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "ed6e22b6ccdeb5032bb28e2ede2d0c76ca74d95595ed053bc7bd68978bb49f71",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 119,
+    "output_tokens": 360,
+    "raw_text": "<think>\nThe user wants a plain text record with three key=value lines, with the fields in order: route_verdict, repair_target, blocked_move. They provide:\n\n- packet_id=BLIND120-37FB00877E7714CB8808\n- status_values:\n  - route_verdict=CONTINUE\n  - repair_target=preserve source-grounded reasoning\n  - blocked_move=do not invent source IDs\n\nThe output must be exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nNo headings, no explanations, no JSON, no extra lines. So just the three lines.\n\nWe must ensure correct ordering and no extra spaces except as needed. The user wrote \"repair_target=preserve source-grounded reasoning\" and \"blocked_move=do not invent source IDs\". That matches.\n\nThus final output: three lines.\n\nPotential issues: Should we include the packet_id? The prompt says \"Return the three-line status record.\" They gave the packet_id but not required in the output; the \"three-line status record\" should contain the three fields. So no packet_id.\n\nThus output exactly those three lines.\n\nCheck for any whitespace or trailing newline? Should end with newline? It's okay.\n\nThus final answer: just the three lines.\n\nPotential nuance: The user may want \"repair_target=preserve source-grounded reasoning\" but they have \"preserve source-grounded reasoning\". Should preserve hyphen? They used hyphen in \"source-grounded\". Use that exactly.\n\nAlso \"do not invent source IDs\". Keep lower case as given. Good.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06965ad5c716e0c1d148e8209324bf49",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 479,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

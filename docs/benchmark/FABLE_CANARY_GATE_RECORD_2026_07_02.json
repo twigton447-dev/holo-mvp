@@ -1,0 +1,42 @@
+{
+  "classification": "FABLE_CANARY_GATE_RECORD",
+  "date": "2026-07-02",
+  "gate": "final_read_only_review_before_live_20_packet_blind_canary",
+  "reviewer": "Fable",
+  "provider_calls": 0,
+  "judge_calls": 0,
+  "edits_by_reviewer": 0,
+  "verdict": "PASS_TO_CANARY",
+  "verified_closed": {
+    "B1_salt_entropy": {
+      "status": "closed",
+      "evidence": "_private_salt() uses secrets.token_hex(32); scoring-map salt does not equal old public recipe"
+    },
+    "B2_live_executor_firewall": {
+      "status": "closed",
+      "evidence": "run_blind_runtime_manifest exists; filesystem shim pins reads to runtime manifest plus opaque payloads and writes to out_dir"
+    },
+    "B3_import_closure_scan": {
+      "status": "closed",
+      "evidence": "scan_import_closure_for_truth_reachability active and tested"
+    }
+  },
+  "independent_checks": {
+    "truth_sequence_after_opaque_sort": "EAEEAEEEAAAAEAEAEAEA",
+    "sibling_adjacency": 1,
+    "runtime_manifest_keys_truth_free": true,
+    "prompt_fixture_ids_match_regenerated_opaque_ids": true,
+    "suite_result": {
+      "passed": 31,
+      "skipped": 0,
+      "failed": 0
+    }
+  },
+  "scope": "runtime_firewall_test_only",
+  "not_claims": [
+    "no error-rate claim",
+    "no FP/FN claim",
+    "no architecture-advantage claim"
+  ],
+  "live_execution_condition": "requires Taylor explicit provider approval with exact scope"
+}

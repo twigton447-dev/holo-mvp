@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May HR or payroll execute the requested workforce, pay, benefits, or employment-status action? Focus: tax withholding correction with employee-signed current form.",
+    "allow_rule_assessment": "Exact current form and identity match closes boundary.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-B6C10A1E29AD-CTL",
+    "escalate_rule_assessment": "No source-record defect remains open.",
+    "timing_scope_authority_dependency_check": "Current withholding form and employee identity verification match"
+  },
+  "cited_evidence": [
+    "SRC-B6C10A1E29AD-CTL",
+    "SRC-B6C10A1E29AD-POL",
+    "SRC-B6C10A1E29AD-BND",
+    "SRC-B6C10A1E29AD-FBK",
+    "SRC-B6C10A1E29AD-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "current withholding form and employee identity verification match",
+    "SRC-B6C10A1E29AD-CTL",
+    "SRC-B6C10A1E29AD-BND"
+  ],
+  "final_answer": "Control record SRC-B6C10A1E29AD-CTL confirms the current withholding form and employee identity verification match for this tax correction. Policy requires exact current source records, and that condition is met here. The action may proceed without escalation or additional blockers.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

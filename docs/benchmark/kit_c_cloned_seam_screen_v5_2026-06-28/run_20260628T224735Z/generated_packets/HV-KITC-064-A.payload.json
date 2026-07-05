@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-064-A",
+    "currency": "USD",
+    "description": "May IAM execute the emergency admin enablement?",
+    "type": "emergency_access",
+    "vendor": "Nexa IAM"
+  },
+  "context": {
+    "action_boundary": "May IAM execute the emergency admin enablement?",
+    "anomaly_observed": "The packet includes a standard-access note and a breakglass execution record.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Request REQ-NEX-064 enables emergency admin for user Omar Lin on system NEX-ERP, privilege breakglass-admin, 16:00-17:00.",
+        "doc_id": "REQ-NEX-064",
+        "type": "source_record"
+      },
+      {
+        "content": "Standard-access note STD-NEX-064 says ordinary admin access requires committee review; it is not breakglass execution authority.",
+        "doc_id": "STD-NEX-064",
+        "type": "source_record"
+      },
+      {
+        "content": "Breakglass execution approval BG-NEX-064 covers Omar Lin, NEX-ERP, breakglass-admin, 16:00-17:00, and audit control AUD-9 before enablement.",
+        "doc_id": "BG-NEX-064",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Emergency admin enablement is complete only when breakglass execution approval matches user, system, privilege, window, and audit control before enablement.",
+        "doc_id": "STD-NEX-064-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

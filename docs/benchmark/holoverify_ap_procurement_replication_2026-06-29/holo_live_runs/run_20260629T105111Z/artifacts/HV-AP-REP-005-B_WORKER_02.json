@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "emergency exception fully scoped to vendor, amount, date, and invoice",
+    "allow_rule_assessment": "no closure from source records",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-C7BDEE54413D-CTL",
+    "escalate_rule_assessment": "dependency open per CTL",
+    "timing_scope_authority_dependency_check": "exception scope missing for exact action"
+  },
+  "cited_evidence": [
+    "SRC-C7BDEE54413D-CTL",
+    "SRC-C7BDEE54413D-REQ",
+    "SRC-C7BDEE54413D-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "exception scope must cover exact action",
+    "SRC-C7BDEE54413D-CTL"
+  ],
+  "final_answer": "The action cannot proceed. Source control record SRC-C7BDEE54413D-CTL explicitly states that the exception scope is missing or mismatched for the exact action. This dependency remains open, preventing closure of the action boundary. Therefore, escalation is required to resolve this critical defect before any execution.",
+  "open_blockers": [
+    "exception scope must cover exact action"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

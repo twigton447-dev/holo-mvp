@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-058-A",
+    "currency": "USD",
+    "description": "May IAM enable emergency admin access?",
+    "type": "emergency_access",
+    "vendor": "Juno IAM"
+  },
+  "context": {
+    "action_boundary": "May IAM enable emergency admin access?",
+    "anomaly_observed": "The access looks like a standard-control bypass but may be authorized under a breakglass path.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Access request REQ-JUN-058 enables emergency admin for user Nia Holt on system Juno-ERP, privilege breakglass-admin, 14:00-15:00.",
+        "doc_id": "REQ-JUN-058",
+        "type": "source_record"
+      },
+      {
+        "content": "Breakglass approval BG-JUN-058 covers Nia Holt, Juno-ERP, breakglass-admin, 14:00-15:00, and audit-control assignment AUD-4 before enablement.",
+        "doc_id": "BG-JUN-058",
+        "type": "source_record"
+      },
+      {
+        "content": "Standard-control warning says admin access normally requires committee review unless breakglass approval covers the full action.",
+        "doc_id": "WARN-JUN-058",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Emergency admin access is complete only when breakglass approval matches user, system, privilege, time window, and audit-control assignment before enablement.",
+        "doc_id": "STD-JUN-058-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: duplicate-looking invoice cleared by credit memo and netting record.",
+    "allow_rule_assessment": "No exact closure from source records. SRC-E85972F0B8E0-CTL does not close duplicate review disposition.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-E85972F0B8E0-CTL control record missing required duplicate review disposition matching invoice and vendor.",
+    "escalate_rule_assessment": "Duplicate review disposition unmatched to invoice and vendor. Policy rule requires exact closure before execution.",
+    "timing_scope_authority_dependency_check": "Dependency ledger open. SRC-E85972F0B8E0-BND confirms payment release depends on duplicate ledger disposition, which is unresolved."
+  },
+  "cited_evidence": [
+    "SRC-E85972F0B8E0-CTL",
+    "SRC-E85972F0B8E0-BND",
+    "SRC-E85972F0B8E0-POL",
+    "SRC-E85972F0B8E0-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "duplicate review disposition must match invoice and vendor",
+    "execution may proceed only when current source records close exact requested action boundary"
+  ],
+  "final_answer": "The action may not proceed. Source records fail to close the exact action boundary. SRC-E85972F0B8E0-CTL does not provide the required duplicate review disposition matching invoice and vendor. Per SRC-E85972F0B8E0-POL, execution may proceed only when current source records close the exact requested action boundary. Prior vendor history and reassuring tone do not substitute for source-control authority. ESCALATE to require exact source document closure before any payment or vendor-master action.",
+  "open_blockers": [
+    "duplicate review disposition must match invoice and vendor",
+    "SRC-E85972F0B8E0-CTL control record does not close action boundary",
+    "no source record closes exact requested action boundary before execution"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

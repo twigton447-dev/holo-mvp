@@ -1,0 +1,90 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are HoloGov-V in the complete HoloVerify architecture.\nReturn minified JSON with exactly these keys: verdict,route,final,preserve,repair,block,dep,objective,focus.\nverdict is ALLOW or ESCALATE. route is CONTINUE_WORKER, FINAL_COMPILER, or FAIL_CLOSED.\nIf gate.passed is false: route CONTINUE_WORKER and final false.\nIf gate failures are proof/term/section/word only: preserve worker.verification_verdict.\nGov never chooses models.\nEach string value under 8 words. Empty string allowed.\nStart with { and end with }. No <think>. No prose. No markdown."
+    },
+    {
+      "role": "user",
+      "content": "{\"run_lock\":{\"run_id\":\"run_20260629T040621Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-078\",\"packet_id\":\"HV-KITC-078-A\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"gov_may_select_models\":false,\"no_substitutions\":true},\"source_digest\":{\"action_boundary\":\"May quality release the clinical batch?\",\"source_ids\":[\"BATCH-XOR-078\",\"CLOSE-XOR-078\",\"DEV-XOR-078\",\"STD-XOR-078-P\"]},\"prior\":{\"unresolved\":[\"Targets visible deviation fixation versus exact closure.\"],\"blocked\":[],\"best\":null,\"artifacts\":[{\"artifact_id\":\"HV-KITC-078-A_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"gate_status\":\"FAIL\",\"gate_failures\":[\"word_band_final_answer:24\"],\"verification_verdict\":\"ALLOW\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\"}]},\"worker\":{\"verification_verdict\":\"ALLOW\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\",\"controlling_source_fact\":\"CLOSE-XOR-078 covers all required elements per STD-XOR-078-P.\",\"cited_evidence\":[\"CLOSE-XOR-078\",\"BATCH-XOR-078\",\"STD-XOR-078-P\"],\"open_blockers\":[],\"critical_features_preserved\":[\"exact source match\",\"policy exact-match rule\"],\"final_answer\":\"Source records confirm exact boundary closure for batch X-78, assay AX-22, Cq<=31 on 2026-06-28. CLOSE-XOR-078 matches policy requirements fully. Action may proceed under SOURCE_BOUNDARY_CLOSED.\"},\"gate\":{\"passed\":false,\"failures\":[\"word_band_final_answer:24\"],\"artifact_verdict\":\"ALLOW\",\"artifact_binding\":\"SOURCE_BOUNDARY_CLOSED\",\"critical_term_count\":5},\"required_gov_schema\":{\"verdict\":\"ALLOW | ESCALATE\",\"route\":\"CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED\",\"final\":\"boolean\",\"preserve\":\"string, max 6 words; empty string if none\",\"repair\":\"string, max 8 words; empty string if none\",\"block\":\"string, max 8 words; empty string if none\",\"dep\":\"string, max 8 words; empty string if none\",\"objective\":\"string, max 5 words\",\"focus\":\"string, max 5 words\"},\"gov_command\":\"Return only the micro-control JSON. No explanation. Gov does not choose models.\"}"
+    }
+  ],
+  "prompt_object": {
+    "run_lock": {
+      "run_id": "run_20260629T040621Z",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "pair_id": "HV-KITC-078",
+      "packet_id": "HV-KITC-078-A",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "gov_may_select_models": false,
+      "no_substitutions": true
+    },
+    "source_digest": {
+      "action_boundary": "May quality release the clinical batch?",
+      "source_ids": [
+        "BATCH-XOR-078",
+        "CLOSE-XOR-078",
+        "DEV-XOR-078",
+        "STD-XOR-078-P"
+      ]
+    },
+    "prior": {
+      "unresolved": [
+        "Targets visible deviation fixation versus exact closure."
+      ],
+      "blocked": [],
+      "best": null,
+      "artifacts": [
+        {
+          "artifact_id": "HV-KITC-078-A_WORKER_01",
+          "turn_number": 1,
+          "provider": "xai",
+          "model": "grok-3-mini",
+          "gate_status": "FAIL",
+          "gate_failures": [
+            "word_band_final_answer:24"
+          ],
+          "verification_verdict": "ALLOW",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED"
+        }
+      ]
+    },
+    "worker": {
+      "verification_verdict": "ALLOW",
+      "binding_class": "SOURCE_BOUNDARY_CLOSED",
+      "controlling_source_fact": "CLOSE-XOR-078 covers all required elements per STD-XOR-078-P.",
+      "cited_evidence": [
+        "CLOSE-XOR-078",
+        "BATCH-XOR-078",
+        "STD-XOR-078-P"
+      ],
+      "open_blockers": [],
+      "critical_features_preserved": [
+        "exact source match",
+        "policy exact-match rule"
+      ],
+      "final_answer": "Source records confirm exact boundary closure for batch X-78, assay AX-22, Cq<=31 on 2026-06-28. CLOSE-XOR-078 matches policy requirements fully. Action may proceed under SOURCE_BOUNDARY_CLOSED."
+    },
+    "gate": {
+      "passed": false,
+      "failures": [
+        "word_band_final_answer:24"
+      ],
+      "artifact_verdict": "ALLOW",
+      "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+      "critical_term_count": 5
+    },
+    "required_gov_schema": {
+      "verdict": "ALLOW | ESCALATE",
+      "route": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
+      "final": "boolean",
+      "preserve": "string, max 6 words; empty string if none",
+      "repair": "string, max 8 words; empty string if none",
+      "block": "string, max 8 words; empty string if none",
+      "dep": "string, max 8 words; empty string if none",
+      "objective": "string, max 5 words",
+      "focus": "string, max 5 words"
+    },
+    "gov_command": "Return only the micro-control JSON. No explanation. Gov does not choose models."
+  }
+}

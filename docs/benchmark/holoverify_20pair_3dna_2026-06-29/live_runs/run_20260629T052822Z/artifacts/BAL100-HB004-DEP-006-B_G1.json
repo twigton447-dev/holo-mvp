@@ -1,0 +1,37 @@
+{
+  "block": "Do not allow from adjacent, stale, future, partial, or merely plausible authority when exact current source evidence leaves the boundary open.",
+  "blocked_moves": [
+    "Do not allow from adjacent, stale, future, partial, or merely plausible authority when exact current source evidence leaves the boundary open."
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dep": "",
+  "dependency_ledger": [],
+  "final": false,
+  "final_compiler_allowed": false,
+  "focus": "underblock",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "SOURCE_BOUNDARY_CLOSED"
+  ],
+  "must_repair": [
+    "Potential underblock: re-check whether exact current source evidence leaves the action boundary open; if open, return ESCALATE with SOURCE_BOUNDARY_OPEN."
+  ],
+  "next_worker_baton": {
+    "attack_focus": "underblock",
+    "monotonic_preservation": [
+      "SOURCE_BOUNDARY_CLOSED"
+    ],
+    "objective": "Repair failed deterministic gate before final selection.",
+    "required_repairs": [
+      "Potential underblock: re-check whether exact current source evidence leaves the action boundary open; if open, return ESCALATE with SOURCE_BOUNDARY_OPEN."
+    ]
+  },
+  "objective": "Resolve action_boundary_verdict_mismatch by verifying source evidence completeness",
+  "preserve": "SOURCE_BOUNDARY_CLOSED",
+  "repair": "Re-check exact current source evidence; if action boundary remains open, escalate with SOURCE_BOUNDARY_OPEN status. Do not finalize ALLOW verdict when boundary evidence is uncertain or incomplete.",
+  "route": "CONTINUE_WORKER",
+  "route_verdict": "CONTINUE_WORKER",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verdict": "ESCALATE",
+  "verification_verdict": "ESCALATE"
+}

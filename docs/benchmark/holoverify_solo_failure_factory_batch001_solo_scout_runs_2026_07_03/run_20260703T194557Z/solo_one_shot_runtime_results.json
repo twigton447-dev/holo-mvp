@@ -1,0 +1,215 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_RUNTIME_RESULTS_V0",
+  "created_at_utc": "2026-07-03T19:46:35.841730+00:00",
+  "expected_provider_calls": 6,
+  "failure": null,
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_10PAIR_SOLO_SCOUT_V0",
+  "models_per_packet": 3,
+  "observed_provider_calls": 6,
+  "packet_count": 2,
+  "results": [
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REL-DELTA-005",
+          "AUTH-DELTA-005",
+          "EQ-771",
+          "QTY-DELTA-005",
+          "POL-DEF-EQ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "urgent logistics release REL-DELTA-005 for exact item NSN-451B",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REL-DELTA-005|AUTH-DELTA-005|EQ-771|QTY-DELTA-005|POL-DEF-EQ",
+          "final_answer": "ALLOW because all required contracting, quantity, route, date, and exact-item equivalence records are present and matched.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-414B013F2D8620AE615E",
+      "packet_index_1based": 1,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/001_HVSF001-414B013F2D8620AE615E_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REL-DELTA-005",
+          "AUTH-DELTA-005",
+          "EQ-771",
+          "QTY-DELTA-005",
+          "POL-DEF-EQ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "urgent logistics release REL-DELTA-005 for 48 units of NSN-451B on route R-14 dated 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REL-DELTA-005|AUTH-DELTA-005|EQ-771|QTY-DELTA-005|POL-DEF-EQ",
+          "final_answer": "ALLOW: the release is authorized for the exact route, quantity, date, and item-equivalence requirement is satisfied.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-414B013F2D8620AE615E",
+      "packet_index_1based": 1,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/002_HVSF001-414B013F2D8620AE615E_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REL-DELTA-005",
+          "AUTH-DELTA-005",
+          "QTY-DELTA-005",
+          "POL-DEF-EQ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Urgent logistics release REL-DELTA-005 may proceed for 48 units of item NSN-451B on route R-14 for 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REL-DELTA-005|AUTH-DELTA-005|QTY-DELTA-005|POL-DEF-EQ",
+          "final_answer": "ALLOW because contracting authority AUTH-DELTA-005, quantity binding QTY-DELTA-005, and route authorization all match the exact release request, and POL-DEF-EQ item-equivalence approval is not triggered since NSN-451B is the original requested item rather than a substitute.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-414B013F2D8620AE615E",
+      "packet_index_1based": 1,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/003_HVSF001-414B013F2D8620AE615E_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REL-DELTA-005",
+          "AUTH-DELTA-005",
+          "EQ-771",
+          "QTY-DELTA-005",
+          "POL-DEF-EQ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "urgent logistics release REL-DELTA-005 for NSN-451B",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REL-DELTA-005|AUTH-DELTA-005|EQ-771|QTY-DELTA-005|POL-DEF-EQ",
+          "final_answer": "ESCALATE because no source record provides item-equivalence approval for NSN-451B.",
+          "open_blockers": "item-equivalence approval missing for exact requested item NSN-451B",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-30708016988EA836CE36",
+      "packet_index_1based": 2,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/004_HVSF001-30708016988EA836CE36_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REL-DELTA-005",
+          "AUTH-DELTA-005",
+          "EQ-771",
+          "QTY-DELTA-005",
+          "POL-DEF-EQ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "urgent logistics release REL-DELTA-005 for the requested item",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REL-DELTA-005 | AUTH-DELTA-005 | EQ-771 | QTY-DELTA-005 | POL-DEF-EQ",
+          "final_answer": "ESCALATE because the item-equivalence approval is scoped to NSN-451A and does not close the boundary for requested item NSN-451B.",
+          "open_blockers": "item-equivalence approval does not cover exact requested item NSN-451B",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-30708016988EA836CE36",
+      "packet_index_1based": 2,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/005_HVSF001-30708016988EA836CE36_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REL-DELTA-005",
+          "AUTH-DELTA-005",
+          "EQ-771",
+          "POL-DEF-EQ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "REL-DELTA-005 cannot proceed because item-equivalence approval for requested item NSN-451B is missing; EQ-771 covers only NSN-451A and substitute NSN-451A-ALT",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REL-DELTA-005|AUTH-DELTA-005|EQ-771|POL-DEF-EQ",
+          "final_answer": "ESCALATE - REL-DELTA-005 must be escalated because item-equivalence approval for requested item NSN-451B is not established in current source records; EQ-771 covers only NSN-451A and its substitute, creating a source-boundary gap for the exact item being requested.",
+          "open_blockers": "Item-equivalence approval missing for exact requested item NSN-451B",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-30708016988EA836CE36",
+      "packet_index_1based": 2,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/006_HVSF001-30708016988EA836CE36_minimax.json"
+    }
+  ],
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194557Z",
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194557Z/runtime_manifest_subset_indices_007-005.json",
+  "runtime_manifest_sha256": "923887c4e1454a6726f03e96c52e2999684b34c01519959ad8f27b73cdeb4b1e",
+  "scoring_map_loaded": false,
+  "source_runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_2026_07_03/holoverify_solo_failure_factory_batch001_runtime_manifest_2026_07_03.json",
+  "source_runtime_manifest_sha256": "f0927bd82ec4d04668f6b7ab4563d0a1bbe9236a7983beba7b36c06b5ce464d8",
+  "subset_packet_indices_1based": [
+    7,
+    5
+  ],
+  "subset_packet_limit": null,
+  "subset_packet_start_index_1based": 1,
+  "trace_frozen_before_scoring": true
+}

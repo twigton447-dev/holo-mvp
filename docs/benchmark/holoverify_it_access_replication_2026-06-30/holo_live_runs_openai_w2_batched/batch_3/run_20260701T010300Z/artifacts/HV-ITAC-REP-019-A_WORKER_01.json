@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May IT grant or change the requested access, role, permission, or privileged action? Focus: service account owner mismatch.",
+    "allow_rule_assessment": "Owner mismatch blocks exact closure",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-A4CE871A8A1B-CTL",
+    "escalate_rule_assessment": "Unresolved owner match prevents execution",
+    "timing_scope_authority_dependency_check": "registered owner must match requester unresolved"
+  },
+  "cited_evidence": [
+    "SRC-A4CE871A8A1B-CTL",
+    "SRC-A4CE871A8A1B-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Action may not proceed. Source records confirm unresolved registered owner must match requester dependency for service account owner mismatch. Exact boundary remains open. Escalate to resolve owner alignment before any IT permission change.",
+  "open_blockers": [
+    "registered owner must match requester"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

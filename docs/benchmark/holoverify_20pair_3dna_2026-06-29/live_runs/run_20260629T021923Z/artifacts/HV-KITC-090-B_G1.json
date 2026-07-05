@@ -1,0 +1,44 @@
+{
+  "blocked_moves": [
+    "Any claim that sale may proceed without TX-44 closure",
+    "Treating WARN-JAD-090 as execution authority rather than verification requirement",
+    "Replacing SOURCE_BOUNDARY_OPEN with CLOSED",
+    "Asserting exemption-status class is resolved when CERT-JAD-090 explicitly states TX-44 pending"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "{'dependency': 'exemption-status class closure', 'status': 'UNRESOLVED', 'blocking': True, 'source': 'CERT-JAD-090 explicitly states TX-44 pending', 'required_for': 'action boundary release'}",
+    "{'dependency': 'exemption authority completeness', 'status': 'PARTIAL', 'blocking': False, 'source': 'CERT-JAD-090 matches buyer/state/category/date but status-class unresolved', 'required_for': 'full policy compliance (STD-JAD-090-P)'}"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding",
+    "CERT-JAD-090 pending TX-44 status",
+    "STD-JAD-090-P exact-match rule",
+    "action boundary language"
+  ],
+  "must_repair": [
+    "None\u2014gate passed; no failures to repair",
+    "No blocked moves required",
+    "worker correctly identified pending exemption-status class as the open blocker"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "082-style status-class trap\u2014determine if pending certificate state constitutes incomplete exemption-status class per STD-JAD-090-P exact-match requirement",
+    "monotonic_preservation": [
+      "TX-44 pending state from CERT-JAD-090",
+      "STD-JAD-090-P full-class match requirement",
+      "ESCALATE verdict unless source shows TX-44 closure",
+      "WARN-JAD-090 as verification requirement, not execution authority"
+    ],
+    "objective": "Verify whether any source establishes that exemption-status class is resolved despite TX-44 pending, or confirm boundary remains open until TX-44 closure is documented",
+    "required_repairs": [
+      "None required\u2014current ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding are correct"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Worker correctly identified open exemption-status class blocker. Gate passed with no failures. Source IDs (CERT-JAD-090, WARN-JAD-090, STD-JAD-090-P, ORD-JAD-090) preserved. Policy exact-match rule correctly cited. TX-44 pending status is accurate source fact requiring closure.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

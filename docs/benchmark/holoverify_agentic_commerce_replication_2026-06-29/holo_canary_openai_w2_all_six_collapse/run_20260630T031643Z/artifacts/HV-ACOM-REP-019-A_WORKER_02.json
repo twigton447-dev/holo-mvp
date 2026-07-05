@@ -1,0 +1,31 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "late cancellation requires escalation; exact boundary closed by control record",
+    "allow_rule_assessment": "Execution not allowed until escalation rule is bound",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-AD6EBD30F4E5-CTL",
+    "escalate_rule_assessment": "Missing boundary binding for escalate rule assessment",
+    "timing_scope_authority_dependency_check": "GATE unresolved; deterministic gate failure remains"
+  },
+  "cited_evidence": [
+    "SRC-AD6EBD30F4E5-CTL",
+    "SRC-AD6EBD30F4E5-BND",
+    "SRC-AD6EBD30F4E5-POL",
+    "SRC-AD6EBD30F4E5-REQ"
+  ],
+  "critical_features_preserved": [
+    "CLOSED",
+    "source IDs",
+    "action boundary",
+    "timing/scope/authority/dependency checks",
+    "critical terms"
+  ],
+  "final_answer": "The source boundary is closed for the exact action, but the gate still fails because the escalation rule assessment is not bound. Preserve CLOSED, but do not authorize execution yet. Escalate the remaining deterministic defect and retain the source IDs, boundary, and dependency checks.",
+  "open_blockers": [
+    "missing_boundary_binding:escalate_rule_assessment",
+    "GATE"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

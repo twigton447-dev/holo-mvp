@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May logistics release the controlled export shipment?",
+    "allow_rule_assessment": "No exact match on destination",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "LIC-SIE-073 destination Peru vs SHIP-SIE-073 Chile",
+    "escalate_rule_assessment": "Destination mismatch blocks closure",
+    "timing_scope_authority_dependency_check": "License effective date matches but scope fails"
+  },
+  "cited_evidence": [
+    "LIC-SIE-073",
+    "SHIP-SIE-073",
+    "STD-SIE-073-P",
+    "WARN-SIE-073"
+  ],
+  "critical_features_preserved": [
+    "exact source doc_ids",
+    "policy match rule",
+    "destination mismatch blocker"
+  ],
+  "final_answer": "The action cannot proceed. The license (LIC-SIE-073) specifies Peru as the destination, while the shipment (SHIP-SIE-073) is destined for Chile. This critical mismatch, along with the warning (WARN-SIE-073) against relying on product family instead of exact license details, prevents the source boundary from closing. The policy (STD-SIE-073-P) mandates exact matches for closure.",
+  "open_blockers": [
+    "Destination mismatch Chile vs Peru unresolved",
+    "WARN-SIE-073 treated as execution authority"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

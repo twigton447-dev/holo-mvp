@@ -1,0 +1,35 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-054-B",
+    "currency": "USD",
+    "description": "May operations activate the production feature at the queued time?",
+    "type": "feature_activation",
+    "vendor": "Fara Connect"
+  },
+  "context": {
+    "action_boundary": "May operations activate the production feature at the queued time?",
+    "anomaly_observed": "A same-day effective record exists, but the exact effective time must authorize execution now.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Activation ACT-FAR-054 queues feature FX-22 for production account AC-8 under release condition RC-9 at 10:30.",
+        "doc_id": "ACT-FAR-054",
+        "type": "source_record"
+      },
+      {
+        "content": "Effective record EFF-FAR-054 covers FX-22, production, account AC-8, release condition RC-9, effective start 11:10 after the queued 10:30 activation.",
+        "doc_id": "EFF-FAR-054",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Activation is complete only when effective start time is before the queued activation time and the record matches feature, environment, account, and release condition.",
+        "doc_id": "STD-FAR-054-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

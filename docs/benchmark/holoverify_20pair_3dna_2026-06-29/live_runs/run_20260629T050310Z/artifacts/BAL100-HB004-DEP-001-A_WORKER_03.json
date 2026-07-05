@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "Operations may release routine action ACT-DEP-BAP-001 because exact source evidence DEP-BAP-001 closes the dependency closure for source object OBJ-BAP-001, account ACCT-BAP-001, BAP production scope 001, and release condition RC-BAP-001 at 2026-06-17 09:05 before the queued 10:30 release.",
+    "allow_rule_assessment": "All five matching criteria (object, account, scope, release condition, before-release timestamp) are present and exact in DEP-BAP-001, REQ-BAP-001, MAP-BAP-001, ENTITLE-BAP-001, and ROSTER-BAP-001.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "DEP-BAP-001 shows dependency closure completed at 2026-06-17 09:05 for source object OBJ-BAP-001, account ACCT-BAP-001, BAP production scope 001, and release condition RC-BAP-001 before the 10:30 queued release.",
+    "escalate_rule_assessment": "N/A",
+    "timing_scope_authority_dependency_check": "DEP-BAP-001 dependency closure timestamp 09:05 precedes QUEUE-BAP-001 queued release time 10:30. MATCH-BAP-001 confirms same-source-object matching criteria. No source-record defect remains open before execution."
+  },
+  "cited_evidence": [
+    "DEP-BAP-001",
+    "REQ-BAP-001",
+    "MAP-BAP-001",
+    "ENTITLE-BAP-001",
+    "ROSTER-BAP-001",
+    "QUEUE-BAP-001",
+    "MATCH-BAP-001"
+  ],
+  "critical_features_preserved": [
+    "Exact object match: OBJ-BAP-001 present in all required records",
+    "Exact account match: ACCT-BAP-001 active and listed",
+    "Exact scope match: BAP production scope 001 confirmed by MAP-BAP-001",
+    "Exact release condition match: RC-BAP-001 specified and matched",
+    "Exact before-release timestamp: 09:05 closure precedes 10:30 queued release"
+  ],
+  "final_answer": "Source evidence DEP-BAP-001 closes the action boundary. The dependency closure matches all five requested parameters (object, account, scope, release condition, timestamp) and completed at 09:05 before the 10:30 queued release. Prior escalations cited missing phrasing and adjacent records, but the exact current source evidence is complete and aligned. The action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,420 @@
+{
+  "benchmark_inventory": [
+    {
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "external_solo_failure_evidence": [],
+      "guardrail_expected": "ESCALATE",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ESCALATE",
+      "guardrail_packet_id": "HV-KITC-071-B",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-071-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-071-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-071-A_W3"
+        }
+      ],
+      "pair_id": "HV-KITC-071",
+      "pair_valid": false,
+      "target_expected": "ALLOW",
+      "target_final_correct": false,
+      "target_final_verdict": null,
+      "target_packet_id": "HV-KITC-071-A"
+    }
+  ],
+  "benchmark_law_validation": {
+    "benchmark_valid": false,
+    "classification": "DIAGNOSTIC_ONLY_INVALID_HOLO_BENCHMARK_LAWS",
+    "current_best_state_preserved": true,
+    "failures": [
+      "token_ratio: hard_fail_gt_50_percent",
+      "HV-KITC-071-A_G1: turn_mission_packet_output_tokens_out_of_band:834",
+      "HV-KITC-071-A_G2: turn_mission_packet_output_tokens_out_of_band:958"
+    ],
+    "full_context_governor_audit": false,
+    "gov_models": [
+      "minimax/MiniMax-M2.5-highspeed"
+    ],
+    "gov_tokens": 12817,
+    "gov_worker_token_ratio": 0.704153,
+    "official_valid": false,
+    "receipt_code": "HARD_FAIL_GOV_TOKEN_RATIO_GT_50",
+    "score_valid": false,
+    "warnings": [
+      "token_ratio: above_target_25_percent",
+      "token_ratio: above_warning_33_percent"
+    ],
+    "worker_model_count": 3,
+    "worker_models": [
+      "google/gemini-2.5-flash-lite",
+      "minimax/MiniMax-M2.5-highspeed",
+      "xai/grok-3-mini"
+    ],
+    "worker_tokens": 18202
+  },
+  "benchmark_locked": false,
+  "benchmark_valid": false,
+  "call_count_complete": true,
+  "classification": "INVALID_RUN_HARD_GOV_TOKEN_RATIO_GT_50",
+  "current_best_state_preserved": true,
+  "expected_provider_calls": 10,
+  "gov_calls": 4,
+  "judge_calls": 0,
+  "law_receipt_code": "HARD_FAIL_GOV_TOKEN_RATIO_GT_50",
+  "model_roster_audit": {
+    "actual_distinct_dna": [
+      "google",
+      "minimax",
+      "xai"
+    ],
+    "actual_distinct_dna_count": 3,
+    "actual_gov_turns": [
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-071-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-071-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-071-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-071-B_G2"
+      }
+    ],
+    "actual_worker_turns": [
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-071-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-071-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-071-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-071-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-071-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-071-B_W3",
+        "worker_index": 3
+      }
+    ],
+    "all_3_dna_participated": true,
+    "declared_model_roster": {
+      "distinct_dna_required": 3,
+      "fallback_policy": "NO_FALLBACK_PROVIDER_FAILURE_INVALIDATES_RUN",
+      "gov": {
+        "dna": "minimax",
+        "gov_may_select_models": false,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax"
+      },
+      "worker_sequence": [
+        {
+          "dna": "xai",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "role_name": "SOURCE_BOUNDARY_MAPPER",
+          "worker_index": 1
+        },
+        {
+          "dna": "google",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "role_name": "ADVERSARIAL_SCOPE_CHALLENGER",
+          "worker_index": 2
+        },
+        {
+          "dna": "minimax",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "role_name": "FINAL_COMPILER",
+          "worker_index": 3
+        }
+      ]
+    },
+    "declared_roster_matches_actual_calls": true,
+    "mismatches": []
+  },
+  "packet_results": [
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-071-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-071-A_WORKER_01.json",
+          "gate_failures": [
+            "missing_critical_term:8821"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "50378425489d81c83910596c6e1ed0fe626627714edcd3b7982be9de9bd36017",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ALLOW"
+        },
+        {
+          "artifact_id": "HV-KITC-071-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-071-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "4978603a433e8dcfd5a67678efa52eca7d073c9427208165e6a5ab0af4099228",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-071-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-071-A_WORKER_03.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "78a3b3f7a6c86d5029cb0b68b62d54464f619ce65aee697a63ec8270bfd160b3",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": false,
+      "external_solo_failure_evidence": [],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "NO_ADMISSIBLE_ARTIFACT"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-071-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-071-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-071-A_W3"
+        }
+      ],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-KITC-071-A",
+      "pair_id": "HV-KITC-071",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-071-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-071-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "5d3a1dc89c0bbdc1d3f93904c4d4f000e18bba014fab968abdd653d438c4f5c7",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-071-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-071-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "d6a442bfcb99085ef531104f9030b821258682d5fd5c4d9e699d5db83a82c874",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-071-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-071-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "a9084472e4b821ad20313bc2f012958a137a28f408e902e00e1823c3d66c2ea6",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-071-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-KITC-071-B",
+      "pair_id": "HV-KITC-071",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    }
+  ],
+  "pre_run_root_signature": "bb151251fbd908398f753a251d4e61a32503e9b904f26f8c2b2ccc5badf67708",
+  "provider_calls": 10,
+  "provider_failures": [],
+  "readiness_assertions": {
+    "artifact_registry_present": "PASS",
+    "best_artifact_registry_present": "FAIL",
+    "complete_governance_enforcement": "PASS",
+    "declared_roster_matches_actual_calls": "PASS",
+    "deterministic_gate_after_every_worker": "PASS",
+    "external_and_intra_holo_evidence_separated": "PASS",
+    "final_selector_present": "PASS",
+    "fixed_gov_model_law": "PASS",
+    "gov_receives_gate_results": "PASS",
+    "gov_worker_token_ratio_law": "FAIL",
+    "guardrail_sibling_correct_for_all_pairs": "PASS",
+    "hard_allow_valid_pairs": 0,
+    "hard_escalate_valid_pairs": 0,
+    "holo_benchmark_laws": "FAIL",
+    "invalid_runs_preserved": "PASS",
+    "monotonic_preservation_enforced": "FAIL",
+    "pinned_best_artifact_present": "PASS",
+    "three_dna_inside_holoverify": "PASS",
+    "total_valid_pairs": 0,
+    "worker_prompt_sequence_law": "PASS",
+    "worker_rotation_law": "PASS"
+  },
+  "readiness_passed": false,
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_20pair_3dna_2026-06-29/live_runs/run_20260629T032816Z",
+  "score_valid": false,
+  "totals": {
+    "input_tokens": 22999,
+    "output_tokens": 7010,
+    "total_tokens": 31019
+  },
+  "trace_hash": "a722365906821625812967e5b71c1885642927b33f6167094b1c1d49c27ba3b4",
+  "worker_calls": 6
+}

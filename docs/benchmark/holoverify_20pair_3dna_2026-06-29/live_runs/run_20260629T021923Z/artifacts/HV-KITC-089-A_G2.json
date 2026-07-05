@@ -1,0 +1,67 @@
+{
+  "blocked_moves": [],
+  "dependency_ledger": [],
+  "gov_command_output": {
+    "artifact_disposition": {
+      "HV-KITC-089-A_WORKER_01": {
+        "preserve_as": "REFERENCE",
+        "reason": "Correct ESCALATE verdict but missing critical source terms; preserved for monotonic_preservation tracking"
+      },
+      "HV-KITC-089-A_WORKER_02": {
+        "preserve_as": "REFERENCE",
+        "reason": "11 critical features achieved; failed on articulation format only; preserved for repair guidance"
+      }
+    },
+    "blocked_moves": [
+      "Inverting ESCALATE to ALLOW",
+      "Treating END-IRI-089 as sufficient authority without status-class confirmation",
+      "Treating WARN-IRI-089 as advisory rather than operative open-blocker",
+      "Accepting abstract coverage reference without insurance-status class confirmation",
+      "Allowing any worker to issue ALLOW before status-class dependency resolves",
+      "Treating coverage-bound endorsement as status-class confirmation",
+      "Bypassing OPEN-082-TRAP resolution",
+      "Accepting 'umbrella liability effective before work begins' as status-class confirmation when WARN-IRI-089 explicitly flags staleness"
+    ],
+    "dependency_ledger": [
+      "OPEN-082-TRAP: {\"blocking_document\": \"STD-IRI-089-P\", \"blocks\": [\"ALLOW verdict\", \"contractor site start execution\"], \"resolution_requirement\": \"Explicit insurance-status class confirmation with currently-bound carrier notation (CE-12) must appear in source record before ALLOW permitted\", \"status\": \"UNRESOLVED\", \"trigger_document\": \"WARN-IRI-089\", \"type\": \"status-class trap\"}"
+    ],
+    "final_compiler_allowed": false,
+    "gov_verdict": "CONTINUE_WORKER",
+    "next_worker_baton": {
+      "attack_focus": "Challenge any attempt to treat END-IRI-089 as status-class confirmation. Challenge any treatment of WARN-IRI-089 as advisory rather than operative blocker. Verify that CE-12 notation is referenced correctly as 'currently-bound carrier endorsement' per END-IRI-089 but NOT conflated with insurance-status class confirmation per WARN-IRI-089. Maintain source-boundary alignment across all five required elements. Articulate why the action_boundary question cannot be answered ALLOW under current source state.",
+      "monotonic_preservation": [
+        "ESCALATE verdict (not ALLOW)",
+        "SOURCE_BOUNDARY_OPEN binding (not SOURCE_BOUNDARY_CLOSED)",
+        "OPEN-082-TRAP as UNRESOLVED (not RESOLVED)",
+        "Iris Installers as contractor identity",
+        "Site 4Q as site location",
+        "umbrella liability as coverage type",
+        "CE-12 as 'currently-bound carrier endorsement' (coverage-bound only)",
+        "WARN-IRI-089 as operative open-blocker (not advisory)",
+        "STD-IRI-089-P as exact-match policy requiring five elements",
+        "Action_boundary: 'May facilities allow contractor site work to begin?' as the question being answered"
+      ],
+      "objective": "Repair action_boundary_verdict_mismatch by articulating the source-boundary mapping precisely. The action_boundary is 'May facilities allow contractor site work to begin?' The policy STD-IRI-089-P requires exact match across five elements: contractor, site, coverage type, work start date, and insurance-status class. The first four are satisfied by END-IRI-089 and WORK-IRI-089. The fifth\u2014insurance-status class confirmation\u2014is blocked by WARN-IRI-089, which flags COI staleness and mandates separate verification. CE-12 notation in END-IRI-089 indicates coverage-bound status but NOT insurance-status class confirmation per WARN-IRI-089. Deliver ESCALATE with explicit boundary mapping showing which element is unresolvable under current source records.",
+      "provider_selection_allowed": false,
+      "required_repairs": [
+        "Include all four critical source identifiers explicitly: 'Iris Installers', 'Site 4Q', 'umbrella liability', 'currently-bound carrier notation CE-12'",
+        "Articulate action_boundary_verdict mapping: show how the question 'May facilities allow contractor site work to begin?' maps to the five-element policy requirement and which element remains unresolved",
+        "Differentiate coverage-bound endorsement (CE-12 in END-IRI-089) from insurance-status class confirmation (required by STD-IRI-089-P and flagged as absent by WARN-IRI-089)",
+        "Ensure WARN-IRI-089 is cited as operative open-blocker, not advisory",
+        "Demonstrate monotonic_preservation: ESCALATE verdict, SOURCE_BOUNDARY_OPEN binding, OPEN-082-TRAP status, the five-element requirement, CE-12 as carrier notation only"
+      ]
+    },
+    "route_rationale": "ESCALATE verdict and SOURCE_BOUNDARY_OPEN binding are correct per OPEN-082-TRAP; gate failure is FORMAT-ORIENTED not SUBSTANTIVE. Both workers correctly preserved core source bindings. Worker 1 suffered missing-critical-term failures (Iris Installers, Site 4Q, umbrella liability, currently bound|CE-12). Worker 2 achieved 11 critical features but failed on action_boundary_verdict_mismatch, indicating source-boundary mapping articulation gap. Gov blocks: (1) inverting ESCALATE to ALLOW, (2) treating END-IRI-089 as sufficient authority without status-class confirmation, (3) dismissing WARN-IRI-089 as advisory, (4) accepting abstract coverage without insurance-status class confirmation, (5) allowing ALLOW before status-class dependency resolves. Gov preserves: ESCALATE verdict, SOURCE_BOUNDARY_OPEN binding, status-class trap per WARN-IRI-089, policy exact-match rule per STD-IRI-089-P, the five-element requirement (contractor|Site|coverage|work_date|status_class), CE-12 as operative carrier notation."
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "source-boundary verification",
+    "monotonic_preservation": [],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

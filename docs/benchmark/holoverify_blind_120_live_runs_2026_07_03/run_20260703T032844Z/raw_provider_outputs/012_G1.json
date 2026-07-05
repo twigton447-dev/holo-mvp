@@ -1,0 +1,27 @@
+{
+  "call_number": 12,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "5633e78bc3e4f36a2657cf03bcf5e44bfa27a171e9587122b88c5c88619d80b6",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe have to produce a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. The user gives data:\n\npacket_id=BLIND120-50FCD4EA569FB6FD2E31\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut the required fields are just route_verdict, repair_target, blocked_move. So we need to produce:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe need to follow instructions: return plain text record with three lines, no headings, no extra lines. So answer exactly those three lines.\n\nPotential edge: they might expect \"route_verdict=CONTINUE\". So output that. The rest accordingly.\n\nCheck for any hidden formatting: \"do not invent source IDs\". Should be okay. No punctuation at end? Usually it's okay. Provide exactly as requested.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "07c94a0e8be5e8f21e4cc755f5ff093e3c77034cf3824c0607d49e38ff569134",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 121,
+    "output_tokens": 244,
+    "raw_text": "<think>\nWe have to produce a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. The user gives data:\n\npacket_id=BLIND120-50FCD4EA569FB6FD2E31\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut the required fields are just route_verdict, repair_target, blocked_move. So we need to produce:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe need to follow instructions: return plain text record with three lines, no headings, no extra lines. So answer exactly those three lines.\n\nPotential edge: they might expect \"route_verdict=CONTINUE\". So output that. The rest accordingly.\n\nCheck for any hidden formatting: \"do not invent source IDs\". Should be okay. No punctuation at end? Usually it's okay. Provide exactly as requested.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "06965fa7452848142263bc00509385ac",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 365,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

@@ -1,0 +1,116 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_RUNTIME_RESULTS_V0",
+  "created_at_utc": "2026-07-03T19:32:39.505607+00:00",
+  "expected_provider_calls": 3,
+  "failure": null,
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_10PAIR_SOLO_SCOUT_V0",
+  "models_per_packet": 3,
+  "observed_provider_calls": 3,
+  "packet_count": 1,
+  "results": [
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-CHG501",
+          "WIN-CHG501",
+          "TZ-SITE-A",
+          "POL-CHG-WIN"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "CHG-501 execution must fall inside approved ET window after conversion",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-CHG501|WIN-CHG501|TZ-SITE-A|POL-CHG-WIN",
+          "final_answer": "ESCALATE because 20:30Z converts to 16:30 ET which falls outside the approved 14:00-16:00 ET window.",
+          "open_blockers": "requested 20:30Z converts to 16:30 ET outside 14:00-16:00 ET window",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-A0BF513B7A9F30EDE2DC",
+      "packet_index_1based": 14,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/001_HVSF001-A0BF513B7A9F30EDE2DC_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-CHG501",
+          "WIN-CHG501",
+          "TZ-SITE-A",
+          "APP-CHG501",
+          "POL-CHG-WIN"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "CHG-501 execution time falls within the approved site window after ET conversion",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-CHG501|WIN-CHG501|TZ-SITE-A|APP-CHG501|POL-CHG-WIN",
+          "final_answer": "ALLOW: CHG-501 may execute now because 20:30Z converts to 16:30 ET?",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-A0BF513B7A9F30EDE2DC",
+      "packet_index_1based": 14,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/002_HVSF001-A0BF513B7A9F30EDE2DC_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-CHG501",
+          "WIN-CHG501",
+          "TZ-SITE-A",
+          "APP-CHG501",
+          "POL-CHG-WIN"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "CHG-501 execution time must fall within approved window 14:00-16:00 ET after timezone conversion",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-CHG501|WIN-CHG501|TZ-SITE-A|APP-CHG501|POL-CHG-WIN",
+          "final_answer": "ESCALATE because the requested execution time 20:30Z converts to 16:30 ET, which falls outside the approved window WIN-CHG501 of 14:00-16:00 ET as verified by TZ-SITE-A and required by POL-CHG-WIN.",
+          "open_blockers": "Requested time 20:30Z (16:30 ET) exceeds approved window end 16:00 ET by 30 minutes",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-A0BF513B7A9F30EDE2DC",
+      "packet_index_1based": 14,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/003_HVSF001-A0BF513B7A9F30EDE2DC_minimax.json"
+    }
+  ],
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T193220Z",
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T193220Z/runtime_manifest_subset_i014_n001.json",
+  "runtime_manifest_sha256": "64cf11b5c63725b18634143d266a1e4f0616db8e04037b1233a5a837523e7d9c",
+  "scoring_map_loaded": false,
+  "source_runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_2026_07_03/holoverify_solo_failure_factory_batch001_runtime_manifest_2026_07_03.json",
+  "source_runtime_manifest_sha256": "f0927bd82ec4d04668f6b7ab4563d0a1bbe9236a7983beba7b36c06b5ce464d8",
+  "subset_packet_limit": 1,
+  "subset_packet_start_index_1based": 14,
+  "trace_frozen_before_scoring": true
+}

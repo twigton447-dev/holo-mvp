@@ -1,0 +1,384 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a HoloVerify worker. Preserve state. Obey Gov.\nWorker prompt hierarchy is strict: Gov adversarial baton, structured canonical state, then artifact context.\nRaw accumulating transcript injection is forbidden; use structured state and artifact refs only.\nReturn only valid JSON. No markdown fences."
+    },
+    {
+      "role": "user",
+      "content": "{\"gov_adversarial_baton\":{\"routing_lens\":{\"route_verdict\":\"FAIL_CLOSED\",\"main_repair_target\":\"initial source-bound mapping\",\"blocked_move\":\"do not decide from anomaly tone alone\",\"unresolved_dependency\":\"STD-QUA-071-P requires pre-change callback source as mandatory gate for payment release after bank update\",\"current_objective\":\"FINAL_COMPILER\"},\"full_latest_gov_baton\":{\"run_id\":\"run_20260629T021923Z\",\"pair_id\":\"HV-KITC-071\",\"packet_id\":\"HV-KITC-071-B\",\"turn\":3,\"role\":\"gov\",\"dna\":\"minimax\",\"gov_verdict\":\"FAIL_CLOSED\",\"gov_binding\":\"PRE_CHANGE_GATE_UNSATISFIABLE\",\"gate_status\":\"PASS\",\"source_id_count\":7,\"deterministic_gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":true,\"failures\":[],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_OPEN\"},\"artifact_verdict_accepted\":true,\"artifact_binding_accepted\":true,\"must_preserve\":[\"pre-change callback source requirement in STD-QUA-071-P\",\"CALL-QUA-071 is post-change email thread, cannot satisfy pre-change gate\",\"account ending 8821 as common reference across sources\",\"four-gate chain structure (pre-change callback, VM approval, bank ownership, payment-release authority)\"],\"must_repair\":[],\"blocked_moves_preserved\":[\"treating post-change email thread as pre-change callback source\",\"substituting CALL-QUA-071 for required pre-change source\",\"issuing FINAL_COMPILER without pre-change gate closure\",\"treating adjacent source as exact source boundary\",\"treating planning artifact as execution authority\",\"conflating REL-QUA-071 as satisfying pre-change gate\",\"ignoring timing_scope_authority_dependency_check\"],\"blocked_moves_extended\":[],\"dependency_ledger\":[\"STD-QUA-071-P requires pre-change callback source as mandatory gate for payment release after bank update\",\"CALL-QUA-071 confirmed as post-change email thread (uses post-change invoice email thread, not pre-change vendor master phone source)\",\"VM-QUA-071 gate SATISFIED\",\"BANK-QUA-071 gate SATISFIED\",\"REL-QUA-071 gate SATISFIED\",\"PRE_CHANGE_GATE gate UNSATISFIABLE - no pre-change callback source exists in packet\",\"PAY-QUA-071 gate UNREACHABLE due to upstream dependency failure\"],\"gov_reasoning\":\"Worker 02 (gemini-2.5-flash-lite) correctly identified that CALL-QUA-071 is a post-change email thread and cannot satisfy the mandatory pre-change callback source requirement in STD-QUA-071-P. The deterministic gate passed with no failures. Reviewing the full packet: no pre-change callback source exists among the seven source documents. The pre-change gate is fundamentally unsatisfiable with available evidence. Since STD-QUA-071-P states 'No single record must carry every field if the chain closes all four gates,' and the chain cannot close the pre-change gate, the action boundary 'May AP release payment after the vendor bank update?' must be answered NO. Workers correctly preserved the action boundary, policy exact-match rule, pre-change vs post-change distinction, and account ending 8821 as common reference. Routing to FAIL_CLOSED is appropriate because the mandatory pre-change callback source gate cannot be repaired or satisfied with any source in the current packet.\",\"final_compiler_allowed\":true,\"final_compiler_rationale\":\"The pre-change callback source is a mandatory gate per STD-QUA-071-P. No pre-change source exists in the packet. CALL-QUA-071 is post-change and cannot be substituted. The action cannot legally proceed under the exact source-boundary policy.\",\"next_worker_baton\":{\"objective\":\"Continue under Gov source-bound repairs.\",\"attack_focus\":\"source-boundary verification\",\"required_repairs\":[],\"monotonic_preservation\":[\"pre-change callback source requirement in STD-QUA-071-P\",\"CALL-QUA-071 is post-change email thread, cannot satisfy pre-change gate\",\"account ending 8821 as common reference across sources\",\"four-gate chain structure (pre-change callback, VM approval, bank ownership, payment-release authority)\"]},\"control_action\":\"FAIL_CLOSED\",\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\",\"route_verdict\":\"FAIL_CLOSED\",\"blocked_moves\":[]},\"role_frame\":\"Act as an adversarial source-boundary verifier, not a sycophant.\"},\"structured_canonical_state\":{\"USER_GOAL\":\"Decide whether the action may proceed using only source records in this packet.\",\"SETTLED_DECISIONS\":[\"Gov chooses control actions, not models.\",\"Source context is ground truth.\",\"Workers return compact JSON only.\"],\"unresolved_tensions\":[\"STD-QUA-071-P requires pre-change callback source as mandatory gate for payment release after bank update\",\"CALL-QUA-071 confirmed as post-change email thread (uses post-change invoice email thread, not pre-change vendor master phone source)\",\"VM-QUA-071 gate SATISFIED\",\"BANK-QUA-071 gate SATISFIED\",\"REL-QUA-071 gate SATISFIED\",\"PRE_CHANGE_GATE gate UNSATISFIABLE - no pre-change callback source exists in packet\",\"PAY-QUA-071 gate UNREACHABLE due to upstream dependency failure\"],\"system_role\":\"HoloVerify worker. Preserve state. Obey Gov.\",\"run_lock\":{\"run_id\":\"run_20260629T021923Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-071\",\"packet_id\":\"HV-KITC-071-B\",\"worker_index\":3,\"worker_role\":\"FINAL_COMPILER\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"no_substitutions\":true},\"state_brief\":{\"run_id\":\"run_20260629T021923Z\",\"pair_id\":\"HV-KITC-071\",\"packet_id\":\"HV-KITC-071-B\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-071-B_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-071-B_WORKER_01.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"46ad9e85f94c2cc0c97a1f1b00a063046ea77f8098b01ae3a529aa927122c3bb\",\"source_ids\":[\"ALERT-QUA-071\",\"BANK-QUA-071\",\"CALL-QUA-071\",\"PAY-QUA-071\",\"REL-QUA-071\",\"STD-QUA-071-P\",\"VM-QUA-071\"]},{\"turn\":2,\"role\":\"gov\",\"turn_id\":\"HV-KITC-071-B_G1\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict ESCALATE route CONTINUE_WORKER\",\"full_output_ref\":\"artifacts/HV-KITC-071-B_G1.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"42c7f9ea6625c1e6cf2995d998c0d92a26c3bd333c0479c001cd051de32bcc09\",\"source_ids\":[\"ALERT-QUA-071\",\"BANK-QUA-071\",\"CALL-QUA-071\",\"PAY-QUA-071\",\"REL-QUA-071\",\"STD-QUA-071-P\",\"VM-QUA-071\"],\"blocked_moves\":[\"treating post-change email thread as pre-change callback source\",\"substituting CALL-QUA-071 for required pre-change source\",\"issuing FINAL_COMPILER without pre-change gate closure\",\"treating adjacent source as exact source boundary\",\"treating planning artifact as execution authority\",\"conflating REL-QUA-071 as satisfying pre-change gate\",\"ignoring timing_scope_authority_dependency_check\"]},{\"turn\":3,\"role\":\"worker\",\"turn_id\":\"HV-KITC-071-B_W2\",\"model\":\"google/gemini-2.5-flash-lite\",\"dna\":\"google\",\"output_summary\":\"ADVERSARIAL_SCOPE_CHALLENGER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-071-B_WORKER_02.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"e14bdc12ff4a8d7acda51b2403cf13f2883497a0ab487658f98441e5dcdba0b8\",\"source_ids\":[\"ALERT-QUA-071\",\"BANK-QUA-071\",\"CALL-QUA-071\",\"PAY-QUA-071\",\"REL-QUA-071\",\"STD-QUA-071-P\",\"VM-QUA-071\"]},{\"turn\":4,\"role\":\"gov\",\"turn_id\":\"HV-KITC-071-B_G2\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict None route FAIL_CLOSED\",\"full_output_ref\":\"artifacts/HV-KITC-071-B_G2.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"2850a32abf913c9a8d409336a905b30a03a45ee95e12da8a59ad9738fad9d84a\",\"source_ids\":[\"ALERT-QUA-071\",\"BANK-QUA-071\",\"CALL-QUA-071\",\"PAY-QUA-071\",\"REL-QUA-071\",\"STD-QUA-071-P\",\"VM-QUA-071\"],\"blocked_moves\":[]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"STD-QUA-071-P requires pre-change callback source as mandatory gate for payment release after bank update\",\"CALL-QUA-071 confirmed as post-change email thread (uses post-change invoice email thread, not pre-change vendor master phone source)\",\"VM-QUA-071 gate SATISFIED\",\"BANK-QUA-071 gate SATISFIED\",\"REL-QUA-071 gate SATISFIED\",\"PRE_CHANGE_GATE gate UNSATISFIABLE - no pre-change callback source exists in packet\",\"PAY-QUA-071 gate UNREACHABLE due to upstream dependency failure\"],\"blocked_moves_so_far\":[\"treating post-change email thread as pre-change callback source\",\"substituting CALL-QUA-071 for required pre-change source\",\"issuing FINAL_COMPILER without pre-change gate closure\",\"treating adjacent source as exact source boundary\",\"treating planning artifact as execution authority\",\"conflating REL-QUA-071 as satisfying pre-change gate\",\"ignoring timing_scope_authority_dependency_check\"],\"source_ids_used_so_far\":[\"ALERT-QUA-071\",\"BANK-QUA-071\",\"CALL-QUA-071\",\"PAY-QUA-071\",\"REL-QUA-071\",\"STD-QUA-071-P\",\"VM-QUA-071\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":{\"artifact_id\":\"HV-KITC-071-B_WORKER_02\",\"turn_number\":2,\"provider\":\"google\",\"model\":\"gemini-2.5-flash-lite\",\"dna\":\"google\",\"full_output_ref\":\"artifacts/HV-KITC-071-B_WORKER_02.json\",\"hash\":\"e14bdc12ff4a8d7acda51b2403cf13f2883497a0ab487658f98441e5dcdba0b8\",\"gate_status\":\"PASS\",\"gate_passed\":true,\"gate_failures\":[],\"critical_feature_count\":5,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"},\"pinned_best_artifact_full_text\":\"{\\n  \\\"boundary_binding\\\": {\\n    \\\"action_boundary\\\": \\\"May AP release payment after the vendor bank update?\\\",\\n    \\\"allow_rule_assessment\\\": \\\"Chain fails to supply pre-change callback source as required by STD-QUA-071-P.\\\",\\n    \\\"binding_class\\\": \\\"SOURCE_BOUNDARY_OPEN\\\",\\n    \\\"controlling_source_fact\\\": \\\"STD-QUA-071-P requires a pre-change callback source as a mandatory gate for payment release after a bank update.\\\",\\n    \\\"escalate_rule_assessment\\\": \\\"CALL-QUA-071 is a post-change email thread and does not satisfy the STD-QUA-071-P requirement for a pre-change callback source.\\\",\\n    \\\"timing_scope_authority_dependency_check\\\": \\\"Payment-release authority REL-QUA-071 is present, but the pre-change gate remains open.\\\"\\n  },\\n  \\\"cited_evidence\\\": [\\n    \\\"CALL-QUA-071\\\",\\n    \\\"STD-QUA-071-P\\\",\\n    \\\"VM-QUA-071\\\",\\n    \\\"BANK-QUA-071\\\",\\n    \\\"REL-QUA-071\\\"\\n  ],\\n  \\\"critical_features_preserved\\\": [\\n    \\\"source IDs\\\",\\n    \\\"action boundary\\\",\\n    \\\"policy exact-match rule\\\",\\n    \\\"pre-change vs post-change distinction\\\",\\n    \\\"account ending 8821 as common reference\\\"\\n  ],\\n  \\\"final_answer\\\": \\\"ESCALATE. The action may not proceed because the evidence chain fails to satisfy the mandatory pre-change callback source gate required by STD-QUA-071-P. CALL-QUA-071 is a post-change email thread and does not qualify. VM-QUA-071, BANK-QUA-071, and REL-QUA-071 gates are satisfied, but the pre-change gate remains open before payment execution.\\\",\\n  \\\"open_blockers\\\": [\\n    \\\"Pre-change callback source is missing and CALL-QUA-071 is post-change.\\\",\\n    \\\"STD-QUA-071-P exact-match policy requires pre-change callback source as mandatory gate; CALL-QUA-071 is post-change email thread, does not satisfy.\\\"\\n  ],\\n  \\\"verification_verdict\\\": \\\"ESCALATE\\\",\\n  \\\"worker_role\\\": \\\"ADVERSARIAL_SCOPE_CHALLENGER\\\"\\n}\"},\"task_and_answer_contract\":{\"task\":\"Decide whether the action may proceed using only source records in this packet.\",\"answer_contract\":{\"worker_role\":\"string\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"open_blockers\":[\"string\"],\"critical_features_preserved\":[\"string\"],\"final_answer\":\"string\"},\"word_band\":\"final_answer 25-120 words\",\"source_rules\":[\"cite exact doc_id values only\",\"do not invent source IDs\",\"ALLOW only when exact current source boundary is closed before execution\",\"ESCALATE when a narrow source-record defect remains open before execution\"],\"deterministic_gate_categories\":[\"word band\",\"required sections\",\"source IDs\",\"invented source IDs\",\"timing/scope/authority/dependency section\",\"action-boundary violations\",\"critical dependencies/traps\"]},\"current_turn_command\":\"Act under the baton. If state and Gov conflict, flag the conflict in open_blockers.\"},\"artifact_context\":{\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-071-B\",\"type\":\"vendor_bank_update_payment\",\"vendor\":\"Quanta Field Services\",\"amount\":73400,\"currency\":\"USD\",\"description\":\"May AP release payment after the vendor bank update?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May AP release payment after the vendor bank update?\",\"anomaly_observed\":\"The packet includes a bank-change alert, a vendor-master form, a callback record, and a payment-release authority.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"PAY-QUA-071\",\"type\":\"source_record\",\"content\":\"Payment PAY-QUA-071 releases USD 73400 to Quanta Field Services account ending 8821 on 2026-06-28.\"},{\"doc_id\":\"ALERT-QUA-071\",\"type\":\"source_record\",\"content\":\"Bank-change alert remains visible for Quanta Field Services because the account changed this week.\"},{\"doc_id\":\"CALL-QUA-071\",\"type\":\"source_record\",\"content\":\"Callback CALL-QUA-071 used the post-change invoice email thread, not the pre-change vendor master phone source, to confirm account ending 8821.\"},{\"doc_id\":\"VM-QUA-071\",\"type\":\"source_record\",\"content\":\"Vendor-master approval VM-QUA-071 approves account ending 8821 for Quanta Field Services.\"},{\"doc_id\":\"BANK-QUA-071\",\"type\":\"source_record\",\"content\":\"Bank ownership BANK-QUA-071 confirms account ending 8821 is owned by Quanta Field Services.\"},{\"doc_id\":\"REL-QUA-071\",\"type\":\"source_record\",\"content\":\"Payment-release authority REL-QUA-071 approves Quanta Field Services, USD 73400, account ending 8821, release date 2026-06-28 before payment.\"}],\"policy_documents\":[{\"doc_id\":\"STD-QUA-071-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Payment after bank update is complete when the evidence chain collectively supplies: pre-change callback source, vendor-master account approval, bank ownership validation, and payment-release authority matching vendor, amount, account, and release date before payment. No single record must carry every field if the chain closes all four gates.\"}]}},\"prior_artifact_refs\":[{\"turn_id\":\"HV-KITC-071-B_W1\",\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"gate_passed\":true,\"gate_failures\":[]},{\"turn_id\":\"HV-KITC-071-B_W2\",\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"gate_passed\":true,\"gate_failures\":[]}]}}"
+    }
+  ],
+  "prompt_object": {
+    "gov_adversarial_baton": {
+      "routing_lens": {
+        "route_verdict": "FAIL_CLOSED",
+        "main_repair_target": "initial source-bound mapping",
+        "blocked_move": "do not decide from anomaly tone alone",
+        "unresolved_dependency": "STD-QUA-071-P requires pre-change callback source as mandatory gate for payment release after bank update",
+        "current_objective": "FINAL_COMPILER"
+      },
+      "full_latest_gov_baton": {
+        "run_id": "run_20260629T021923Z",
+        "pair_id": "HV-KITC-071",
+        "packet_id": "HV-KITC-071-B",
+        "turn": 3,
+        "role": "gov",
+        "dna": "minimax",
+        "gov_verdict": "FAIL_CLOSED",
+        "gov_binding": "PRE_CHANGE_GATE_UNSATISFIABLE",
+        "gate_status": "PASS",
+        "source_id_count": 7,
+        "deterministic_gate_result": {
+          "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+          "passed": true,
+          "failures": [],
+          "artifact_verdict": "ESCALATE",
+          "artifact_binding": "SOURCE_BOUNDARY_OPEN"
+        },
+        "artifact_verdict_accepted": true,
+        "artifact_binding_accepted": true,
+        "must_preserve": [
+          "pre-change callback source requirement in STD-QUA-071-P",
+          "CALL-QUA-071 is post-change email thread, cannot satisfy pre-change gate",
+          "account ending 8821 as common reference across sources",
+          "four-gate chain structure (pre-change callback, VM approval, bank ownership, payment-release authority)"
+        ],
+        "must_repair": [],
+        "blocked_moves_preserved": [
+          "treating post-change email thread as pre-change callback source",
+          "substituting CALL-QUA-071 for required pre-change source",
+          "issuing FINAL_COMPILER without pre-change gate closure",
+          "treating adjacent source as exact source boundary",
+          "treating planning artifact as execution authority",
+          "conflating REL-QUA-071 as satisfying pre-change gate",
+          "ignoring timing_scope_authority_dependency_check"
+        ],
+        "blocked_moves_extended": [],
+        "dependency_ledger": [
+          "STD-QUA-071-P requires pre-change callback source as mandatory gate for payment release after bank update",
+          "CALL-QUA-071 confirmed as post-change email thread (uses post-change invoice email thread, not pre-change vendor master phone source)",
+          "VM-QUA-071 gate SATISFIED",
+          "BANK-QUA-071 gate SATISFIED",
+          "REL-QUA-071 gate SATISFIED",
+          "PRE_CHANGE_GATE gate UNSATISFIABLE - no pre-change callback source exists in packet",
+          "PAY-QUA-071 gate UNREACHABLE due to upstream dependency failure"
+        ],
+        "gov_reasoning": "Worker 02 (gemini-2.5-flash-lite) correctly identified that CALL-QUA-071 is a post-change email thread and cannot satisfy the mandatory pre-change callback source requirement in STD-QUA-071-P. The deterministic gate passed with no failures. Reviewing the full packet: no pre-change callback source exists among the seven source documents. The pre-change gate is fundamentally unsatisfiable with available evidence. Since STD-QUA-071-P states 'No single record must carry every field if the chain closes all four gates,' and the chain cannot close the pre-change gate, the action boundary 'May AP release payment after the vendor bank update?' must be answered NO. Workers correctly preserved the action boundary, policy exact-match rule, pre-change vs post-change distinction, and account ending 8821 as common reference. Routing to FAIL_CLOSED is appropriate because the mandatory pre-change callback source gate cannot be repaired or satisfied with any source in the current packet.",
+        "final_compiler_allowed": true,
+        "final_compiler_rationale": "The pre-change callback source is a mandatory gate per STD-QUA-071-P. No pre-change source exists in the packet. CALL-QUA-071 is post-change and cannot be substituted. The action cannot legally proceed under the exact source-boundary policy.",
+        "next_worker_baton": {
+          "objective": "Continue under Gov source-bound repairs.",
+          "attack_focus": "source-boundary verification",
+          "required_repairs": [],
+          "monotonic_preservation": [
+            "pre-change callback source requirement in STD-QUA-071-P",
+            "CALL-QUA-071 is post-change email thread, cannot satisfy pre-change gate",
+            "account ending 8821 as common reference across sources",
+            "four-gate chain structure (pre-change callback, VM approval, bank ownership, payment-release authority)"
+          ]
+        },
+        "control_action": "FAIL_CLOSED",
+        "gov_mode": "CONTROL_ROUTER",
+        "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+        "route_verdict": "FAIL_CLOSED",
+        "blocked_moves": []
+      },
+      "role_frame": "Act as an adversarial source-boundary verifier, not a sycophant."
+    },
+    "structured_canonical_state": {
+      "USER_GOAL": "Decide whether the action may proceed using only source records in this packet.",
+      "SETTLED_DECISIONS": [
+        "Gov chooses control actions, not models.",
+        "Source context is ground truth.",
+        "Workers return compact JSON only."
+      ],
+      "unresolved_tensions": [
+        "STD-QUA-071-P requires pre-change callback source as mandatory gate for payment release after bank update",
+        "CALL-QUA-071 confirmed as post-change email thread (uses post-change invoice email thread, not pre-change vendor master phone source)",
+        "VM-QUA-071 gate SATISFIED",
+        "BANK-QUA-071 gate SATISFIED",
+        "REL-QUA-071 gate SATISFIED",
+        "PRE_CHANGE_GATE gate UNSATISFIABLE - no pre-change callback source exists in packet",
+        "PAY-QUA-071 gate UNREACHABLE due to upstream dependency failure"
+      ],
+      "system_role": "HoloVerify worker. Preserve state. Obey Gov.",
+      "run_lock": {
+        "run_id": "run_20260629T021923Z",
+        "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+        "pair_id": "HV-KITC-071",
+        "packet_id": "HV-KITC-071-B",
+        "worker_index": 3,
+        "worker_role": "FINAL_COMPILER",
+        "model": "minimax/MiniMax-M2.5-highspeed",
+        "no_substitutions": true
+      },
+      "state_brief": {
+        "run_id": "run_20260629T021923Z",
+        "pair_id": "HV-KITC-071",
+        "packet_id": "HV-KITC-071-B",
+        "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+        "turns_completed": [
+          {
+            "turn": 1,
+            "role": "worker",
+            "turn_id": "HV-KITC-071-B_W1",
+            "model": "xai/grok-3-mini",
+            "dna": "xai",
+            "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ESCALATE",
+            "full_output_ref": "artifacts/HV-KITC-071-B_WORKER_01.json",
+            "gate_status": "PASS",
+            "artifact_hash": "46ad9e85f94c2cc0c97a1f1b00a063046ea77f8098b01ae3a529aa927122c3bb",
+            "source_ids": [
+              "ALERT-QUA-071",
+              "BANK-QUA-071",
+              "CALL-QUA-071",
+              "PAY-QUA-071",
+              "REL-QUA-071",
+              "STD-QUA-071-P",
+              "VM-QUA-071"
+            ]
+          },
+          {
+            "turn": 2,
+            "role": "gov",
+            "turn_id": "HV-KITC-071-B_G1",
+            "model": "minimax/MiniMax-M2.5-highspeed",
+            "dna": "minimax",
+            "output_summary": "Gov local verdict ESCALATE route CONTINUE_WORKER",
+            "full_output_ref": "artifacts/HV-KITC-071-B_G1.json",
+            "gate_status": "PASS",
+            "artifact_hash": "42c7f9ea6625c1e6cf2995d998c0d92a26c3bd333c0479c001cd051de32bcc09",
+            "source_ids": [
+              "ALERT-QUA-071",
+              "BANK-QUA-071",
+              "CALL-QUA-071",
+              "PAY-QUA-071",
+              "REL-QUA-071",
+              "STD-QUA-071-P",
+              "VM-QUA-071"
+            ],
+            "blocked_moves": [
+              "treating post-change email thread as pre-change callback source",
+              "substituting CALL-QUA-071 for required pre-change source",
+              "issuing FINAL_COMPILER without pre-change gate closure",
+              "treating adjacent source as exact source boundary",
+              "treating planning artifact as execution authority",
+              "conflating REL-QUA-071 as satisfying pre-change gate",
+              "ignoring timing_scope_authority_dependency_check"
+            ]
+          },
+          {
+            "turn": 3,
+            "role": "worker",
+            "turn_id": "HV-KITC-071-B_W2",
+            "model": "google/gemini-2.5-flash-lite",
+            "dna": "google",
+            "output_summary": "ADVERSARIAL_SCOPE_CHALLENGER local verdict ESCALATE",
+            "full_output_ref": "artifacts/HV-KITC-071-B_WORKER_02.json",
+            "gate_status": "PASS",
+            "artifact_hash": "e14bdc12ff4a8d7acda51b2403cf13f2883497a0ab487658f98441e5dcdba0b8",
+            "source_ids": [
+              "ALERT-QUA-071",
+              "BANK-QUA-071",
+              "CALL-QUA-071",
+              "PAY-QUA-071",
+              "REL-QUA-071",
+              "STD-QUA-071-P",
+              "VM-QUA-071"
+            ]
+          },
+          {
+            "turn": 4,
+            "role": "gov",
+            "turn_id": "HV-KITC-071-B_G2",
+            "model": "minimax/MiniMax-M2.5-highspeed",
+            "dna": "minimax",
+            "output_summary": "Gov local verdict None route FAIL_CLOSED",
+            "full_output_ref": "artifacts/HV-KITC-071-B_G2.json",
+            "gate_status": "FAIL",
+            "artifact_hash": "2850a32abf913c9a8d409336a905b30a03a45ee95e12da8a59ad9738fad9d84a",
+            "source_ids": [
+              "ALERT-QUA-071",
+              "BANK-QUA-071",
+              "CALL-QUA-071",
+              "PAY-QUA-071",
+              "REL-QUA-071",
+              "STD-QUA-071-P",
+              "VM-QUA-071"
+            ],
+            "blocked_moves": []
+          }
+        ],
+        "current_position": "source-bound action verification with adversarial cross-DNA repair",
+        "resolved_dependencies": [],
+        "unresolved_dependencies": [
+          "STD-QUA-071-P requires pre-change callback source as mandatory gate for payment release after bank update",
+          "CALL-QUA-071 confirmed as post-change email thread (uses post-change invoice email thread, not pre-change vendor master phone source)",
+          "VM-QUA-071 gate SATISFIED",
+          "BANK-QUA-071 gate SATISFIED",
+          "REL-QUA-071 gate SATISFIED",
+          "PRE_CHANGE_GATE gate UNSATISFIABLE - no pre-change callback source exists in packet",
+          "PAY-QUA-071 gate UNREACHABLE due to upstream dependency failure"
+        ],
+        "blocked_moves_so_far": [
+          "treating post-change email thread as pre-change callback source",
+          "substituting CALL-QUA-071 for required pre-change source",
+          "issuing FINAL_COMPILER without pre-change gate closure",
+          "treating adjacent source as exact source boundary",
+          "treating planning artifact as execution authority",
+          "conflating REL-QUA-071 as satisfying pre-change gate",
+          "ignoring timing_scope_authority_dependency_check"
+        ],
+        "source_ids_used_so_far": [
+          "ALERT-QUA-071",
+          "BANK-QUA-071",
+          "CALL-QUA-071",
+          "PAY-QUA-071",
+          "REL-QUA-071",
+          "STD-QUA-071-P",
+          "VM-QUA-071"
+        ],
+        "claims_requiring_support": [],
+        "known_failure_risks": [
+          "warning fixation",
+          "planning artifact treated as execution authority",
+          "adjacent source treated as exact source",
+          "status-class literalism",
+          "authority-chain shortcut"
+        ],
+        "best_artifact_registry": {
+          "artifact_id": "HV-KITC-071-B_WORKER_02",
+          "turn_number": 2,
+          "provider": "google",
+          "model": "gemini-2.5-flash-lite",
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-071-B_WORKER_02.json",
+          "hash": "e14bdc12ff4a8d7acda51b2403cf13f2883497a0ab487658f98441e5dcdba0b8",
+          "gate_status": "PASS",
+          "gate_passed": true,
+          "gate_failures": [],
+          "critical_feature_count": 5,
+          "verification_verdict": "ESCALATE",
+          "binding_class": "SOURCE_BOUNDARY_OPEN"
+        },
+        "pinned_best_artifact_full_text": "{\n  \"boundary_binding\": {\n    \"action_boundary\": \"May AP release payment after the vendor bank update?\",\n    \"allow_rule_assessment\": \"Chain fails to supply pre-change callback source as required by STD-QUA-071-P.\",\n    \"binding_class\": \"SOURCE_BOUNDARY_OPEN\",\n    \"controlling_source_fact\": \"STD-QUA-071-P requires a pre-change callback source as a mandatory gate for payment release after a bank update.\",\n    \"escalate_rule_assessment\": \"CALL-QUA-071 is a post-change email thread and does not satisfy the STD-QUA-071-P requirement for a pre-change callback source.\",\n    \"timing_scope_authority_dependency_check\": \"Payment-release authority REL-QUA-071 is present, but the pre-change gate remains open.\"\n  },\n  \"cited_evidence\": [\n    \"CALL-QUA-071\",\n    \"STD-QUA-071-P\",\n    \"VM-QUA-071\",\n    \"BANK-QUA-071\",\n    \"REL-QUA-071\"\n  ],\n  \"critical_features_preserved\": [\n    \"source IDs\",\n    \"action boundary\",\n    \"policy exact-match rule\",\n    \"pre-change vs post-change distinction\",\n    \"account ending 8821 as common reference\"\n  ],\n  \"final_answer\": \"ESCALATE. The action may not proceed because the evidence chain fails to satisfy the mandatory pre-change callback source gate required by STD-QUA-071-P. CALL-QUA-071 is a post-change email thread and does not qualify. VM-QUA-071, BANK-QUA-071, and REL-QUA-071 gates are satisfied, but the pre-change gate remains open before payment execution.\",\n  \"open_blockers\": [\n    \"Pre-change callback source is missing and CALL-QUA-071 is post-change.\",\n    \"STD-QUA-071-P exact-match policy requires pre-change callback source as mandatory gate; CALL-QUA-071 is post-change email thread, does not satisfy.\"\n  ],\n  \"verification_verdict\": \"ESCALATE\",\n  \"worker_role\": \"ADVERSARIAL_SCOPE_CHALLENGER\"\n}"
+      },
+      "task_and_answer_contract": {
+        "task": "Decide whether the action may proceed using only source records in this packet.",
+        "answer_contract": {
+          "worker_role": "string",
+          "verification_verdict": "ALLOW | ESCALATE",
+          "boundary_binding": {
+            "action_boundary": "string",
+            "allow_rule_assessment": "string",
+            "escalate_rule_assessment": "string",
+            "timing_scope_authority_dependency_check": "string",
+            "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+            "controlling_source_fact": "string"
+          },
+          "cited_evidence": [
+            "exact source doc_id"
+          ],
+          "open_blockers": [
+            "string"
+          ],
+          "critical_features_preserved": [
+            "string"
+          ],
+          "final_answer": "string"
+        },
+        "word_band": "final_answer 25-120 words",
+        "source_rules": [
+          "cite exact doc_id values only",
+          "do not invent source IDs",
+          "ALLOW only when exact current source boundary is closed before execution",
+          "ESCALATE when a narrow source-record defect remains open before execution"
+        ],
+        "deterministic_gate_categories": [
+          "word band",
+          "required sections",
+          "source IDs",
+          "invented source IDs",
+          "timing/scope/authority/dependency section",
+          "action-boundary violations",
+          "critical dependencies/traps"
+        ]
+      },
+      "current_turn_command": "Act under the baton. If state and Gov conflict, flag the conflict in open_blockers."
+    },
+    "artifact_context": {
+      "source_context": {
+        "action": {
+          "business_ref": "HV-KITC-071-B",
+          "type": "vendor_bank_update_payment",
+          "vendor": "Quanta Field Services",
+          "amount": 73400,
+          "currency": "USD",
+          "description": "May AP release payment after the vendor bank update?",
+          "action_date": "2026-06-28"
+        },
+        "context": {
+          "action_boundary": "May AP release payment after the vendor bank update?",
+          "anomaly_observed": "The packet includes a bank-change alert, a vendor-master form, a callback record, and a payment-release authority.",
+          "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+          "internal_documents": [
+            {
+              "doc_id": "PAY-QUA-071",
+              "type": "source_record",
+              "content": "Payment PAY-QUA-071 releases USD 73400 to Quanta Field Services account ending 8821 on 2026-06-28."
+            },
+            {
+              "doc_id": "ALERT-QUA-071",
+              "type": "source_record",
+              "content": "Bank-change alert remains visible for Quanta Field Services because the account changed this week."
+            },
+            {
+              "doc_id": "CALL-QUA-071",
+              "type": "source_record",
+              "content": "Callback CALL-QUA-071 used the post-change invoice email thread, not the pre-change vendor master phone source, to confirm account ending 8821."
+            },
+            {
+              "doc_id": "VM-QUA-071",
+              "type": "source_record",
+              "content": "Vendor-master approval VM-QUA-071 approves account ending 8821 for Quanta Field Services."
+            },
+            {
+              "doc_id": "BANK-QUA-071",
+              "type": "source_record",
+              "content": "Bank ownership BANK-QUA-071 confirms account ending 8821 is owned by Quanta Field Services."
+            },
+            {
+              "doc_id": "REL-QUA-071",
+              "type": "source_record",
+              "content": "Payment-release authority REL-QUA-071 approves Quanta Field Services, USD 73400, account ending 8821, release date 2026-06-28 before payment."
+            }
+          ],
+          "policy_documents": [
+            {
+              "doc_id": "STD-QUA-071-P",
+              "title": "Exact source-boundary policy",
+              "content": "Payment after bank update is complete when the evidence chain collectively supplies: pre-change callback source, vendor-master account approval, bank ownership validation, and payment-release authority matching vendor, amount, account, and release date before payment. No single record must carry every field if the chain closes all four gates."
+            }
+          ]
+        }
+      },
+      "prior_artifact_refs": [
+        {
+          "turn_id": "HV-KITC-071-B_W1",
+          "verification_verdict": "ESCALATE",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "gate_passed": true,
+          "gate_failures": []
+        },
+        {
+          "turn_id": "HV-KITC-071-B_W2",
+          "verification_verdict": "ESCALATE",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "gate_passed": true,
+          "gate_failures": []
+        }
+      ]
+    }
+  }
+}

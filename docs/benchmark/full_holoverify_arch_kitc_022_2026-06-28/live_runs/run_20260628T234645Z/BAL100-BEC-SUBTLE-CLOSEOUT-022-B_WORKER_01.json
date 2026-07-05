@@ -1,0 +1,36 @@
+{
+  "activation_dependency_binding": {
+    "activation_device_group": "DG-41B",
+    "activation_id": "ACT-ACR-2026-8022",
+    "activation_site": "Site 18-P",
+    "binding_class": "SITE_AND_USE_CLASS_MISMATCH",
+    "calibration_device_group": "DG-41B",
+    "calibration_id": "CAL-ACR-022",
+    "calibration_site": "Site 18-L",
+    "controlling_source_fact": "STD-ACR-022-P: shared naming prefixes not sufficient; exact match of device group, site, release condition, and timing required",
+    "dependency_alert_id": "ALERT-ACR-DEP-022",
+    "release_condition": "RC-7",
+    "timing_match": "RC-7 requires calibration before activation; timing field not yet verified in activation packet"
+  },
+  "cited_evidence": [
+    "ACT-ACR-022: activation for DG-41B production telemetry at Site 18-P",
+    "CAL-ACR-022: calibration for DG-41B lab telemetry at Site 18-L for RC-7",
+    "SITE-ACR-022: roster shows DG-41B production telemetry at Site 18-P",
+    "STD-ACR-022-P: shared naming prefixes not sufficient by themselves"
+  ],
+  "critical_features_preserved": [
+    "device_group_prefix DG-41B shared across calibration and activation",
+    "site binding: CAL-ACR-022 at Site 18-L vs activation at Site 18-P",
+    "use_class: CAL-ACR-022 lab vs activation production",
+    "release_condition RC-7 tied to calibration packet requirement"
+  ],
+  "final_answer": "CAL-ACR-022 does not satisfy activation dependency for ACT-ACR-2026-8022. While device group prefix DG-41B matches, the calibration evidence covers lab telemetry units at Site 18-L while the activation targets production telemetry units at Site 18-P. Per STD-ACR-022-P, shared naming prefixes are not sufficient. The activation dependency remains open; platform operations may not activate until calibration evidence matching Site 18-P production units is attached.",
+  "open_blockers": [
+    "CAL-ACR-022 covers Site 18-L lab units; activation requires Site 18-P production units",
+    "use_class mismatch: calibration is lab, activation is production",
+    "release condition RC-7 satisfied but site/use class mismatch unresolved"
+  ],
+  "verification_verdict": "ESCALATE",
+  "warning_or_prelim_artifact_handling": "NOTE-ACR-022 identifies shared DG-41B prefix between lab and production devices. This warning must not be treated as a blocker when an exact calibration match exists; however, in this case CAL-ACR-022 is not an exact match\u2014it covers lab units at Site 18-L. The warning appropriately highlights the distinction required.",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

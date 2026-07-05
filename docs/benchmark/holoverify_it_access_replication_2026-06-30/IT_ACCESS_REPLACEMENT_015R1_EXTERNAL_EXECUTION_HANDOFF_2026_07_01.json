@@ -1,0 +1,90 @@
+{
+  "classification": "IT_ACCESS_REPLACEMENT_015R1_EXTERNAL_EXECUTION_HANDOFF",
+  "created_at": "2026-07-01T01:26:00.404655+00:00",
+  "purpose": "Run targeted IT Access replacement Holo batch outside Codex in an authorized local shell/environment.",
+  "codex_live_batch_status": "BLOCKED_BEFORE_BENCHMARK_CONTENT_EXPORT",
+  "scope": {
+    "domain": "IT access / permission change controls",
+    "replacement_pair_id": "HV-ITAC-REP-015R1",
+    "replacement_for": "HV-ITAC-REP-015",
+    "packets": 2,
+    "pairs": 1,
+    "expected_holo_calls": 10,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "commerce_calls": 0,
+    "ap_calls": 0,
+    "packet_edits_allowed": false,
+    "prompt_edits_allowed": false
+  },
+  "lineage": {
+    "replacement_freeze_commit": "1b914293",
+    "latest_readiness_blocker_commit": "db1f8332",
+    "original_3family_packet_freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "replacement_freeze_root": "6c61024da5f6c36c1ee5210b95efd1d7a1ed0caff60a11efe0ace1ca1e72dc4e"
+  },
+  "provider_roster": [
+    {
+      "role": "W1",
+      "model": "xai/grok-3-mini"
+    },
+    {
+      "role": "G1",
+      "model": "minimax/MiniMax-M2.5-highspeed"
+    },
+    {
+      "role": "W2",
+      "model": "openai/gpt-5.4-mini"
+    },
+    {
+      "role": "G2",
+      "model": "minimax/MiniMax-M2.5-highspeed"
+    },
+    {
+      "role": "W3",
+      "model": "minimax/MiniMax-M2.5-highspeed"
+    }
+  ],
+  "commands": {
+    "repo_root": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+    "preflight": "python3 -B docs/benchmark/run_it_access_openai_w2_holo_batched_family_2026_06_30.py --preflight-batch --batch replacement_015r1",
+    "minimax_health": "python3 -B docs/benchmark/run_it_access_openai_w2_holo_batched_family_2026_06_30.py --minimax-health-check",
+    "minimax_worker_contract_smoke": "python3 -B docs/benchmark/run_it_access_openai_w2_holo_batched_family_2026_06_30.py --minimax-worker-contract-smoke",
+    "targeted_replacement_batch": "python3 -B docs/benchmark/run_it_access_openai_w2_holo_batched_family_2026_06_30.py --run-batch --batch replacement_015r1 --require-minimax-health --require-minimax-worker-smoke"
+  },
+  "expected_output_root": "docs/benchmark/holoverify_it_access_replication_2026-06-30/holo_live_runs_openai_w2_batched/replacement_015r1/",
+  "expected_outputs": [
+    "live_summary",
+    "results_json",
+    "TRACE_CALLS.jsonl",
+    "lock_manifest",
+    "no_leakage_report",
+    "readiness_assertions"
+  ],
+  "pass_rules": {
+    "packets_complete": 2,
+    "pairs_complete": 1,
+    "expected_holo_calls_complete": 10,
+    "provider_failures_unrecovered": 0,
+    "worker_compact_outputs_parse": true,
+    "gov_micro_batons_parse": true,
+    "deterministic_gates_present": true,
+    "final_selector_present": true,
+    "no_leakage": true,
+    "packet_identity_matches_replacement_freeze": true,
+    "both_sibling_final_verdicts_correct": true,
+    "solo_calls": 0,
+    "judge_calls": 0
+  },
+  "fail_closed_if": [
+    "transport_failure_unrecovered",
+    "gov_parse_or_content_failure",
+    "worker_parse_or_content_failure",
+    "verdict_failure",
+    "leakage_detected",
+    "packet_drift_detected",
+    "expected_calls_incomplete",
+    "solo_or_judge_calls_occur"
+  ],
+  "reporting_rule": "If the run passes, freeze and commit only the replacement run artifacts. If it fails, preserve the failed run exactly as emitted with no repair, retry, or substitution inside the same run lineage."
+}

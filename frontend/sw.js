@@ -2,12 +2,14 @@
 // Caches the app shell so the UI loads instantly and works offline.
 // API calls always go to the network — never cached.
 
-const CACHE    = "holo-v1";
+const CACHE    = "holo-v2";
 const SHELL    = [
   "/",
+  "/chat",
   "/static/manifest.json",
   "/static/icon-192.png",
   "/static/icon-512.png",
+  "/static/apple-touch-icon.png",
   "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap",
 ];
 

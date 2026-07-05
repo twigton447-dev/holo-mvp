@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after the vendor bank update?",
+    "allow_rule_assessment": "The policy requires a pre-change callback source, which CALL-QUA-071 explicitly states was not used. The other three gates (VM, BANK, REL) are satisfied but cannot compensate for the missing gate.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CALL-QUA-071 explicitly states that the post-change email thread was used for confirmation, not the pre-change vendor master phone source as required by STD-QUA-071-P.",
+    "escalate_rule_assessment": "CALL-QUA-071 confirms the use of a post-change email thread, directly violating the pre-change callback requirement of STD-QUA-071-P. This remains an unresolvable dependency for payment release.",
+    "timing_scope_authority_dependency_check": "The pre-change callback gate must be satisfied before the payment release date of 2026-06-28. This dependency remains unresolved."
+  },
+  "cited_evidence": [
+    "CALL-QUA-071",
+    "STD-QUA-071-P",
+    "VM-QUA-071",
+    "BANK-QUA-071",
+    "REL-QUA-071"
+  ],
+  "critical_features_preserved": [
+    "exact source IDs only",
+    "policy four-gate chain rule",
+    "action boundary match",
+    "pre-change callback requirement"
+  ],
+  "final_answer": "ESCALATE. The critical dependency for a pre-change callback source, as mandated by STD-QUA-071-P, remains unresolved. CALL-QUA-071 explicitly confirms that a post-change email thread was used instead of the required pre-change vendor master phone source. While other policy gates are satisfied, this single open gate prevents payment release. No evidence in the packet supports a pre-change callback, thus the action cannot proceed.",
+  "open_blockers": [
+    "Unresolved dependency: pre-change callback source is required but CALL-QUA-071 confirms post-change channel was used.",
+    "Cannot treat post-change email confirmation (CALL-QUA-071) as satisfying pre-change callback gate."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

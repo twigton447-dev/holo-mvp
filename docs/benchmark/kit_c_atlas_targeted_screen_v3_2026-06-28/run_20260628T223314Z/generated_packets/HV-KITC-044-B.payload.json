@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-044-B",
+    "currency": "USD",
+    "description": "May support release replacement devices under a warranty exception?",
+    "type": "warranty_release",
+    "vendor": "Peregrine Health"
+  },
+  "context": {
+    "action_boundary": "May support release replacement devices under a warranty exception?",
+    "anomaly_observed": "A broad service exception exists, but release authority depends on device class and claim channel.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Replacement release REL-PER-044 ships 12 class-B monitors through clinical claims channel for reason field-failure cluster.",
+        "doc_id": "REL-PER-044",
+        "type": "source_record"
+      },
+      {
+        "content": "Exception approval EXC-PER-044 covers class-B monitors through retail returns channel, quantity up to 15, reason field-failure cluster, before replacement shipment.",
+        "doc_id": "EXC-PER-044",
+        "type": "source_record"
+      },
+      {
+        "content": "Service memo says general service exceptions cannot replace claim-channel exception approval.",
+        "doc_id": "SVC-PER-044",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Warranty exception release is complete only when exception approval matches device class, claim channel, quantity, and release reason before replacement shipment.",
+        "doc_id": "STD-PER-044-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

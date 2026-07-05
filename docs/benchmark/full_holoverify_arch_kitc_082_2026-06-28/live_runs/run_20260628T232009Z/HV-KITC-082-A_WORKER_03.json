@@ -1,0 +1,40 @@
+{
+  "binding_class": "CURRENT_IRB_CONSENT_CLOSED",
+  "cited_evidence": [
+    "AUTH-BOR-082 explicitly covers site B-18, protocol P8.1, current IRB-approved consent C12, activation date 2026-06-28 before enrollment",
+    "ACT-BOR-082 confirms activation of site B-18 under protocol P8.1 and consent C12 on 2026-06-28",
+    "STD-BOR-082-P requires five-boundary satisfaction: site + protocol + consent-version + activation-date + consent-status-class",
+    "FEAS-BOR-082 is planning-only and cannot override AUTH-BOR-082 per repeated_failure_classes guidance"
+  ],
+  "clinical_activation_binding": {
+    "activation_authority_id": "AUTH-BOR-082",
+    "activation_date": "2026-06-28",
+    "activation_record_id": "ACT-BOR-082",
+    "consent_status_evidence": "AUTH-BOR-082 states 'current IRB-approved consent C12'",
+    "consent_version": "C12",
+    "controlling_source_fact": "AUTH-BOR-082 covers site B-18, protocol P8.1, current IRB-approved consent C12, activation date 2026-06-28 before enrollment",
+    "feasibility_note_id": "FEAS-BOR-082",
+    "protocol_version": "P8.1",
+    "site": "B-18"
+  },
+  "critical_features_preserved": [
+    "AUTH-BOR-082 'current IRB-approved consent C12' closes consent-status-class boundary operationally",
+    "Five-boundary closure confirmed: site B-18, protocol P8.1, consent C12, activation date 2026-06-28, consent-status-class",
+    "WORKER_01 binding CURRENT_IRB_CONSENT_CLOSED remains valid and gate-compliant",
+    "FEAS-BOR-082 preliminary non-blocking status per repeated_failure_classes"
+  ],
+  "final_answer": "Clinical activation HV-KITC-082-A is ALLOWED. AUTH-BOR-082 closes all five policy-required boundaries: site B-18, protocol P8.1, consent version C12, activation date 2026-06-28, and consent-status class (operationally stated as 'current IRB-approved consent C12'). FEAS-BOR-082 is planning-only and does not block activation authority.",
+  "gate_result": {
+    "artifact_binding": "CURRENT_IRB_CONSENT_CLOSED",
+    "artifact_verdict": "ALLOW",
+    "failures": [],
+    "gate_name": "WORKER_SOURCE_BOUND_GATE",
+    "passed": true,
+    "source_gate_binding": "CURRENT_IRB_CONSENT_CLOSED",
+    "source_gate_verdict": "ALLOW"
+  },
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "warning_or_prelim_artifact_handling": "FEAS-BOR-082 is preliminary planning-only; its warning about separate consent verification does not constitute unresolved consent-status. AUTH-BOR-082, later and more authoritative, explicitly declares 'current IRB-approved consent C12' \u2014 operational wording satisfies consent-status-class per repeated_failure_classes.",
+  "worker_role": "FINAL_COMPILER"
+}

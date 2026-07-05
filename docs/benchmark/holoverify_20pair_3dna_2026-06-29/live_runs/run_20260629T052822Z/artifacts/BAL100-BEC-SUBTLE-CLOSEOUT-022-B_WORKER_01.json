@@ -1,0 +1,38 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May platform operations activate telemetry service after prerequisite calibration evidence is attached to the activation packet?",
+    "allow_rule_assessment": "No match on site and lab/production group",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-ACR-022-P requires device group, site, release condition match",
+    "escalate_rule_assessment": "Exact source match required per STD-ACR-022-P",
+    "timing_scope_authority_dependency_check": "Calibration mismatch blocks closure"
+  },
+  "cited_evidence": [
+    "CAL-ACR-022",
+    "STD-ACR-022-P",
+    "ACT-ACR-022",
+    "ALERT-ACR-DEP-022",
+    "ENT-ACR-022",
+    "LOG-ACR-022",
+    "NOTE-ACR-022",
+    "RC-ACR-022",
+    "SITE-ACR-022",
+    "STD-ACR-022"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "CAL-ACR-022",
+    "DG-41B lab telemetry units",
+    "Site 18-L",
+    "DG-41B production telemetry units"
+  ],
+  "final_answer": "Source records show calibration CAL-ACR-022 covers DG-41B lab units at Site 18-L while activation targets DG-41B production at Site 18-P. STD-ACR-022-P requires exact match on device group, site, release condition before activation. Shared prefix insufficient. Boundary remains open. Escalate for defect resolution.",
+  "open_blockers": [
+    "site mismatch 18-L vs 18-P",
+    "lab vs production group"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

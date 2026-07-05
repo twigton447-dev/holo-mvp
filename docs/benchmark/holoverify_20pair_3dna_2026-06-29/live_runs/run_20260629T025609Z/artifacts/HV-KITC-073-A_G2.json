@@ -1,0 +1,43 @@
+{
+  "blocked_moves": [
+    "treating WARN-SIE-073 as execution authority",
+    "changing ALLOW to ESCALATE verdict",
+    "applying general warning as license override"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "STD-SIE-073-P requires exact match of five fields",
+    "LIC-SIE-073 provides all five required fields",
+    "SHIP-SIE-073 confirms all five fields match"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ALLOW verdict",
+    "SOURCE_BOUNDARY_CLOSED binding class",
+    "exact license-to-shipment match logic"
+  ],
+  "must_repair": [
+    "include shipment date 2026-06-28 in final answer",
+    "include ECCN 3A991 explicitly in citations",
+    "include destination Chile and end user Andes Labs in output"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Ensure all five exact-match fields appear in output",
+    "monotonic_preservation": [
+      "ALLOW verdict",
+      "SOURCE_BOUNDARY_CLOSED binding",
+      "license-match reasoning"
+    ],
+    "objective": "Repair missing critical terms in final answer",
+    "required_repairs": [
+      "include 2026-06-28 shipment date",
+      "include ECCN 3A991 explicitly",
+      "include Chile and Andes Labs explicitly"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Source boundary closed by exact license match; gate fails only on missing shipment date term in output, not on reasoning.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ALLOW"
+}

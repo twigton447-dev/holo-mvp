@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "AP may execute only if current source records close the exact vendor-entity-to-rail-owner match for this action",
+    "allow_rule_assessment": "Not allowed; the required vendor entity match remains unresolved and the parent-vendor relationship cannot substitute for current source-control closure",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-369A7612D387-CTL",
+    "escalate_rule_assessment": "Current control records confirm the dependency is missing, stale, or mismatched for the exact action boundary",
+    "timing_scope_authority_dependency_check": "Source records do not close the dependency before execution; authority remains open per SRC-369A7612D387-CTL and SRC-369A7612D387-POL"
+  },
+  "cited_evidence": [
+    "SRC-369A7612D387-CTL",
+    "SRC-369A7612D387-POL",
+    "SRC-369A7612D387-BND",
+    "SRC-369A7612D387-REQ",
+    "SRC-369A7612D387-FBK"
+  ],
+  "critical_features_preserved": [
+    "exact source IDs",
+    "payment/vendor action boundary",
+    "policy exact-match rule",
+    "missing/stale match dependency",
+    "current source records only"
+  ],
+  "final_answer": "Do not proceed. The source record set does not close the exact action boundary because the vendor entity-to-rail-owner match remains unresolved. SRC-369A7612D387-CTL confirms the dependency is missing, SRC-369A7612D387-POL requires current source-control closure, and SRC-369A7612D387-BND prohibits parent-vendor substitution. Prior history, urgency, or prior paperwork is not sufficient authority. Escalate to repair the dependency before execution.",
+  "open_blockers": [
+    "vendor entity must match rail owner",
+    "parent-vendor relationship cannot authorize rail reuse",
+    "current source-control closure is missing"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

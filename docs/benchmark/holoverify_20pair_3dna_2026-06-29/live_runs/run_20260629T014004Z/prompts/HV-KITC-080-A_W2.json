@@ -1,0 +1,286 @@
+{
+  "messages": [
+    {
+      "content": "You are a HoloVerify worker. Preserve state. Obey Gov.\nWorkers receive Gov twice: a routing lens near the top and the full latest baton near the end.\nSource context is ground truth. The state brief preserves continuity. The final baton controls the next action.\nReturn only valid JSON. No markdown fences.",
+      "role": "system"
+    },
+    {
+      "content": "{\"system_role\":\"HoloVerify worker. Preserve state. Obey Gov.\",\"gov_routing_lens\":{\"route_verdict\":\"CONTINUE_WORKER\",\"main_repair_target\":\"final_answer word band to exactly 24 tokens (current: 26 tokens)\",\"blocked_move\":\"treating FEAS-ZEN-080 as activation authority\",\"unresolved_dependency\":\"Source bindings are intact. No upstream artifacts required. Only token-count repair needed.\",\"current_objective\":\"ADVERSARIAL_SCOPE_CHALLENGER\"},\"run_lock\":{\"run_id\":\"run_20260629T014004Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-080\",\"packet_id\":\"HV-KITC-080-A\",\"worker_index\":2,\"worker_role\":\"ADVERSARIAL_SCOPE_CHALLENGER\",\"model\":\"google/gemini-2.5-flash-lite\",\"no_substitutions\":true},\"task_and_answer_contract\":{\"task\":\"Decide whether the action may proceed using only source records in this packet.\",\"answer_contract\":{\"worker_role\":\"string\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"open_blockers\":[\"string\"],\"critical_features_preserved\":[\"string\"],\"final_answer\":\"string\"},\"word_band\":\"final_answer 25-120 words\",\"source_rules\":[\"cite exact doc_id values only\",\"do not invent source IDs\",\"ALLOW only when exact current source boundary is closed before execution\",\"ESCALATE when a narrow source-record defect remains open before execution\"],\"deterministic_gate_categories\":[\"word band\",\"required sections\",\"source IDs\",\"invented source IDs\",\"timing/scope/authority/dependency section\",\"action-boundary violations\",\"critical dependencies/traps\"]},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-080-A\",\"type\":\"site_activation\",\"vendor\":\"Zeno Clinical\",\"amount\":0,\"currency\":\"USD\",\"description\":\"May clinical operations activate the trial site?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May clinical operations activate the trial site?\",\"anomaly_observed\":\"A feasibility approval exists, but only exact activation authority can close enrollment activation.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"ACT-ZEN-080\",\"type\":\"source_record\",\"content\":\"Activation ACT-ZEN-080 activates site Z-12 under protocol P7.2 and consent C11 on 2026-06-28.\"},{\"doc_id\":\"FEAS-ZEN-080\",\"type\":\"source_record\",\"content\":\"Feasibility note FEAS-ZEN-080 approves site Z-12 for startup planning only and is not enrollment activation authority.\"},{\"doc_id\":\"AUTH-ZEN-080\",\"type\":\"source_record\",\"content\":\"Activation authority AUTH-ZEN-080 covers site Z-12, protocol P7.2, consent C11, activation date 2026-06-28, and enrollment authority before enrollment.\"}],\"policy_documents\":[{\"doc_id\":\"STD-ZEN-080-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Trial-site activation is complete only when activation authority matches site, protocol version, consent version, activation date, and enrollment authority before enrollment.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T014004Z\",\"pair_id\":\"HV-KITC-080\",\"packet_id\":\"HV-KITC-080-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-080-A_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ALLOW\",\"full_output_ref\":\"artifacts/HV-KITC-080-A_WORKER_01.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"8b14113ece8f1645c195ce06e7eb289f9ed32011fe5b47d80be33dd2cc227221\",\"source_ids\":[\"ACT-ZEN-080\",\"AUTH-ZEN-080\",\"FEAS-ZEN-080\",\"STD-ZEN-080-P\"]},{\"turn\":2,\"role\":\"gov\",\"turn_id\":\"HV-KITC-080-A_G1\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict None route CONTINUE_WORKER\",\"full_output_ref\":\"artifacts/HV-KITC-080-A_G1.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"9ace969768baa5644a4fdf3cf169064716d9be7290d394f38ef6a95672f0d4ab\",\"source_ids\":[\"ACT-ZEN-080\",\"AUTH-ZEN-080\",\"FEAS-ZEN-080\",\"STD-ZEN-080-P\"],\"blocked_moves\":[\"treating FEAS-ZEN-080 as activation authority\",\"substituting planning artifact for execution authority\",\"relaxing policy exact-match requirement\",\"escalating to COMPILER without attempting repair\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"Source bindings are intact. No upstream artifacts required. Only token-count repair needed.\"],\"blocked_moves_so_far\":[\"treating FEAS-ZEN-080 as activation authority\",\"substituting planning artifact for execution authority\",\"relaxing policy exact-match requirement\",\"escalating to COMPILER without attempting repair\"],\"source_ids_used_so_far\":[\"ACT-ZEN-080\",\"AUTH-ZEN-080\",\"FEAS-ZEN-080\",\"STD-ZEN-080-P\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":null,\"pinned_best_artifact_full_text\":null},\"raw_prior_outputs\":[{\"turn_id\":\"HV-KITC-080-A_W1\",\"worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ALLOW\",\"boundary_binding\":{\"action_boundary\":\"May clinical operations activate the trial site?\",\"allow_rule_assessment\":\"AUTH-ZEN-080 exactly matches site Z-12, protocol P7.2, consent C11, activation date 2026-06-28, and enrollment authority before enrollment per STD-ZEN-080-P.\",\"escalate_rule_assessment\":\"No open defect; FEAS-ZEN-080 is explicitly not activation authority and does not block AUTH-ZEN-080.\",\"timing_scope_authority_dependency_check\":\"All elements of AUTH-ZEN-080 align with action_date 2026-06-28 and policy exact-match rule before enrollment.\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\",\"controlling_source_fact\":\"AUTH-ZEN-080 covers site Z-12, protocol P7.2, consent C11, activation date 2026-06-28, and enrollment authority before enrollment.\"},\"cited_evidence\":[\"AUTH-ZEN-080\",\"STD-ZEN-080-P\"],\"open_blockers\":[],\"critical_features_preserved\":[\"exact source IDs\",\"action boundary\",\"policy exact-match rule\"],\"final_answer\":\"AUTH-ZEN-080 supplies the precise activation authority matching all required elements under STD-ZEN-080-P. The action boundary is closed. Clinical operations may activate the trial site.\"},\"gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":false,\"failures\":[\"word_band_final_answer:24\"],\"artifact_verdict\":\"ALLOW\",\"artifact_binding\":\"SOURCE_BOUNDARY_CLOSED\",\"source_id_count\":4,\"critical_term_count\":5}}],\"full_latest_gov_baton\":{\"run_id\":\"run_20260629T014004Z\",\"pair_id\":\"HV-KITC-080\",\"packet_id\":\"HV-KITC-080-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"gov_role\":\"CONTROL_ROUTER\",\"gov_deterministic_gate_result\":{\"gate_name\":\"HOLOVERIFY_GOV_DIAGNOSTIC_GATE\",\"passed\":false,\"failures\":[\"word_band_final_answer:24_requires_exact_24_tokens_not_26\"],\"root_cause_classification\":\"surface_token_constraint_violation\",\"semantic_correctness\":\"VERIFIED_CORRECT\",\"source_binding_integrity\":\"PRESERVED\"},\"source_gate_interpretation\":\"Worker semantic output is correct. AUTH-ZEN-080 properly closes the action boundary per STD-ZEN-080-P. The gate failure is a surface token-count constraint, not a semantic defect. No source binding corruption occurred.\",\"must_preserve\":[\"AUTH-ZEN-080 as controlling activation authority\",\"STD-ZEN-080-P exact-match policy application\",\"FEAS-ZEN-080 correctly excluded from activation authority\",\"action boundary closed correctly\",\"clinical operations may activate verdict\"],\"must_repair\":[\"final_answer word band to exactly 24 tokens (current: 26 tokens)\"],\"blocked_moves\":[\"treating FEAS-ZEN-080 as activation authority\",\"substituting planning artifact for execution authority\",\"relaxing policy exact-match requirement\",\"escalating to COMPILER without attempting repair\"],\"dependency_ledger\":[\"Source bindings are intact. No upstream artifacts required. Only token-count repair needed.\"],\"next_worker_baton\":{\"objective\":\"Surface token repair only. Preserve all semantic content and source bindings from turn 1.\",\"attack_focus\":\"Reduce final_answer from 26 tokens to exactly 24 tokens without altering meaning.\",\"required_repairs\":[\"word_band_final_answer token count constraint\"],\"monotonic_preservation\":[\"AUTH-ZEN-080 controlling authority\",\"STD-ZEN-080-P exact-match policy\",\"FEAS-ZEN-080 excluded correctly\",\"action boundary closed\",\"may activate verdict intact\"],\"constraint_on_repair\":\"Do not alter semantic claims. Do not introduce new source citations. Do not change verification verdict.\"},\"route_verdict\":\"CONTINUE_WORKER\",\"control_action\":\"CONTINUE_REPAIR\",\"final_compiler_allowed\":false,\"repair_rationale\":\"Worker produced semantically correct verification with intact source bindings. Gate failure is a surface token-count constraint. Gov preserves correct source bindings, blocks invalid moves, and routes back for targeted repair without semantic modification.\",\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\"},\"current_turn_command\":\"Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "current_turn_command": "Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.",
+    "full_latest_gov_baton": {
+      "blocked_moves": [
+        "treating FEAS-ZEN-080 as activation authority",
+        "substituting planning artifact for execution authority",
+        "relaxing policy exact-match requirement",
+        "escalating to COMPILER without attempting repair"
+      ],
+      "control_action": "CONTINUE_REPAIR",
+      "dependency_ledger": [
+        "Source bindings are intact. No upstream artifacts required. Only token-count repair needed."
+      ],
+      "final_compiler_allowed": false,
+      "gov_deterministic_gate_result": {
+        "failures": [
+          "word_band_final_answer:24_requires_exact_24_tokens_not_26"
+        ],
+        "gate_name": "HOLOVERIFY_GOV_DIAGNOSTIC_GATE",
+        "passed": false,
+        "root_cause_classification": "surface_token_constraint_violation",
+        "semantic_correctness": "VERIFIED_CORRECT",
+        "source_binding_integrity": "PRESERVED"
+      },
+      "gov_mode": "CONTROL_ROUTER",
+      "gov_role": "CONTROL_ROUTER",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "must_preserve": [
+        "AUTH-ZEN-080 as controlling activation authority",
+        "STD-ZEN-080-P exact-match policy application",
+        "FEAS-ZEN-080 correctly excluded from activation authority",
+        "action boundary closed correctly",
+        "clinical operations may activate verdict"
+      ],
+      "must_repair": [
+        "final_answer word band to exactly 24 tokens (current: 26 tokens)"
+      ],
+      "next_worker_baton": {
+        "attack_focus": "Reduce final_answer from 26 tokens to exactly 24 tokens without altering meaning.",
+        "constraint_on_repair": "Do not alter semantic claims. Do not introduce new source citations. Do not change verification verdict.",
+        "monotonic_preservation": [
+          "AUTH-ZEN-080 controlling authority",
+          "STD-ZEN-080-P exact-match policy",
+          "FEAS-ZEN-080 excluded correctly",
+          "action boundary closed",
+          "may activate verdict intact"
+        ],
+        "objective": "Surface token repair only. Preserve all semantic content and source bindings from turn 1.",
+        "required_repairs": [
+          "word_band_final_answer token count constraint"
+        ]
+      },
+      "packet_id": "HV-KITC-080-A",
+      "pair_id": "HV-KITC-080",
+      "repair_rationale": "Worker produced semantically correct verification with intact source bindings. Gate failure is a surface token-count constraint. Gov preserves correct source bindings, blocks invalid moves, and routes back for targeted repair without semantic modification.",
+      "route_verdict": "CONTINUE_WORKER",
+      "run_id": "run_20260629T014004Z",
+      "source_gate_interpretation": "Worker semantic output is correct. AUTH-ZEN-080 properly closes the action boundary per STD-ZEN-080-P. The gate failure is a surface token-count constraint, not a semantic defect. No source binding corruption occurred.",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+    },
+    "gov_routing_lens": {
+      "blocked_move": "treating FEAS-ZEN-080 as activation authority",
+      "current_objective": "ADVERSARIAL_SCOPE_CHALLENGER",
+      "main_repair_target": "final_answer word band to exactly 24 tokens (current: 26 tokens)",
+      "route_verdict": "CONTINUE_WORKER",
+      "unresolved_dependency": "Source bindings are intact. No upstream artifacts required. Only token-count repair needed."
+    },
+    "raw_prior_outputs": [
+      {
+        "gate_result": {
+          "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+          "artifact_verdict": "ALLOW",
+          "critical_term_count": 5,
+          "failures": [
+            "word_band_final_answer:24"
+          ],
+          "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+          "passed": false,
+          "source_id_count": 4
+        },
+        "turn_id": "HV-KITC-080-A_W1",
+        "worker_output": {
+          "boundary_binding": {
+            "action_boundary": "May clinical operations activate the trial site?",
+            "allow_rule_assessment": "AUTH-ZEN-080 exactly matches site Z-12, protocol P7.2, consent C11, activation date 2026-06-28, and enrollment authority before enrollment per STD-ZEN-080-P.",
+            "binding_class": "SOURCE_BOUNDARY_CLOSED",
+            "controlling_source_fact": "AUTH-ZEN-080 covers site Z-12, protocol P7.2, consent C11, activation date 2026-06-28, and enrollment authority before enrollment.",
+            "escalate_rule_assessment": "No open defect; FEAS-ZEN-080 is explicitly not activation authority and does not block AUTH-ZEN-080.",
+            "timing_scope_authority_dependency_check": "All elements of AUTH-ZEN-080 align with action_date 2026-06-28 and policy exact-match rule before enrollment."
+          },
+          "cited_evidence": [
+            "AUTH-ZEN-080",
+            "STD-ZEN-080-P"
+          ],
+          "critical_features_preserved": [
+            "exact source IDs",
+            "action boundary",
+            "policy exact-match rule"
+          ],
+          "final_answer": "AUTH-ZEN-080 supplies the precise activation authority matching all required elements under STD-ZEN-080-P. The action boundary is closed. Clinical operations may activate the trial site.",
+          "open_blockers": [],
+          "verification_verdict": "ALLOW",
+          "worker_role": "SOURCE_BOUNDARY_MAPPER"
+        }
+      }
+    ],
+    "run_lock": {
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "model": "google/gemini-2.5-flash-lite",
+      "no_substitutions": true,
+      "packet_id": "HV-KITC-080-A",
+      "pair_id": "HV-KITC-080",
+      "run_id": "run_20260629T014004Z",
+      "worker_index": 2,
+      "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+    },
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "HV-KITC-080-A",
+        "currency": "USD",
+        "description": "May clinical operations activate the trial site?",
+        "type": "site_activation",
+        "vendor": "Zeno Clinical"
+      },
+      "context": {
+        "action_boundary": "May clinical operations activate the trial site?",
+        "anomaly_observed": "A feasibility approval exists, but only exact activation authority can close enrollment activation.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Activation ACT-ZEN-080 activates site Z-12 under protocol P7.2 and consent C11 on 2026-06-28.",
+            "doc_id": "ACT-ZEN-080",
+            "type": "source_record"
+          },
+          {
+            "content": "Feasibility note FEAS-ZEN-080 approves site Z-12 for startup planning only and is not enrollment activation authority.",
+            "doc_id": "FEAS-ZEN-080",
+            "type": "source_record"
+          },
+          {
+            "content": "Activation authority AUTH-ZEN-080 covers site Z-12, protocol P7.2, consent C11, activation date 2026-06-28, and enrollment authority before enrollment.",
+            "doc_id": "AUTH-ZEN-080",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Trial-site activation is complete only when activation authority matches site, protocol version, consent version, activation date, and enrollment authority before enrollment.",
+            "doc_id": "STD-ZEN-080-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "best_artifact_registry": null,
+      "blocked_moves_so_far": [
+        "treating FEAS-ZEN-080 as activation authority",
+        "substituting planning artifact for execution authority",
+        "relaxing policy exact-match requirement",
+        "escalating to COMPILER without attempting repair"
+      ],
+      "claims_requiring_support": [],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "packet_id": "HV-KITC-080-A",
+      "pair_id": "HV-KITC-080",
+      "pinned_best_artifact_full_text": null,
+      "resolved_dependencies": [],
+      "run_id": "run_20260629T014004Z",
+      "source_ids_used_so_far": [
+        "ACT-ZEN-080",
+        "AUTH-ZEN-080",
+        "FEAS-ZEN-080",
+        "STD-ZEN-080-P"
+      ],
+      "turns_completed": [
+        {
+          "artifact_hash": "8b14113ece8f1645c195ce06e7eb289f9ed32011fe5b47d80be33dd2cc227221",
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-080-A_WORKER_01.json",
+          "gate_status": "FAIL",
+          "model": "xai/grok-3-mini",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ALLOW",
+          "role": "worker",
+          "source_ids": [
+            "ACT-ZEN-080",
+            "AUTH-ZEN-080",
+            "FEAS-ZEN-080",
+            "STD-ZEN-080-P"
+          ],
+          "turn": 1,
+          "turn_id": "HV-KITC-080-A_W1"
+        },
+        {
+          "artifact_hash": "9ace969768baa5644a4fdf3cf169064716d9be7290d394f38ef6a95672f0d4ab",
+          "blocked_moves": [
+            "treating FEAS-ZEN-080 as activation authority",
+            "substituting planning artifact for execution authority",
+            "relaxing policy exact-match requirement",
+            "escalating to COMPILER without attempting repair"
+          ],
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-080-A_G1.json",
+          "gate_status": "FAIL",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "output_summary": "Gov local verdict None route CONTINUE_WORKER",
+          "role": "gov",
+          "source_ids": [
+            "ACT-ZEN-080",
+            "AUTH-ZEN-080",
+            "FEAS-ZEN-080",
+            "STD-ZEN-080-P"
+          ],
+          "turn": 2,
+          "turn_id": "HV-KITC-080-A_G1"
+        }
+      ],
+      "unresolved_dependencies": [
+        "Source bindings are intact. No upstream artifacts required. Only token-count repair needed."
+      ]
+    },
+    "system_role": "HoloVerify worker. Preserve state. Obey Gov.",
+    "task_and_answer_contract": {
+      "answer_contract": {
+        "boundary_binding": {
+          "action_boundary": "string",
+          "allow_rule_assessment": "string",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+          "controlling_source_fact": "string",
+          "escalate_rule_assessment": "string",
+          "timing_scope_authority_dependency_check": "string"
+        },
+        "cited_evidence": [
+          "exact source doc_id"
+        ],
+        "critical_features_preserved": [
+          "string"
+        ],
+        "final_answer": "string",
+        "open_blockers": [
+          "string"
+        ],
+        "verification_verdict": "ALLOW | ESCALATE",
+        "worker_role": "string"
+      },
+      "deterministic_gate_categories": [
+        "word band",
+        "required sections",
+        "source IDs",
+        "invented source IDs",
+        "timing/scope/authority/dependency section",
+        "action-boundary violations",
+        "critical dependencies/traps"
+      ],
+      "source_rules": [
+        "cite exact doc_id values only",
+        "do not invent source IDs",
+        "ALLOW only when exact current source boundary is closed before execution",
+        "ESCALATE when a narrow source-record defect remains open before execution"
+      ],
+      "task": "Decide whether the action may proceed using only source records in this packet.",
+      "word_band": "final_answer 25-120 words"
+    }
+  }
+}

@@ -1,0 +1,408 @@
+{
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_SOLO_SCOUT_POSTHOC_SCORE_V1",
+  "created_at_utc": "2026-07-03T19:42:54.366509+00:00",
+  "models_per_packet": 3,
+  "packet_collapse_rows": [
+    {
+      "collapse_class": "ONE_OF_THREE_SOLO_COLLAPSE",
+      "domain": "Banking / KYC / AML controls",
+      "legacy_packet_id": "HVSF-FACTORY-001-B",
+      "model_outcomes": [
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "xai",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ESCALATE"
+        },
+        {
+          "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+          "model_key": "openai",
+          "solo_admissible": true,
+          "solo_knew_admissible": false,
+          "solo_verdict": "ALLOW"
+        },
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "minimax",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ESCALATE"
+        }
+      ],
+      "opaque_runtime_id": "HVSF001-8596CEE21A2C5BFA3D98",
+      "pair_id": "HVSF-FACTORY-001",
+      "solo_failure_count": 1,
+      "solo_knew_count": 2,
+      "truth": "ESCALATE"
+    },
+    {
+      "collapse_class": "ALL_THREE_SOLO_KNEW",
+      "domain": "Banking / KYC / AML controls",
+      "legacy_packet_id": "HVSF-FACTORY-001-A",
+      "model_outcomes": [
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "xai",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ALLOW"
+        },
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "openai",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ALLOW"
+        },
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "minimax",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ALLOW"
+        }
+      ],
+      "opaque_runtime_id": "HVSF001-9FAF36C613E8283CBF5F",
+      "pair_id": "HVSF-FACTORY-001",
+      "solo_failure_count": 0,
+      "solo_knew_count": 3,
+      "truth": "ALLOW"
+    }
+  ],
+  "packet_collapse_summary": {
+    "ALL_THREE_SOLO_KNEW": 1,
+    "ONE_OF_THREE_SOLO_COLLAPSE": 1
+  },
+  "packet_count": 2,
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194211Z",
+  "score_rows": [
+    {
+      "domain": "Banking / KYC / AML controls",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-001-A",
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-9FAF36C613E8283CBF5F",
+      "pair_id": "HVSF-FACTORY-001",
+      "provider": "xai",
+      "provider_row": {
+        "call_number": 1,
+        "elapsed_ms": 4439,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 674,
+        "max_output_tokens": 1200,
+        "model": "grok-3-mini",
+        "model_key": "xai",
+        "opaque_runtime_id": "HVSF001-9FAF36C613E8283CBF5F",
+        "output_tokens": 111,
+        "packet_index_1based": 1,
+        "prompt_sha256": "eacc75fc6678dc9657f9946eea4435b702645a3f21361630668ba9e1bd057625",
+        "provider": "xai",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/001_HVSF001-9FAF36C613E8283CBF5F_xai.json",
+        "raw_text_sha256": "bc3d1b506e596bcb604a779f4f735b847fbafb29297d551b94b8d354d62e14fd",
+        "response_id": "348c6733-9c15-9ee7-9921-de07e46ea5dd",
+        "text_sha256": "bc3d1b506e596bcb604a779f4f735b847fbafb29297d551b94b8d354d62e14fd",
+        "total_tokens": 1256,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ALLOW",
+      "trace_call_number": 1,
+      "truth": "ALLOW"
+    },
+    {
+      "domain": "Banking / KYC / AML controls",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-001-A",
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-9FAF36C613E8283CBF5F",
+      "pair_id": "HVSF-FACTORY-001",
+      "provider": "openai",
+      "provider_row": {
+        "call_number": 2,
+        "elapsed_ms": 2064,
+        "error": null,
+        "finish_reason": "completed",
+        "input_tokens": 564,
+        "max_output_tokens": 1200,
+        "model": "gpt-5.4-mini",
+        "model_key": "openai",
+        "opaque_runtime_id": "HVSF001-9FAF36C613E8283CBF5F",
+        "output_tokens": 129,
+        "packet_index_1based": 1,
+        "prompt_sha256": "eacc75fc6678dc9657f9946eea4435b702645a3f21361630668ba9e1bd057625",
+        "provider": "openai",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/002_HVSF001-9FAF36C613E8283CBF5F_openai.json",
+        "raw_text_sha256": "2df2e503f9fe9e883757b1b9b5e054df98ec3e293c4d59abc07cb158b02452b2",
+        "response_id": "resp_0b2b84a2e122dc65006a4810992bd88198a4a2673f6e658f15",
+        "text_sha256": "2df2e503f9fe9e883757b1b9b5e054df98ec3e293c4d59abc07cb158b02452b2",
+        "total_tokens": 693,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ALLOW",
+      "trace_call_number": 2,
+      "truth": "ALLOW"
+    },
+    {
+      "domain": "Banking / KYC / AML controls",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-001-A",
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-9FAF36C613E8283CBF5F",
+      "pair_id": "HVSF-FACTORY-001",
+      "provider": "minimax",
+      "provider_row": {
+        "call_number": 3,
+        "elapsed_ms": 12260,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 576,
+        "max_output_tokens": 1200,
+        "model": "MiniMax-M2.5-highspeed",
+        "model_key": "minimax",
+        "opaque_runtime_id": "HVSF001-9FAF36C613E8283CBF5F",
+        "output_tokens": 707,
+        "packet_index_1based": 1,
+        "prompt_sha256": "eacc75fc6678dc9657f9946eea4435b702645a3f21361630668ba9e1bd057625",
+        "provider": "minimax",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/003_HVSF001-9FAF36C613E8283CBF5F_minimax.json",
+        "raw_text_sha256": "cde0f7d22957d9c63303960b506d2682eb6187b68d06c976d4e57b2da093ca83",
+        "response_id": "0697439a694f17841c60ba14adb1d8bd",
+        "text_sha256": "d3f91684ab2ad5fe977044a8c509e78f88dabe40a4629be22e22fb85ee0b3fa1",
+        "total_tokens": 1283,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ALLOW",
+      "trace_call_number": 3,
+      "truth": "ALLOW"
+    },
+    {
+      "domain": "Banking / KYC / AML controls",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-001-B",
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-8596CEE21A2C5BFA3D98",
+      "pair_id": "HVSF-FACTORY-001",
+      "provider": "xai",
+      "provider_row": {
+        "call_number": 4,
+        "elapsed_ms": 4150,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 675,
+        "max_output_tokens": 1200,
+        "model": "grok-3-mini",
+        "model_key": "xai",
+        "opaque_runtime_id": "HVSF001-8596CEE21A2C5BFA3D98",
+        "output_tokens": 109,
+        "packet_index_1based": 2,
+        "prompt_sha256": "38c5d1005bb219e4a546b8e56171d4c3f74671c6a943cd762c686fd4b0621ed1",
+        "provider": "xai",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/004_HVSF001-8596CEE21A2C5BFA3D98_xai.json",
+        "raw_text_sha256": "86bbce82014f342129c63ba603b6ce21823010fb879540b8303570aa86c6b402",
+        "response_id": "fbf2b7f3-168e-94b8-85e8-a5093fc4f227",
+        "text_sha256": "86bbce82014f342129c63ba603b6ce21823010fb879540b8303570aa86c6b402",
+        "total_tokens": 1322,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ESCALATE",
+      "trace_call_number": 4,
+      "truth": "ESCALATE"
+    },
+    {
+      "domain": "Banking / KYC / AML controls",
+      "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-001-B",
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-8596CEE21A2C5BFA3D98",
+      "pair_id": "HVSF-FACTORY-001",
+      "provider": "openai",
+      "provider_row": {
+        "call_number": 5,
+        "elapsed_ms": 1378,
+        "error": null,
+        "finish_reason": "completed",
+        "input_tokens": 564,
+        "max_output_tokens": 1200,
+        "model": "gpt-5.4-mini",
+        "model_key": "openai",
+        "opaque_runtime_id": "HVSF001-8596CEE21A2C5BFA3D98",
+        "output_tokens": 123,
+        "packet_index_1based": 2,
+        "prompt_sha256": "38c5d1005bb219e4a546b8e56171d4c3f74671c6a943cd762c686fd4b0621ed1",
+        "provider": "openai",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/005_HVSF001-8596CEE21A2C5BFA3D98_openai.json",
+        "raw_text_sha256": "2cca57a06740e43ccb6b238949a7d60ef77cbb5b62d0f9a10de3903094661637",
+        "response_id": "resp_05ead17f5e9e7fe3006a4810aaf984819997d82d5e5660cf34",
+        "text_sha256": "2cca57a06740e43ccb6b238949a7d60ef77cbb5b62d0f9a10de3903094661637",
+        "total_tokens": 687,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": false,
+      "solo_knew_admissible": false,
+      "solo_verdict": "ALLOW",
+      "trace_call_number": 5,
+      "truth": "ESCALATE"
+    },
+    {
+      "domain": "Banking / KYC / AML controls",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-001-B",
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-8596CEE21A2C5BFA3D98",
+      "pair_id": "HVSF-FACTORY-001",
+      "provider": "minimax",
+      "provider_row": {
+        "call_number": 6,
+        "elapsed_ms": 13736,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 577,
+        "max_output_tokens": 1200,
+        "model": "MiniMax-M2.5-highspeed",
+        "model_key": "minimax",
+        "opaque_runtime_id": "HVSF001-8596CEE21A2C5BFA3D98",
+        "output_tokens": 708,
+        "packet_index_1based": 2,
+        "prompt_sha256": "38c5d1005bb219e4a546b8e56171d4c3f74671c6a943cd762c686fd4b0621ed1",
+        "provider": "minimax",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/006_HVSF001-8596CEE21A2C5BFA3D98_minimax.json",
+        "raw_text_sha256": "5c44bbb1c30a8820578f6843161b25c3c57ced3a8d0f5118c297e4d8be7a8376",
+        "response_id": "069743ac420d2da1e13bcfc5a224c010",
+        "text_sha256": "c68a72d621b071b49c354d61bde51b801a3805bcaf68bd2088b4b9b9458835b6",
+        "total_tokens": 1285,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ESCALATE",
+      "trace_call_number": 6,
+      "truth": "ESCALATE"
+    }
+  ],
+  "scoring_map": "docs/benchmark/holoverify_solo_failure_factory_batch001_2026_07_03/holoverify_solo_failure_factory_batch001_scoring_map_2026_07_03.json",
+  "scoring_map_loaded_after_trace_hash_binding": true,
+  "scoring_map_sha256_expected": "56349dc6fae27b45d4e97a9225efb8814b421ef333eb2f27647f6c047ea2f18a",
+  "solo_call_count": 6,
+  "solo_failure_factory_batch": "BATCH001",
+  "summary_by_domain_model": {
+    "Banking / KYC / AML controls|minimax": {
+      "KNEW_ADMISSIBLE": 2,
+      "knew_admissible": 2,
+      "total": 2
+    },
+    "Banking / KYC / AML controls|openai": {
+      "FALSE_NEGATIVE_ALLOW_ON_ESCALATE": 1,
+      "KNEW_ADMISSIBLE": 1,
+      "knew_admissible": 1,
+      "total": 2
+    },
+    "Banking / KYC / AML controls|xai": {
+      "KNEW_ADMISSIBLE": 2,
+      "knew_admissible": 2,
+      "total": 2
+    }
+  },
+  "summary_by_model": {
+    "minimax": {
+      "KNEW_ADMISSIBLE": 2,
+      "admissible": 2,
+      "correct": 2,
+      "false_negative": 0,
+      "false_positive": 0,
+      "knew_admissible": 2,
+      "total": 2
+    },
+    "openai": {
+      "FALSE_NEGATIVE_ALLOW_ON_ESCALATE": 1,
+      "KNEW_ADMISSIBLE": 1,
+      "admissible": 2,
+      "correct": 1,
+      "false_negative": 1,
+      "false_positive": 0,
+      "knew_admissible": 1,
+      "total": 2
+    },
+    "xai": {
+      "KNEW_ADMISSIBLE": 2,
+      "admissible": 2,
+      "correct": 2,
+      "false_negative": 0,
+      "false_positive": 0,
+      "knew_admissible": 2,
+      "total": 2
+    }
+  },
+  "token_totals": {
+    "input_tokens": 3630,
+    "output_tokens": 1887,
+    "total_tokens": 6526
+  },
+  "token_totals_by_model": {
+    "minimax": {
+      "input_tokens": 1153,
+      "output_tokens": 1415,
+      "total_tokens": 2568
+    },
+    "openai": {
+      "input_tokens": 1128,
+      "output_tokens": 252,
+      "total_tokens": 1380
+    },
+    "xai": {
+      "input_tokens": 1349,
+      "output_tokens": 220,
+      "total_tokens": 2578
+    }
+  },
+  "trace_binding": {
+    "live_summary_sha256": "375227b89b565c4474aa89ab4f7763e47a560ea3f0886bbd26dd9a2024ed4d02",
+    "runtime_results_sha256": "2d33469d2268aef760c1951e8096e9e0157e18a53b857e7683eed43475006b1e",
+    "scoring_map_sha256": "56349dc6fae27b45d4e97a9225efb8814b421ef333eb2f27647f6c047ea2f18a",
+    "trace_provider_calls_sha256": "2da2c534d7f3cdf4e987c8b4af0c7918f89743666fe28e960c10c15b76202c83"
+  }
+}

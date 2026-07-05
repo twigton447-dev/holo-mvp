@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment/vendor-master action resolved by tax ID and master record",
+    "allow_rule_assessment": "Proceed only if source records close exact boundary per policy",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-65B725086F96-CTL states record does not close required dependency",
+    "escalate_rule_assessment": "Dependency defect open; control record does not close tax ID alias link",
+    "timing_scope_authority_dependency_check": "Missing tax ID and vendor master alias link blocks execution"
+  },
+  "cited_evidence": [
+    "SRC-65B725086F96-CTL",
+    "SRC-65B725086F96-POL",
+    "SRC-65B725086F96-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "tax ID and vendor master alias link",
+    "SRC-65B725086F96-CTL"
+  ],
+  "final_answer": "Source records indicate an unresolved tax ID and vendor master alias link, as per SRC-65B725086F96-CTL. The policy mandates that the action boundary must be precisely closed by source records before execution. Since this critical dependency remains open, the action cannot proceed. Escalate for resolution of the tax ID and vendor master alias link.",
+  "open_blockers": [
+    "tax ID and vendor master alias link unresolved"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

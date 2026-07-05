@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May clinical operations activate the trial site?",
+    "allow_rule_assessment": "Enrollment authority defect remains open; AUTH-ZEN-080 confirms C11 consent pending",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "AUTH-ZEN-080 controls enrollment authority and confirms C11 enrollment authority pending despite matching site, protocol, and activation date",
+    "escalate_rule_assessment": "Narrow defect in enrollment authority blocks closure; resolution pathway identified",
+    "timing_scope_authority_dependency_check": "AUTH-ZEN-080 shows consent C11 enrollment authority pending before 2026-06-28 activation date"
+  },
+  "cited_evidence": [
+    "ACT-ZEN-080",
+    "AUTH-ZEN-080",
+    "FEAS-ZEN-080",
+    "STD-ZEN-080-P"
+  ],
+  "critical_features_preserved": [
+    "AUTH-ZEN-080 as controlling source for enrollment authority",
+    "FEAS-ZEN-080 is planning artifact only, not activation authority",
+    "Exact-match rule requires enrollment authority before enrollment",
+    "Action boundary on site activation",
+    "Consent C11 status pending as stated in AUTH-ZEN-080"
+  ],
+  "final_answer": "The action boundary remains open because AUTH-ZEN-080 confirms consent C11 enrollment authority is pending, despite matching site, protocol, and activation date. STD-ZEN-080-P requires all elements closed before enrollment. Resolution requires either an updated AUTH-ZEN-080 confirming C11 enrollment authority or a consent amendment establishing supplemental enrollment authority. FEAS-ZEN-080 cannot substitute for enrollment activation authority.",
+  "open_blockers": [
+    "AUTH-ZEN-080 C11 enrollment authority pending",
+    "All elements must close per STD-ZEN-080-P before enrollment",
+    "Resolution requires updated AUTH or consent amendment"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

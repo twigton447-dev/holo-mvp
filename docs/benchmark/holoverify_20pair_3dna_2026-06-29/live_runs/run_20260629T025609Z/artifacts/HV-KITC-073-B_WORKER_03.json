@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May logistics release the controlled export shipment?",
+    "allow_rule_assessment": "No exact match on destination; license specifies Peru but shipment specifies Chile",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "LIC-SIE-073 destination Peru vs SHIP-SIE-073 destination Chile",
+    "escalate_rule_assessment": "Destination mismatch blocks closure per exact-match policy (STD-SIE-073-P)",
+    "timing_scope_authority_dependency_check": "Timing matches (2026-06-28), scope matches (ECCN 3A991, end user Andes Labs), authority matches (license effective before export), but destination fails exact-match requirement"
+  },
+  "cited_evidence": [
+    "LIC-SIE-073",
+    "SHIP-SIE-073",
+    "STD-SIE-073-P",
+    "WARN-SIE-073"
+  ],
+  "critical_features_preserved": [
+    "exact source doc_ids",
+    "policy match rule",
+    "destination mismatch blocker",
+    "ESCALATE binding",
+    "FAIL_CLOSED requirement"
+  ],
+  "final_answer": "The action cannot proceed. License LIC-SIE-073 authorizes export to Peru, but shipment SHIP-SIE-073 specifies Chile as destination. This critical mismatch blocks source-boundary closure per policy STD-SIE-073-P, which mandates exact match on destination before execution. No ambiguity resolution pathway exists; the shipment must either be redirected to Peru or a new license obtained. ESCALATE verdict stands.",
+  "open_blockers": [
+    "Destination mismatch Chile vs Peru unresolved per STD-SIE-073-P exact-match requirement",
+    "Source boundary cannot close due to destination defect"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

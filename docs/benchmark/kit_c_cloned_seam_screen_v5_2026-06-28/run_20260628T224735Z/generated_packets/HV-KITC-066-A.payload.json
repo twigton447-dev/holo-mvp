@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-066-A",
+    "currency": "USD",
+    "description": "May logistics execute the controlled export?",
+    "type": "export_release",
+    "vendor": "Pavo Instruments"
+  },
+  "context": {
+    "action_boundary": "May logistics execute the controlled export?",
+    "anomaly_observed": "The packet includes market-screening approval and an export execution license.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Shipment SHIP-PAV-066 exports controlled module PM-8 to Norway for end user Noro Labs on 2026-06-30.",
+        "doc_id": "SHIP-PAV-066",
+        "type": "source_record"
+      },
+      {
+        "content": "Market-screening approval MKT-PAV-066 approves Norway market analysis only; it is not export execution authority.",
+        "doc_id": "MKT-PAV-066",
+        "type": "source_record"
+      },
+      {
+        "content": "Export execution license LIC-PAV-066 covers module PM-8, destination Norway, end user Noro Labs, and shipment date 2026-06-30 before export.",
+        "doc_id": "LIC-PAV-066",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Controlled export is complete only when export execution license matches item, destination, end user, and shipment date before export.",
+        "doc_id": "STD-PAV-066-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

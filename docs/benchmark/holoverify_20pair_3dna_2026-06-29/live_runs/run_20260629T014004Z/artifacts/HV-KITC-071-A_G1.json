@@ -1,0 +1,34 @@
+{
+  "blocked_moves": [
+    "introduction of any source_id not in source_ids_used_so_far",
+    "modification of cited_evidence array from worker_01",
+    "reopening of any of the four closed gates",
+    "relaxation of exact-match policy requirement",
+    "treating ALERT-QUA-071 as execution authority rather than contextual alert"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "HV-KITC-071-A_WORKER_01: SOURCE_BOUNDARY_MAPPER \u2192 HV-KITC-071-A_WORKER_02: EXECUTION_COMPILER. Gate pass confirmed by HOLOVERIFY_WORKER_DETERMINISTIC_GATE. No unresolved dependencies. Repairs-041 context resolved. Artifact hash 3c77478f validated."
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact source IDs from worker_01 artifact (ALERT-QUA-071, BANK-QUA-071, CALL-QUA-071, PAY-QUA-071, REL-QUA-071, VM-QUA-071, STD-QUA-071-P)",
+    "action boundary 'May AP release payment after the vendor bank update?'",
+    "policy exact-match rule under STD-QUA-071-P",
+    "binding_class SOURCE_BOUNDARY_CLOSED",
+    "timing_scope: release date 2026-06-28 confirmed before execution",
+    "vendor-amount-account alignment: Quanta Field Services, USD 73400, account ending 8821"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Verify no source substitution or boundary drift in final compilation. Confirm all cited evidence remains exact and unaltered from worker_01 artifact. Validate that execution authority derives solely from closed chain under STD-QUA-071-P.",
+    "monotonic_preservation": "All critical features from worker_01 artifact must be carried forward unchanged: exact source IDs, action boundary, policy rule, binding class, cited evidence, and timing confirmation.",
+    "objective": "Compile final execution authority for AP payment release to Quanta Field Services, USD 73400, account ending 8821",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "SOURCE_BOUNDARY_CLOSED: All four policy gates closed by collective records under STD-QUA-071-P. CALL-QUA-071 (pre-change callback), VM-QUA-071 (vendor-master approval), BANK-QUA-071 (bank ownership), REL-QUA-071 (payment-release authority for vendor Quanta Field Services, USD 73400, account 8821, release date 2026-06-28). Timing dependency satisfied: release date matches before execution.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ALLOW"
+}

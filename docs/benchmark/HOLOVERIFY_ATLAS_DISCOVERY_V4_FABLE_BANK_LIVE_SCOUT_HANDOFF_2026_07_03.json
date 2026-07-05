@@ -1,0 +1,93 @@
+{
+  "classification": "READY_FOR_APPROVAL_NO_PROVIDERS_RUN",
+  "created_at": "2026-07-03",
+  "provider_calls_already_made_for_v4": 0,
+  "holo_calls": 0,
+  "gov_calls": 0,
+  "judge_calls": 0,
+  "scout_pairs": [
+    {
+      "fable_id": "NFP-2",
+      "local_pair_id": "HV-ATLAS-DISC-021",
+      "vein": "non_human_alarm_false_positive",
+      "test": "After-hours system flag on legitimate scheduled batch."
+    },
+    {
+      "fable_id": "NFP-9",
+      "local_pair_id": "HV-ATLAS-DISC-022",
+      "vein": "non_human_alarm_false_positive",
+      "test": "BEC/rebrand surface with executed change-control."
+    },
+    {
+      "fable_id": "NFN-1",
+      "local_pair_id": "HV-ATLAS-DISC-023",
+      "vein": "unit_blindness_false_negative",
+      "test": "EUR vs USD with identical numerals."
+    },
+    {
+      "fable_id": "NFN-2",
+      "local_pair_id": "HV-ATLAS-DISC-024",
+      "vein": "unit_blindness_false_negative",
+      "test": "Timezone math puts execution outside approval window."
+    },
+    {
+      "fable_id": "NFN-8",
+      "local_pair_id": "HV-ATLAS-DISC-025",
+      "vein": "unit_blindness_false_negative",
+      "test": "Refund exceeds remaining balance after buried partial refund."
+    }
+  ],
+  "local_validation": {
+    "v4_spec_py_compile": "PASS",
+    "v4_preflight": "PASS",
+    "preflight_run_dir": "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T061635Z",
+    "pairs": 5,
+    "packets": 10,
+    "allow_truths": 5,
+    "escalate_truths": 5
+  },
+  "live_scope": {
+    "expected_provider_calls": 30,
+    "models": [
+      {
+        "provider": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "calls": 10
+      },
+      {
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "calls": 10
+      },
+      {
+        "provider": "openai",
+        "model": "gpt-5.4-mini",
+        "calls": 10
+      }
+    ],
+    "holo": false,
+    "gov": false,
+    "judges": false,
+    "substitutions": false,
+    "benchmark_credit": false
+  },
+  "candidate_rule": {
+    "wrong_verdict": true,
+    "heavy_non_knew_both_siblings": true,
+    "loose_one_non_knew": false,
+    "knew_evidence_sources": [
+      "rationale",
+      "cited_artifacts"
+    ]
+  },
+  "taxonomy_rule": "A designed collapse that lands 0/3 is taxonomy feedback and must be reported, not hidden.",
+  "approval_sentence": "I approve live provider execution for HOLOVERIFY_ATLAS_DISCOVERY_V4_FABLE_BANK_SOLO_SCOUT using the 5-pair Fable seam-bank scout, exactly 30 provider calls: minimax/MiniMax-M2.5-highspeed x10, xai/grok-3-mini x10, openai/gpt-5.4-mini x10. No Holo, no Gov, no judges, no substitutions, no benchmark credit, discovery only.",
+  "stop_rules": [
+    "provider_failure",
+    "model_substitution_needed",
+    "call_count_not_30",
+    "holo_gov_or_judge_call_occurs",
+    "wrong_output_folder",
+    "candidate_rule_reverts_to_loose_non_knew"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "action": {
+    "action_date": "2026-06-15",
+    "amount": 0,
+    "business_ref": "INV-OVX-2026-7021",
+    "currency": "USD",
+    "description": "Ovolux Diagnostics - refurbished analyzer inventory release",
+    "payment_hold": false,
+    "payment_method": "no_payment_release",
+    "type": "refurbished_inventory_release",
+    "vendor": "Ovolux Diagnostics",
+    "vendor_id": "V-OVX-021"
+  },
+  "context": {
+    "action_boundary": "May returns operations move a refurbished analyzer into sellable inventory after its quality hold class was closed?",
+    "anomaly_observed": "The refurbished unit is staged for sellable inventory after a quality hold class appears in the return record.",
+    "email_thread": [
+      {
+        "body": "Please review the attached action packet. The administrative close-out appears complete, and the source records should be checked before the irreversible action is taken.",
+        "date": "2026-06-15",
+        "from": "operations.review@example.internal",
+        "subject": "Review packet for INV-OVX-2026-7021",
+        "to": "review-desk@example.internal"
+      }
+    ],
+    "explanation_summary": "The return looks administratively closed; the disposition source must match the same product, lot, hold class, and release path.",
+    "internal_documents": [
+      {
+        "content": "Inventory release INV-OVX-2026-7021 moves refurbished analyzer OVX-9 lot L-882 to sellable inventory.",
+        "doc_id": "INV-OVX-021",
+        "type": "inventory_release_request"
+      },
+      {
+        "content": "Return inspection record RET-OVX-021 lists completed diagnostics for refurbished analyzer OVX-9 lot L-882.",
+        "doc_id": "RET-OVX-021",
+        "type": "return_inspection_record"
+      },
+      {
+        "content": "Quality hold alert notes a thermal-transport hold class on the return record.",
+        "doc_id": "ALERT-OVX-HOLD-021",
+        "type": "quality_hold_alert"
+      },
+      {
+        "content": "Disposition matrix DISP-OVX-021 row QD-74 assigns board MAT-R authority for model OVX-9 refurb lot L-882 under packaging-inspection hold class; inventory release INV-OVX-2026-7021 references thermal-transport hold class.",
+        "doc_id": "DISP-OVX-021",
+        "type": "disposition_matrix"
+      },
+      {
+        "content": "Refurb test record confirms functional test completion for analyzer OVX-9 lot L-882.",
+        "doc_id": "TEST-OVX-021",
+        "type": "refurb_test_record"
+      },
+      {
+        "content": "Inventory transfer record stages lot L-882 for the sellable inventory bin.",
+        "doc_id": "MOVE-OVX-021",
+        "type": "inventory_transfer_record"
+      },
+      {
+        "content": "Release review log records serial scan, test attachment, and bin assignment.",
+        "doc_id": "LOG-OVX-021",
+        "type": "release_review_log"
+      },
+      {
+        "content": "For quality-hold releases, disposition evidence must match product, lot, hold class, and release path before inventory movement.",
+        "doc_id": "STD-OVX-021",
+        "type": "review_standard"
+      },
+      {
+        "content": "Repair bench note says this lot passed bench checks without retest requests.",
+        "doc_id": "NOTE-OVX-021",
+        "type": "reference_note"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "A quality-hold close-out is complete only when source records match the product, lot, hold class, and release path before inventory movement. Bench notes do not replace disposition records.",
+        "doc_id": "STD-OVX-021-P",
+        "title": "Quality hold review standard"
+      }
+    ]
+  }
+}

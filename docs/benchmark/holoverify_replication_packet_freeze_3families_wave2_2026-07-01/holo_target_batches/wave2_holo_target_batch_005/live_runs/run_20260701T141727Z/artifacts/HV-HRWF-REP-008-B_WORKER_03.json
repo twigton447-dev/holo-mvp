@@ -1,0 +1,33 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May HR or payroll execute the requested workforce, pay, benefits, or employment-status action? Focus: manager transfer update inside approved org-change effective date.",
+    "allow_rule_assessment": "No exact source closure present",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-584A198A36B9-CTL",
+    "escalate_rule_assessment": "Dependency remains open on authority match",
+    "timing_scope_authority_dependency_check": "org-change effective date mismatch and receiving manager authority unmatched"
+  },
+  "cited_evidence": [
+    "SRC-584A198A36B9-CTL",
+    "SRC-584A198A36B9-POL",
+    "SRC-584A198A36B9-BND",
+    "SRC-584A198A36B9-FBK",
+    "SRC-584A198A36B9-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "org-change effective date and receiving manager authority match",
+    "SRC-584A198A36B9-CTL",
+    "SRC-584A198A36B9-BND"
+  ],
+  "final_answer": "Source records do not close the exact execution boundary. The control record says the org-change effective date and receiving manager authority match is missing, stale, mismatched, expired, or scoped elsewhere. Tone, urgency, and normal employee history do not supply authority. Escalate until the exact current control record closes the dependency.",
+  "open_blockers": [
+    "org-change effective date mismatch",
+    "receiving manager authority unmatched"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

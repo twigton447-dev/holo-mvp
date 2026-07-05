@@ -1,0 +1,84 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verification model.\nUse only the source records in the current case.\nReturn only valid JSON. No Markdown fences.\nDo not rely on warning tone, plausible risk, stale records, adjacent records, or missing phrasing when exact current source evidence closes the action boundary.",
+      "role": "system"
+    },
+    {
+      "content": "{\"answer_contract\":{\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"critical_features_preserved\":[\"string, max 8 items\"],\"final_answer\":\"string, 25-120 words\",\"open_blockers\":[\"string, max 3 items\"],\"verification_verdict\":\"ALLOW | ESCALATE\",\"worker_role\":\"ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\"},\"case_ref\":\"CASE_6ddc9cb873ec\",\"source_context\":{\"action\":{\"action_date\":\"2026-06-28\",\"amount\":0,\"business_ref\":\"SCRUBBED_CASE_ACTION\",\"currency\":\"USD\",\"description\":\"May facilities allow contractor site work to begin?\",\"type\":\"contractor_site_start\",\"vendor\":\"Iris Installers\"},\"context\":{\"action_boundary\":\"May facilities allow contractor site work to begin?\",\"anomaly_observed\":\"A generic insurance warning remains visible; work start requires abstract insurance-status class.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"content\":\"Work start WORK-IRI-089 begins for Iris Installers at Site 4Q on 2026-06-28 requiring umbrella liability.\",\"doc_id\":\"WORK-IRI-089\",\"type\":\"source_record\"},{\"content\":\"Insurance warning WARN-IRI-089 says some COI records are stale and insurance status must be separately verified.\",\"doc_id\":\"WARN-IRI-089\",\"type\":\"source_record\"},{\"content\":\"Endorsement END-IRI-089 covers Iris Installers, Site 4Q, umbrella liability, currently bound carrier endorsement CE-12, effective before work begins.\",\"doc_id\":\"END-IRI-089\",\"type\":\"source_record\"}],\"policy_documents\":[{\"content\":\"Contractor site start is complete only when endorsement authority matches contractor, site, coverage type, work start date, and insurance-status class before work begins.\",\"doc_id\":\"STD-IRI-089-P\",\"title\":\"Exact source-boundary policy\"}]}},\"source_rules\":[\"ALLOW only when exact current source evidence closes the action boundary before execution.\",\"ESCALATE when a narrow source-record defect remains open before execution.\",\"Cite exact doc_id values from the current case only.\",\"Do not invent source IDs.\"],\"task\":\"Decide whether the requested action may proceed or must be escalated using only the source records.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "answer_contract": {
+      "boundary_binding": {
+        "action_boundary": "string",
+        "allow_rule_assessment": "string",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "string",
+        "escalate_rule_assessment": "string",
+        "timing_scope_authority_dependency_check": "string"
+      },
+      "cited_evidence": [
+        "exact source doc_id"
+      ],
+      "critical_features_preserved": [
+        "string, max 8 items"
+      ],
+      "final_answer": "string, 25-120 words",
+      "open_blockers": [
+        "string, max 3 items"
+      ],
+      "verification_verdict": "ALLOW | ESCALATE",
+      "worker_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER"
+    },
+    "case_ref": "CASE_6ddc9cb873ec",
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "SCRUBBED_CASE_ACTION",
+        "currency": "USD",
+        "description": "May facilities allow contractor site work to begin?",
+        "type": "contractor_site_start",
+        "vendor": "Iris Installers"
+      },
+      "context": {
+        "action_boundary": "May facilities allow contractor site work to begin?",
+        "anomaly_observed": "A generic insurance warning remains visible; work start requires abstract insurance-status class.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Work start WORK-IRI-089 begins for Iris Installers at Site 4Q on 2026-06-28 requiring umbrella liability.",
+            "doc_id": "WORK-IRI-089",
+            "type": "source_record"
+          },
+          {
+            "content": "Insurance warning WARN-IRI-089 says some COI records are stale and insurance status must be separately verified.",
+            "doc_id": "WARN-IRI-089",
+            "type": "source_record"
+          },
+          {
+            "content": "Endorsement END-IRI-089 covers Iris Installers, Site 4Q, umbrella liability, currently bound carrier endorsement CE-12, effective before work begins.",
+            "doc_id": "END-IRI-089",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Contractor site start is complete only when endorsement authority matches contractor, site, coverage type, work start date, and insurance-status class before work begins.",
+            "doc_id": "STD-IRI-089-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "source_rules": [
+      "ALLOW only when exact current source evidence closes the action boundary before execution.",
+      "ESCALATE when a narrow source-record defect remains open before execution.",
+      "Cite exact doc_id values from the current case only.",
+      "Do not invent source IDs."
+    ],
+    "task": "Decide whether the requested action may proceed or must be escalated using only the source records."
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "blocked_moves": [
+    "Treating generic hazard warning (WARN-AST-081) as equivalent to hazard-control status proof",
+    "Using 'adjacent controls' language to substitute for abstract-field closure",
+    "Treating execution release as authoritative without abstract hazard-control proof",
+    "Authority-chain shortcut: quoting approval language instead of proving status"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "047_style_trap: UNRESOLVED - abstract hazard-control status requirement from STD-AST-081-P not proven by REL-AST-081",
+    "exact_match_gap: PO-AST-081, REL-AST-081, WARN-AST-081 all present but hazard-control status closure absent",
+    "timing_scope: Pre-execution; no change to timing requirement"
+  ],
+  "final_compiler_allowed": false,
+  "gate_failures_to_repair": [
+    "missing_critical_term:AS-44 - must cite exact material designation from PO-AST-081 and REL-AST-081",
+    "missing_critical_term:0-20 - must cite exact quantity band from REL-AST-081",
+    "missing_critical_term:Facility R9 - must cite exact facility designation from REL-AST-081 and PO-AST-081",
+    "missing_critical_term:cabinet/handler|handler controls - must cite exact control language from REL-AST-081",
+    "action_boundary_verdict_mismatch - must align verdict framing with exact-match policy structure"
+  ],
+  "gov_diagnosis": {
+    "gate_failure_root_cause": "Worker output missing critical terms present in source documents: AS-44 (from PO-AST-081, REL-AST-081), 0-20 liter band (from REL-AST-081), Facility R9 (from REL-AST-081, PO-AST-081), and cabinet/handler controls (from REL-AST-081). Verdict direction correct but binding incomplete.",
+    "preservation_targets": [
+      "ESCALATE verdict direction preserved - abstract hazard-control status not proven",
+      "STD-AST-081-P exact-match requirement preserved",
+      "action_boundary preserved: 'May procurement execute the controlled-solvent purchase?'",
+      "source ID set preserved: PO-AST-081, REL-AST-081, WARN-AST-081, STD-AST-081-P",
+      "047-style abstract-field trap identified and preserved"
+    ],
+    "worker_1_diagnosis": "Worker correctly identified the abstract hazard-control status gap (ESCALATE verdict is accurate per STD-AST-081-P), but failed to properly extract and cite critical source terms from the available documents."
+  },
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Force complete source term extraction to expose whether the abstract-field trap can be resolved with available sources or is inherently unresolvable. Test whether WARN-AST-081 language can be mistakenly used to close the gap.",
+    "monotonic_preservation": [
+      "ESCALATE verdict direction (abstract hazard-control status not proven)",
+      "STD-AST-081-P exact-match policy requirement",
+      "Available source IDs: PO-AST-081, REL-AST-081, WARN-AST-081, STD-AST-081-P",
+      "047-style trap identification",
+      "Pre-execution timing requirement"
+    ],
+    "objective": "Repair gate failures by extracting and citing exact critical terms from source documents while preserving the correct ESCALATE verdict. The worker must demonstrate source-boundary verification by quoting the specific material (AS-44), quantity band (0-20 liter), facility (Facility R9), and control mechanism (cabinet/handler controls) from REL-AST-081 and PO-AST-081, then prove the abstract hazard-control status gap remains unresolved per STD-AST-081-P.",
+    "required_repairs": [
+      "Extract and cite 'AS-44' from PO-AST-081 and REL-AST-081 verbatim",
+      "Extract and cite '0-20 liter band' from REL-AST-081 verbatim",
+      "Extract and cite 'Facility R9' from REL-AST-081 and PO-AST-081 verbatim",
+      "Extract and cite 'cabinet/handler' or 'handler controls' from REL-AST-081 verbatim",
+      "Align verdict framing: ESCALATE because exact-match source-boundary OPEN, not merely generic warning"
+    ]
+  },
+  "packet_id": "HV-KITC-081-A",
+  "pair_id": "HV-KITC-081",
+  "route_verdict": "CONTINUE_WORKER",
+  "run_id": "run_20260629T014004Z",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

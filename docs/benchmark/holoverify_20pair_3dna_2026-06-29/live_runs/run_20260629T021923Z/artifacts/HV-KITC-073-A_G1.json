@@ -1,0 +1,42 @@
+{
+  "artifact_summary": "SOURCE_BOUNDARY_MAPPER produced ALLOW verdict with SOURCE_BOUNDARY_CLOSED binding. Worker correctly identified that LIC-SIE-073 provides exact match on all five policy fields (ECCN 3A991, Chile, Andes Labs, 2026-06-28 shipment date, effective before export) per STD-SIE-073-P. WARN-SIE-073 correctly classified as general warning, not execution authority.",
+  "blocked_moves": [],
+  "control_action": "FINAL_COMPILER",
+  "critical_feature_preservation": [
+    "exact source match on all policy fields",
+    "no invented source IDs",
+    "general warning correctly subordinated to exact license evidence"
+  ],
+  "dependency_ledger": [
+    "HV-KITC-073-A: SOURCE_BOUNDARY_MAPPER verdict ALLOW with SOURCE_BOUNDARY_CLOSED binding, gate PASS, no open dependencies. Export action verified."
+  ],
+  "failure_category": "NONE",
+  "final_compiler_allowed": true,
+  "gate_failures": [],
+  "gate_status": "PASS",
+  "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton.",
+  "gov_mode": "CONTROL_ROUTER",
+  "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+  "must_preserve": [
+    "ALLOW verdict",
+    "SOURCE_BOUNDARY_CLOSED binding",
+    "exact match on ECCN 3A991, Chile, Andes Labs, 2026-06-28, license effective before export",
+    "correct subordination of WARN-SIE-073 to LIC-SIE-073",
+    "cited source IDs LIC-SIE-073, SHIP-SIE-073, STD-SIE-073-P, WARN-SIE-073"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Verify that final compilation preserves exact source boundary closure and emits FINAL_RELEASE verdict",
+    "monotonic_preservation": "Preserve ALLOW verdict, SOURCE_BOUNDARY_CLOSED binding, exact match on all five policy fields, and correct citation of LIC-SIE-073 as controlling authority",
+    "objective": "FINAL_COMPILER",
+    "required_repairs": []
+  },
+  "packet_id": "HV-KITC-073-A",
+  "pair_id": "HV-KITC-073",
+  "route_verdict": "FINAL_COMPILER",
+  "run_id": "run_20260629T021923Z",
+  "source_binding_integrity": "VALID - exact match confirmed across all required fields",
+  "source_gate_interpretation": "Gate passed. No failures. Artifact binding SOURCE_BOUNDARY_CLOSED confirmed. LIC-SIE-073 exactly satisfies STD-SIE-073-P requirements for SHIP-SIE-073 export. WARN-SIE-073 is general guidance, not a blocking condition when exact license match exists.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ALLOW"
+}

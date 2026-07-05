@@ -1,0 +1,34 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May facilities execute the hot-work start?",
+    "allow_rule_assessment": "No exact match; ignition-control status is PENDING, not CLOSED. Policy requires CLOSED status before start. Blocked.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Hot-work permit PERMIT-EMB-085 shows active fire watch FW-6 and spark-shield controls remain PENDING. Policy STD-EMB-085-P requires ignition-control status CLOSED before start. No source provides CLOSED status.",
+    "escalate_rule_assessment": "Deterministic source defect confirmed: PENDING status cannot satisfy exact-match requirement for CLOSED. Workers xai and google both ESCALATE. Deterministic gate passed. Abstract-field trap resolved.",
+    "timing_scope_authority_dependency_check": "Permit date and scope match, but ignition-control authority remains unconfirmed. PENDING status is not equivalent to CLOSED per policy."
+  },
+  "cited_evidence": [
+    "PERMIT-EMB-085",
+    "STD-EMB-085-P",
+    "ACCESS-EMB-085"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "exact-match policy rule from STD-EMB-085-P",
+    "PENDING \u2260 CLOSED distinction",
+    "ACCESS-EMB-085 scope limitation (site entry only)",
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding",
+    "Gov baton directives",
+    "deterministic gate result",
+    "monotonic preservation requirements"
+  ],
+  "final_answer": "Action may not proceed. Source records PERMIT-EMB-085 and ACCESS-EMB-085 confirm ignition-control status is PENDING and requires separate verification. Policy STD-EMB-085-P requires CLOSED status before hot-work start. No source provides CLOSED status. Workers xai and google both ESCALATE; deterministic gate passed; defect is deterministic. FAIL_CLOSED. PENDING status cannot satisfy exact-match requirement for CLOSED. Hot-work start blocked until ignition-control closure is verified and recorded.",
+  "open_blockers": [
+    "Ignition-control status PENDING in PERMIT-EMB-085; STD-EMB-085-P requires CLOSED status before start; no source provides CLOSED status; abstract-field trap confirmed; PENDING cannot satisfy exact-match requirement.",
+    "Gov conflict resolved: Gov baton confirms deterministic defect; PENDING \u2260 CLOSED per policy exact-match; workers xai and google both ESCALATE; FINAL_COMPILER preserves ESCALATE and outputs FAIL_CLOSED."
+  ],
+  "verification_verdict": "FAIL_CLOSED",
+  "worker_role": "FINAL_COMPILER"
+}

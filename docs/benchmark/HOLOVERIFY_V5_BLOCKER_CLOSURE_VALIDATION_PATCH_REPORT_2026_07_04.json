@@ -1,0 +1,68 @@
+{
+  "classification": "HOLOVERIFY_V5_BLOCKER_CLOSURE_VALIDATION_PATCH_REPORT_V0",
+  "created_at_utc": "2026-07-04T05:53:51Z",
+  "status": "NO_PROVIDER_ACCEPTANCE_TESTS_PASS",
+  "claim_boundary": {
+    "providers_run": 0,
+    "holo_live_runs": 0,
+    "solo_runs": 0,
+    "judge_runs": 0,
+    "not_benchmark_evidence": true,
+    "not_public_claim_material": true
+  },
+  "implementation_summary": {
+    "selector_policy_version": "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+    "worker_contract_version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+    "adds_blocker_type": true,
+    "adds_structured_blocker_resolution": true,
+    "validates_source_fields_not_just_source_ids": true,
+    "invalid_closure_keeps_blocker_open": true,
+    "selector_blocks_allow_with_invalid_closure": true,
+    "gov_routes_invalid_closure_forward": true
+  },
+  "primary_fixtures": [
+    "HVSF-FACTORY16-010-B",
+    "HVSF-FACTORY16-020-B"
+  ],
+  "tests": [
+    {
+      "command": "python3 -m pytest tests/test_holoverify_v5_blocker_closure_validation.py -q",
+      "status": "passed",
+      "passed": 9,
+      "failed": 0
+    },
+    {
+      "command": "python3 -m pytest tests/test_holoverify_blind_selector_repair_regression.py -q",
+      "status": "passed",
+      "passed": 16,
+      "failed": 0
+    },
+    {
+      "command": "python3 -m pytest tests/test_holoverify_blind_canary_live_wrapper.py tests/test_holoverify_blind_120_live_wrapper.py tests/test_holoverify_atlas_holo_rescue_patch_validation_gate.py -q",
+      "status": "passed",
+      "passed": 37,
+      "failed": 0
+    },
+    {
+      "command": "python3 -m py_compile holoverify_blind_runner_v0.py docs/benchmark/run_holoverify_blind_canary_live_2026_07_02.py docs/benchmark/run_holoverify_atlas_holo_rescue_live_2026_07_03.py",
+      "status": "passed"
+    }
+  ],
+  "acceptance_tests_added": [
+    "test_v5_rejects_false_closure_wrong_transaction_type_b16_010",
+    "test_v5_rejects_false_closure_missing_amount_limit_b16_010",
+    "test_v5_rejects_false_closure_wrong_payment_release_scope_b16_020",
+    "test_v5_rejects_false_closure_missing_amount_limit_b16_020",
+    "test_v5_selector_blocks_allow_when_invalid_closure_exists",
+    "test_v5_gov_routes_invalid_closure_forward",
+    "test_v5_accepts_allow_when_closure_source_matches_required_scope_and_limit",
+    "test_v5_marks_policy_underspecified_packet_as_packet_repair_not_win_or_loss",
+    "test_v5_worker_contract_requires_blocker_type_and_structured_resolution"
+  ],
+  "readiness": {
+    "ready_for_small_no_provider_preflight": true,
+    "ready_for_live_rerun": false,
+    "live_rerun_requires_explicit_approval": true
+  }
+}
+

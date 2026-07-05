@@ -1,0 +1,40 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release the invoice while the ERP hold remains visible?",
+    "allow_rule_assessment": "Policy STD-RAV-072-P requires closeout ledger to match payment release approval before payment; CLOSE-RAV-072 states payment release approval remains open.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CLOSE-RAV-072 payment release approval remains open; STD-RAV-072-P requires completed payment release approval.",
+    "escalate_rule_assessment": "Exact source boundary remains open due to unmatched payment release approval in CLOSE-RAV-072.",
+    "timing_scope_authority_dependency_check": "HOLD-RAV-072 visible; CLOSE-RAV-072 payment release open; no authority to override visible hold."
+  },
+  "cited_evidence": [
+    "CLOSE-RAV-072",
+    "STD-RAV-072-P",
+    "HOLD-RAV-072"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "Gov adversarial baton",
+    "structured canonical state",
+    "artifact context"
+  ],
+  "final_answer": "Action may not proceed. CLOSE-RAV-072 explicitly states payment release approval remains open, violating STD-RAV-072-P requirement for completed payment release approval before release. HOLD-RAV-072 remains visible. Boundary is open. ESCALATE. Gov requires exact match, not visible-hold override. State and Gov conflict on worker autonomy.",
+  "open_blockers": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only.",
+    "HV-KITC-072-B_STATUS: SOURCE_BOUNDARY_OPEN_BLOCKED",
+    "blocking_condition: Payment release approval remains open in CLOSE-RAV-072",
+    "policy_requirement_violated: STD-RAV-072-P exact-match for payment release approval",
+    "required_resolution: Payment release approval must be completed in closeout ledger before invoice release may proceed",
+    "erp_hold_status: Visible but superseded by closeout ledger deficiency per policy",
+    "CONTINUE_WORKER with authorization override - policy requires exact match, not visible-hold override",
+    "Any ALLOW verdict - controlling source fact explicitly violates policy rule",
+    "Treating HOLD-RAV-072 visibility as sufficient without closeout ledger exact-match completion",
+    "Ignoring payment release approval open status as minor discrepancy"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

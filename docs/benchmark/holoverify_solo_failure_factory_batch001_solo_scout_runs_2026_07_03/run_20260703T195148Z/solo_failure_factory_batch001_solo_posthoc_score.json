@@ -1,0 +1,408 @@
+{
+  "classification": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_SOLO_SCOUT_POSTHOC_SCORE_V1",
+  "created_at_utc": "2026-07-03T19:52:29.665387+00:00",
+  "models_per_packet": 3,
+  "packet_collapse_rows": [
+    {
+      "collapse_class": "ALL_THREE_SOLO_KNEW",
+      "domain": "Agentic commerce / order execution controls",
+      "legacy_packet_id": "HVSF-FACTORY-004-A",
+      "model_outcomes": [
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "xai",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ALLOW"
+        },
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "openai",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ALLOW"
+        },
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "minimax",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ALLOW"
+        }
+      ],
+      "opaque_runtime_id": "HVSF001-07C2ABDF098D94234998",
+      "pair_id": "HVSF-FACTORY-004",
+      "solo_failure_count": 0,
+      "solo_knew_count": 3,
+      "truth": "ALLOW"
+    },
+    {
+      "collapse_class": "ONE_OF_THREE_SOLO_COLLAPSE",
+      "domain": "Agentic commerce / order execution controls",
+      "legacy_packet_id": "HVSF-FACTORY-004-B",
+      "model_outcomes": [
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "xai",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ESCALATE"
+        },
+        {
+          "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+          "model_key": "openai",
+          "solo_admissible": true,
+          "solo_knew_admissible": false,
+          "solo_verdict": "ALLOW"
+        },
+        {
+          "error_class": "KNEW_ADMISSIBLE",
+          "model_key": "minimax",
+          "solo_admissible": true,
+          "solo_knew_admissible": true,
+          "solo_verdict": "ESCALATE"
+        }
+      ],
+      "opaque_runtime_id": "HVSF001-9CDDD01598036DFD70B3",
+      "pair_id": "HVSF-FACTORY-004",
+      "solo_failure_count": 1,
+      "solo_knew_count": 2,
+      "truth": "ESCALATE"
+    }
+  ],
+  "packet_collapse_summary": {
+    "ALL_THREE_SOLO_KNEW": 1,
+    "ONE_OF_THREE_SOLO_COLLAPSE": 1
+  },
+  "packet_count": 2,
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T195148Z",
+  "score_rows": [
+    {
+      "domain": "Agentic commerce / order execution controls",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-004-A",
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-07C2ABDF098D94234998",
+      "pair_id": "HVSF-FACTORY-004",
+      "provider": "xai",
+      "provider_row": {
+        "call_number": 1,
+        "elapsed_ms": 3468,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 644,
+        "max_output_tokens": 1200,
+        "model": "grok-3-mini",
+        "model_key": "xai",
+        "opaque_runtime_id": "HVSF001-07C2ABDF098D94234998",
+        "output_tokens": 102,
+        "packet_index_1based": 1,
+        "prompt_sha256": "c598ae3cba75479810ded842b31d73c2337c927be830487f8e5035e38cd45d9a",
+        "provider": "xai",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/001_HVSF001-07C2ABDF098D94234998_xai.json",
+        "raw_text_sha256": "08512a2fb8603a2f129af63d26906729ddcbcda4bf84b62d309b14bef220bfdf",
+        "response_id": "90d3bc30-92bc-9570-93a9-2458fdcb08bc",
+        "text_sha256": "08512a2fb8603a2f129af63d26906729ddcbcda4bf84b62d309b14bef220bfdf",
+        "total_tokens": 1165,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ALLOW",
+      "trace_call_number": 1,
+      "truth": "ALLOW"
+    },
+    {
+      "domain": "Agentic commerce / order execution controls",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-004-A",
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-07C2ABDF098D94234998",
+      "pair_id": "HVSF-FACTORY-004",
+      "provider": "openai",
+      "provider_row": {
+        "call_number": 2,
+        "elapsed_ms": 1455,
+        "error": null,
+        "finish_reason": "completed",
+        "input_tokens": 536,
+        "max_output_tokens": 1200,
+        "model": "gpt-5.4-mini",
+        "model_key": "openai",
+        "opaque_runtime_id": "HVSF001-07C2ABDF098D94234998",
+        "output_tokens": 120,
+        "packet_index_1based": 1,
+        "prompt_sha256": "c598ae3cba75479810ded842b31d73c2337c927be830487f8e5035e38cd45d9a",
+        "provider": "openai",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/002_HVSF001-07C2ABDF098D94234998_openai.json",
+        "raw_text_sha256": "378dd437e228a15fc63f86b8ab49ccf6e7ffdff5c5b2e96d436f003dce8bc069",
+        "response_id": "resp_0bb995b3a6faa38e006a4812d897f8819899d0bc5865fae3bb",
+        "text_sha256": "378dd437e228a15fc63f86b8ab49ccf6e7ffdff5c5b2e96d436f003dce8bc069",
+        "total_tokens": 656,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ALLOW",
+      "trace_call_number": 2,
+      "truth": "ALLOW"
+    },
+    {
+      "domain": "Agentic commerce / order execution controls",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-004-A",
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-07C2ABDF098D94234998",
+      "pair_id": "HVSF-FACTORY-004",
+      "provider": "minimax",
+      "provider_row": {
+        "call_number": 3,
+        "elapsed_ms": 10733,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 548,
+        "max_output_tokens": 1200,
+        "model": "MiniMax-M2.5-highspeed",
+        "model_key": "minimax",
+        "opaque_runtime_id": "HVSF001-07C2ABDF098D94234998",
+        "output_tokens": 638,
+        "packet_index_1based": 1,
+        "prompt_sha256": "c598ae3cba75479810ded842b31d73c2337c927be830487f8e5035e38cd45d9a",
+        "provider": "minimax",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/003_HVSF001-07C2ABDF098D94234998_minimax.json",
+        "raw_text_sha256": "c726f0c59eaffc22373c7befd7c3bd292bc348cfec35d8a08411833e04f9f2db",
+        "response_id": "069745da676e63a3772e2b281df044db",
+        "text_sha256": "46a5a5e869c7a9c10afa307c43f3cf32e6b71d899d79c45cc124b7694fc1caab",
+        "total_tokens": 1186,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ALLOW",
+      "trace_call_number": 3,
+      "truth": "ALLOW"
+    },
+    {
+      "domain": "Agentic commerce / order execution controls",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-004-B",
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-9CDDD01598036DFD70B3",
+      "pair_id": "HVSF-FACTORY-004",
+      "provider": "xai",
+      "provider_row": {
+        "call_number": 4,
+        "elapsed_ms": 4091,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 654,
+        "max_output_tokens": 1200,
+        "model": "grok-3-mini",
+        "model_key": "xai",
+        "opaque_runtime_id": "HVSF001-9CDDD01598036DFD70B3",
+        "output_tokens": 109,
+        "packet_index_1based": 2,
+        "prompt_sha256": "ce7ea8ad08198f74b630d0c8939f27adf99d5bc7f3f05c14f3872fc4fcb41616",
+        "provider": "xai",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/004_HVSF001-9CDDD01598036DFD70B3_xai.json",
+        "raw_text_sha256": "aab176f4a395958836958958103184608ca315ad77ad2a93017f12fb3b96e6dc",
+        "response_id": "879c5d4d-7b7c-92e1-bb45-e7336776bbb1",
+        "text_sha256": "aab176f4a395958836958958103184608ca315ad77ad2a93017f12fb3b96e6dc",
+        "total_tokens": 1219,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ESCALATE",
+      "trace_call_number": 4,
+      "truth": "ESCALATE"
+    },
+    {
+      "domain": "Agentic commerce / order execution controls",
+      "error_class": "FALSE_NEGATIVE_ALLOW_ON_ESCALATE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-004-B",
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-9CDDD01598036DFD70B3",
+      "pair_id": "HVSF-FACTORY-004",
+      "provider": "openai",
+      "provider_row": {
+        "call_number": 5,
+        "elapsed_ms": 1643,
+        "error": null,
+        "finish_reason": "completed",
+        "input_tokens": 547,
+        "max_output_tokens": 1200,
+        "model": "gpt-5.4-mini",
+        "model_key": "openai",
+        "opaque_runtime_id": "HVSF001-9CDDD01598036DFD70B3",
+        "output_tokens": 120,
+        "packet_index_1based": 2,
+        "prompt_sha256": "ce7ea8ad08198f74b630d0c8939f27adf99d5bc7f3f05c14f3872fc4fcb41616",
+        "provider": "openai",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/005_HVSF001-9CDDD01598036DFD70B3_openai.json",
+        "raw_text_sha256": "dd9277625c324efc6a00996d79f15f46737b1689616f3195add469eef3d39d34",
+        "response_id": "resp_0fa54588387da474006a4812e8c8a4819b9514de1e1d3abb62",
+        "text_sha256": "dd9277625c324efc6a00996d79f15f46737b1689616f3195add469eef3d39d34",
+        "total_tokens": 667,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": false,
+      "solo_knew_admissible": false,
+      "solo_verdict": "ALLOW",
+      "trace_call_number": 5,
+      "truth": "ESCALATE"
+    },
+    {
+      "domain": "Agentic commerce / order execution controls",
+      "error_class": "KNEW_ADMISSIBLE",
+      "gate_failures": [],
+      "legacy_packet_id": "HVSF-FACTORY-004-B",
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-9CDDD01598036DFD70B3",
+      "pair_id": "HVSF-FACTORY-004",
+      "provider": "minimax",
+      "provider_row": {
+        "call_number": 6,
+        "elapsed_ms": 13351,
+        "error": null,
+        "finish_reason": "stop",
+        "input_tokens": 559,
+        "max_output_tokens": 1200,
+        "model": "MiniMax-M2.5-highspeed",
+        "model_key": "minimax",
+        "opaque_runtime_id": "HVSF001-9CDDD01598036DFD70B3",
+        "output_tokens": 685,
+        "packet_index_1based": 2,
+        "prompt_sha256": "ce7ea8ad08198f74b630d0c8939f27adf99d5bc7f3f05c14f3872fc4fcb41616",
+        "provider": "minimax",
+        "provider_call_ok": true,
+        "raw_output_ref": "raw_provider_outputs/006_HVSF001-9CDDD01598036DFD70B3_minimax.json",
+        "raw_text_sha256": "653b08345168629ecebea09961a46a5a4f7941b70c5e26a41ab7822c4e785c32",
+        "response_id": "069745ea4b9d567df7a3b5da353ba626",
+        "text_sha256": "0f4988437d8583e53dbde3656e225cbe1de7407e81bef0597a30e94dd4ccb258",
+        "total_tokens": 1244,
+        "transport_attempt_count": 1,
+        "transport_recovered": false,
+        "transport_retry_failures": []
+      },
+      "solo_admissible": true,
+      "solo_correct": true,
+      "solo_knew_admissible": true,
+      "solo_verdict": "ESCALATE",
+      "trace_call_number": 6,
+      "truth": "ESCALATE"
+    }
+  ],
+  "scoring_map": "docs/benchmark/holoverify_solo_failure_factory_batch001_2026_07_03/holoverify_solo_failure_factory_batch001_scoring_map_2026_07_03.json",
+  "scoring_map_loaded_after_trace_hash_binding": true,
+  "scoring_map_sha256_expected": "56349dc6fae27b45d4e97a9225efb8814b421ef333eb2f27647f6c047ea2f18a",
+  "solo_call_count": 6,
+  "solo_failure_factory_batch": "BATCH001",
+  "summary_by_domain_model": {
+    "Agentic commerce / order execution controls|minimax": {
+      "KNEW_ADMISSIBLE": 2,
+      "knew_admissible": 2,
+      "total": 2
+    },
+    "Agentic commerce / order execution controls|openai": {
+      "FALSE_NEGATIVE_ALLOW_ON_ESCALATE": 1,
+      "KNEW_ADMISSIBLE": 1,
+      "knew_admissible": 1,
+      "total": 2
+    },
+    "Agentic commerce / order execution controls|xai": {
+      "KNEW_ADMISSIBLE": 2,
+      "knew_admissible": 2,
+      "total": 2
+    }
+  },
+  "summary_by_model": {
+    "minimax": {
+      "KNEW_ADMISSIBLE": 2,
+      "admissible": 2,
+      "correct": 2,
+      "false_negative": 0,
+      "false_positive": 0,
+      "knew_admissible": 2,
+      "total": 2
+    },
+    "openai": {
+      "FALSE_NEGATIVE_ALLOW_ON_ESCALATE": 1,
+      "KNEW_ADMISSIBLE": 1,
+      "admissible": 2,
+      "correct": 1,
+      "false_negative": 1,
+      "false_positive": 0,
+      "knew_admissible": 1,
+      "total": 2
+    },
+    "xai": {
+      "KNEW_ADMISSIBLE": 2,
+      "admissible": 2,
+      "correct": 2,
+      "false_negative": 0,
+      "false_positive": 0,
+      "knew_admissible": 2,
+      "total": 2
+    }
+  },
+  "token_totals": {
+    "input_tokens": 3488,
+    "output_tokens": 1774,
+    "total_tokens": 6137
+  },
+  "token_totals_by_model": {
+    "minimax": {
+      "input_tokens": 1107,
+      "output_tokens": 1323,
+      "total_tokens": 2430
+    },
+    "openai": {
+      "input_tokens": 1083,
+      "output_tokens": 240,
+      "total_tokens": 1323
+    },
+    "xai": {
+      "input_tokens": 1298,
+      "output_tokens": 211,
+      "total_tokens": 2384
+    }
+  },
+  "trace_binding": {
+    "live_summary_sha256": "5cdcae314b351b903048a9b333dcccb452de69683fc9b57ba5979c59f6e40a27",
+    "runtime_results_sha256": "e14810c786005ae3103d65952fed045b8c294567dea6bed6ece3bc644d89af59",
+    "scoring_map_sha256": "56349dc6fae27b45d4e97a9225efb8814b421ef333eb2f27647f6c047ea2f18a",
+    "trace_provider_calls_sha256": "e44f23a08a00e6fb6de722792a044cb00ea174b010ff12596556c89f09311992"
+  }
+}

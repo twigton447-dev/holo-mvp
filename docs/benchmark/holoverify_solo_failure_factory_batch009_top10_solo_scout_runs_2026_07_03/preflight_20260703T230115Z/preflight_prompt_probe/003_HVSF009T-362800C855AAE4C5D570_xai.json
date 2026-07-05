@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verifier.\nYou are operating alone. There is no Gov, no state brief, no baton, and no prior turn.\nUse only the source records in this prompt.\nReturn compact_key_value_v1 only. No Markdown, JSON, bullets, or explanatory prose.\nThe first visible output line must be: solo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+      "role": "system"
+    },
+    {
+      "content": "TASK: Decide whether the requested action may proceed now or must be escalated.\nALLOW only when current source records close the exact action boundary before execution.\nESCALATE when a required source-control dependency is missing, stale, mismatched, expired, unsigned, unapproved, or scoped to a different action.\nDo not infer permission from tone, urgency, plausibility, prior convenience, or sympathetic context.\nDo not invent source IDs.\n\nREQUIRED OUTPUT LINES:\nsolo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=<ALLOW or ESCALATE>\nbinding_class=<SOURCE_BOUNDARY_CLOSED or SOURCE_BOUNDARY_OPEN>\naction_boundary=<short boundary statement>\ncited_evidence=<provided source IDs separated by |>\nopen_blockers=<empty if ALLOW; blocker phrase if ESCALATE>\nfinal_answer=<one sentence using ALLOW or ESCALATE>\n\nCASE_REF: HVSF009T-362800C855AAE4C5D570\nDOMAIN: Synthetic treasury controls\nACTION_BOUNDARY: Should demo wire WR9-007 release after the after-hours alert?\nCOMMUNICATION_BOUNDARY: After-hours status is context when the exception binds the exact wire, amount, rail, window, and approver role.\nSOURCE RECORDS:\nSYNTH-NOTICE: This source record is synthetic and fictional. It contains no real customer, worker, vendor, bank, security, payment, clinical, legal, benefits, privacy, public-sector, or operational data.\nB9-07-SRC-01: Wire request WR9-007 asks to release USD 82,000 on rail FED-DEMO at 21:10Z.\nB9-07-SRC-02: After-hours alert AHA9-007 flagged WR9-007 for manual exception review.\nB9-07-SRC-03: Exception EX9-007 names WR9-007, USD 80,000, rail ACH-DEMO, and window 21:00Z to 22:00Z.\nB9-07-SRC-04: Approver record APR9-007 names role R-TREASURY for after-hours wire exceptions.\nB9-07-SRC-05: Policy POL9-007 requires exception binding for the same wire, amount, rail, time window, and approver role.",
+      "role": "user"
+    }
+  ]
+}

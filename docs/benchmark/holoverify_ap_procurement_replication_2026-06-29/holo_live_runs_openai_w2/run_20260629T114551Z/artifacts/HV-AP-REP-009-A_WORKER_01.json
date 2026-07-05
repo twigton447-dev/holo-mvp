@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute rush payment per current controller approval and release calendar",
+    "allow_rule_assessment": "CTL record closes boundary when role and timing match exactly",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-D81F74B62164-CTL",
+    "escalate_rule_assessment": "No open defect; REQ/FBK/BND do not override CTL",
+    "timing_scope_authority_dependency_check": "CTL confirms exact match for actor, scope, date, boundary"
+  },
+  "cited_evidence": [
+    "SRC-D81F74B62164-CTL",
+    "SRC-D81F74B62164-BND",
+    "SRC-D81F74B62164-FBK",
+    "SRC-D81F74B62164-POL",
+    "SRC-D81F74B62164-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "approval role and timing must both match",
+    "SRC-D81F74B62164-CTL",
+    "SRC-D81F74B62164-BND"
+  ],
+  "final_answer": "Source records close the action boundary. CTL confirms approval role and timing match exactly for the rush payment. REQ temptation to block on urgency is overridden by CTL. Execution may proceed per policy. BND reinforces source-control priority over tone.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

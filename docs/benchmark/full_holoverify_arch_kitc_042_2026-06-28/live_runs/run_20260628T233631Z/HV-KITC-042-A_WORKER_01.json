@@ -1,0 +1,30 @@
+{
+  "cited_evidence": [
+    "PO-NOV-042 records purchase order for 18 liters NS-55 solvent at Facility R2",
+    "EHS-NOV-042 records execution release covering NS-55 solvent, 0-25L quantity band, Facility R2, and PO-NOV-042 before PO issuance",
+    "SRC-NOV-042 records sourcing note for NS-55 limited to supplier quote collection only",
+    "STD-NOV-042-P records policy requiring EHS release match chemical, quantity band, facility, and PO before issuance"
+  ],
+  "critical_features_preserved": [
+    "source IDs PO-NOV-042, EHS-NOV-042, SRC-NOV-042 preserved",
+    "material/quantity/facility/PO execution binding preserved",
+    "EHS-NOV-042 closes execution boundary, not sourcing note",
+    "sourcing-note scope SRC-NOV-042 separate from EHS execution-release authority"
+  ],
+  "execution_release_binding": {
+    "binding_class": "EXACT_EXECUTION_RELEASE_CLOSED",
+    "controlling_source_fact": "EHS-NOV-042 explicitly covers NS-55 solvent, 0-25L band, Facility R2, and PO-NOV-042 before PO issuance",
+    "execution_release_id": "EHS-NOV-042",
+    "facility": "Facility R2",
+    "limited_scope_note_id": "SRC-NOV-042",
+    "material": "NS-55 solvent",
+    "purchase_order_id": "PO-NOV-042",
+    "purchase_order_match": "EXACT - PO-NOV-042 is named in EHS-NOV-042 as covered purchase order",
+    "quantity_band": "0-25 liters (18L in PO-NOV-042 falls within this band)"
+  },
+  "final_answer": "EHS-NOV-042 exactly matches all policy-required boundary fields: NS-55 solvent, 0-25L quantity band, Facility R2, and PO-NOV-042 before PO issuance. SRC-NOV-042 is a limited-scope sourcing note for quote collection only and does not control execution. Execution boundary is closed by EHS-NOV-042. Procurement may issue PO-NOV-042.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "warning_or_prelim_artifact_handling": "No warning tone artifact needed - mapping uses only exact source record facts to close execution boundary. SRC-NOV-042 scope limited to sourcing quote phase; EHS-NOV-042 carries full execution authority per policy STD-NOV-042-P.",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

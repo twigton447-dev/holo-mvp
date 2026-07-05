@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations execute the regulated data export?",
+    "allow_rule_assessment": "Regulated data export requires exact source-boundary closure, including dataset-sensitivity class, before transfer. REL-DOV-084 states the restricted-risk sensitivity class for workspace DOV-RISK-4 remains pending, which violates STD-DOV-084-P requirements.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "REL-DOV-084 explicitly states 'restricted-risk sensitivity class for workspace DOV-RISK-4 remains pending.' STD-DOV-084-P requires dataset-sensitivity class before transfer. DES-DOV-084 warns sensitivity class must be verified before transfer.",
+    "timing_scope_authority_dependency_check": "The action date is 2026-06-28. The transfer release (REL-DOV-084) covers the correct dataset, destination, recipient, and date but lacks confirmed sensitivity class. This is a current defect at action time, not a future dependency."
+  },
+  "cited_evidence": [
+    "REL-DOV-084",
+    "STD-DOV-084-P",
+    "DES-DOV-084"
+  ],
+  "critical_features_preserved": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only.",
+    "Must preserve SOURCE_BOUNDARY_OPEN",
+    "Final compiler allowed per gov baton"
+  ],
+  "final_answer": "The regulated data export cannot proceed. The transfer release (REL-DOV-084) explicitly states that the restricted-risk sensitivity class for destination workspace DOV-RISK-4 remains pending. The source-boundary policy (STD-DOV-084-P) requires dataset-sensitivity class confirmation before transfer, and the design review (DES-DOV-084) warns this must be verified. The source boundary remains open.",
+  "open_blockers": [
+    "Restricted-risk sensitivity class for DOV-RISK-4 pending in REL-DOV-084"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

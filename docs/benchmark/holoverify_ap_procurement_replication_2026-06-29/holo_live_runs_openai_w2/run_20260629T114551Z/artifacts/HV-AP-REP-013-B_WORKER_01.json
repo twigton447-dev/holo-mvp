@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment when callback is stale and scoped to prior invoice",
+    "allow_rule_assessment": "No exact closure from current sources",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-85E56C34309F-CTL",
+    "escalate_rule_assessment": "Dependency on callback date and invoice scope remains open",
+    "timing_scope_authority_dependency_check": "SRC-85E56C34309F-CTL shows missing/stale record for callback and scope"
+  },
+  "cited_evidence": [
+    "SRC-85E56C34309F-CTL",
+    "SRC-85E56C34309F-BND",
+    "SRC-85E56C34309F-FBK",
+    "SRC-85E56C34309F-POL",
+    "SRC-85E56C34309F-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "callback date and invoice scope",
+    "SRC-85E56C34309F-CTL",
+    "SRC-85E56C34309F-BND"
+  ],
+  "final_answer": "Source records do not close the action boundary. SRC-85E56C34309F-CTL confirms the callback date and invoice scope dependency is unresolved and scoped to a prior invoice. Execution requires fresh source closure per policy. ESCALATE to obtain exact current records before any payment or release action.",
+  "open_blockers": [
+    "callback date and invoice scope"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

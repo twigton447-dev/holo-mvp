@@ -1,0 +1,63 @@
+{
+  "autopsy_id": "AP_ALL_SIX_CANARY_WORKER_EMPTY_TEXT_AUTOPSY_2026_06_29",
+  "date": "2026-06-29",
+  "run_folder": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260629T191023Z",
+  "run_classification": "AP_OPENAI_W2_ALL_SIX_COLLAPSE_HOLO_CANARY_INVALID_OR_INCOMPLETE",
+  "root_cause_classification": "WORKER_EXACT_EMPTY_TEXT_ZERO_OUTPUT_TOKENS",
+  "benchmark_verdict_failure": false,
+  "gov_baton_failure": false,
+  "transport_failure_under_policy_v1": false,
+  "failing_turn": {
+    "turn_id": "HV-AP-REP-013-B_W1",
+    "pair_id": "HV-AP-REP-013",
+    "packet_id": "HV-AP-REP-013-B",
+    "suffix": "B",
+    "call_kind": "worker",
+    "worker_index": 1,
+    "role_name": "SOURCE_BOUNDARY_MAPPER",
+    "provider": "xai",
+    "model": "grok-3-mini",
+    "provider_call_ok": true,
+    "parse_ok": false,
+    "admissible": false,
+    "finish_reason": "",
+    "text": "",
+    "input_tokens": 1678,
+    "output_tokens": 0,
+    "total_tokens": 1704,
+    "error": "ValueError: worker_empty_text",
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "preserved_run_state": {
+    "provider_calls_completed": 26,
+    "provider_calls_expected": 60,
+    "worker_calls_completed": 16,
+    "worker_calls_expected": 36,
+    "gov_calls_completed": 10,
+    "gov_calls_expected": 24,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "provider_failures": 0,
+    "no_leakage": "PASS",
+    "lock_validation": "PASS",
+    "benchmark_laws": "PASS"
+  },
+  "preserve_invalid_run": true,
+  "retroactive_repair_allowed": false,
+  "prospective_policy_registered": "HOLOVERIFY_EMPTY_WORKER_OUTPUT_RETRY_POLICY_V1_2026_06_29",
+  "policy_scope": {
+    "allowed": "exact empty worker response with output_tokens=0 and finish_reason not length",
+    "forbidden": [
+      "malformed non-empty worker content",
+      "markdown-wrapped worker content",
+      "wrong verdict",
+      "empty Gov text",
+      "malformed Gov baton",
+      "finish_reason length incomplete output",
+      "schema/admissibility failure",
+      "deterministic gate failure"
+    ]
+  }
+}

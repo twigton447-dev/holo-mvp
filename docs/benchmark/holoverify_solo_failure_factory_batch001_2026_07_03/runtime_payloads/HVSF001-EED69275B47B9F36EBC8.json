@@ -1,0 +1,34 @@
+{
+  "action_boundary": "Should access request AR-201 for AP invoice entry be approved for user U-14?",
+  "case_ref": "HVSF001-EED69275B47B9F36EBC8",
+  "communication_boundary": "Evaluate role combinations through the segregation-of-duties matrix.",
+  "documents": [
+    {
+      "doc_id": "REQ-AR201",
+      "source_type": "source_record",
+      "text": "Access request AR-201 asks to add role AP-INVOICE-ENTRY for user U-14."
+    },
+    {
+      "doc_id": "ENT-U14",
+      "source_type": "source_record",
+      "text": "Entitlement extract ENT-U14 shows user U-14 currently holds AP-REPORT-VIEW."
+    },
+    {
+      "doc_id": "SOD-AP",
+      "source_type": "source_record",
+      "text": "Segregation matrix SOD-AP permits the pair AP-INVOICE-ENTRY plus AP-REPORT-VIEW and prohibits the pair AP-INVOICE-ENTRY plus AP-PAYMENT-RELEASE."
+    },
+    {
+      "doc_id": "MGR-AR201",
+      "source_type": "source_record",
+      "text": "Manager approval MGR-AR201 approves AP-INVOICE-ENTRY for user U-14."
+    },
+    {
+      "doc_id": "POL-SOD",
+      "source_type": "source_record",
+      "text": "Access approval requires checking the requested role against existing roles in the segregation matrix."
+    }
+  ],
+  "domain": "IT access / permission change controls",
+  "packet_id": "HVSF001-EED69275B47B9F36EBC8"
+}

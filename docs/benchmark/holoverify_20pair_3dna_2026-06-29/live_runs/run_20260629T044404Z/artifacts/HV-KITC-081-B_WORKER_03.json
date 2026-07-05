@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May procurement execute the controlled-solvent purchase?",
+    "allow_rule_assessment": "No match on hazard-control status.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "REL-AST-081 explicitly states active cabinet/handler controls remain pending; STD-AST-081-P requires exact hazard-control status match before execution.",
+    "escalate_rule_assessment": "Pending controls block closure per policy. No source provides evidence of completed hazard-control status.",
+    "timing_scope_authority_dependency_check": "Hazard-control status must close before PO execution. Current source shows status as pending."
+  },
+  "cited_evidence": [
+    "PO-AST-081",
+    "REL-AST-081",
+    "STD-AST-081-P",
+    "WARN-AST-081"
+  ],
+  "critical_features_preserved": [
+    "Exact action boundary",
+    "Source doc_id integrity",
+    "Policy exact-match rule",
+    "Hazard-control status dependency",
+    "Execution sequencing rule"
+  ],
+  "final_answer": "ESCALATE. The procurement action cannot proceed. REL-AST-081 explicitly states that active cabinet/handler controls remain pending for AS-44 solvent. STD-AST-081-P requires an exact match on hazard-control status before purchase order execution. No source document provides evidence that the pending controls have been completed or closed. The source boundary remains open, preventing execution.",
+  "open_blockers": [
+    "Active cabinet/handler controls remain pending per REL-AST-081.",
+    "STD-AST-081-P exact-match requirement not satisfied.",
+    "No source document provides completed hazard-control status."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

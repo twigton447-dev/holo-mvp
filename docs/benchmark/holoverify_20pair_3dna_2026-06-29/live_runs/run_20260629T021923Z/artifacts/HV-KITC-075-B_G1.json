@@ -1,0 +1,33 @@
+{
+  "blocked_moves": [
+    "any attempt to close the boundary without audit-control assignment",
+    "treating WARN-UMA-075 as override authority",
+    "treating REQ-UMA-075 as execution authority",
+    "bypassing STD-UMA-075-P exact-match requirement"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Audit-control assignment dependency remains UNRESOLVED. STD-UMA-075-P mandates full field match (user, system, privilege, time window, audit-control assignment) for boundary closure. BG-UMA-075 provides four of five required matches; audit-control assignment field is PENDING, not COMPLETED. This creates a hard block on execution."
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "CONTINUE_WORKER",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding class",
+    "audit-control assignment pending blocker",
+    "exact source doc_id binding to BG-UMA-075",
+    "policy exact-match rule from STD-UMA-075-P"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "Expose any attempt to treat the pending audit-control assignment as optional or to invoke alternative authority to close the boundary without this field.",
+    "monotonic_preservation": "Preserve the open blocker status. Do not allow closure through authority substitution or scope reduction. Maintain exact-match requirement under STD-UMA-075-P.",
+    "objective": "Prepare escalation package documenting why action HV-KITC-075-B cannot proceed. Identify whether audit-control assignment can be completed or whether action must be denied.",
+    "required_repairs": []
+  },
+  "route_verdict": "ESCALATE",
+  "source_gate_interpretation": "Gate passed with zero failures. Worker correctly identified audit-control assignment pending as the open blocker. SOURCE_BOUNDARY_OPEN binding class is accurate per STD-UMA-075-P exact-match requirements. ESCALATE verdict is correct and binding.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May clinical operations activate the trial site?",
+    "allow_rule_assessment": "No exact match; enrollment authority pending",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "AUTH-ZEN-080 consent C11 enrollment authority remains pending",
+    "escalate_rule_assessment": "Narrow defect in consent authority blocks closure",
+    "timing_scope_authority_dependency_check": "AUTH-ZEN-080 shows consent C11 pending before 2026-06-28 activation"
+  },
+  "cited_evidence": [
+    "AUTH-ZEN-080",
+    "STD-ZEN-080-P"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "AUTH-ZEN-080 as controlling source"
+  ],
+  "final_answer": "The action boundary remains open because AUTH-ZEN-080 explicitly states that C11 enrollment authority is pending, despite other matching criteria. STD-ZEN-080-P mandates that all elements must be closed before enrollment can proceed. Therefore, an ESCALATE verdict is necessary to address this narrow defect in consent authority before any activation.",
+  "open_blockers": [
+    "AUTH-ZEN-080 C11 enrollment authority pending",
+    "STD-ZEN-080-P requires all elements closed before enrollment"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

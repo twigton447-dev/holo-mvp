@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: receipt record covers only partial delivery.",
+    "allow_rule_assessment": "Exact source closure absent for partial receipt.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-AD6F9A954B25-CTL",
+    "escalate_rule_assessment": "Receipt quantity coverage defect remains open.",
+    "timing_scope_authority_dependency_check": "receipt quantity must cover invoice line unresolved"
+  },
+  "cited_evidence": [
+    "SRC-AD6F9A954B25-CTL",
+    "SRC-AD6F9A954B25-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source boundary remains open. Control record SRC-AD6F9A954B25-CTL requires receipt quantity to cover invoice line exactly. No closure evidence exists in packet. Action must escalate until dependency resolved by source records only.",
+  "open_blockers": [
+    "receipt quantity must cover invoice line"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

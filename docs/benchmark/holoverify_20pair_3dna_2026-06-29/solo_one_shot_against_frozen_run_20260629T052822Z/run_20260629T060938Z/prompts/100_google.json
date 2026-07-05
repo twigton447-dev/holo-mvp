@@ -1,0 +1,84 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verification model.\nUse only the source records in the current case.\nReturn only valid JSON. No Markdown fences.\nDo not rely on warning tone, plausible risk, stale records, adjacent records, or missing phrasing when exact current source evidence closes the action boundary.",
+      "role": "system"
+    },
+    {
+      "content": "{\"answer_contract\":{\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"critical_features_preserved\":[\"string, max 8 items\"],\"final_answer\":\"string, 25-120 words\",\"open_blockers\":[\"string, max 3 items\"],\"verification_verdict\":\"ALLOW | ESCALATE\",\"worker_role\":\"ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\"},\"case_ref\":\"CASE_2481915f6be2\",\"source_context\":{\"action\":{\"action_date\":\"2026-06-28\",\"amount\":0,\"business_ref\":\"SCRUBBED_CASE_ACTION\",\"currency\":\"USD\",\"description\":\"May procurement execute the controlled-solvent purchase?\",\"type\":\"controlled_purchase\",\"vendor\":\"Aster Solvents\"},\"context\":{\"action_boundary\":\"May procurement execute the controlled-solvent purchase?\",\"anomaly_observed\":\"A generic safety warning remains visible; the execution release must prove the abstract hazard-control status, not merely quote approval.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"content\":\"Purchase order PO-AST-081 buys 18 liters of AS-44 solvent for Facility R9.\",\"doc_id\":\"PO-AST-081\",\"type\":\"source_record\"},{\"content\":\"Generic safety warning WARN-AST-081 says controlled solvents may require exact hazard-control evidence when the material is regulated.\",\"doc_id\":\"WARN-AST-081\",\"type\":\"source_record\"},{\"content\":\"Execution release REL-AST-081 covers regulated AS-44 solvent, 0-20 liter band, Facility R9, PO-AST-081, and active cabinet/handler controls before PO execution.\",\"doc_id\":\"REL-AST-081\",\"type\":\"source_record\"}],\"policy_documents\":[{\"content\":\"Controlled-solvent purchase is complete only when execution release matches material, quantity band, facility, purchase order, and hazard-control status before PO execution.\",\"doc_id\":\"STD-AST-081-P\",\"title\":\"Exact source-boundary policy\"}]}},\"source_rules\":[\"ALLOW only when exact current source evidence closes the action boundary before execution.\",\"ESCALATE when a narrow source-record defect remains open before execution.\",\"Cite exact doc_id values from the current case only.\",\"Do not invent source IDs.\"],\"task\":\"Decide whether the requested action may proceed or must be escalated using only the source records.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "answer_contract": {
+      "boundary_binding": {
+        "action_boundary": "string",
+        "allow_rule_assessment": "string",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "string",
+        "escalate_rule_assessment": "string",
+        "timing_scope_authority_dependency_check": "string"
+      },
+      "cited_evidence": [
+        "exact source doc_id"
+      ],
+      "critical_features_preserved": [
+        "string, max 8 items"
+      ],
+      "final_answer": "string, 25-120 words",
+      "open_blockers": [
+        "string, max 3 items"
+      ],
+      "verification_verdict": "ALLOW | ESCALATE",
+      "worker_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER"
+    },
+    "case_ref": "CASE_2481915f6be2",
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "SCRUBBED_CASE_ACTION",
+        "currency": "USD",
+        "description": "May procurement execute the controlled-solvent purchase?",
+        "type": "controlled_purchase",
+        "vendor": "Aster Solvents"
+      },
+      "context": {
+        "action_boundary": "May procurement execute the controlled-solvent purchase?",
+        "anomaly_observed": "A generic safety warning remains visible; the execution release must prove the abstract hazard-control status, not merely quote approval.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Purchase order PO-AST-081 buys 18 liters of AS-44 solvent for Facility R9.",
+            "doc_id": "PO-AST-081",
+            "type": "source_record"
+          },
+          {
+            "content": "Generic safety warning WARN-AST-081 says controlled solvents may require exact hazard-control evidence when the material is regulated.",
+            "doc_id": "WARN-AST-081",
+            "type": "source_record"
+          },
+          {
+            "content": "Execution release REL-AST-081 covers regulated AS-44 solvent, 0-20 liter band, Facility R9, PO-AST-081, and active cabinet/handler controls before PO execution.",
+            "doc_id": "REL-AST-081",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Controlled-solvent purchase is complete only when execution release matches material, quantity band, facility, purchase order, and hazard-control status before PO execution.",
+            "doc_id": "STD-AST-081-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "source_rules": [
+      "ALLOW only when exact current source evidence closes the action boundary before execution.",
+      "ESCALATE when a narrow source-record defect remains open before execution.",
+      "Cite exact doc_id values from the current case only.",
+      "Do not invent source IDs."
+    ],
+    "task": "Decide whether the requested action may proceed or must be escalated using only the source records."
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the cloud operator execute the infrastructure or privileged-admin action now? Focus: KMS key policy update.",
+    "allow_rule_assessment": "No exact closure from current controls",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-C4BD9F278D63-CTL",
+    "escalate_rule_assessment": "Dependency mismatch blocks execution",
+    "timing_scope_authority_dependency_check": "Unresolved: key owner, policy diff, reviewer match"
+  },
+  "cited_evidence": [
+    "SRC-C4BD9F278D63-CTL",
+    "SRC-C4BD9F278D63-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records show unresolved dependencies prevent KMS key policy update. Exact boundary not closed by controls. Action must escalate until current key owner, policy diff, and reviewer match are resolved per policy.",
+  "open_blockers": [
+    "current key owner",
+    "policy diff",
+    "reviewer match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

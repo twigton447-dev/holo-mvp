@@ -1,0 +1,40 @@
+{
+  "blocked_moves": [
+    "Rejecting or overriding the exact license match on WARN-SIE-073 alone",
+    "Treating WARN-SIE-073 as controlling authority instead of satisfied evidence",
+    "Adding any source not in source_ids_used_so_far"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Warning WARN-SIE-073 is resolved by exact license match; no open defect remains. LIC-SIE-073 provides complete field alignment (ECCN, destination, end user, date, effective date). All four source_ids form closed chain."
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "LIC-SIE-073 as controlling source for exact ECCN 3A991 match",
+    "SHIP-SIE-073 as shipment boundary anchor",
+    "STD-SIE-073-P as exact-match policy rule",
+    "WARN-SIE-073 as satisfied (not controlling)",
+    "SOURCE_BOUNDARY_CLOSED binding class",
+    "ALLOW verification verdict"
+  ],
+  "must_repair": [
+    "word_band_final_answer:23 - reduce final answer to exactly 23 words or fewer"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Word-band compliance - ensure final_answer field contains 23 or fewer words",
+    "monotonic_preservation": [
+      "Exact match verification logic",
+      "License evidence as controlling source",
+      "Final ALLOW verdict for logistics release"
+    ],
+    "objective": "Produce final answer text within word_band constraint while preserving ALLOW verdict and SOURCE_BOUNDARY_CLOSED binding",
+    "required_repairs": [
+      "Recraft final_answer to be 23 words or fewer without losing critical source-binding language",
+      "Ensure cited_evidence array remains [LIC-SIE-073, SHIP-SIE-073, STD-SIE-073-P]"
+    ]
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "Worker produced valid SOURCE_BOUNDARY_CLOSED binding with correct exact-match evidence. Gate failure is word_band_final_answer constraint only; verdict and source citations are intact.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May logistics release the controlled export shipment?",
+    "allow_rule_assessment": "ALLOW requires exact license match on ECCN, destination, end user, shipment date per STD-SIE-073-P. No match achieved on destination field.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "LIC-SIE-073 specifies Peru; SHIP-SIE-073 routes to Chile. Exact-match policy requires identical destination. No source record bridges Peru-Chile gap.",
+    "escalate_rule_assessment": "License LIC-SIE-073 destination Peru does not match shipment SHIP-SIE-073 destination Chile. Policy STD-SIE-073-P mandates exact match. No bridge source exists.",
+    "timing_scope_authority_dependency_check": "License effective before export date but destination mismatch is terminal and unresolvable from current source corpus."
+  },
+  "cited_evidence": [
+    "LIC-SIE-073",
+    "SHIP-SIE-073",
+    "STD-SIE-073-P",
+    "WARN-SIE-073"
+  ],
+  "critical_features_preserved": [
+    "License destination = Peru (LIC-SIE-073)",
+    "Shipment destination = Chile (SHIP-SIE-073)",
+    "Exact-match policy on destination (STD-SIE-073-P)",
+    "Advisory status of WARN-SIE-073 (cannot authorize release)",
+    "No regional, adjacent, or product-family interpretation permitted"
+  ],
+  "final_answer": "ESCALATE. The destination mismatch between license LIC-SIE-073 (Peru) and shipment SHIP-SIE-073 (Chile) is terminal and unresolvable within current source corpus. Policy STD-SIE-073-P requires exact match on destination. No bridge source exists. Advise human compliance officer to (a) obtain license amendment covering Chile, (b) reroute shipment to Peru under LIC-SIE-073, or (c) cancel shipment. Do not release.",
+  "open_blockers": [
+    "Destination mismatch: license authorizes Peru, shipment routes to Chile. Binary unresolvable gap.",
+    "No repair path within source corpus. Requires external evidence or amended license.",
+    "Gov governance rule terminates when no repair path exists and continuation would violate monotonic preservation."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

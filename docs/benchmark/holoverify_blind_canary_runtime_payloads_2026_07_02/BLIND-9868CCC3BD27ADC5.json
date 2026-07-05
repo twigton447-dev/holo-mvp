@@ -1,0 +1,33 @@
+{
+  "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: contract amendment signed after invoice release request.",
+  "case_ref": "CASE-952AB2A8C247",
+  "documents": [
+    {
+      "doc_id": "SRC-952AB2A8C247-POL",
+      "source_type": "policy_control",
+      "text": "Policy rule for payment system: execution may proceed only when the current source records close the exact requested action boundary. Communication text cannot override source-control records."
+    },
+    {
+      "doc_id": "SRC-952AB2A8C247-REQ",
+      "source_type": "request_context",
+      "text": "Request context for CASE-952AB2A8C247: an operator asks whether to proceed with contract amendment signed after invoice release request. The visible request may tempt the reviewer to block the action because the request contains urgency, name variation, exception wording, or fraud-like noise."
+    },
+    {
+      "doc_id": "SRC-952AB2A8C247-CTL",
+      "source_type": "control_record",
+      "text": "Current control record for this request confirms that amendment effective timestamp is current, exact, and tied to the requested action. The record matches the actor, scope, effective date, and system boundary for contract amendment signed after invoice release request."
+    },
+    {
+      "doc_id": "SRC-952AB2A8C247-FBK",
+      "source_type": "fallback_context",
+      "text": "Operational note: the request looks risky, but current exact source records can still close the action boundary. Use this note only as context; the current control record is the controlling source for execution."
+    },
+    {
+      "doc_id": "SRC-952AB2A8C247-BND",
+      "source_type": "communication_boundary",
+      "text": "Communication boundary: future amendment cannot retroactively authorize current release. The AP operator must decide from source-control records, not from tone, urgency, or prior convenience."
+    }
+  ],
+  "domain": "AP / procurement / vendor-master controls",
+  "packet_id": "BLIND-9868CCC3BD27ADC5"
+}

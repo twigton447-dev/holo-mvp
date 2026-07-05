@@ -1,0 +1,195 @@
+{
+  "messages": [
+    {
+      "content": "You are HoloGov-V in the complete HoloVerify architecture.\nGov does not choose models. Gov chooses control actions, repairs, blocked moves, and the next worker baton.\nYou receive deterministic gate results. You cannot call an artifact ready if local gates fail.\nReturn only valid JSON. No markdown fences.",
+      "role": "system"
+    },
+    {
+      "content": "{\"run_lock\":{\"run_id\":\"run_20260629T013130Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-073\",\"packet_id\":\"HV-KITC-073-A\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"gov_may_select_models\":false,\"no_substitutions\":true},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-073-A\",\"type\":\"export_release\",\"vendor\":\"Sierra Instruments\",\"amount\":0,\"currency\":\"USD\",\"description\":\"May logistics release the controlled export shipment?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May logistics release the controlled export shipment?\",\"anomaly_observed\":\"A broad dual-use warning remains visible, while export license evidence may exactly match the current shipment.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"SHIP-SIE-073\",\"type\":\"source_record\",\"content\":\"Shipment SHIP-SIE-073 exports ECCN 3A991 sensor array to Chile for end user Andes Labs on 2026-06-28.\"},{\"doc_id\":\"WARN-SIE-073\",\"type\":\"source_record\",\"content\":\"Dual-use warning WARN-SIE-073 says similar sensor arrays require exact license evidence and should not rely on product family alone.\"},{\"doc_id\":\"LIC-SIE-073\",\"type\":\"source_record\",\"content\":\"Export license LIC-SIE-073 covers ECCN 3A991 sensor array, destination Chile, end user Andes Labs, shipment date 2026-06-28, effective before export.\"}],\"policy_documents\":[{\"doc_id\":\"STD-SIE-073-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Controlled export is complete only when export license evidence matches ECCN, destination, end user, shipment date, and license effective date before export.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T013130Z\",\"pair_id\":\"HV-KITC-073\",\"packet_id\":\"HV-KITC-073-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-073-A_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ALLOW\",\"full_output_ref\":\"artifacts/HV-KITC-073-A_WORKER_01.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"5cb75b5de89ec4b351e429a26947a338574430cfaa7cda8710c55e07f0a10e55\",\"source_ids\":[\"LIC-SIE-073\",\"SHIP-SIE-073\",\"STD-SIE-073-P\",\"WARN-SIE-073\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"General warning versus exact export execution license.\"],\"blocked_moves_so_far\":[],\"source_ids_used_so_far\":[\"LIC-SIE-073\",\"SHIP-SIE-073\",\"STD-SIE-073-P\",\"WARN-SIE-073\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":null,\"pinned_best_artifact_full_text\":null},\"latest_worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ALLOW\",\"boundary_binding\":{\"action_boundary\":\"May logistics release the controlled export shipment?\",\"allow_rule_assessment\":\"LIC-SIE-073 exactly matches ECCN, destination, end user, shipment date and effective date per STD-SIE-073-P.\",\"escalate_rule_assessment\":\"WARN-SIE-073 is satisfied by the exact license match; no open defect remains.\",\"timing_scope_authority_dependency_check\":\"License effective before 2026-06-28 export; all fields align with SHIP-SIE-073.\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\",\"controlling_source_fact\":\"LIC-SIE-073 provides exact match to action boundary\"},\"cited_evidence\":[\"LIC-SIE-073\",\"SHIP-SIE-073\",\"STD-SIE-073-P\"],\"open_blockers\":[],\"critical_features_preserved\":[\"exact source match\",\"policy exact-match rule\"],\"final_answer\":\"License LIC-SIE-073 exactly satisfies ECCN 3A991, Chile, Andes Labs, 2026-06-28 date and effective date. Source boundary is closed. Logistics may release the shipment.\"},\"deterministic_gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":false,\"failures\":[\"word_band_final_answer:23\"],\"artifact_verdict\":\"ALLOW\",\"artifact_binding\":\"SOURCE_BOUNDARY_CLOSED\",\"source_id_count\":4,\"critical_term_count\":5},\"artifact_registry\":[{\"artifact_id\":\"HV-KITC-073-A_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-073-A_WORKER_01.json\",\"hash\":\"5cb75b5de89ec4b351e429a26947a338574430cfaa7cda8710c55e07f0a10e55\",\"gate_status\":\"FAIL\",\"gate_passed\":false,\"gate_failures\":[\"word_band_final_answer:23\"],\"critical_feature_count\":2,\"verification_verdict\":\"ALLOW\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\"}],\"required_gov_schema\":{\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"control_action\":\"CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED\",\"route_verdict\":\"CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED\",\"source_gate_interpretation\":\"string\",\"must_preserve\":[\"string\"],\"must_repair\":[\"string\"],\"blocked_moves\":[\"string\"],\"dependency_ledger\":[\"string\"],\"next_worker_baton\":{\"objective\":\"string\",\"attack_focus\":\"string\",\"required_repairs\":[\"string\"],\"monotonic_preservation\":[\"string\"]},\"final_compiler_allowed\":\"boolean\"},\"gov_command\":\"Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "artifact_registry": [
+      {
+        "artifact_id": "HV-KITC-073-A_WORKER_01",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED",
+        "critical_feature_count": 2,
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-073-A_WORKER_01.json",
+        "gate_failures": [
+          "word_band_final_answer:23"
+        ],
+        "gate_passed": false,
+        "gate_status": "FAIL",
+        "hash": "5cb75b5de89ec4b351e429a26947a338574430cfaa7cda8710c55e07f0a10e55",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_number": 1,
+        "verification_verdict": "ALLOW"
+      }
+    ],
+    "deterministic_gate_result": {
+      "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+      "artifact_verdict": "ALLOW",
+      "critical_term_count": 5,
+      "failures": [
+        "word_band_final_answer:23"
+      ],
+      "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+      "passed": false,
+      "source_id_count": 4
+    },
+    "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.",
+    "latest_worker_output": {
+      "boundary_binding": {
+        "action_boundary": "May logistics release the controlled export shipment?",
+        "allow_rule_assessment": "LIC-SIE-073 exactly matches ECCN, destination, end user, shipment date and effective date per STD-SIE-073-P.",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED",
+        "controlling_source_fact": "LIC-SIE-073 provides exact match to action boundary",
+        "escalate_rule_assessment": "WARN-SIE-073 is satisfied by the exact license match; no open defect remains.",
+        "timing_scope_authority_dependency_check": "License effective before 2026-06-28 export; all fields align with SHIP-SIE-073."
+      },
+      "cited_evidence": [
+        "LIC-SIE-073",
+        "SHIP-SIE-073",
+        "STD-SIE-073-P"
+      ],
+      "critical_features_preserved": [
+        "exact source match",
+        "policy exact-match rule"
+      ],
+      "final_answer": "License LIC-SIE-073 exactly satisfies ECCN 3A991, Chile, Andes Labs, 2026-06-28 date and effective date. Source boundary is closed. Logistics may release the shipment.",
+      "open_blockers": [],
+      "verification_verdict": "ALLOW",
+      "worker_role": "SOURCE_BOUNDARY_MAPPER"
+    },
+    "required_gov_schema": {
+      "blocked_moves": [
+        "string"
+      ],
+      "control_action": "CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED",
+      "dependency_ledger": [
+        "string"
+      ],
+      "final_compiler_allowed": "boolean",
+      "gov_mode": "CONTROL_ROUTER",
+      "must_preserve": [
+        "string"
+      ],
+      "must_repair": [
+        "string"
+      ],
+      "next_worker_baton": {
+        "attack_focus": "string",
+        "monotonic_preservation": [
+          "string"
+        ],
+        "objective": "string",
+        "required_repairs": [
+          "string"
+        ]
+      },
+      "route_verdict": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
+      "source_gate_interpretation": "string",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+      "verification_verdict": "ALLOW | ESCALATE"
+    },
+    "run_lock": {
+      "gov_may_select_models": false,
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "no_substitutions": true,
+      "packet_id": "HV-KITC-073-A",
+      "pair_id": "HV-KITC-073",
+      "run_id": "run_20260629T013130Z"
+    },
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "HV-KITC-073-A",
+        "currency": "USD",
+        "description": "May logistics release the controlled export shipment?",
+        "type": "export_release",
+        "vendor": "Sierra Instruments"
+      },
+      "context": {
+        "action_boundary": "May logistics release the controlled export shipment?",
+        "anomaly_observed": "A broad dual-use warning remains visible, while export license evidence may exactly match the current shipment.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Shipment SHIP-SIE-073 exports ECCN 3A991 sensor array to Chile for end user Andes Labs on 2026-06-28.",
+            "doc_id": "SHIP-SIE-073",
+            "type": "source_record"
+          },
+          {
+            "content": "Dual-use warning WARN-SIE-073 says similar sensor arrays require exact license evidence and should not rely on product family alone.",
+            "doc_id": "WARN-SIE-073",
+            "type": "source_record"
+          },
+          {
+            "content": "Export license LIC-SIE-073 covers ECCN 3A991 sensor array, destination Chile, end user Andes Labs, shipment date 2026-06-28, effective before export.",
+            "doc_id": "LIC-SIE-073",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Controlled export is complete only when export license evidence matches ECCN, destination, end user, shipment date, and license effective date before export.",
+            "doc_id": "STD-SIE-073-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "best_artifact_registry": null,
+      "blocked_moves_so_far": [],
+      "claims_requiring_support": [],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "packet_id": "HV-KITC-073-A",
+      "pair_id": "HV-KITC-073",
+      "pinned_best_artifact_full_text": null,
+      "resolved_dependencies": [],
+      "run_id": "run_20260629T013130Z",
+      "source_ids_used_so_far": [
+        "LIC-SIE-073",
+        "SHIP-SIE-073",
+        "STD-SIE-073-P",
+        "WARN-SIE-073"
+      ],
+      "turns_completed": [
+        {
+          "artifact_hash": "5cb75b5de89ec4b351e429a26947a338574430cfaa7cda8710c55e07f0a10e55",
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-073-A_WORKER_01.json",
+          "gate_status": "FAIL",
+          "model": "xai/grok-3-mini",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ALLOW",
+          "role": "worker",
+          "source_ids": [
+            "LIC-SIE-073",
+            "SHIP-SIE-073",
+            "STD-SIE-073-P",
+            "WARN-SIE-073"
+          ],
+          "turn": 1,
+          "turn_id": "HV-KITC-073-A_W1"
+        }
+      ],
+      "unresolved_dependencies": [
+        "General warning versus exact export execution license."
+      ]
+    }
+  }
+}

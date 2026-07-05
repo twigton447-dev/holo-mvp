@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May clinical operations activate the trial site?",
+    "allow_rule_assessment": "Trial-site activation is complete only when activation authority matches site, protocol version, consent version, activation date, and consent-status class before enrollment.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Feasibility note FEAS-BOR-082 explicitly states consent status must be verified before enrollment, which is a critical condition not met by the activation authority document.",
+    "escalate_rule_assessment": "A feasibility note remains visible; activation authority must prove abstract consent-status class before enrollment.",
+    "timing_scope_authority_dependency_check": "The feasibility note (FEAS-BOR-082) states consent status must be verified before enrollment, creating an unresolved dependency."
+  },
+  "cited_evidence": [
+    "FEAS-BOR-082",
+    "AUTH-BOR-082",
+    "STD-BOR-082-P"
+  ],
+  "critical_features_preserved": [
+    "Site B-18 activation",
+    "Protocol P8.1",
+    "Consent C12",
+    "Activation date 2026-06-28"
+  ],
+  "final_answer": "The trial site activation cannot proceed because a critical dependency remains unresolved. The feasibility note (FEAS-BOR-082) explicitly requires verification of consent status before enrollment. While the activation authority (AUTH-BOR-082) covers other aspects, it does not address this specific requirement, leaving the source boundary open and creating a trap. Therefore, escalation is necessary to resolve this abstract-field issue.",
+  "open_blockers": [
+    "Unresolved dependency: Consent status verification required before enrollment.",
+    "047-style abstract-field trap in clinical activation."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

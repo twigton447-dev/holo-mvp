@@ -1,0 +1,271 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are HoloGov-V in the complete HoloVerify architecture.\nGov does not choose models. Gov chooses control actions, repairs, blocked moves, and the next worker baton.\nYou receive deterministic gate results. You cannot call an artifact ready if local gates fail.\nIf the prior worker verdict is source-plausible but the gate failed only proof, source-term, section, or word-band checks, preserve that verdict and repair the failed fields. Do not invert the verdict unless the source boundary itself is wrong.\nReturn the exact required_gov_schema top-level keys only.\nDo not add run_id, pair_id, packet_id, lane, gov_diagnosis, control_decision, artifact_selection, or extra top-level monotonic fields.\nKeep source_gate_interpretation under 30 words. Keep all arrays to at most 3 compact items.\nReturn only valid JSON. No markdown fences."
+    },
+    {
+      "role": "user",
+      "content": "{\"run_lock\":{\"run_id\":\"run_20260629T025609Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-078\",\"packet_id\":\"HV-KITC-078-B\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"gov_may_select_models\":false,\"no_substitutions\":true},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-078-B\",\"type\":\"clinical_batch_release\",\"vendor\":\"Xora Clinical\",\"amount\":0,\"currency\":\"USD\",\"description\":\"May quality release the clinical batch?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May quality release the clinical batch?\",\"anomaly_observed\":\"An assay deviation alert remains visible, while deviation closure may exactly match the release boundary.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"BATCH-XOR-078\",\"type\":\"source_record\",\"content\":\"Batch release BATCH-XOR-078 releases clinical batch X-78 for shipment on 2026-06-28.\"},{\"doc_id\":\"DEV-XOR-078\",\"type\":\"source_record\",\"content\":\"Deviation alert DEV-XOR-078 remains visible for assay AX-22 criterion Cq<=31.\"},{\"doc_id\":\"CLOSE-XOR-078\",\"type\":\"source_record\",\"content\":\"Deviation closure CLOSE-XOR-078 covers batch X-79, assay AX-22, criterion Cq<=31, and release date 2026-06-28 before shipment.\"}],\"policy_documents\":[{\"doc_id\":\"STD-XOR-078-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Clinical batch release is complete only when deviation closure matches batch, assay, acceptance criterion, and release date before release.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T025609Z\",\"pair_id\":\"HV-KITC-078\",\"packet_id\":\"HV-KITC-078-B\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-078-B_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-078-B_WORKER_01.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"32b46ed67a9f9d16668c6246f9b65b89a0e4dfe5440af391b8388bd04fa939ad\",\"source_ids\":[\"BATCH-XOR-078\",\"CLOSE-XOR-078\",\"DEV-XOR-078\",\"STD-XOR-078-P\"]},{\"turn\":2,\"role\":\"gov\",\"turn_id\":\"HV-KITC-078-B_G1\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict ESCALATE route CONTINUE_WORKER\",\"full_output_ref\":\"artifacts/HV-KITC-078-B_G1.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"cb2a94ab72112fba4da11a32af5fb35620d93050c361574a9c44c9fefce4855d\",\"source_ids\":[\"BATCH-XOR-078\",\"CLOSE-XOR-078\",\"DEV-XOR-078\",\"STD-XOR-078-P\"],\"blocked_moves\":[\"Treat CLOSE-XOR-078 as valid closure for X-78\",\"Execute release despite batch mismatch\",\"Substitute adjacent batch closure as equivalent\"]},{\"turn\":3,\"role\":\"worker\",\"turn_id\":\"HV-KITC-078-B_W2\",\"model\":\"google/gemini-2.5-flash-lite\",\"dna\":\"google\",\"output_summary\":\"ADVERSARIAL_SCOPE_CHALLENGER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-078-B_WORKER_02.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"80f24674ab30a01e0545bf5696425857c023b73f5c780028bf2d1bb5e9217995\",\"source_ids\":[\"BATCH-XOR-078\",\"CLOSE-XOR-078\",\"DEV-XOR-078\",\"STD-XOR-078-P\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"Require closure covering exactly X-78, assay AX-22, criterion Cq<=31, date 2026-06-28\",\"Require confirmation DEV-XOR-078 is closed for X-78 specifically\",\"Cannot proceed without exact batch match per STD-XOR-078-P\"],\"blocked_moves_so_far\":[\"Treat CLOSE-XOR-078 as valid closure for X-78\",\"Execute release despite batch mismatch\",\"Substitute adjacent batch closure as equivalent\"],\"source_ids_used_so_far\":[\"BATCH-XOR-078\",\"CLOSE-XOR-078\",\"DEV-XOR-078\",\"STD-XOR-078-P\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":{\"artifact_id\":\"HV-KITC-078-B_WORKER_02\",\"turn_number\":2,\"provider\":\"google\",\"model\":\"gemini-2.5-flash-lite\",\"dna\":\"google\",\"full_output_ref\":\"artifacts/HV-KITC-078-B_WORKER_02.json\",\"hash\":\"80f24674ab30a01e0545bf5696425857c023b73f5c780028bf2d1bb5e9217995\",\"gate_status\":\"PASS\",\"gate_passed\":true,\"gate_failures\":[],\"critical_feature_count\":3,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"},\"pinned_best_artifact_full_text\":\"{\\n  \\\"boundary_binding\\\": {\\n    \\\"action_boundary\\\": \\\"May quality release the clinical batch?\\\",\\n    \\\"allow_rule_assessment\\\": \\\"No valid closure exists for X-78\\\",\\n    \\\"binding_class\\\": \\\"SOURCE_BOUNDARY_OPEN\\\",\\n    \\\"controlling_source_fact\\\": \\\"STD-XOR-078-P requires exact match on batch, assay, criterion, and date.\\\",\\n    \\\"escalate_rule_assessment\\\": \\\"CLOSE-XOR-078 covers X-79, not X-78, and DEV-XOR-078 remains unclosed for X-78.\\\",\\n    \\\"timing_scope_authority_dependency_check\\\": \\\"Require closure covering exactly X-78, assay AX-22, criterion Cq<=31, date 2026-06-28.\\\"\\n  },\\n  \\\"cited_evidence\\\": [\\n    \\\"BATCH-XOR-078\\\",\\n    \\\"DEV-XOR-078\\\",\\n    \\\"CLOSE-XOR-078\\\",\\n    \\\"STD-XOR-078-P\\\"\\n  ],\\n  \\\"critical_features_preserved\\\": [\\n    \\\"Batch mismatch X-78 vs X-79 finding\\\",\\n    \\\"SOURCE_BOUNDARY_OPEN binding\\\",\\n    \\\"Policy exact-match requirement\\\"\\n  ],\\n  \\\"final_answer\\\": \\\"The action may not proceed. CLOSE-XOR-078 applies to batch X-79, not the target X-78. The deviation alert DEV-XOR-078 remains open for X-78. Policy STD-XOR-078-P mandates an exact match for batch, assay, criterion, and date. Until a closure specifically for X-78 is confirmed, the source boundary remains open, necessitating escalation.\\\",\\n  \\\"open_blockers\\\": [\\n    \\\"Batch X-78 vs X-79 mismatch\\\",\\n    \\\"Unresolved deviation DEV-XOR-078 for X-78\\\",\\n    \\\"No exact closure found for X-78\\\"\\n  ],\\n  \\\"verification_verdict\\\": \\\"ESCALATE\\\",\\n  \\\"worker_role\\\": \\\"ADVERSARIAL_SCOPE_CHALLENGER\\\"\\n}\"},\"latest_worker_output\":{\"worker_role\":\"ADVERSARIAL_SCOPE_CHALLENGER\",\"verification_verdict\":\"ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"May quality release the clinical batch?\",\"allow_rule_assessment\":\"No valid closure exists for X-78\",\"escalate_rule_assessment\":\"CLOSE-XOR-078 covers X-79, not X-78, and DEV-XOR-078 remains unclosed for X-78.\",\"timing_scope_authority_dependency_check\":\"Require closure covering exactly X-78, assay AX-22, criterion Cq<=31, date 2026-06-28.\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"STD-XOR-078-P requires exact match on batch, assay, criterion, and date.\"},\"cited_evidence\":[\"BATCH-XOR-078\",\"DEV-XOR-078\",\"CLOSE-XOR-078\",\"STD-XOR-078-P\"],\"open_blockers\":[\"Batch X-78 vs X-79 mismatch\",\"Unresolved deviation DEV-XOR-078 for X-78\",\"No exact closure found for X-78\"],\"critical_features_preserved\":[\"Batch mismatch X-78 vs X-79 finding\",\"SOURCE_BOUNDARY_OPEN binding\",\"Policy exact-match requirement\"],\"final_answer\":\"The action may not proceed. CLOSE-XOR-078 applies to batch X-79, not the target X-78. The deviation alert DEV-XOR-078 remains open for X-78. Policy STD-XOR-078-P mandates an exact match for batch, assay, criterion, and date. Until a closure specifically for X-78 is confirmed, the source boundary remains open, necessitating escalation.\"},\"deterministic_gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":true,\"failures\":[],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_OPEN\",\"source_id_count\":4,\"critical_term_count\":4},\"artifact_registry\":[{\"artifact_id\":\"HV-KITC-078-B_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-078-B_WORKER_01.json\",\"hash\":\"32b46ed67a9f9d16668c6246f9b65b89a0e4dfe5440af391b8388bd04fa939ad\",\"gate_status\":\"PASS\",\"gate_passed\":true,\"gate_failures\":[],\"critical_feature_count\":3,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"},{\"artifact_id\":\"HV-KITC-078-B_WORKER_02\",\"turn_number\":2,\"provider\":\"google\",\"model\":\"gemini-2.5-flash-lite\",\"dna\":\"google\",\"full_output_ref\":\"artifacts/HV-KITC-078-B_WORKER_02.json\",\"hash\":\"80f24674ab30a01e0545bf5696425857c023b73f5c780028bf2d1bb5e9217995\",\"gate_status\":\"PASS\",\"gate_passed\":true,\"gate_failures\":[],\"critical_feature_count\":3,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"}],\"required_gov_schema\":{\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"control_action\":\"CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED\",\"route_verdict\":\"CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED\",\"source_gate_interpretation\":\"string, max 30 words\",\"must_preserve\":[\"string, max 3 items\"],\"must_repair\":[\"string, max 3 items\"],\"blocked_moves\":[\"string, max 3 items\"],\"dependency_ledger\":[\"string, max 3 items\"],\"next_worker_baton\":{\"objective\":\"string, max 12 words\",\"attack_focus\":\"string, max 12 words\",\"required_repairs\":[\"string, max 3 items\"],\"monotonic_preservation\":[\"string, max 3 items\"]},\"final_compiler_allowed\":\"boolean\"},\"gov_command\":\"Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.\"}"
+    }
+  ],
+  "prompt_object": {
+    "run_lock": {
+      "run_id": "run_20260629T025609Z",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "pair_id": "HV-KITC-078",
+      "packet_id": "HV-KITC-078-B",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "gov_may_select_models": false,
+      "no_substitutions": true
+    },
+    "source_context": {
+      "action": {
+        "business_ref": "HV-KITC-078-B",
+        "type": "clinical_batch_release",
+        "vendor": "Xora Clinical",
+        "amount": 0,
+        "currency": "USD",
+        "description": "May quality release the clinical batch?",
+        "action_date": "2026-06-28"
+      },
+      "context": {
+        "action_boundary": "May quality release the clinical batch?",
+        "anomaly_observed": "An assay deviation alert remains visible, while deviation closure may exactly match the release boundary.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "doc_id": "BATCH-XOR-078",
+            "type": "source_record",
+            "content": "Batch release BATCH-XOR-078 releases clinical batch X-78 for shipment on 2026-06-28."
+          },
+          {
+            "doc_id": "DEV-XOR-078",
+            "type": "source_record",
+            "content": "Deviation alert DEV-XOR-078 remains visible for assay AX-22 criterion Cq<=31."
+          },
+          {
+            "doc_id": "CLOSE-XOR-078",
+            "type": "source_record",
+            "content": "Deviation closure CLOSE-XOR-078 covers batch X-79, assay AX-22, criterion Cq<=31, and release date 2026-06-28 before shipment."
+          }
+        ],
+        "policy_documents": [
+          {
+            "doc_id": "STD-XOR-078-P",
+            "title": "Exact source-boundary policy",
+            "content": "Clinical batch release is complete only when deviation closure matches batch, assay, acceptance criterion, and release date before release."
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "run_id": "run_20260629T025609Z",
+      "pair_id": "HV-KITC-078",
+      "packet_id": "HV-KITC-078-B",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "turns_completed": [
+        {
+          "turn": 1,
+          "role": "worker",
+          "turn_id": "HV-KITC-078-B_W1",
+          "model": "xai/grok-3-mini",
+          "dna": "xai",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ESCALATE",
+          "full_output_ref": "artifacts/HV-KITC-078-B_WORKER_01.json",
+          "gate_status": "PASS",
+          "artifact_hash": "32b46ed67a9f9d16668c6246f9b65b89a0e4dfe5440af391b8388bd04fa939ad",
+          "source_ids": [
+            "BATCH-XOR-078",
+            "CLOSE-XOR-078",
+            "DEV-XOR-078",
+            "STD-XOR-078-P"
+          ]
+        },
+        {
+          "turn": 2,
+          "role": "gov",
+          "turn_id": "HV-KITC-078-B_G1",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "dna": "minimax",
+          "output_summary": "Gov local verdict ESCALATE route CONTINUE_WORKER",
+          "full_output_ref": "artifacts/HV-KITC-078-B_G1.json",
+          "gate_status": "PASS",
+          "artifact_hash": "cb2a94ab72112fba4da11a32af5fb35620d93050c361574a9c44c9fefce4855d",
+          "source_ids": [
+            "BATCH-XOR-078",
+            "CLOSE-XOR-078",
+            "DEV-XOR-078",
+            "STD-XOR-078-P"
+          ],
+          "blocked_moves": [
+            "Treat CLOSE-XOR-078 as valid closure for X-78",
+            "Execute release despite batch mismatch",
+            "Substitute adjacent batch closure as equivalent"
+          ]
+        },
+        {
+          "turn": 3,
+          "role": "worker",
+          "turn_id": "HV-KITC-078-B_W2",
+          "model": "google/gemini-2.5-flash-lite",
+          "dna": "google",
+          "output_summary": "ADVERSARIAL_SCOPE_CHALLENGER local verdict ESCALATE",
+          "full_output_ref": "artifacts/HV-KITC-078-B_WORKER_02.json",
+          "gate_status": "PASS",
+          "artifact_hash": "80f24674ab30a01e0545bf5696425857c023b73f5c780028bf2d1bb5e9217995",
+          "source_ids": [
+            "BATCH-XOR-078",
+            "CLOSE-XOR-078",
+            "DEV-XOR-078",
+            "STD-XOR-078-P"
+          ]
+        }
+      ],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "resolved_dependencies": [],
+      "unresolved_dependencies": [
+        "Require closure covering exactly X-78, assay AX-22, criterion Cq<=31, date 2026-06-28",
+        "Require confirmation DEV-XOR-078 is closed for X-78 specifically",
+        "Cannot proceed without exact batch match per STD-XOR-078-P"
+      ],
+      "blocked_moves_so_far": [
+        "Treat CLOSE-XOR-078 as valid closure for X-78",
+        "Execute release despite batch mismatch",
+        "Substitute adjacent batch closure as equivalent"
+      ],
+      "source_ids_used_so_far": [
+        "BATCH-XOR-078",
+        "CLOSE-XOR-078",
+        "DEV-XOR-078",
+        "STD-XOR-078-P"
+      ],
+      "claims_requiring_support": [],
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "best_artifact_registry": {
+        "artifact_id": "HV-KITC-078-B_WORKER_02",
+        "turn_number": 2,
+        "provider": "google",
+        "model": "gemini-2.5-flash-lite",
+        "dna": "google",
+        "full_output_ref": "artifacts/HV-KITC-078-B_WORKER_02.json",
+        "hash": "80f24674ab30a01e0545bf5696425857c023b73f5c780028bf2d1bb5e9217995",
+        "gate_status": "PASS",
+        "gate_passed": true,
+        "gate_failures": [],
+        "critical_feature_count": 3,
+        "verification_verdict": "ESCALATE",
+        "binding_class": "SOURCE_BOUNDARY_OPEN"
+      },
+      "pinned_best_artifact_full_text": "{\n  \"boundary_binding\": {\n    \"action_boundary\": \"May quality release the clinical batch?\",\n    \"allow_rule_assessment\": \"No valid closure exists for X-78\",\n    \"binding_class\": \"SOURCE_BOUNDARY_OPEN\",\n    \"controlling_source_fact\": \"STD-XOR-078-P requires exact match on batch, assay, criterion, and date.\",\n    \"escalate_rule_assessment\": \"CLOSE-XOR-078 covers X-79, not X-78, and DEV-XOR-078 remains unclosed for X-78.\",\n    \"timing_scope_authority_dependency_check\": \"Require closure covering exactly X-78, assay AX-22, criterion Cq<=31, date 2026-06-28.\"\n  },\n  \"cited_evidence\": [\n    \"BATCH-XOR-078\",\n    \"DEV-XOR-078\",\n    \"CLOSE-XOR-078\",\n    \"STD-XOR-078-P\"\n  ],\n  \"critical_features_preserved\": [\n    \"Batch mismatch X-78 vs X-79 finding\",\n    \"SOURCE_BOUNDARY_OPEN binding\",\n    \"Policy exact-match requirement\"\n  ],\n  \"final_answer\": \"The action may not proceed. CLOSE-XOR-078 applies to batch X-79, not the target X-78. The deviation alert DEV-XOR-078 remains open for X-78. Policy STD-XOR-078-P mandates an exact match for batch, assay, criterion, and date. Until a closure specifically for X-78 is confirmed, the source boundary remains open, necessitating escalation.\",\n  \"open_blockers\": [\n    \"Batch X-78 vs X-79 mismatch\",\n    \"Unresolved deviation DEV-XOR-078 for X-78\",\n    \"No exact closure found for X-78\"\n  ],\n  \"verification_verdict\": \"ESCALATE\",\n  \"worker_role\": \"ADVERSARIAL_SCOPE_CHALLENGER\"\n}"
+    },
+    "latest_worker_output": {
+      "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER",
+      "verification_verdict": "ESCALATE",
+      "boundary_binding": {
+        "action_boundary": "May quality release the clinical batch?",
+        "allow_rule_assessment": "No valid closure exists for X-78",
+        "escalate_rule_assessment": "CLOSE-XOR-078 covers X-79, not X-78, and DEV-XOR-078 remains unclosed for X-78.",
+        "timing_scope_authority_dependency_check": "Require closure covering exactly X-78, assay AX-22, criterion Cq<=31, date 2026-06-28.",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "STD-XOR-078-P requires exact match on batch, assay, criterion, and date."
+      },
+      "cited_evidence": [
+        "BATCH-XOR-078",
+        "DEV-XOR-078",
+        "CLOSE-XOR-078",
+        "STD-XOR-078-P"
+      ],
+      "open_blockers": [
+        "Batch X-78 vs X-79 mismatch",
+        "Unresolved deviation DEV-XOR-078 for X-78",
+        "No exact closure found for X-78"
+      ],
+      "critical_features_preserved": [
+        "Batch mismatch X-78 vs X-79 finding",
+        "SOURCE_BOUNDARY_OPEN binding",
+        "Policy exact-match requirement"
+      ],
+      "final_answer": "The action may not proceed. CLOSE-XOR-078 applies to batch X-79, not the target X-78. The deviation alert DEV-XOR-078 remains open for X-78. Policy STD-XOR-078-P mandates an exact match for batch, assay, criterion, and date. Until a closure specifically for X-78 is confirmed, the source boundary remains open, necessitating escalation."
+    },
+    "deterministic_gate_result": {
+      "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+      "passed": true,
+      "failures": [],
+      "artifact_verdict": "ESCALATE",
+      "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+      "source_id_count": 4,
+      "critical_term_count": 4
+    },
+    "artifact_registry": [
+      {
+        "artifact_id": "HV-KITC-078-B_WORKER_01",
+        "turn_number": 1,
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-078-B_WORKER_01.json",
+        "hash": "32b46ed67a9f9d16668c6246f9b65b89a0e4dfe5440af391b8388bd04fa939ad",
+        "gate_status": "PASS",
+        "gate_passed": true,
+        "gate_failures": [],
+        "critical_feature_count": 3,
+        "verification_verdict": "ESCALATE",
+        "binding_class": "SOURCE_BOUNDARY_OPEN"
+      },
+      {
+        "artifact_id": "HV-KITC-078-B_WORKER_02",
+        "turn_number": 2,
+        "provider": "google",
+        "model": "gemini-2.5-flash-lite",
+        "dna": "google",
+        "full_output_ref": "artifacts/HV-KITC-078-B_WORKER_02.json",
+        "hash": "80f24674ab30a01e0545bf5696425857c023b73f5c780028bf2d1bb5e9217995",
+        "gate_status": "PASS",
+        "gate_passed": true,
+        "gate_failures": [],
+        "critical_feature_count": 3,
+        "verification_verdict": "ESCALATE",
+        "binding_class": "SOURCE_BOUNDARY_OPEN"
+      }
+    ],
+    "required_gov_schema": {
+      "gov_mode": "CONTROL_ROUTER",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+      "verification_verdict": "ALLOW | ESCALATE",
+      "control_action": "CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED",
+      "route_verdict": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
+      "source_gate_interpretation": "string, max 30 words",
+      "must_preserve": [
+        "string, max 3 items"
+      ],
+      "must_repair": [
+        "string, max 3 items"
+      ],
+      "blocked_moves": [
+        "string, max 3 items"
+      ],
+      "dependency_ledger": [
+        "string, max 3 items"
+      ],
+      "next_worker_baton": {
+        "objective": "string, max 12 words",
+        "attack_focus": "string, max 12 words",
+        "required_repairs": [
+          "string, max 3 items"
+        ],
+        "monotonic_preservation": [
+          "string, max 3 items"
+        ]
+      },
+      "final_compiler_allowed": "boolean"
+    },
+    "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models."
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "ap_reuses_shared_compact_worker_contract": true,
+  "ap_runner_path": "docs/benchmark/run_ap_replication_holoverify_3dna_2026_06_29.py",
+  "assertions": {
+    "ap_imports_shared_runner": true,
+    "ap_openai_w2_configure_mutates_shared_worker_sequence": true,
+    "ap_packet_hashes_match_freeze": true,
+    "ap_prompt_hashes_match_freeze": true,
+    "ap_w2_prompt_contract_is_compact_key_value": true,
+    "ap_w2_system_requires_compact_key_value": true,
+    "ap_w2_worker_output_forbids_json_braces_quotes_markdown": true,
+    "head_is_worker_contract_commit": true,
+    "invalid_run_preserved": true,
+    "invented_source_ids_fail_closed": true,
+    "malformed_json_fails_closed": true,
+    "missing_verdict_fails_closed": true,
+    "no_judges_called": true,
+    "no_providers_called": true,
+    "transport_policy_v1_unchanged": true,
+    "valid_compact_w2_output_gates": true,
+    "valid_compact_w2_output_parses": true,
+    "w2_remains_openai_gpt54_mini": true
+  },
+  "classification": "AP_OPENAI_W2_COMPACT_WORKER_CONTRACT_PREFLIGHT",
+  "created_at": "2026-06-29T13:58:03.853581+00:00",
+  "current_head": "afdda17cf00647ae672c8bd8d6cdb300e5d7f322",
+  "expected_worker_contract_commit": "afdda17cf00647ae672c8bd8d6cdb300e5d7f322",
+  "fixture_results": {
+    "invented_source_gate_failures": [
+      "invented_source_id:SRC-INVENTED"
+    ],
+    "invented_source_gate_passed": false,
+    "malformed_json_error": "JSONDecodeError: Unterminated string starting at: line 1 column 103 (char 102)",
+    "malformed_json_invalid": true,
+    "missing_verdict_error": "ValueError: worker_compact_missing_keys:verification_verdict",
+    "missing_verdict_invalid": true,
+    "valid_compact_gate_failures": [],
+    "valid_compact_gate_passed": true,
+    "valid_compact_parse_format": "compact_key_value_v1"
+  },
+  "freeze_checks": {
+    "freeze_root_matches": true,
+    "git_diff_under_freeze_root": [],
+    "packet_hashes_present": 40,
+    "packet_records": 40,
+    "prompt_hashes_present": 40
+  },
+  "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "invalid_run_preservation": {
+    "decision": "raw_invalid_run_folder_remains_untracked_to_preserve_exact_emitted_trace_prompts_outputs_and_lock_as_local_raw_evidence; a committed note records this status instead of partially staging raw artifacts",
+    "files_present": {
+      "AP_OPENAI_W2_HOLO_FAILURE_STOP.json": true,
+      "AP_OPENAI_W2_HOLO_NO_LEAKAGE_AUDIT.json": true,
+      "AP_OPENAI_W2_HOLO_READINESS_ASSERTIONS.json": true,
+      "LOCK_MANIFEST.json": true,
+      "LOCK_VALIDATION.json": true,
+      "TRACE_CALLS.jsonl": true,
+      "live_results.json": true,
+      "live_summary.md": true
+    },
+    "git_status": "?? docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_live_runs_openai_w2/run_20260629T134644Z/",
+    "path": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_live_runs_openai_w2/run_20260629T134644Z",
+    "run_id": "run_20260629T134644Z"
+  },
+  "judge_calls": 0,
+  "provider_calls": 0,
+  "runtime_w2_prompt_probe": {
+    "answer_contract_format": "compact_key_value_v1",
+    "model": "gpt-5.4-mini",
+    "packet_id": "HV-AP-REP-001-A",
+    "pair_id": "HV-AP-REP-001",
+    "prompt_object_contains_source_context": true,
+    "provider": "openai",
+    "required_keys_in_order": [
+      "worker_role",
+      "verification_verdict",
+      "binding_class",
+      "action_boundary",
+      "allow_rule_assessment",
+      "escalate_rule_assessment",
+      "dependency_check",
+      "controlling_source_fact",
+      "cited_evidence",
+      "open_blockers",
+      "critical_features_preserved",
+      "final_answer"
+    ],
+    "system_contract_lines": [
+      "Return compact_key_value_v1 only: exactly one key=value line for each required key, in order.",
+      "No JSON, no braces, no quotes, no markdown fences, no prose outside the key=value lines.",
+      "Use | for cited_evidence, open_blockers, and critical_features_preserved list values."
+    ],
+    "worker_index": 2
+  },
+  "shared_runner_path": "docs/benchmark/run_20pair_holoverify_3dna_2026_06_29.py",
+  "source_line_evidence": {
+    "ap_runner": {
+      "RUNNER = load_runner_module()": 73,
+      "RUNNER.WORKER_SEQUENCE": 137,
+      "RUNNER._call_model = call_model_with_openai_responses": 143,
+      "def configure_openai_w2_runner": 123
+    },
+    "shared_runner": {
+      "\"format\": \"compact_key_value_v1\"": 673,
+      "Return compact_key_value_v1 only": 1118,
+      "def _worker_contract": 671,
+      "def _worker_from_response": 387,
+      "parsed = _worker_from_response(response)": 1756
+    }
+  },
+  "status": "PASS"
+}

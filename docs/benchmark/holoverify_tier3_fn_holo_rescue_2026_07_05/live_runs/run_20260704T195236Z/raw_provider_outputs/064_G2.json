@@ -1,0 +1,27 @@
+{
+  "call_number": 64,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "be5663ad403634e7f1a8449b1e8250e9348aa2c6dd6a0e6190bcdc10c3b4c96b",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe have a conversation. The user says: \"packet_id=T3FN3SCOUT-9EF9224281072619AC88\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nSo the user is explicitly providing values. The instructions say to return a plain text record with three key=value lines. Fields: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus we need to output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe need to confirm if any additional formatting like quotes needed? The example says \"key=value\". So we just output exactly that. Ensure no extra whitespace or lines. Also check if we need to include the packet_id. The user says \"Return the three-line status record.\" The status record includes only those three fields, not packet_id. So we only output those three lines.\n\nThus answer is as above.\n\nPotential nuance: The user provided \"route_verdict=CONTINUE\" as uppercase. Should we preserve case? Yes. So output exactly same. The second line: \"repair_target=preserve source-grounded reasoning\". The third: \"blocked_move=do not invent source IDs\". Ensure to include punctuation exactly as given. Provide them each on a new line.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "27bf74feaf77c7ade162ff867aa45d8b17fbae5b8ac7dff46aca6be3953ecc39",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 121,
+    "output_tokens": 343,
+    "raw_text": "<think>\nWe have a conversation. The user says: \"packet_id=T3FN3SCOUT-9EF9224281072619AC88\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nSo the user is explicitly providing values. The instructions say to return a plain text record with three key=value lines. Fields: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus we need to output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe need to confirm if any additional formatting like quotes needed? The example says \"key=value\". So we just output exactly that. Ensure no extra whitespace or lines. Also check if we need to include the packet_id. The user says \"Return the three-line status record.\" The status record includes only those three fields, not packet_id. So we only output those three lines.\n\nThus answer is as above.\n\nPotential nuance: The user provided \"route_verdict=CONTINUE\" as uppercase. Should we preserve case? Yes. So output exactly same. The second line: \"repair_target=preserve source-grounded reasoning\". The third: \"blocked_move=do not invent source IDs\". Ensure to include punctuation exactly as given. Provide them each on a new line.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "069898c9a27a0f957e2cfb8e4fe8de94",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 464,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

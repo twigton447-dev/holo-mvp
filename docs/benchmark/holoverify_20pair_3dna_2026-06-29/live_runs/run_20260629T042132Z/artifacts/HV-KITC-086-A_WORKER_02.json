@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May quality release the clinical batch?",
+    "allow_rule_assessment": "The action boundary requires verification of assay acceptance status before shipment. The closure evidence does not explicitly confirm abstract assay-acceptance status, only a retest result.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Deviation closure CLOSE-FJO-086 covers batch FJ-86, assay AX-41, criterion Cq<=31, release date 2026-06-28, and accepted retest result before shipment. Policy STD-FJO-086-P requires assay-acceptance status to be verified.",
+    "escalate_rule_assessment": "The deviation closure (CLOSE-FJO-086) does not explicitly state that the 'assay acceptance status' is verified, only that a 'retest result' was accepted. This leaves the abstract assay-acceptance status unconfirmed, violating the policy that closure must match all criteria, including assay-acceptance status, before shipment.",
+    "timing_scope_authority_dependency_check": "The action boundary and policy require assay acceptance status to be confirmed before shipment. The closure evidence only confirms a retest result, not the abstract assay acceptance status."
+  },
+  "cited_evidence": [
+    "CLOSE-FJO-086",
+    "DEV-FJO-086",
+    "STD-FJO-086-P"
+  ],
+  "critical_features_preserved": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only."
+  ],
+  "final_answer": "The clinical batch release action must be escalated. While the deviation closure (CLOSE-FJO-086) addresses the batch, assay, criterion, and release date, it fails to explicitly confirm the abstract 'assay acceptance status' as required by the policy (STD-FJO-086-P). The closure only mentions an 'accepted retest result', which is insufficient to prove abstract assay acceptance before shipment, leaving the source boundary open.",
+  "open_blockers": [
+    "047-style abstract-field trap in quality release."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

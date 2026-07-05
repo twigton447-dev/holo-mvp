@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-038-B",
+    "currency": "USD",
+    "description": "May AP release an invoice after a duplicate-payment alert?",
+    "type": "duplicate_invoice_release",
+    "vendor": "Sable Credit"
+  },
+  "context": {
+    "action_boundary": "May AP release an invoice after a duplicate-payment alert?",
+    "anomaly_observed": "The packet includes a duplicate invoice alert; reversal evidence must match original invoice, amount, vendor, and ledger status.",
+    "explanation_summary": "REV-SAB-038 voids a different prior invoice.",
+    "internal_documents": [
+      {
+        "content": "Invoice INV-SAB-2026-038 requests USD 37,500 for Sable Credit Services.",
+        "doc_id": "INV-SAB-038",
+        "type": "source_record"
+      },
+      {
+        "content": "Duplicate-payment alert references prior invoice INV-SAB-2026-014 for USD 37,500.",
+        "doc_id": "ALERT-SAB-038",
+        "type": "source_record"
+      },
+      {
+        "content": "Reversal record REV-SAB-038 voids prior invoice INV-SAB-2026-013 for Sable Credit Services, USD 37,500, posted in ledger before release.",
+        "doc_id": "REV-SAB-038",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Duplicate alert is closed only when reversal or credit evidence matches vendor, original invoice, amount, and posted ledger status before release.",
+        "doc_id": "STD-SAB-038-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

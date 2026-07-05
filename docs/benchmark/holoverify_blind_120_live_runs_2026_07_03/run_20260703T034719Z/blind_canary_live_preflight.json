@@ -1,0 +1,104 @@
+{
+  "attempt_budget_policy": {
+    "content_failures_are_not_retried": true,
+    "manual_rerun_requires_new_approval_and_preserved_invalid_trace": true,
+    "max_content_contract_attempts_per_packet": 1,
+    "max_live_run_attempts_per_packet": 1,
+    "transport_retries_per_call": 2,
+    "version": "BLIND_RUNTIME_ATTEMPT_BUDGET_V1_2026_07_03"
+  },
+  "call_sequence": [
+    "W1",
+    "G1",
+    "W2",
+    "G2",
+    "W3"
+  ],
+  "checks": {
+    "content_contract_attempt_budget": true,
+    "env_keys_present": true,
+    "expected_call_count": true,
+    "judge_calls_disabled": true,
+    "live_run_attempt_budget": true,
+    "packet_count": true,
+    "payloads_present": true,
+    "posthoc_scoring_script_present": true,
+    "prompt_probe_leakage": true,
+    "provider_calls_not_yet_made": true,
+    "provider_counts": true,
+    "runtime_consumable": true,
+    "runtime_input_leakage": true,
+    "scoring_map_path_absent_from_live_wrapper": true,
+    "solo_calls_disabled": true,
+    "source_runtime_manifest_hash": true
+  },
+  "classification": "HOLOVERIFY_BLIND_CANARY_LIVE_PREFLIGHT_V0",
+  "created_at_utc": "2026-07-03T03:47:19.870559+00:00",
+  "current_head": "7def6026d87b614b785526327991a2ae1fbccca5",
+  "env_presence": {
+    "MINIMAX_API_KEY": "PRESENT",
+    "OPENAI_API_KEY": "PRESENT",
+    "XAI_API_KEY": "PRESENT"
+  },
+  "expected_provider_calls": 50,
+  "expected_runtime_manifest_sha256": "c3a2bbe2ff2b4b4a3d2e4da0112489b3ba19d41147c5eff45cc0f36c5ca940a1",
+  "expected_scoring_map_sha256": "b5f3c219c473aa2821540aca7cf84e5fc8d2441f977f69d9df226aad550ed166",
+  "missing_payloads": [],
+  "packets": 10,
+  "passed": true,
+  "posthoc_scoring_required_after_trace_freeze": true,
+  "posthoc_scoring_script": "docs/benchmark/score_holoverify_blind_120_posthoc_2026_07_03.py",
+  "prompt_probe_leakage_hits": [],
+  "roster": {
+    "G1": {
+      "kind": "openai_compatible",
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "role": "gov",
+      "slot": "G1",
+      "url": "https://api.minimax.io/v1/chat/completions"
+    },
+    "G2": {
+      "kind": "openai_compatible",
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "role": "gov",
+      "slot": "G2",
+      "url": "https://api.minimax.io/v1/chat/completions"
+    },
+    "W1": {
+      "kind": "openai_compatible",
+      "model": "grok-3-mini",
+      "provider": "xai",
+      "role": "worker",
+      "slot": "W1",
+      "url": "https://api.x.ai/v1/chat/completions"
+    },
+    "W2": {
+      "kind": "openai_responses",
+      "model": "gpt-5.4-mini",
+      "provider": "openai",
+      "role": "worker",
+      "slot": "W2",
+      "url": "https://api.openai.com/v1/responses"
+    },
+    "W3": {
+      "kind": "openai_compatible",
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax",
+      "role": "worker",
+      "slot": "W3",
+      "url": "https://api.minimax.io/v1/chat/completions"
+    }
+  },
+  "runtime_input_leakage_hits": [],
+  "runtime_manifest": "docs/benchmark/holoverify_blind_120_live_runs_2026_07_03/run_20260703T034719Z/runtime_manifest_subset_i061_n010.json",
+  "runtime_manifest_sha256": "fb75a534f921a2a3bae8ec46ad34fa576e8f271dc1084ec1057e82bce259301a",
+  "scoring_map_access_control": {
+    "live_wrapper_has_scoring_map_path": false,
+    "live_wrapper_scoring_split_enforced_by": "tests/test_holoverify_blind_120_live_wrapper.py::test_120_live_wrapper_does_not_keep_scoring_map_path_or_posthoc_scorer",
+    "posthoc_scorer_owns_scoring_map_path": "docs/benchmark/score_holoverify_blind_120_posthoc_2026_07_03.py",
+    "preflight_read_guard_enforced_by": "tests/test_holoverify_blind_120_live_wrapper.py::test_preflight_does_not_read_120_scoring_map_bytes"
+  },
+  "source_runtime_manifest_sha256": "c3a2bbe2ff2b4b4a3d2e4da0112489b3ba19d41147c5eff45cc0f36c5ca940a1"
+}

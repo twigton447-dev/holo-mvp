@@ -1,0 +1,61 @@
+{
+  "blocked_moves": [
+    "RELEASE",
+    "ALLOW",
+    "CONTINUE_REPAIR",
+    "SUBSTITUTE"
+  ],
+  "control_action": "FAIL_CLOSED",
+  "dependency_ledger": [
+    "Source boundary OPEN - no pending dependencies resolvable by additional worker turns. Source records are complete and conclusive. Milestone M-4/R4 already paid per MS-VAN-076. Current invoice INV-VAN-076 lacks required credit/reversal distinction per STD-VAN-076-P. Further worker repair cannot create source evidence that does not exist."
+  ],
+  "deterministic_gate_result": {
+    "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+    "artifact_verdict": "ESCALATE",
+    "critical_term_count": 4,
+    "failures": [],
+    "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+    "passed": true,
+    "source_id_count": 4
+  },
+  "final_compiler_allowed": true,
+  "final_compiler_instruction": "Issue hard stop. Source authority chain: MS-VAN-076 registers M-4/R4 as single billable release paid by PRIOR-VAN-076. INV-VAN-076 presents same milestone without credit/reversal status. Policy STD-VAN-076-P requires explicit distinction. AP may not release duplicate without source-evidenced distinction. Fail-closed per HOLOVERIFY_3DNA_FULL_ARCH CONTROL_ROUTER directive.",
+  "gov_action": "CONTROL_ROUTER",
+  "gov_command": "PRESERVE_ESCALATE_FINAL_COMPILER",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "INV-VAN-076",
+    "PRIOR-VAN-076",
+    "MS-VAN-076",
+    "STD-VAN-076-P",
+    "action_boundary",
+    "policy exact-match rule"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "STD-VAN-076-P exact-match policy: duplicate invoice requires distinguishing credit/reversal status or separate milestone evidence. Current source shows neither exists. Boundary is closed only upon such distinction in source records.",
+    "monotonic_preservation": [
+      "INV-VAN-076",
+      "PRIOR-VAN-076",
+      "MS-VAN-076",
+      "STD-VAN-076-P",
+      "action_boundary",
+      "policy exact-match rule"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "packet_id": "HV-KITC-076-B",
+  "pair_id": "HV-KITC-076",
+  "rationale": "Source records (INV-VAN-076, PRIOR-VAN-076, MS-VAN-076) confirm duplicate milestone M-4/R4 already paid. STD-VAN-076-P requires explicit credit/reversal status distinction absent from source. No repair possible at worker level; source boundary is definitively OPEN.",
+  "route_verdict": "FINAL_COMPILER",
+  "run_id": "run_20260629T021923Z",
+  "source_gate_interpretation": "STD-VAN-076-P exact-match policy: duplicate invoice requires distinguishing credit/reversal status or separate milestone evidence. Current source shows neither exists. Boundary is closed only upon such distinction in source records.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verdict_preservation": {
+    "binding_class_preserved": "SOURCE_BOUNDARY_OPEN",
+    "no_inversion": true,
+    "preserved": true,
+    "reason": "Gate passed; source IDs, action boundary, and policy exact-match rule intact; ESCALATE verdict source-plausible per STD-VAN-076-P requirement for credit/reversal distinction absent from source records."
+  }
+}

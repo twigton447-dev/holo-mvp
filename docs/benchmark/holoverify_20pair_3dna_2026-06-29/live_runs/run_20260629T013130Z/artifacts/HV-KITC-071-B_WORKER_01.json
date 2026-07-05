@@ -1,0 +1,25 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after the vendor bank update?",
+    "allow_rule_assessment": "Chain fails to supply pre-change callback source per STD-QUA-071-P",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CALL-QUA-071",
+    "escalate_rule_assessment": "CALL-QUA-071 explicitly used post-change thread instead of pre-change vendor master phone source",
+    "timing_scope_authority_dependency_check": "All other gates (VM-QUA-071, BANK-QUA-071, REL-QUA-071) match but pre-change callback gate remains open"
+  },
+  "cited_evidence": [
+    "CALL-QUA-071",
+    "STD-QUA-071-P"
+  ],
+  "critical_features_preserved": [
+    "exact source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "ESCALATE. The evidence chain supplies VM-QUA-071, BANK-QUA-071 and REL-QUA-071 but CALL-QUA-071 confirms use of post-change email thread rather than pre-change vendor-master phone source. Per STD-QUA-071-P the pre-change callback gate stays open, leaving the source boundary open before execution.",
+  "open_blockers": [
+    "Missing pre-change callback source required by policy"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

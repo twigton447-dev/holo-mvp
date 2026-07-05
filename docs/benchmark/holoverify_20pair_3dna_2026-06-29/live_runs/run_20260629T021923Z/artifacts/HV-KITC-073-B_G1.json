@@ -1,0 +1,71 @@
+{
+  "binding_analysis": {
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "binding_correct": true,
+    "controlling_constraint": "STD-SIE-073-P exact-match rule on ECCN, destination, end user, shipment date, license effective date",
+    "defect_type": "Source-record mismatch between shipment and license (destination field)",
+    "repairability": "NOT_REPAIRABLE - defect exists in source records themselves; no artifact manipulation can change Chile to Peru without new evidence"
+  },
+  "blocked_moves": [
+    "Worker substitution (no_substitutions=true)",
+    "Artifact word-band repairs (mismatch is in source records, not worker output)",
+    "Allow rule execution (destination defect cannot be waived)",
+    "Planning artifact as execution authority (LIC-SIE-073 is execution authority but covers wrong destination)"
+  ],
+  "dependency_ledger": [
+    "General warning versus exact export execution license: {\"resolution\": \"WARN-SIE-073 correctly cited as supporting context confirming exact-match requirement. LIC-SIE-073 fails because destination scope does not cover SHIP-SIE-073 destination.\", \"status\": \"RESOLVED\"}",
+    "Source-record defect: {\"resolution\": \"No repair path exists within source_context. Either new license covering Chile, or shipment rerouted to Peru, required to close boundary.\", \"status\": \"UNRESOLVED_AND_UNREPAIRABLE\"}"
+  ],
+  "final_compiler_allowed": true,
+  "final_compiler_instruction": {
+    "action": "Compile ESCALATE final response",
+    "binding": "SOURCE_BOUNDARY_OPEN",
+    "denial_rationale": "STD-SIE-073-P requires exact match on all five fields before controlled export release. Exact match impossible with current source records. No execution authority exists.",
+    "document_action": "DENY release - logistics may not release controlled export shipment under current source evidence",
+    "open_blocker": "Destination mismatch - SHIP-SIE-073 authorizes Chile, LIC-SIE-073 authorizes Peru",
+    "verdict": "ESCALATE"
+  },
+  "gate_status": {
+    "failures": [],
+    "gate_passed": true,
+    "interpretation": "Worker output is structurally sound. All 4 source IDs are legitimate. No repair needed on worker artifact."
+  },
+  "gov_action": {
+    "control_action": "FINAL_COMPILER",
+    "reasoning_for_final_compiler": "Gate passed and verdict is source-correct. The destination mismatch is a fundamental source-record defect\u2014not a word-band, proof, or section failure. No artifact repair can close this boundary. No additional evidence exists in source_context to reconcile Chile/Peru. Policy requires exact match before execution; exact match impossible with current sources. Proceed to final compiler with ESCALATE.",
+    "route_verdict": "FINAL_COMPILER",
+    "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+    "verification_verdict": "ESCALATE"
+  },
+  "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton.",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "SHIP-SIE-073 source content",
+    "LIC-SIE-073 source content",
+    "STD-SIE-073-P policy rule",
+    "WARN-SIE-073 warning",
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding class",
+    "Destination mismatch as open blocker"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "N/A - boundary cannot be closed",
+    "monotonic_preservation": "Preserve all cited source IDs and their exact content through final compiler",
+    "objective": "Finalize execution denial",
+    "required_repairs": [],
+    "special_instructions": "No further worker turns required. Boundary is definitively open. Pass to final compiler for ESCALATE confirmation and denial documentation."
+  },
+  "no_substitutions_flag": {
+    "active": true,
+    "implication": "Model substitution blocked. Cross-DNA repair not permitted. Must work with current grok-3-mini output if escalated to continue."
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Worker correctly identified destination mismatch (SHIP Chile vs LIC Peru) as blocking defect per STD-SIE-073-P exact-match requirement. Gate passed confirms artifact integrity. Verdict ESCALATE is binding source conclusion, not repairable artifact issue.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "worker_verdict_analysis": {
+    "reasoning": "Destination mismatch (Chile vs Peru) between SHIP-SIE-073 and LIC-SIE-073 is a genuine source-boundary defect. STD-SIE-073-P mandates exact match on all five fields before execution. This defect cannot be resolved through artifact repair\u2014it requires either new evidence or denial.",
+    "verdict": "ESCALATE",
+    "verdict_correct": true
+  }
+}

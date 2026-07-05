@@ -1,0 +1,34 @@
+## gov_declared_acceptable_despite_gate_failure
+- {"turn": 1, "gov_status": "PASS_WITH_MINOR_IMPROVEMENTS", "gate_status": "fail", "artifact_id": "step-01-turn-01", "evidence": ["governor_briefs.jsonl:11", "turn_outputs.jsonl", "judge_scores_gemini_only.json"], "reason": "Gov returned PASS/PASS_WITH_MINOR_IMPROVEMENTS while deterministic copy-field claim-boundary audit found gate failure."}
+- {"turn": 9, "gov_status": "PASS", "gate_status": "pass_with_warnings", "artifact_id": "step-09-turn-09", "evidence": ["governor_briefs.jsonl:20", "judge_scores_gemini_only.json"], "reason": "Gov declared identical/strongest accepted or run complete while later judge found minor claim-imprecision warning and score below prior best."}
+- {"turn": 10, "gov_status": "PASS", "gate_status": "pass_with_warnings", "artifact_id": "step-10-turn-10", "evidence": ["governor_briefs.jsonl:21", "judge_scores_gemini_only.json"], "reason": "Gov declared identical/strongest accepted or run complete while later judge found minor claim-imprecision warning and score below prior best."}
+
+## best_artifact_not_preserved
+- {"turn": 1, "artifact_id": "step-01-turn-01", "turn_score": 62, "prior_best_artifact": "step-00-initial-seed-draft", "prior_best_score": 68, "evidence": ["judge_scores_gemini_only.json", "step_graph_data_gemini_only.csv"], "basis": "post-run accepted Gemini-only tally; runtime did not carry an explicit pinned-best field in turn_inputs.jsonl"}
+- {"turn": 3, "artifact_id": "step-03-turn-03", "turn_score": 84, "prior_best_artifact": "step-02-turn-02", "prior_best_score": 97, "evidence": ["judge_scores_gemini_only.json", "step_graph_data_gemini_only.csv"], "basis": "post-run accepted Gemini-only tally; runtime did not carry an explicit pinned-best field in turn_inputs.jsonl"}
+- {"turn": 4, "artifact_id": "step-04-turn-04", "turn_score": 95, "prior_best_artifact": "step-02-turn-02", "prior_best_score": 97, "evidence": ["judge_scores_gemini_only.json", "step_graph_data_gemini_only.csv"], "basis": "post-run accepted Gemini-only tally; runtime did not carry an explicit pinned-best field in turn_inputs.jsonl"}
+- {"turn": 5, "artifact_id": "step-05-turn-05", "turn_score": 95, "prior_best_artifact": "step-02-turn-02", "prior_best_score": 97, "evidence": ["judge_scores_gemini_only.json", "step_graph_data_gemini_only.csv"], "basis": "post-run accepted Gemini-only tally; runtime did not carry an explicit pinned-best field in turn_inputs.jsonl"}
+- {"turn": 6, "artifact_id": "step-06-turn-06", "turn_score": 96, "prior_best_artifact": "step-02-turn-02", "prior_best_score": 97, "evidence": ["judge_scores_gemini_only.json", "step_graph_data_gemini_only.csv"], "basis": "post-run accepted Gemini-only tally; runtime did not carry an explicit pinned-best field in turn_inputs.jsonl"}
+- {"turn": 7, "artifact_id": "step-07-turn-07", "turn_score": 96, "prior_best_artifact": "step-02-turn-02", "prior_best_score": 97, "evidence": ["judge_scores_gemini_only.json", "step_graph_data_gemini_only.csv"], "basis": "post-run accepted Gemini-only tally; runtime did not carry an explicit pinned-best field in turn_inputs.jsonl"}
+- {"turn": 9, "artifact_id": "step-09-turn-09", "turn_score": 96, "prior_best_artifact": "step-02-turn-02", "prior_best_score": 97, "evidence": ["judge_scores_gemini_only.json", "step_graph_data_gemini_only.csv"], "basis": "post-run accepted Gemini-only tally; runtime did not carry an explicit pinned-best field in turn_inputs.jsonl"}
+- {"turn": 10, "artifact_id": "step-10-turn-10", "turn_score": 96, "prior_best_artifact": "step-02-turn-02", "prior_best_score": 97, "evidence": ["judge_scores_gemini_only.json", "step_graph_data_gemini_only.csv"], "basis": "post-run accepted Gemini-only tally; runtime did not carry an explicit pinned-best field in turn_inputs.jsonl"}
+
+## live_gov_call_expected_but_did_not_occur
+- NONE
+
+## required_context_missing
+- {"context": "full compiled execution prompts for worker turns 1-10", "status": "UNKNOWN", "evidence": ["turn_inputs.jsonl records only user_task + prompt_chars for execution revisions"]}
+- {"context": "full Gov input prompts for HoloGov calls 1-10", "status": "UNKNOWN", "evidence": ["governor_briefs.jsonl records parsed Gov output + usage but not Gov input prompt"]}
+- {"context": "pinned best artifact injection", "status": "UNKNOWN", "evidence": ["turn_inputs.jsonl has canonical_thread_policy but no pinned_best_artifact field"]}
+- {"context": "separate runtime deterministic gate object before Gov", "status": "PARTIAL_UNKNOWN", "evidence": ["worker outputs include status and validation_errors; no separate saved gate_eval object with source/timing/action checks before Gov"]}
+
+## final_selection_mistake
+- {"event": "initial_final_candidate_write_after_turn_10", "timestamp": "2026-06-26T15:53:15-07:00", "mistake": "Runtime wrote final candidate after turn 10 even though post-run accepted judge later scored turn 8 higher than turn 10 before repair.", "evidence": ["canonical_thread.jsonl:48", "judge_scores_gemini_only.json rows step-08-turn-08=97, step-10-turn-10=96"], "corrected_by": "post_run_governor_repair + accepted Gemini-only final selection step-11-final-governor-repair score 98"}
+
+## audit_answers
+- did_gov_actually_make_live_calls: {"answer": true, "count": 10, "evidence": ["governor_briefs.jsonl lines 11,13-21"]}
+- what_exact_context_did_gov_receive: {"answer": "UNKNOWN_FULL_GOV_PROMPT_NOT_PERSISTED", "known_context": "lossless canonical_thread entries contain worker output/status before HoloGov; Gov brief output and token usage persisted", "evidence": ["canonical_thread.jsonl", "governor_briefs.jsonl"]}
+- did_gov_receive_deterministic_gate_results: {"answer": "PARTIAL", "known": "Gov saw worker output records containing status and validation_errors in canonical_thread; no separate source/timing/action deterministic gate object is persisted pre-Gov", "evidence": ["canonical_thread.jsonl active_model_output entries", "turn_outputs.jsonl"]}
+- did_best_admissible_artifact_get_preserved_across_turns: {"answer": false, "basis": "post-run accepted Gemini-only tally shows several later turns scored below prior best; no pinned-best injection field exists", "evidence": ["judge_scores_gemini_only.json", "turn_inputs.jsonl"]}
+- did_final_answer_regress_from_better_prior_artifact: {"answer": false, "final": "step-11-final-governor-repair", "final_score": 98, "prior_best_before_final_repair": "step-02-turn-02", "prior_best_score": 97, "evidence": ["judge_scores_gemini_only.json", "final_candidate_artifact.json"]}
+- exact_divergence_event: {"answer": "turn 1 worker_end/gate_eval, followed by turn 1 HoloGov PASS_WITH_MINOR_IMPROVEMENTS", "reason": "worker turn 1 retained unsupported DC motor technology and cook from frozen claims while runner status was PASS and Gov did not fail closed", "evidence": ["turn_outputs.jsonl:1", "governor_briefs.jsonl:11", "judge_scores_gemini_only.json step-01-turn-01 defects"]}

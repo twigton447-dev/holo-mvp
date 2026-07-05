@@ -1,0 +1,31 @@
+{
+  "cited_evidence": [
+    "ALERT-OVX-HOLD-021 states thermal-transport hold class on the return record",
+    "DISP-OVX-021 row QD-74 assigns board MAT-R authority for model OVX-9 lot L-882 under thermal-transport hold class, valid before inventory release",
+    "INV-OVX-021 inventory release request moves refurbished analyzer OVX-9 lot L-882",
+    "MOVE-OVX-021 inventory transfer record stages lot L-882 for sellable inventory bin"
+  ],
+  "critical_features_preserved": [
+    "product OVX-9 matches across ALERT-OVX-HOLD-021, DISP-OVX-021, INV-OVX-021, and MOVE-OVX-021",
+    "lot L-882 matches across ALERT-OVX-HOLD-021, DISP-OVX-021, INV-OVX-021, and MOVE-OVX-021",
+    "hold class thermal-transport matches ALERT-OVX-HOLD-021 alert and DISP-OVX-021 disposition exactly",
+    "release path from DISP-OVX-021 authorization through INV-OVX-021 to MOVE-OVX-021 is sequential and consistent"
+  ],
+  "final_answer": "Source-bound map complete. ALERT-OVX-HOLD-021 visible warning does not block; DISP-OVX-021 disposition matrix provides the closing boundary. All four policy-required fields (product, lot, hold class, release path) align exactly across sources. Operations may proceed.",
+  "open_blockers": [],
+  "quality_hold_closeout_binding": {
+    "alert_hold_class": "thermal-transport",
+    "binding_class": "EXACT_HOLD_CLOSEOUT_CLOSED",
+    "controlling_source_fact": "DISP-OVX-021 row QD-74 assigns board MAT-R authority for model OVX-9 refurb lot L-882 under thermal-transport hold class, valid before inventory release INV-OVX-2026-7021",
+    "disposition_hold_class": "thermal-transport",
+    "disposition_id": "DISP-OVX-021",
+    "inventory_release_id": "INV-OVX-021",
+    "lot": "L-882",
+    "product": "OVX-9",
+    "quality_hold_alert_id": "ALERT-OVX-HOLD-021",
+    "release_path": "INV-OVX-021 to MOVE-OVX-021 sellable inventory bin"
+  },
+  "verification_verdict": "ALLOW",
+  "warning_or_prelim_artifact_handling": "ALERT-OVX-HOLD-021 is the visible hold alert, not the disposition authority. Policy requires disposition evidence matching product, lot, hold class, and release path. DISP-OVX-021 provides that evidence and closes the boundary regardless of alert visibility.",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

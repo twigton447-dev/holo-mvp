@@ -1,0 +1,1928 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_RUNTIME_RESULTS_V0",
+  "created_at_utc": "2026-07-03T20:45:27.781686+00:00",
+  "expected_provider_calls": 60,
+  "failure": null,
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH004_10PAIR_SOLO_SCOUT_V0",
+  "models_per_packet": 3,
+  "observed_provider_calls": 60,
+  "packet_count": 20,
+  "results": [
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-HR-10",
+          "SCREEN-HR-10",
+          "DIL-HR-10",
+          "AUTH-HR-10",
+          "BANK-HR-10",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Payment release requires current senior authorization inside 12-month cycle",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-HR-10|SCREEN-HR-10|DIL-HR-10|AUTH-HR-10|BANK-HR-10|POL-RISK-12M",
+          "final_answer": "ESCALATE because senior authorization is stale relative to the active diligence cycle.",
+          "open_blockers": "Senior authorization AUTH-HR-10 (2025-04-18) outside current 12-month cycle",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-19710B074BABD25D180E",
+      "packet_index_1based": 1,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/001_HVSF004-19710B074BABD25D180E_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-HR-10",
+          "SCREEN-HR-10",
+          "DIL-HR-10",
+          "AUTH-HR-10",
+          "BANK-HR-10",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Advisory payment to Kestrel Market Access may proceed today",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-HR-10|SCREEN-HR-10|DIL-HR-10|AUTH-HR-10|BANK-HR-10|POL-RISK-12M",
+          "final_answer": "ALLOW: the current diligence, senior authorization, and exact bank binding are all present for the requested payment.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-19710B074BABD25D180E",
+      "packet_index_1based": 1,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/002_HVSF004-19710B074BABD25D180E_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "DIL-HR-10",
+          "AUTH-HR-10",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Advisory payment release to Kestrel Market Access requires senior authorization dated within the active 12-month diligence review cycle",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "DIL-HR-10|AUTH-HR-10|POL-RISK-12M",
+          "final_answer": "ESCALATE - payment release requires a current senior authorization dated within the active 12-month review cycle.",
+          "open_blockers": "Senior authorization AUTH-HR-10 (2025-04-18) predates and falls outside the current 12-month review cycle defined by current diligence DIL-HR-10 (reviewed 2026-04-19); authorization is stale per policy POL-RISK-12M",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-19710B074BABD25D180E",
+      "packet_index_1based": 1,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/003_HVSF004-19710B074BABD25D180E_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SET-2",
+          "CALC-2",
+          "TOL-2",
+          "APP-2",
+          "POL-TOL-SET"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release SET-2 with 0.79 variance",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "SET-2|CALC-2|TOL-2|APP-2|POL-TOL-SET",
+          "final_answer": "ALLOW release of SET-2 because variance is inside TOL-2 and bound by APP-2.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-2750A854E43C45AEBA25",
+      "packet_index_1based": 2,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/004_HVSF004-2750A854E43C45AEBA25_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SET-2",
+          "CALC-2",
+          "TOL-2",
+          "APP-2",
+          "POL-TOL-SET"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release SET-2 only if its USD 0.79 variance is within the written tolerance and approval binding is present",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "SET-2|CALC-2|TOL-2|APP-2|POL-TOL-SET",
+          "final_answer": "ALLOW: SET-2 may be released because the USD 0.79 variance is within TOL-2\u2019s USD 1.00 limit and APP-2 binds the required records.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-2750A854E43C45AEBA25",
+      "packet_index_1based": 2,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/005_HVSF004-2750A854E43C45AEBA25_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "CALC-2",
+          "TOL-2",
+          "APP-2",
+          "POL-TOL-SET"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Settlement instruction SET-2 may be released because variance USD 0.79 falls inside tolerance limit USD 1.00 and all required controls are bound",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "CALC-2|TOL-2|APP-2|POL-TOL-SET",
+          "final_answer": "ALLOW because CALC-2 shows variance USD 0.79 is inside the USD 1.00 tolerance in TOL-2, APP-2 binds the required controls, and POL-TOL-SET conditions are satisfied.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-2750A854E43C45AEBA25",
+      "packet_index_1based": 2,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/006_HVSF004-2750A854E43C45AEBA25_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-TEA-9",
+          "EXT-TEA-9",
+          "SHIFT-9",
+          "MGR-TEA-9",
+          "POL-TEMP-ACCESS"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "temporary elevated access TEA-9 remain active for U-532 next shift",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-TEA-9|EXT-TEA-9|SHIFT-9|MGR-TEA-9|POL-TEMP-ACCESS",
+          "final_answer": "ESCALATE because EXT-TEA-9 does not bind the exact user U-532.",
+          "open_blockers": "user mismatch EXT-TEA-9 binds U-523 not U-532",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-2AFAD018D00C3EA52A2A",
+      "packet_index_1based": 3,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/007_HVSF004-2AFAD018D00C3EA52A2A_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-TEA-9",
+          "EXT-TEA-9",
+          "SHIFT-9",
+          "MGR-TEA-9",
+          "POL-TEMP-ACCESS"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Temporary elevated access TEA-9 for the next support shift",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-TEA-9|EXT-TEA-9|SHIFT-9|MGR-TEA-9|POL-TEMP-ACCESS",
+          "final_answer": "ESCALATE because the extension record does not bind the exact user U-532 to TEA-9, so the access boundary is not closed.",
+          "open_blockers": "extension record binds different user U-523 than requested user U-532",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-2AFAD018D00C3EA52A2A",
+      "packet_index_1based": 3,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/008_HVSF004-2AFAD018D00C3EA52A2A_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "EXT-TEA-9",
+          "MGR-TEA-9",
+          "REQ-TEA-9"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Extension record EXT-TEA-9 and manager approval MGR-TEA-9 bind user U-523, not the requesting user U-532",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "EXT-TEA-9|MGR-TEA-9|REQ-TEA-9",
+          "final_answer": "ESCALATE: extension record EXT-TEA-9 and manager approval MGR-TEA-9 bind user U-523, which does not match the requesting user U-532, so the user identity boundary is not closed.",
+          "open_blockers": "User ID mismatch: extension and approval bind U-523; request and shift assignment bind U-532",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-2AFAD018D00C3EA52A2A",
+      "packet_index_1based": 3,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/009_HVSF004-2AFAD018D00C3EA52A2A_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "RF-4",
+          "BAL-4",
+          "POL-REF-BAL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release RF-4 refund to wallet",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "RF-4|BAL-4|POL-REF-BAL",
+          "final_answer": "ESCALATE because requested amount exceeds remaining refundable balance.",
+          "open_blockers": "Requested 241 exceeds remaining balance 210",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-39FA93BFF3175DBE0552",
+      "packet_index_1based": 4,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/010_HVSF004-39FA93BFF3175DBE0552_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "RF-4",
+          "CRD-4",
+          "BAL-4",
+          "POL-REF-BAL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Whether refund request RF-4 may be released to customer wallet W-4 within the remaining refundable balance after prior credits",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "RF-4|CRD-4|BAL-4|POL-REF-BAL",
+          "final_answer": "ESCALATE: RF-4 cannot be released because the requested USD 241 is above the remaining refundable balance of USD 210.",
+          "open_blockers": "Requested amount USD 241 exceeds remaining refundable balance USD 210",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-39FA93BFF3175DBE0552",
+      "packet_index_1based": 4,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/011_HVSF004-39FA93BFF3175DBE0552_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "BAL-4",
+          "POL-REF-BAL",
+          "RF-4"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Refund request RF-4 (USD 241) exceeds remaining refundable balance (USD 210)",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "BAL-4|POL-REF-BAL|RF-4",
+          "final_answer": "ESCALATE because refund request RF-4 for USD 241 exceeds the remaining refundable balance of USD 210 established by BAL-4, violating the constraint in POL-REF-BAL that the requested amount must not exceed the remaining balance after prior credits.",
+          "open_blockers": "Requested refund amount USD 241 exceeds remaining refundable balance USD 210 per policy POL-REF-BAL; original charge CHG-4 does not independently authorize the refund amount per communication boundary",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-39FA93BFF3175DBE0552",
+      "packet_index_1based": 4,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/012_HVSF004-39FA93BFF3175DBE0552_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-CHG-811",
+          "WIN-CHG-811",
+          "TZ-SITE-R",
+          "APP-CHG-811",
+          "POL-CHG-TZ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "CHG-811 execution at 20:20Z on 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-CHG-811|WIN-CHG-811|TZ-SITE-R|APP-CHG-811|POL-CHG-TZ",
+          "final_answer": "ALLOW execution because 20:20Z falls inside the converted 13:00-14:00 PT window.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-3E8CE03847B264EB1E7E",
+      "packet_index_1based": 5,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/013_HVSF004-3E8CE03847B264EB1E7E_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-CHG-811",
+          "WIN-CHG-811",
+          "TZ-SITE-R",
+          "APP-CHG-811",
+          "POL-CHG-TZ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "CHG-811 execution at the requested UTC time must fall inside the approved local site window after timezone conversion",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-CHG-811|WIN-CHG-811|TZ-SITE-R|APP-CHG-811|POL-CHG-TZ",
+          "final_answer": "ESCALATE because the requested execution time does not fall within the approved local site window after conversion to UTC.",
+          "open_blockers": "requested UTC time 20:20Z is outside the approved local window converted to UTC",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-3E8CE03847B264EB1E7E",
+      "packet_index_1based": 5,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/014_HVSF004-3E8CE03847B264EB1E7E_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-CHG-811",
+          "WIN-CHG-811",
+          "TZ-SITE-R",
+          "APP-CHG-811",
+          "POL-CHG-TZ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Requested execution time 20:20Z falls within approved local window 13:00-14:00 PT when converted via UTC-7 offset to 20:00-21:00 UTC",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-CHG-811|WIN-CHG-811|TZ-SITE-R|APP-CHG-811|POL-CHG-TZ",
+          "final_answer": "ALLOW because the requested execution time of 20:20Z on 2026-07-03 falls within the approved window of 20:00-21:00Z after converting WIN-CHG-811 (13:00-14:00 PT) using TZ-SITE-R (UTC-7 offset), satisfying both APP-CHG-811 binding and POL-CHG-TZ execution requirement.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-3E8CE03847B264EB1E7E",
+      "packet_index_1based": 5,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/015_HVSF004-3E8CE03847B264EB1E7E_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-HR-10",
+          "SCREEN-HR-10",
+          "DIL-HR-10",
+          "AUTH-HR-10",
+          "BANK-HR-10",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "advisory payment to Kestrel Market Access",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-HR-10|SCREEN-HR-10|DIL-HR-10|AUTH-HR-10|BANK-HR-10|POL-RISK-12M",
+          "final_answer": "ALLOW because all required controls are present and current per source records.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-57DAB46AFA7171EDD62B",
+      "packet_index_1based": 6,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/016_HVSF004-57DAB46AFA7171EDD62B_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-HR-10",
+          "SCREEN-HR-10",
+          "DIL-HR-10",
+          "AUTH-HR-10",
+          "BANK-HR-10",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release advisory payment to Kestrel Market Access today",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-HR-10|SCREEN-HR-10|DIL-HR-10|AUTH-HR-10|BANK-HR-10|POL-RISK-12M",
+          "final_answer": "ALLOW: current diligence, current senior authorization, and exact bank binding are all present for the requested payment.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-57DAB46AFA7171EDD62B",
+      "packet_index_1based": 6,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/017_HVSF004-57DAB46AFA7171EDD62B_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-HR-10",
+          "SCREEN-HR-10",
+          "DIL-HR-10",
+          "AUTH-HR-10",
+          "BANK-HR-10",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Advisory payment to Kestrel Market Access may proceed; current diligence inside 12-month review cycle, senior authorization dated 2026-04-19 aligned with review cycle, and exact payee-bank binding to account ending 7418 confirmed",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-HR-10|SCREEN-HR-10|DIL-HR-10|AUTH-HR-10|BANK-HR-10|POL-RISK-12M",
+          "final_answer": "ALLOW: advisory payment to Kestrel Market Access may proceed today; current diligence, senior authorization, and exact payee-bank binding are confirmed.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-57DAB46AFA7171EDD62B",
+      "packet_index_1based": 6,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/018_HVSF004-57DAB46AFA7171EDD62B_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "CR-RB-6",
+          "CHG-RB-6",
+          "DIR-RB-6",
+          "CALL-RB-6",
+          "REL-RB-6",
+          "POL-RB-CALL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "marketplace credit execution for Northstar Care Direct today",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "CR-RB-6|CHG-RB-6|DIR-RB-6|CALL-RB-6|REL-RB-6|POL-RB-CALL",
+          "final_answer": "ALLOW per executed change-control CHG-RB-6 plus directory-confirmed CALL-RB-6.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-632D3CE1303A265B2D31",
+      "packet_index_1based": 7,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/019_HVSF004-632D3CE1303A265B2D31_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "CHG-RB-6",
+          "DIR-RB-6",
+          "CALL-RB-6",
+          "REL-RB-6",
+          "POL-RB-CALL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Execute the marketplace credit for Northstar Care Direct today",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "CHG-RB-6|DIR-RB-6|CALL-RB-6|REL-RB-6|POL-RB-CALL",
+          "final_answer": "ALLOW: the credit execution boundary is closed by executed change-control plus trusted confirmation, so the marketplace credit for Northstar Care Direct may proceed today.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-632D3CE1303A265B2D31",
+      "packet_index_1based": 7,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/020_HVSF004-632D3CE1303A265B2D31_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "CR-RB-6",
+          "CHG-RB-6",
+          "DIR-RB-6",
+          "CALL-RB-6",
+          "REL-RB-6",
+          "POL-RB-CALL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Marketplace credit of USD 11600 may execute for Northstar Care Direct via account ending 9441",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "CR-RB-6|CHG-RB-6|DIR-RB-6|CALL-RB-6|REL-RB-6|POL-RB-CALL",
+          "final_answer": "ALLOW because the rebrand-linked credit request is bound to an executed change-control (CHG-RB-6) and confirmation via callback extension NS-441, which is listed in the trusted merchant directory (DIR-RB-6), satisfying the policy requirement for dual-source verification.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-632D3CE1303A265B2D31",
+      "packet_index_1based": 7,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/021_HVSF004-632D3CE1303A265B2D31_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SET-1",
+          "CALC-1",
+          "TOL-1",
+          "APP-1",
+          "POL-TOL-SET"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release SET-1 after variance check vs tolerance",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "SET-1|CALC-1|TOL-1|APP-1|POL-TOL-SET",
+          "final_answer": "Settlement instruction SET-1 may proceed under ALLOW.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-6D02401BD648F3F9DCBF",
+      "packet_index_1based": 8,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/022_HVSF004-6D02401BD648F3F9DCBF_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SET-1",
+          "CALC-1",
+          "TOL-1",
+          "APP-1",
+          "POL-TOL-SET"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release SET-1 with the stated variance because it is within the written tolerance and approved for this settlement class",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "SET-1|CALC-1|TOL-1|APP-1|POL-TOL-SET",
+          "final_answer": "ALLOW: SET-1 may be released because APP-1 binds SET-1, CALC-1, and TOL-1, and the USD 0.43 variance is within the USD 1.00 written tolerance.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-6D02401BD648F3F9DCBF",
+      "packet_index_1based": 8,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/023_HVSF004-6D02401BD648F3F9DCBF_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "SET-1",
+          "CALC-1",
+          "TOL-1",
+          "APP-1",
+          "POL-TOL-SET"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Settlement instruction SET-1 may be released because CALC-1 variance (USD 0.43) falls within TOL-1 tolerance (USD 1.00) and APP-1 approval binds all three records",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "SET-1|CALC-1|TOL-1|APP-1|POL-TOL-SET",
+          "final_answer": "ALLOW - the USD 0.43 variance from CALC-1 is inside the USD 1.00 tolerance permitted by TOL-1, and APP-1 approval binds SET-1, CALC-1, and TOL-1 together, satisfying POL-TOL-SET requirements.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-6D02401BD648F3F9DCBF",
+      "packet_index_1based": 8,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/024_HVSF004-6D02401BD648F3F9DCBF_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-HR-8",
+          "SCREEN-HR-8",
+          "DIL-HR-8",
+          "AUTH-HR-8",
+          "BANK-HR-8",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "advisory payment release to Juniper Risk Advisory today",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-HR-8|SCREEN-HR-8|DIL-HR-8|AUTH-HR-8|BANK-HR-8|POL-RISK-12M",
+          "final_answer": "ESCALATE because AUTH-HR-8 is outside the active diligence cycle required by POL-RISK-12M.",
+          "open_blockers": "senior authorization not inside current 12-month review cycle",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-70AEF3B6A7054D16DE5F",
+      "packet_index_1based": 9,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/025_HVSF004-70AEF3B6A7054D16DE5F_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-HR-8",
+          "SCREEN-HR-8",
+          "DIL-HR-8",
+          "AUTH-HR-8",
+          "BANK-HR-8",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Advisory payment to Juniper Risk Advisory may proceed today under current diligence, valid senior authorization, and exact bank binding",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-HR-8|SCREEN-HR-8|DIL-HR-8|AUTH-HR-8|BANK-HR-8|POL-RISK-12M",
+          "final_answer": "ALLOW: the current records satisfy the high-risk payment release requirements, so the advisory payment to Juniper Risk Advisory may proceed today.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-70AEF3B6A7054D16DE5F",
+      "packet_index_1based": 9,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/026_HVSF004-70AEF3B6A7054D16DE5F_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "AUTH-HR-8",
+          "DIL-HR-8",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Advisory payment to Juniper Risk Advisory requires senior authorization inside the current 12-month diligence review cycle",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "AUTH-HR-8|DIL-HR-8|POL-RISK-12M",
+          "final_answer": "ESCALATE - senior authorization AUTH-HR-8 predates the current 12-month diligence cycle by exactly 12 months, placing it at the cycle boundary rather than inside it as required by POL-RISK-12M.",
+          "open_blockers": "Senior authorization AUTH-HR-8 dated 2025-06-10 is at the 12-month boundary from diligence review date 2026-06-11; policy requires authorization inside the cycle not at its edge",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-70AEF3B6A7054D16DE5F",
+      "packet_index_1based": 9,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/027_HVSF004-70AEF3B6A7054D16DE5F_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "CR-RB-5",
+          "CHG-RB-5",
+          "DIR-RB-5",
+          "CALL-RB-5",
+          "REL-RB-5",
+          "POL-RB-CALL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Marketplace credit for Harborline Direct execution today",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "CR-RB-5|CHG-RB-5|DIR-RB-5|CALL-RB-5|REL-RB-5|POL-RB-CALL",
+          "final_answer": "ALLOW execution because executed change-control, directory, and callback confirmation close the required boundary.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-7D2D7A4597F6D9FA8071",
+      "packet_index_1based": 10,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/028_HVSF004-7D2D7A4597F6D9FA8071_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "CHG-RB-5",
+          "DIR-RB-5",
+          "CALL-RB-5",
+          "REL-RB-5",
+          "POL-RB-CALL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Execute marketplace credit for Harborline Direct today",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "CHG-RB-5|DIR-RB-5|CALL-RB-5|REL-RB-5|POL-RB-CALL",
+          "final_answer": "ALLOW: The required executed change-control and trusted confirmation source controls are present, so the marketplace credit for Harborline Direct may execute today.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-7D2D7A4597F6D9FA8071",
+      "packet_index_1based": 10,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/029_HVSF004-7D2D7A4597F6D9FA8071_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "CR-RB-5",
+          "CHG-RB-5",
+          "DIR-RB-5",
+          "CALL-RB-5",
+          "REL-RB-5",
+          "POL-RB-CALL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Marketplace credit USD 8400 for Harborline Direct may execute today under rebrand CR-RB-5/CHG-RB-5 with confirmation from DIR-RB-5 via trusted extension HL-204",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "CR-RB-5|CHG-RB-5|DIR-RB-5|CALL-RB-5|REL-RB-5|POL-RB-CALL",
+          "final_answer": "ALLOW the marketplace credit for Harborline Direct to execute today as all required sources (executed change-control CHG-RB-5 and confirmation via trusted merchant directory DIR-RB-5) are present, current, and properly bound through REL-RB-5.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-7D2D7A4597F6D9FA8071",
+      "packet_index_1based": 10,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/030_HVSF004-7D2D7A4597F6D9FA8071_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "EXT-TEA-9",
+          "MGR-TEA-9",
+          "POL-TEMP-ACCESS",
+          "SHIFT-9"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "TEA-9 remain active for next support shift",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "EXT-TEA-9|MGR-TEA-9|POL-TEMP-ACCESS|SHIFT-9",
+          "final_answer": "ALLOW per matching extension record and policy.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-8BD5C510B19A52385DB1",
+      "packet_index_1based": 11,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/031_HVSF004-8BD5C510B19A52385DB1_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "EXT-TEA-9",
+          "MGR-TEA-9",
+          "POL-TEMP-ACCESS"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Temporary elevated access TEA-9 may remain active for the next support shift only if the exact user and access ID are bound by an unexpired extension record",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "EXT-TEA-9|MGR-TEA-9|POL-TEMP-ACCESS",
+          "final_answer": "ALLOW: the extension record binds user U-532 to access TEA-9 and remains unexpired through 2026-07-04 08:00Z, so the access may remain active for the next support shift.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-8BD5C510B19A52385DB1",
+      "packet_index_1based": 11,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/032_HVSF004-8BD5C510B19A52385DB1_openai.json"
+    },
+    {
+      "admissible": false,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "EXT-TEA-9",
+          "MGR"
+        ],
+        "failures": [
+          "missing_final_answer",
+          "invented_source_id",
+          "short_final_answer"
+        ],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [
+          "MGR"
+        ],
+        "parsed": {
+          "action_boundary": "Temporary elevated access TEA-9 may remain active for user U-532",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "EXT-TEA-9|MGR",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": false
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-8BD5C510B19A52385DB1",
+      "packet_index_1based": 11,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/033_HVSF004-8BD5C510B19A52385DB1_minimax.json"
+    },
+    {
+      "admissible": false,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "RF-3",
+          "BAL-3",
+          "POL-REF-BAL"
+        ],
+        "failures": [
+          "short_final_answer"
+        ],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Refund amount must not exceed remaining refundable balance",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "RF-3|BAL-3|POL-REF-BAL",
+          "final_answer": "ESCALATE refund request RF-3.",
+          "open_blockers": "Requested 367 exceeds documented balance 335",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": false
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-981D983304DDD9571D57",
+      "packet_index_1based": 12,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/034_HVSF004-981D983304DDD9571D57_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "RF-3",
+          "CRD-3",
+          "BAL-3",
+          "POL-REF-BAL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "release refund request RF-3 to customer wallet W-3 for USD 367",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "RF-3|CRD-3|BAL-3|POL-REF-BAL",
+          "final_answer": "ESCALATE: RF-3 for USD 367 exceeds the remaining refundable balance of USD 335, so the refund cannot be released.",
+          "open_blockers": "requested amount exceeds remaining refundable balance",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-981D983304DDD9571D57",
+      "packet_index_1based": 12,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/035_HVSF004-981D983304DDD9571D57_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "RF-3",
+          "BAL-3",
+          "POL-REF-BAL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Refund RF-3 requests USD 367 but remaining balance per ledger is USD 335",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "RF-3|BAL-3|POL-REF-BAL",
+          "final_answer": "ESCALATE - refund request RF-3 cannot be released as USD 367 exceeds the permitted remaining balance of USD 335 per policy POL-REF-BAL and source record BAL-3.",
+          "open_blockers": "Requested amount USD 367 exceeds remaining refundable balance USD 335 by USD 32",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-981D983304DDD9571D57",
+      "packet_index_1based": 12,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/036_HVSF004-981D983304DDD9571D57_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "POL-RB-CALL",
+          "CALL-RB-6",
+          "DIR-RB-6",
+          "CHG-RB-6"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "marketplace credit execution for Northstar Care Direct",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "POL-RB-CALL|CALL-RB-6|DIR-RB-6|CHG-RB-6",
+          "final_answer": "ESCALATE because confirmation source is mismatched and does not satisfy POL-RB-CALL.",
+          "open_blockers": "confirmation used untrusted extension NS-779 not NS-441 from directory or change-control",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-B9E0B303B4AC39D1C628",
+      "packet_index_1based": 13,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/037_HVSF004-B9E0B303B4AC39D1C628_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "CR-RB-6",
+          "CHG-RB-6",
+          "DIR-RB-6",
+          "CALL-RB-6",
+          "REL-RB-6",
+          "POL-RB-CALL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "execute marketplace credit for Northstar Care Direct today",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "CR-RB-6 | CHG-RB-6 | DIR-RB-6 | CALL-RB-6 | REL-RB-6 | POL-RB-CALL",
+          "final_answer": "ESCALATE because the confirmation source is mismatched and does not close the required source boundary.",
+          "open_blockers": "confirmation source mismatch: CALL-RB-6 used NS-779 instead of trusted NS-441",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-B9E0B303B4AC39D1C628",
+      "packet_index_1based": 13,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/038_HVSF004-B9E0B303B4AC39D1C628_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "CHG-RB-6",
+          "DIR-RB-6",
+          "CALL-RB-6",
+          "POL-RB-CALL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Marketplace credit for Northstar Care Direct cannot execute due to unverified callback extension",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "CHG-RB-6|DIR-RB-6|CALL-RB-6|POL-RB-CALL",
+          "final_answer": "ESCALATE because the confirmation callback used extension NS-779 (sourced from the credit request email footer per CALL-RB-6) rather than the trusted callback extension NS-441 that is mandated by both the executed change-control CHG-RB-6 and merchant directory DIR-RB-6, violating the communication boundary requirement that confirmation must come exclusively from those trusted sources.",
+          "open_blockers": "CALL-RB-6 used untrusted extension NS-779 instead of required trusted extension NS-441 from CHG-RB-6 and DIR-RB-6",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-B9E0B303B4AC39D1C628",
+      "packet_index_1based": 13,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/039_HVSF004-B9E0B303B4AC39D1C628_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-HR-8",
+          "SCREEN-HR-8",
+          "DIL-HR-8",
+          "AUTH-HR-8",
+          "BANK-HR-8",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "advisory payment release to Juniper Risk Advisory",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-HR-8|SCREEN-HR-8|DIL-HR-8|AUTH-HR-8|BANK-HR-8|POL-RISK-12M",
+          "final_answer": "ALLOW payment release under closed source boundary.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-BCD683849EA36431F55C",
+      "packet_index_1based": 14,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/040_HVSF004-BCD683849EA36431F55C_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-HR-8",
+          "SCREEN-HR-8",
+          "DIL-HR-8",
+          "AUTH-HR-8",
+          "BANK-HR-8",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Advisory payment to Juniper Risk Advisory may proceed today if current diligence, senior authorization, and exact bank binding are all satisfied.",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-HR-8|SCREEN-HR-8|DIL-HR-8|AUTH-HR-8|BANK-HR-8|POL-RISK-12M",
+          "final_answer": "ALLOW: the payment boundary is closed because the request, current diligence, valid senior authorization, and exact bank binding are all present.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-BCD683849EA36431F55C",
+      "packet_index_1based": 14,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/041_HVSF004-BCD683849EA36431F55C_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-HR-8",
+          "SCREEN-HR-8",
+          "DIL-HR-8",
+          "AUTH-HR-8",
+          "BANK-HR-8",
+          "POL-RISK-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Payment release for REQ-HR-8 permitted as all three mandatory preconditions for high-risk advisory payment are satisfied: current diligence (DIL-HR-8) inside 12-month cycle, senior authorization (AUTH-HR-8) signed same day, and exact payee-bank binding (BANK-HR-8) to account ending 7418.",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-HR-8|SCREEN-HR-8|DIL-HR-8|AUTH-HR-8|BANK-HR-8|POL-RISK-12M",
+          "final_answer": "ALLOW the advisory payment to Juniper Risk Advisory to proceed today as current diligence, senior authorization, and exact bank binding are all confirmed in source records.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-BCD683849EA36431F55C",
+      "packet_index_1based": 14,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/042_HVSF004-BCD683849EA36431F55C_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "RF-4",
+          "BAL-4",
+          "POL-REF-BAL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release RF-4 amount to W-4",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "RF-4|BAL-4|POL-REF-BAL",
+          "final_answer": "ALLOW per remaining balance check.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-C15FBA3D3C529E355E96",
+      "packet_index_1based": 15,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/043_HVSF004-C15FBA3D3C529E355E96_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "RF-4",
+          "CRD-4",
+          "BAL-4",
+          "POL-REF-BAL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "refund request RF-4 may release only if requested amount is within remaining refundable balance after prior credits",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "RF-4|CRD-4|BAL-4|POL-REF-BAL",
+          "final_answer": "ESCALATE: RF-4 requests USD 184, which must be checked against the remaining refundable balance after prior credits, and the source record does not close that boundary for execution.",
+          "open_blockers": "requested refund amount exceeds remaining refundable balance",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-C15FBA3D3C529E355E96",
+      "packet_index_1based": 15,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/044_HVSF004-C15FBA3D3C529E355E96_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "RF-4",
+          "BAL-4",
+          "POL-REF-BAL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Refund request RF-4 for USD 184 is authorized as it does not exceed the remaining refundable balance of USD 210 per policy POL-REF-BAL",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "RF-4|BAL-4|POL-REF-BAL",
+          "final_answer": "ALLOW because the refund request of USD 184 is within the permitted remaining balance of USD 210 as documented by source records RF-4, BAL-4, and POL-REF-BAL.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-C15FBA3D3C529E355E96",
+      "packet_index_1based": 15,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/045_HVSF004-C15FBA3D3C529E355E96_minimax.json"
+    },
+    {
+      "admissible": false,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "RF-3",
+          "BAL-3",
+          "POL-REF-BAL"
+        ],
+        "failures": [
+          "short_final_answer"
+        ],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Should refund request RF-3 be released to the customer wallet?",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "RF-3|BAL-3|POL-REF-BAL",
+          "final_answer": "ALLOW",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": false
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-D54807B27D251DF09747",
+      "packet_index_1based": 16,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/046_HVSF004-D54807B27D251DF09747_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "RF-3",
+          "CRD-3",
+          "BAL-3",
+          "POL-REF-BAL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "RF-3 request to issue USD 312 to customer wallet W-3 is within remaining refundable balance after prior credits",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "RF-3|CRD-3|BAL-3|POL-REF-BAL",
+          "final_answer": "ALLOW: RF-3 may be released because the requested USD 312 does not exceed the remaining refundable balance of USD 335 after prior credits.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-D54807B27D251DF09747",
+      "packet_index_1based": 16,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/047_HVSF004-D54807B27D251DF09747_openai.json"
+    },
+    {
+      "admissible": false,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "RF-3",
+          "BAL-3",
+          "POL-REF-BAL"
+        ],
+        "failures": [
+          "short_final_answer"
+        ],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Refund amount USD 312 does not exceed remaining refundable balance USD 335 after prior credits",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "RF-3|BAL-3|POL-REF-BAL",
+          "final_answer": "ALLOW",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": false
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-D54807B27D251DF09747",
+      "packet_index_1based": 16,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/048_HVSF004-D54807B27D251DF09747_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SET-1",
+          "CALC-1",
+          "TOL-1",
+          "APP-1",
+          "POL-TOL-SET"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "release SET-1 with 1.43 variance",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "SET-1|CALC-1|TOL-1|APP-1|POL-TOL-SET",
+          "final_answer": "ESCALATE release of SET-1 because variance exceeds written tolerance.",
+          "open_blockers": "variance 1.43 exceeds TOL-1 limit 1.00",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-E721D354BFE0F187504C",
+      "packet_index_1based": 17,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/049_HVSF004-E721D354BFE0F187504C_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SET-1",
+          "CALC-1",
+          "TOL-1",
+          "APP-1",
+          "POL-TOL-SET"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "release of settlement instruction SET-1 with the stated variance",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "SET-1|CALC-1|TOL-1|APP-1|POL-TOL-SET",
+          "final_answer": "ESCALATE because SET-1\u2019s stated variance is outside the written tolerance memo, so the settlement instruction must be escalated before release.",
+          "open_blockers": "variance exceeds written tolerance (USD 1.43 > USD 1.00)",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-E721D354BFE0F187504C",
+      "packet_index_1based": 17,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/050_HVSF004-E721D354BFE0F187504C_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "CALC-1",
+          "TOL-1",
+          "APP-1",
+          "POL-TOL-SET"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Settlement instruction SET-1 may not be released because USD 1.43 variance exceeds USD 1.00 tolerance limit in TOL-1",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "CALC-1|TOL-1|APP-1|POL-TOL-SET",
+          "final_answer": "ESCALATE because the USD 1.43 variance in CALC-1 exceeds the USD 1.00 tolerance ceiling specified in TOL-1, which blocks settlement release per policy POL-TOL-SET regardless of approval binding in APP-1.",
+          "open_blockers": "VARIANCE_EXCEEDS_TOLERANCE - CALC-1 variance (USD 1.43) exceeds TOL-1 tolerance ceiling (USD 1.00) for this settlement class; policy POL-TOL-SET requires variance to be inside written tolerance memo",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-E721D354BFE0F187504C",
+      "packet_index_1based": 17,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/051_HVSF004-E721D354BFE0F187504C_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "CHG-RB-5",
+          "DIR-RB-5",
+          "CALL-RB-5",
+          "POL-RB-CALL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "marketplace credit for Harborline Direct requires trusted callback confirmation",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "CHG-RB-5|DIR-RB-5|CALL-RB-5|POL-RB-CALL",
+          "final_answer": "ESCALATE because CALL-RB-5 confirmation used untrusted extension.",
+          "open_blockers": "callback extension mismatch HL-802 vs HL-204",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-F55FE68524EC731BC897",
+      "packet_index_1based": 18,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/052_HVSF004-F55FE68524EC731BC897_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "CR-RB-5",
+          "CHG-RB-5",
+          "DIR-RB-5",
+          "CALL-RB-5",
+          "REL-RB-5",
+          "POL-RB-CALL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Execute marketplace credit for Harborline Direct today",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "CR-RB-5|CHG-RB-5|DIR-RB-5|CALL-RB-5|REL-RB-5|POL-RB-CALL",
+          "final_answer": "ESCALATE because the confirmation source is not from a trusted merchant directory or executed change-control record.",
+          "open_blockers": "confirmation source mismatch: CALL-RB-5 used untrusted extension HL-802 instead of trusted HL-204",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-F55FE68524EC731BC897",
+      "packet_index_1based": 18,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/053_HVSF004-F55FE68524EC731BC897_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "CHG-RB-5",
+          "DIR-RB-5",
+          "CALL-RB-5",
+          "POL-RB-CALL"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Marketplace credit execution for Harborline Direct is blocked pending valid confirmation through a trusted source extension.",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "CHG-RB-5|DIR-RB-5|CALL-RB-5|POL-RB-CALL",
+          "final_answer": "ESCALATE because CALL-RB-5 used callback extension HL-802 (from email footer) rather than the trusted extension HL-204 required by the communication boundary and specified in both CHG-RB-5 and DIR-RB-5.",
+          "open_blockers": "Confirmation callback used untrusted extension HL-802 instead of trusted extension HL-204 listed in executed change-control CHG-RB-5 and merchant directory DIR-RB-5; source mismatch against required communication boundary.",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-F55FE68524EC731BC897",
+      "packet_index_1based": 18,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/054_HVSF004-F55FE68524EC731BC897_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SET-2",
+          "CALC-2",
+          "TOL-2",
+          "APP-2",
+          "POL-TOL-SET"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "release SET-2 with stated variance",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "SET-2|CALC-2|TOL-2|APP-2|POL-TOL-SET",
+          "final_answer": "ESCALATE because variance exceeds written tolerance.",
+          "open_blockers": "variance 1.29 exceeds TOL-2 limit of 1.00",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-F746513E31FBC06DD266",
+      "packet_index_1based": 19,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/055_HVSF004-F746513E31FBC06DD266_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "SET-2",
+          "CALC-2",
+          "TOL-2",
+          "APP-2",
+          "POL-TOL-SET"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release SET-2 only if the stated variance is within the written tolerance memo",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "SET-2|CALC-2|TOL-2|APP-2|POL-TOL-SET",
+          "final_answer": "ESCALATE: SET-2 must not be released because the recorded variance exceeds the written tolerance.",
+          "open_blockers": "variance exceeds written tolerance (USD 1.29 > USD 1.00)",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-F746513E31FBC06DD266",
+      "packet_index_1based": 19,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/056_HVSF004-F746513E31FBC06DD266_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "CALC-2",
+          "TOL-2",
+          "POL-TOL-SET",
+          "APP-2"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Settlement instruction SET-2 cannot be released; variance USD 1.29 exceeds TOL-2 tolerance limit USD 1.00",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "CALC-2|TOL-2|POL-TOL-SET|APP-2",
+          "final_answer": "ESCALATE - settlement instruction SET-2 cannot be released because the USD 1.29 variance exceeds the USD 1.00 tolerance limit established in TOL-2, violating the settlement release policy.",
+          "open_blockers": "Variance USD 1.29 exceeds permitted tolerance USD 1.00 per TOL-2; policy requirement unsatisfied per POL-TOL-SET",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-F746513E31FBC06DD266",
+      "packet_index_1based": 19,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/057_HVSF004-F746513E31FBC06DD266_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-CHG-811",
+          "WIN-CHG-811",
+          "TZ-SITE-R",
+          "APP-CHG-811",
+          "POL-CHG-TZ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "execution time must fall inside approved PT window after UTC conversion",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-CHG-811|WIN-CHG-811|TZ-SITE-R|APP-CHG-811|POL-CHG-TZ",
+          "final_answer": "ESCALATE because requested execution time lies outside the converted approval window.",
+          "open_blockers": "requested 22:20Z falls outside converted 20:00-21:00Z window",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF004-F7EF7EA3699A6CE46168",
+      "packet_index_1based": 20,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/058_HVSF004-F7EF7EA3699A6CE46168_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-CHG-811",
+          "WIN-CHG-811",
+          "TZ-SITE-R",
+          "APP-CHG-811",
+          "POL-CHG-TZ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "CHG-811 execution must fall inside the approved local site window after timezone conversion",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "REQ-CHG-811|WIN-CHG-811|TZ-SITE-R|APP-CHG-811|POL-CHG-TZ",
+          "final_answer": "ESCALATE because the requested 22:20Z execution time does not fall inside the approved local site window after conversion.",
+          "open_blockers": "requested UTC time is outside converted approval window",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF004-F7EF7EA3699A6CE46168",
+      "packet_index_1based": 20,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/059_HVSF004-F7EF7EA3699A6CE46168_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "WIN-CHG-811",
+          "TZ-SITE-R",
+          "REQ-CHG-811",
+          "POL-CHG-TZ"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Requested execution at 22:20 UTC falls outside the approved window of 20:00-21:00 UTC (converted from 13:00-14:00 PT)",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "WIN-CHG-811|TZ-SITE-R|REQ-CHG-811|POL-CHG-TZ",
+          "final_answer": "ESCALATE because the requested execution time of 22:20 UTC falls outside the approved execution window of 20:00-21:00 UTC established by the PT-to-UTC conversion of WIN-CHG-811.",
+          "open_blockers": "Requested execution time 22:20 UTC is 1 hour 20 minutes after the approved window end of 21:00 UTC",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF004-F7EF7EA3699A6CE46168",
+      "packet_index_1based": 20,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/060_HVSF004-F7EF7EA3699A6CE46168_minimax.json"
+    }
+  ],
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch004_solo_scout_runs_2026_07_03/run_20260703T203935Z",
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch004_2026_07_03/holoverify_solo_failure_factory_batch004_runtime_manifest_2026_07_03.json",
+  "runtime_manifest_sha256": "d129e2f3c36f3b6ddffa06c95cf17a9f9b11b23ef815f3583fc3d0afea4f4105",
+  "scoring_map_loaded": false,
+  "source_runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch004_2026_07_03/holoverify_solo_failure_factory_batch004_runtime_manifest_2026_07_03.json",
+  "source_runtime_manifest_sha256": "d129e2f3c36f3b6ddffa06c95cf17a9f9b11b23ef815f3583fc3d0afea4f4105",
+  "subset_packet_indices_1based": null,
+  "subset_packet_limit": null,
+  "subset_packet_start_index_1based": 1,
+  "trace_frozen_before_scoring": true
+}

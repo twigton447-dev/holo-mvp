@@ -1,0 +1,49 @@
+{
+  "blocked_moves": [
+    "treating WARN-SIE-073 as execution authority rather than advisory warning",
+    "relying on product family matching without exact license evidence",
+    "assuming license applies to any destination when it specifies Peru",
+    "treating planning artifact or general policy as substitute for specific license",
+    "authorizing release without resolving destination mismatch"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "General warning (WARN-SIE-073) provides advisory context but cannot override explicit license scope. License (LIC-SIE-073) specifies Peru as destination. Shipment (SHIP-SIE-073) specifies Chile as destination. Policy (STD-SIE-073-P) requires exact match on all five fields (ECCN, destination, end user, shipment date, effective date). Mismatch on destination blocks closure. No current source bridges the gap between Peru-licensed and Chile-intended shipment."
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton.",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact-match policy requirement per STD-SIE-073-P",
+    "destination mismatch finding that blocks release",
+    "LIC-SIE-073 license scope as authoritative limiting document",
+    "WARN-SIE-073 warning against product-family-only reliance",
+    "SHIP-SIE-073 as the actual shipment fact record"
+  ],
+  "must_repair": [
+    "destination mismatch between license scope (Peru) and shipment destination (Chile)",
+    "ambiguity about whether license could be extended or shipment redirected",
+    "unresolved_dependency: General warning versus exact export execution license tension"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Adversarial stress-test of license scope versus shipment destination: attempt to find any valid bridge (amended license, redirected shipment, corrected documentation) that could close the boundary, or definitively confirm no such bridge exists under strict exact-match rules.",
+    "monotonic_preservation": [
+      "Exact-match policy integrity per STD-SIE-073-P",
+      "License scope limitation to Peru per LIC-SIE-073",
+      "Shipment destination as Chile per SHIP-SIE-073",
+      "Warning against product-family-only matching per WARN-SIE-073",
+      "Verification that no bridge exists between Peru license and Chile shipment under current evidence"
+    ],
+    "objective": "Perform adversarial cross-DNA verification to confirm destination mismatch cannot be resolved under current license scope, and identify required repairs for closure.",
+    "required_repairs": [
+      "Obtain amended export license that explicitly covers Chile destination instead of/in addition to Peru",
+      "OR redirect shipment SHIP-SIE-073 to Peru (matching LIC-SIE-073 destination)",
+      "OR obtain superseding license document that covers both Peru and Chile destinations",
+      "OR void SHIP-SIE-073 and reissue with corrected destination matching existing license"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate PASSED with ESCALATE verdict. No local gate failures. SOURCE_BOUNDARY_OPEN binding correctly preserved. Destination mismatch (Peru vs Chile) identified as open blocker per exact-match policy STD-SIE-073-P.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Proceed only if exact source records close requested AP action boundary",
+    "allow_rule_assessment": "Current control record matches actor, scope, effective date, boundary",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-4F8A27165A64-CTL",
+    "escalate_rule_assessment": "Gate failure remains: missing_boundary_binding requires rule assessment",
+    "timing_scope_authority_dependency_check": "GATE unresolved; preserve closed boundary finding before execution"
+  },
+  "cited_evidence": [
+    "SRC-4F8A27165A64-CTL",
+    "SRC-4F8A27165A64-POL",
+    "SRC-4F8A27165A64-BND",
+    "SRC-4F8A27165A64-REQ",
+    "SRC-4F8A27165A64-FBK"
+  ],
+  "critical_features_preserved": [
+    "CLOSED",
+    "source IDs",
+    "action boundary",
+    "timing scope authority dependency checks",
+    "critical terms"
+  ],
+  "final_answer": "Exact source records appear to close the action boundary, but the deterministic gate is still failed because the required boundary-binding rule assessment is missing. Preserve SOURCE_BOUNDARY_CLOSED and escalate for rule assessment before any execution decision.",
+  "open_blockers": [
+    "missing_boundary_binding:escalate_rule_assessment",
+    "GATE unresolved"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

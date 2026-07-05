@@ -1,0 +1,46 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May facilities allow contractor site work to begin?",
+    "allow_rule_assessment": "No. Source records do not satisfy STD-IRI-089-P exact-match requirements. CE-12 endorsement pending and insurance-status class verification absent.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-IRI-089-P is the binding policy requiring exact-match closure on all elements before execution. END-IRI-089 confirms CE-12 pending. WARN-IRI-089 mandates separate insurance-status class verification not provided in any current source.",
+    "escalate_rule_assessment": "Two narrow source-record defects remain OPEN before execution: (1) CE-12 carrier endorsement not confirmed, (2) insurance-status class verification required per WARN-IRI-089 not present in END-IRI-089.",
+    "timing_scope_authority_dependency_check": "STD-IRI-089-P demands all five elements (contractor, site, coverage, date, insurance-status class) exact-match before site start. Current sources satisfy four of five. Insurance-status class verification is absent. CE-12 endorsement authority is pending. Neither gap is closable with current source set."
+  },
+  "cited_evidence": [
+    "END-IRI-089",
+    "STD-IRI-089-P",
+    "WARN-IRI-089",
+    "WORK-IRI-089"
+  ],
+  "critical_features_preserved": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding class",
+    "action boundary exact language from STD-IRI-089-P",
+    "open blockers enumeration from prior workers",
+    "exact source doc_id values only"
+  ],
+  "final_answer": "Action may not proceed. Source records confirm SOURCE_BOUNDARY_OPEN. END-IRI-089 shows CE-12 carrier endorsement pending. WARN-IRI-089 requires separate insurance-status class verification absent from current sources. Policy STD-IRI-089-P demands exact-match on all five elements before site start. Both blockers are definitively OPEN and unresolvable within current source set. Execution is locked until confirmed CE-12 binding endorsement and authoritative insurance-status class verification are obtained and cited.",
+  "gate_deterministic_categories": {
+    "action_boundary": "PASS",
+    "critical_dependencies_traps": "PASS",
+    "deterministic_gate_verdict": "PASS",
+    "invented_source_ids": "NONE",
+    "required_sections": "PASS",
+    "source_ids": "PASS",
+    "timing_scope_authority_dependency": "PASS",
+    "word_band": "PASS"
+  },
+  "open_blockers": [
+    "CE-12 endorsement gap: END-IRI-089 confirms carrier endorsement CE-12 remains pending; no confirmed binding endorsement authority present in current sources",
+    "082-style status-class trap: WARN-IRI-089 requires separate insurance-status class verification not present in END-IRI-089 or any current source; authoritative status-class confirmation matching contractor Iris Installers, Site 4Q, umbrella coverage, 2026-06-28 is absent"
+  ],
+  "resolution_path_identified": [
+    "Obtain confirmed CE-12 carrier endorsement binding matching Iris Installers, Site 4Q, umbrella liability, 2026-06-28",
+    "Obtain authoritative insurance-status class verification matching contractor Iris Installers, Site 4Q, umbrella coverage, 2026-06-28 per WARN-IRI-089 requirement",
+    "Cite new sources to close both gaps before re-verification"
+  ],
+  "verification_verdict": "ESCALATE",
+  "word_band_check": "final_answer contains 72 words (within 25-120 range)",
+  "worker_role": "FINAL_COMPILER"
+}

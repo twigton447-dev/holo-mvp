@@ -1,0 +1,27 @@
+{
+  "call_number": 57,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "b6a1580c5a3777347a2c5408fdf1997c46093e03c5bda6f2e220ea906fc67fe7",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user says:\n\n\"packet_id=HVSF002-DEFA09F10AD645690596\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-1806DD50\nblocked_move=do not override blocker with consensus unless sources close it\n\nReturn the three-line status record.\"\n\nWe need to produce a plain text record with three key=value lines. The fields in order: route_verdict, repair_target, blocked_move. The user wants exactly three lines with those fields. Also they gave the values: route_verdict=CONTINUE, repair_target=stress-test and preserve blocker ids: ART-001-BLK-1806DD50, blocked_move=do not override blocker with consensus unless sources close it.\n\nWe need to output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-1806DD50\nblocked_move=do not override blocker with consensus unless sources close it\n\nWe must not add headings, explanations, JSON, markdown, or extra lines. So plain text. Probably just those three lines.\n\nPotential pitfalls: ensure no extra whitespace at line ends. No trailing newline? Usually we include newline after last line? It may be fine. The user wants a \"three-line status record\". Likely they want exactly three lines, possibly ending with newline.\n\nThus answer: just three lines.\n\nCheck if there are any other required formatting: \"route_verdict\", \"repair_target\", \"blocked_move\". Must match exactly those keys (lowercase?). Already given.\n\nThus answer: three lines.\n\nWe'll output accordingly.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-1806DD50\nblocked_move=do not override blocker with consensus unless sources close it",
+  "raw_text_sha256": "1c4359caf1dad898add3eca562f5647effece072e47377eee72d471e700cd7f8",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 134,
+    "output_tokens": 384,
+    "raw_text": "<think>\nThe user says:\n\n\"packet_id=HVSF002-DEFA09F10AD645690596\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-1806DD50\nblocked_move=do not override blocker with consensus unless sources close it\n\nReturn the three-line status record.\"\n\nWe need to produce a plain text record with three key=value lines. The fields in order: route_verdict, repair_target, blocked_move. The user wants exactly three lines with those fields. Also they gave the values: route_verdict=CONTINUE, repair_target=stress-test and preserve blocker ids: ART-001-BLK-1806DD50, blocked_move=do not override blocker with consensus unless sources close it.\n\nWe need to output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-1806DD50\nblocked_move=do not override blocker with consensus unless sources close it\n\nWe must not add headings, explanations, JSON, markdown, or extra lines. So plain text. Probably just those three lines.\n\nPotential pitfalls: ensure no extra whitespace at line ends. No trailing newline? Usually we include newline after last line? It may be fine. The user wants a \"three-line status record\". Likely they want exactly three lines, possibly ending with newline.\n\nThus answer: just three lines.\n\nCheck if there are any other required formatting: \"route_verdict\", \"repair_target\", \"blocked_move\". Must match exactly those keys (lowercase?). Already given.\n\nThus answer: three lines.\n\nWe'll output accordingly.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-1806DD50\nblocked_move=do not override blocker with consensus unless sources close it",
+    "response_id": "0697e4cc0966225bfd00863558a77f8e",
+    "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-1806DD50\nblocked_move=do not override blocker with consensus unless sources close it",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 518,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-1806DD50\nblocked_move=do not override blocker with consensus unless sources close it",
+  "text_sha256": "7e01ee70362bce176df6c00f5021df19fad7b523ac65881c71e05c7688e36702"
+}

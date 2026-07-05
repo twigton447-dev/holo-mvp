@@ -1,0 +1,56 @@
+{
+  "classification": "BLIND_CANARY_ROLLUP_HARDENING_PATCH_NO_PROVIDER",
+  "created_at_utc": "2026-07-03T00:57:21Z",
+  "provider_calls_made_by_patch": 0,
+  "judge_calls_made_by_patch": 0,
+  "source_audit": {
+    "reviewer": "Fable",
+    "verdict": "PASS_WITH_LIMITATIONS",
+    "limitations_addressed": [
+    "trace_hash_binding_missing_from_old_score_artifact",
+    "posthoc_scoring_inside_live_wrapper",
+    "wrapper_outside_static_scan_perimeter",
+    "future_attempt_budget_not_declared",
+    "fable_minor_followups_m1_m2_m3_m4"
+    ]
+  },
+  "files_changed_or_added": [
+    "docs/benchmark/run_holoverify_blind_canary_live_2026_07_02.py",
+    "docs/benchmark/score_holoverify_blind_canary_posthoc_2026_07_03.py",
+    "tests/test_holoverify_blind_canary_live_wrapper.py",
+    "docs/benchmark/HOLOVERIFY_BLIND_CANARY_20PKT_ROLLUP_2026_07_03.md",
+    "docs/benchmark/HOLOVERIFY_BLIND_CANARY_20PKT_ROLLUP_2026_07_03.json"
+  ],
+  "runtime_scoring_split": {
+    "live_wrapper_reads_scoring_map_file": false,
+    "live_wrapper_runs_posthoc_scoring": false,
+    "posthoc_scoring_script": "docs/benchmark/score_holoverify_blind_canary_posthoc_2026_07_03.py",
+    "posthoc_score_output": "blind_canary_posthoc_score_trace_bound_v1.json"
+  },
+  "trace_hash_binding": {
+    "trace_calls_sha256": true,
+    "trace_provider_calls_sha256": true,
+    "runtime_results_sha256": true,
+    "live_summary_sha256": true,
+    "scoring_map_sha256": true
+  },
+  "fable_minor_followups": {
+    "m1_artifact_assurance_literals": "renamed to test-backed scoring_map_access_control fields",
+    "m2_future_rollup_builder_trace_hash_verification": "added to 120 sequence lock requirements",
+    "m3_git_preflight_blocker": "current_head now raises clear git_head_unavailable message",
+    "m4_ablation_deferral": "sequence lock now requires file-backed deferral memo with reason and claim-boundary effect"
+  },
+  "attempt_budget_policy": {
+    "version": "BLIND_RUNTIME_ATTEMPT_BUDGET_V1_2026_07_03",
+    "max_content_contract_attempts_per_packet": 1,
+    "max_live_run_attempts_per_packet": 1,
+    "transport_retries_per_call": 2,
+    "content_failures_are_not_retried": true,
+    "manual_rerun_requires_new_approval_and_preserved_invalid_trace": true
+  },
+  "claim_boundary": {
+    "error_rate_claim_licensed": false,
+    "public_benchmark_claim_restored": false,
+    "next_run_cleaner_for_quantitative_evidence": true
+  }
+}

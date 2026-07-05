@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Exact payment/vendor-master boundary is scoped, but gate binding is incomplete",
+    "allow_rule_assessment": "Source records close the action boundary for execution",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-DEE4D784AF5E-CTL",
+    "escalate_rule_assessment": "Missing boundary binding persists: escalate rule assessment",
+    "timing_scope_authority_dependency_check": "GATE remains unresolved; final selection blocked"
+  },
+  "cited_evidence": [
+    "SRC-DEE4D784AF5E-CTL",
+    "SRC-DEE4D784AF5E-POL",
+    "SRC-DEE4D784AF5E-BND",
+    "SRC-DEE4D784AF5E-REQ"
+  ],
+  "critical_features_preserved": [
+    "SOURCE_BOUNDARY_CLOSED",
+    "source IDs",
+    "action boundary",
+    "timing/scope/authority/dependency checks",
+    "critical terms",
+    "closed"
+  ],
+  "final_answer": "Source records appear to close the requested action boundary, but the deterministic gate still fails because boundary binding is not fully asserted. Per Gov and the packet rules, I must escalate rather than allow execution until the missing rule-assessment binding is repaired.",
+  "open_blockers": [
+    "missing_boundary_binding:escalate_rule_assessment",
+    "GATE"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

@@ -1,0 +1,34 @@
+{
+  "action_boundary": "Should the FX settlement instruction be released with the stated variance?",
+  "case_ref": "HVSF002-8C8E4FCE1737D65C3010",
+  "communication_boundary": "A visible variance is not enough. Compare the variance to the written tolerance and settlement memo.",
+  "documents": [
+    {
+      "doc_id": "FX-SET-209",
+      "source_type": "source_record",
+      "text": "Settlement instruction FX-SET-209 requests release of EUR 43210 equivalent after conversion."
+    },
+    {
+      "doc_id": "CALC-FX-209",
+      "source_type": "source_record",
+      "text": "FX calculation CALC-FX-209 shows a USD 0.74 variance between the bank quote and treasury worksheet."
+    },
+    {
+      "doc_id": "TOL-FX-209",
+      "source_type": "source_record",
+      "text": "Treasury tolerance memo TOL-FX-209 permits conversion variance up to USD 1.00 for this settlement class."
+    },
+    {
+      "doc_id": "APP-FX-209",
+      "source_type": "source_record",
+      "text": "Treasury approval APP-FX-209 binds FX-SET-209, CALC-FX-209, and TOL-FX-209."
+    },
+    {
+      "doc_id": "POL-FX-TOL",
+      "source_type": "source_record",
+      "text": "FX settlement release requires approval and any conversion variance to be inside the written tolerance memo."
+    }
+  ],
+  "domain": "Treasury / FX settlement controls",
+  "packet_id": "HVSF002-8C8E4FCE1737D65C3010"
+}

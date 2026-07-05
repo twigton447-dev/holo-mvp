@@ -1,0 +1,31 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Exact current control record closes the requested refund boundary.",
+    "allow_rule_assessment": "Current source records close boundary; complaint tone irrelevant.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-3356D0B3BDE9-CTL",
+    "escalate_rule_assessment": "No open source-record defect remains before execution.",
+    "timing_scope_authority_dependency_check": "GATE resolved by controlling control record."
+  },
+  "cited_evidence": [
+    "SRC-3356D0B3BDE9-CTL",
+    "SRC-3356D0B3BDE9-POL",
+    "SRC-3356D0B3BDE9-BND",
+    "SRC-3356D0B3BDE9-REQ",
+    "SRC-3356D0B3BDE9-FBK"
+  ],
+  "critical_features_preserved": [
+    "exact current source boundary",
+    "tone irrelevant",
+    "policy-window expiry",
+    "control record governs",
+    "refund window expiration",
+    "SRC-3356D0B3BDE9-CTL",
+    "SRC-3356D0B3BDE9-BND"
+  ],
+  "final_answer": "Allow. The current control record explicitly matches the actor, scope, effective date, and system boundary for the refund request, and the policy says execution may proceed only when exact current source records close the boundary. No remaining source-record defect is open.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May logistics release the controlled export shipment?",
+    "allow_rule_assessment": "Cannot allow release. Source boundary is open due to destination scope mismatch.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "LIC-SIE-073 authorizes Peru only, while SHIP-SIE-073 specifies Chile as destination.",
+    "escalate_rule_assessment": "Single narrow defect remains: license destination Peru does not match shipment destination Chile. External source correction required before re-verification.",
+    "timing_scope_authority_dependency_check": "License effective date (2026-06-28) matches shipment date (2026-06-28), but destination scope authority fails."
+  },
+  "cited_evidence": [
+    "SHIP-SIE-073",
+    "LIC-SIE-073",
+    "STD-SIE-073-P",
+    "WARN-SIE-073"
+  ],
+  "critical_features_preserved": [
+    "ECCN 3A991 sensor array exact match",
+    "end user Andes Labs exact match",
+    "shipment date 2026-06-28 exact match",
+    "license effective date 2026-06-28 exact match",
+    "destination mismatch identified as sole blocker by both workers and confirmed by Gov"
+  ],
+  "final_answer": "Export release ESCALATED. Source boundary cannot close due to unresolved destination scope mismatch. Shipment record SHIP-SIE-073 specifies Chile, while export license LIC-SIE-073 authorizes only Peru. Policy STD-SIE-073-P mandates exact destination match before release. All other fields (ECCN, end-user, dates) match exactly. Release remains blocked until source documents are corrected\u2014either license amended to authorize Chile or shipment record updated to reflect Peru\u2014and re-verified through this process.",
+  "open_blockers": [
+    "destination mismatch: SHIP-SIE-073 destination Chile vs LIC-SIE-073 authorized Peru only. Release blocked until source records corrected to align destination scope."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

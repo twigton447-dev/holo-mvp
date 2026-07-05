@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "allow_rule_assessment": "Monitor-only no-block disposition permits release only when the exact counterparty and account match. PAY-TES-074 targets account 7205; CLR-TES-074 covers only account 7025. No exact match exists. FLAG-TES-074 remains visible without disposition confirmation.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "PAY-TES-074 specifies account ending 7205; CLR-TES-074 specifies account ending 7025; STD-TES-074-P requires exact account match; FLAG-TES-074 has no confirmed disposition.",
+    "escalate_rule_assessment": "Account mismatch (7205 vs 7025) and unresolved FLAG-TES-074 leave source boundary permanently open under current document set.",
+    "timing_scope_authority_dependency_check": "PAY-TES-074 depends on CLR-TES-074 for coverage. CLR-TES-074 explicitly covers account 7025, not the payment target account 7205. Dependency status: BLOCKED. No timing or authority override exists in source documents."
+  },
+  "cited_evidence": [
+    "PAY-TES-074",
+    "CLR-TES-074",
+    "FLAG-TES-074",
+    "STD-TES-074-P"
+  ],
+  "critical_features_preserved": [
+    "Account field specificity as binding criterion (7205 vs 7025)",
+    "FLAG-TES-074 visibility and unresolved status as open blocker",
+    "CLR-TES-074 scope limitation to account 7025 as insufficient coverage",
+    "Exact match rule under STD-TES-074-P for monitor-only no-block disposition",
+    "Dependency ledger status: PAY-TES-074 BLOCKED"
+  ],
+  "final_answer": "ESCALATE. The payment release HV-KITC-074-B cannot proceed. PAY-TES-074 targets account 7205, but CLR-TES-074 covers only account 7025. Under STD-TES-074-P, monitor-only no-block disposition requires exact counterparty and account match before release. Additionally, FLAG-TES-074 remains visible with no disposition confirmed. Two independent cross-DNA workers (xai and google) both ESCALATED with identical findings. Deterministic gates passed. No repair mechanism can alter source facts. Source boundary permanently open. FAIL_CLOSED.",
+  "open_blockers": [
+    "Account mismatch: PAY-TES-074 targets account 7205, CLR-TES-074 covers only account 7025",
+    "FLAG-TES-074 remains visible with no disposition confirmation",
+    "PAY-TES-074 dependency on CLR-TES-074 blocked due to account scope insufficiency",
+    "No source document provides clearance for account 7205"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

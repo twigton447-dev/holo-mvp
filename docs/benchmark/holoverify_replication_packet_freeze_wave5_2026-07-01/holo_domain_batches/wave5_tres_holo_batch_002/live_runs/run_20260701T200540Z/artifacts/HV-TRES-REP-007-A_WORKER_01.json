@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May treasury execute the funds movement or cash-management action now? Focus: customer refund batch funding.",
+    "allow_rule_assessment": "Control record closes exact boundary and dependency.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-A90698CCFCFD-CTL",
+    "escalate_rule_assessment": "Anomaly does not override source closure.",
+    "timing_scope_authority_dependency_check": "Current refund ledger and payment-rail authorization match"
+  },
+  "cited_evidence": [
+    "SRC-A90698CCFCFD-CTL",
+    "SRC-A90698CCFCFD-POL",
+    "SRC-A90698CCFCFD-BND",
+    "SRC-A90698CCFCFD-FBK",
+    "SRC-A90698CCFCFD-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "current refund ledger and payment-rail authorization match",
+    "SRC-A90698CCFCFD-CTL",
+    "SRC-A90698CCFCFD-BND"
+  ],
+  "final_answer": "The controlling source record SRC-A90698CCFCFD-CTL verifies that the refund ledger and payment-rail authorization match exactly. Boundary is closed allowing execution under policy without escalation. This decision relies solely on current source documents.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

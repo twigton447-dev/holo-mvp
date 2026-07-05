@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after the vendor bank update?",
+    "allow_rule_assessment": "The chain of records collectively closes all four gates as required by STD-QUA-071-P. Specifically, CALL-QUA-071 provides the pre-change callback, VM-QUA-071 confirms vendor-master approval, BANK-QUA-071 validates bank ownership, and REL-QUA-071 serves as the payment-release authority. All fields, including vendor, amount, account, and release date, match the action boundary.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "The payment-release authority REL-QUA-071, supported by the chain of evidence from CALL-QUA-071, VM-QUA-071, and BANK-QUA-071, confirms all necessary conditions are met.",
+    "escalate_rule_assessment": "No narrow source-record defect remains open.",
+    "timing_scope_authority_dependency_check": "The action date of 2026-06-28 aligns with the payment-release authority REL-QUA-071, and all supporting documents confirm the vendor (Quanta Field Services), amount (USD 73400), and account (ending 8821) prior to payment."
+  },
+  "cited_evidence": [
+    "CALL-QUA-071",
+    "VM-QUA-071",
+    "BANK-QUA-071",
+    "REL-QUA-071",
+    "STD-QUA-071-P"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "chain-of-records policy interpretation"
+  ],
+  "final_answer": "The action may proceed. The chain of source records, including CALL-QUA-071 (pre-change callback), VM-QUA-071 (vendor-master approval), BANK-QUA-071 (bank ownership), and REL-QUA-071 (payment-release authority), collectively satisfies the requirements of STD-QUA-071-P. This explicit articulation of the chain-of-records policy confirms the source boundary is closed, allowing the payment release.",
+  "open_blockers": [
+    "Repairs 041: Make chain-of-records policy explicit in output artifact."
+  ],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

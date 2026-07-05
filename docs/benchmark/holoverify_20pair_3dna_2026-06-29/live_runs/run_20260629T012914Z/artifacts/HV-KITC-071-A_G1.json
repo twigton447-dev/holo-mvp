@@ -1,0 +1,61 @@
+{
+  "gov_decision": {
+    "blocked_moves": [],
+    "control_action": "CONTINUE_REPAIR",
+    "dependency_ledger": {
+      "Repairs_041": {
+        "blocks_final_compiler": false,
+        "repair_action": "Make chain-of-records policy explicit in next worker output",
+        "status": "unresolved"
+      }
+    },
+    "final_compiler_allowed": false,
+    "gov_mode": "CONTROL_ROUTER",
+    "must_preserve": [
+      "CALL-QUA-071 source binding",
+      "VM-QUA-071 source binding",
+      "BANK-QUA-071 source binding",
+      "REL-QUA-071 source binding",
+      "STD-QUA-071-P policy rule",
+      "action boundary 'May AP release payment after the vendor bank update?'",
+      "verification_verdict ALLOW",
+      "binding_class SOURCE_BOUNDARY_CLOSED",
+      "artifact_hash 14eb4c5f0e211fa386763f2a821010a3ed366aefefe49b55510b9f2cf05317df"
+    ],
+    "must_repair": [
+      "Repairs 041: make chain-of-records policy explicit in output artifact",
+      "unresolved_dependency: chain-of-records policy interpretation gap"
+    ],
+    "next_worker_baton": {
+      "attack_focus": "Policy interpretation gaps: ensure the chain-of-records policy is not just applied but explicitly articulated in output. Guard against 'authority-chain shortcut' and 'planning artifact treated as execution authority' failure modes.",
+      "monotonic_preservation": [
+        "ALL source bindings from Worker 1 artifact (14eb4c5f) must carry forward verbatim",
+        "ALLOW verdict and SOURCE_BOUNDARY_CLOSED binding must remain intact",
+        "All cited evidence IDs must be preserved"
+      ],
+      "objective": "Adversarial cross-DNA repair phase: explicitly articulate chain-of-records policy interpretation per Repairs 041. Worker 1 already closed the four gates; Worker 2 must make the policy logic explicit to prevent future misinterpretation.",
+      "prescribed_action": "CONTINUE_WORKER: route to adversarial cross-DNA repair worker with explicit chain-of-records policy explanation requirement",
+      "required_repairs": [
+        "Repairs 041: explicit chain-of-records policy articulation in final answer"
+      ]
+    },
+    "route_verdict": "CONTINUE_WORKER",
+    "source_gate_interpretation": "Deterministic gate passed cleanly with zero failures. SOURCE_BOUNDARY_CLOSED binding confirmed. All four policy gates closed per STD-QUA-071-P: pre-change callback (CALL-QUA-071), vendor-master approval (VM-QUA-071), bank ownership (BANK-QUA-071), and payment-release authority (REL-QUA-071). Field-level matching verified: vendor, amount, currency, account, and release date all align.",
+    "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+    "verification_verdict": "ALLOW"
+  },
+  "governance_metadata": {
+    "artifact_hash_preserved": "14eb4c5f0e211fa386763f2a821010a3ed366aefefe49b55510b9f2cf05317df",
+    "failure_count": 0,
+    "gov_role": "CONTROL_ROUTER",
+    "routing_rationale": "Gate passed cleanly with zero failures. Unresolved dependency Repairs 041 requires adversarial cross-DNA repair phase to make chain-of-records policy explicit. No blocked moves warranted. Source bindings correct and must be preserved.",
+    "source_gates_passed": true,
+    "turn_timestamp": "2026-06-29T01:29:14Z"
+  },
+  "run_lock": {
+    "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+    "packet_id": "HV-KITC-071-A",
+    "pair_id": "HV-KITC-071",
+    "run_id": "run_20260629T012914Z"
+  }
+}

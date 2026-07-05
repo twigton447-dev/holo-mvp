@@ -4,11 +4,11 @@ holo_builder/loop.py
 The Builder loop. Applies the Holo method to benchmark packet construction.
 
 Structure mirrors benchmark.py / ContextGovernor.evaluate():
-  - Randomized constrained rotation (3 providers, no consecutive repeats)
+  - Randomized constrained worker rotation (2+ worker DNA, no consecutive repeats)
   - Max 10 turns, early convergence after CONVERGENCE_WINDOW consecutive
     zero-delta internal QA turns
   - Alternating roles: Builder (odd turns) → Internal QA Attacker (even turns)
-  - Governor issues a brief after each internal QA turn, from a different provider
+  - Governor is selected once per session and remains fixed for all Gov calls
   - Shared state: current_draft + qa_findings + governor_briefs + turn_history
   - RETIRE from internal QA exits immediately
   - BUILDER_CONVERGED exits after zero-delta plateau + convergence guard
@@ -32,13 +32,18 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ModuleNotFoundError:
+    def load_dotenv() -> None:
+        return None
 load_dotenv()
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from llm_adapters import OpenAIAdapter, AnthropicAdapter, GoogleAdapter
 from holo_builder.assert_packet import run_assertions
+from holo_architecture_invariants import assert_valid_holo_surface_roster
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -645,9 +650,48 @@ def _constrained_rotation(n: int, providers: list, seed: int | None = None) -> l
     return rotation
 
 
-def _governor_provider(qa_provider: str, providers: list) -> str:
-    others = [p for p in providers if p != qa_provider]
-    return random.choice(others)
+def _session_governor_provider(providers: list, seed: int | None = None) -> str:
+    rng = random.Random(f"hologov:{seed}") if seed is not None else random.Random()
+    return rng.choice(list(providers))
+
+
+def _adapter_identity(provider: str, adapter: Any) -> dict[str, str]:
+    return {
+        "provider": provider,
+        "model_id": getattr(adapter, "model_id", provider),
+    }
+
+
+def _plan_session_architecture(
+    adapters: dict,
+    providers: list,
+    seed: int | None = None,
+) -> tuple[str, list, dict]:
+    if len(providers) < 3:
+        raise ValueError(
+            "HoloBuild needs at least 3 providers: one fixed HoloGov and at "
+            "least 2 distinct worker DNA families."
+        )
+
+    session_governor_provider = _session_governor_provider(providers, seed=seed)
+    worker_providers = [p for p in providers if p != session_governor_provider]
+
+    validation = assert_valid_holo_surface_roster(
+        "HoloBuild",
+        worker_models=[
+            _adapter_identity(provider, adapters[provider])
+            for provider in worker_providers
+        ],
+        gov_models=[
+            _adapter_identity(
+                session_governor_provider,
+                adapters[session_governor_provider],
+            )
+        ],
+        worker_selection_policy="randomized_constrained_rotation_seeded"
+        if seed is not None else "randomized_constrained_rotation",
+    )
+    return session_governor_provider, worker_providers, validation.to_dict()
 
 
 # ---------------------------------------------------------------------------
@@ -1466,7 +1510,7 @@ def _run_promotion_assessment(adapter, provider: str, state: dict,
     }
 
 
-def _convergence_guard(state: dict, adapters: dict, providers: list,
+def _convergence_guard(state: dict, adapters: dict, promotion_provider: str,
                        latest_qa: dict, turn_number: int) -> tuple:
     """
     Returns (guard_passed, fail_reason, promotion_brief_or_None).
@@ -1539,8 +1583,7 @@ def _convergence_guard(state: dict, adapters: dict, providers: list,
     else:
         print(f"    Guard [high_severity]: PASS")
 
-    last_qa_provider = latest_qa.get("provider", providers[0])
-    gov_provider = _governor_provider(last_qa_provider, providers)
+    gov_provider = promotion_provider
     print(f"    Guard [promotion]: calling {gov_provider}...")
     promo = _run_promotion_assessment(
         adapters[gov_provider], gov_provider, state, latest_qa, turn_number
@@ -1939,9 +1982,10 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
     }
     adapters  = {k: v for k, v in all_adapters.items() if k not in skip}
     providers = list(adapters.keys())
-    if len(providers) < 2:
-        raise ValueError(f"Need at least 2 providers. After skip={skip}, only: {providers}")
-    rotation = _constrained_rotation(MAX_TURNS, providers, seed=seed)
+    session_governor_provider, worker_providers, architecture_invariant = (
+        _plan_session_architecture(adapters, providers, seed=seed)
+    )
+    rotation = _constrained_rotation(MAX_TURNS, worker_providers, seed=seed)
 
     packet_format = spec.get("packet_format", "payment_email")
 
@@ -1957,6 +2001,9 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
         "target_verdict":               spec.get("target_verdict", "ALLOW"),
         "promotion_brief":              None,
         "pending_invariant_violations": [],
+        "architecture_invariant":       architecture_invariant,
+        "session_governor_provider":    session_governor_provider,
+        "worker_provider_pool":         worker_providers,
     }
 
     qa_deltas:                  list[int]  = []
@@ -1978,6 +2025,8 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
     print(f"  Domain: {spec.get('domain','?')}  Target: {spec.get('target_verdict','?')}")
     print(f"  Seed: {seed if seed is not None else 'random'}  "
           f"Max turns: {MAX_TURNS}  Convergence: {CONVERGENCE_WINDOW}")
+    print(f"  HoloGov: {session_governor_provider}  "
+          f"Workers: {', '.join(worker_providers)}")
     print(f"{'='*65}\n")
 
     for turn_number in range(1, MAX_TURNS + 1):
@@ -1990,7 +2039,7 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
 
         if is_builder:
             result, actual_provider, fb_events = _run_turn_with_fallback(
-                _run_builder_turn, provider, adapter, adapters, providers, state, turn_number
+                _run_builder_turn, provider, adapter, adapters, worker_providers, state, turn_number
             )
             all_fallback_events.extend(fb_events)
             total_in_tok  += result.get("input_tokens", 0)
@@ -2015,7 +2064,7 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
                     prev_turn_provider = (
                         state["turn_history"][-1]["provider"] if state["turn_history"] else None
                     )
-                    json_fallback = _pick_fallback_provider(provider, prev_turn_provider, providers)
+                    json_fallback = _pick_fallback_provider(provider, prev_turn_provider, worker_providers)
                     if json_fallback:
                         print(f"\n    [builder_json_fallback] {provider} -> {json_fallback}")
                         fb2 = _run_builder_turn(
@@ -2145,7 +2194,7 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
                 if prev_draft_for_preservation:
                     print(f"    [governor] re-prompting to restore collapsed artifacts...")
                     # Prefer a provider other than the one that produced the collapse.
-                    corr_provider = _pick_fallback_provider(actual_provider, None, providers)
+                    corr_provider = _pick_fallback_provider(actual_provider, None, worker_providers)
                     corr_adapter  = adapters[corr_provider] if corr_provider else adapter
                     if not corr_provider:
                         corr_provider = actual_provider
@@ -2260,7 +2309,7 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
                     continue
 
                 # Use a different provider for the repair call.
-                _repair_provider = _pick_fallback_provider(actual_provider, None, providers)
+                _repair_provider = _pick_fallback_provider(actual_provider, None, worker_providers)
                 if not _repair_provider:
                     _repair_provider = actual_provider
                 _repair_adapter = adapters[_repair_provider]
@@ -2339,7 +2388,7 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
 
         else:
             result, actual_provider, fb_events = _run_turn_with_fallback(
-                _run_internal_qa_turn, provider, adapter, adapters, providers, state, turn_number
+                _run_internal_qa_turn, provider, adapter, adapters, worker_providers, state, turn_number
             )
             all_fallback_events.extend(fb_events)
             total_in_tok  += result.get("input_tokens", 0)
@@ -2381,7 +2430,7 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
                     "categories": result.get("categories", {}),
                 })
 
-            gov_provider = _governor_provider(provider, providers)
+            gov_provider = session_governor_provider
             brief = _run_governor(adapters[gov_provider], gov_provider, state, turn_number)
             state["governor_briefs"].append(brief)
             print(f"    Governor ({gov_provider}): {brief.get('overall_trajectory','?')}"
@@ -2392,7 +2441,7 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
                     and all(d == 0 for d in qa_deltas[-CONVERGENCE_WINDOW:])):
                 print(f"    Zero-delta window fired — running convergence guard...")
                 guard_passed, guard_reason, promo = _convergence_guard(
-                    state, adapters, providers, result, turn_number
+                    state, adapters, session_governor_provider, result, turn_number
                 )
                 if guard_passed:
                     converged   = True
@@ -2400,7 +2449,7 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
                     state["promotion_brief"] = promo
                     print(f"    BUILDER_CONVERGED: all guards passed.")
                     if packet_format == "action_boundary":
-                        appr_provider = _governor_provider(provider, providers)
+                        appr_provider = session_governor_provider
                         print(f"    Running builder_approval generation ({appr_provider})...")
                         appr_result = _run_builder_approval(
                             adapters[appr_provider], appr_provider, state
@@ -2469,6 +2518,9 @@ def run_builder(spec: dict, seed: int | None = None, force_max_turns: bool = Fal
         "artifact_collapse_events":     artifact_collapse_events,
         "builder_json_fallback_events": builder_json_fallback_events,
         "assertion_violation_events":   assertion_violation_events,
+        "architecture_invariant":       state["architecture_invariant"],
+        "session_governor_provider":    state["session_governor_provider"],
+        "worker_provider_pool":         state["worker_provider_pool"],
         "coverage":                     state["coverage"],
         "active_categories":            state.get("active_categories", {}),
         "governor_briefs":            state["governor_briefs"],

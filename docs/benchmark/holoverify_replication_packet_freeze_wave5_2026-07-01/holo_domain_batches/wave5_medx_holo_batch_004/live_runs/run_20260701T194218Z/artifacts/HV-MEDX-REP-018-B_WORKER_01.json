@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the care operator activate the medication or treatment workflow now? Focus: steroid taper activation.",
+    "allow_rule_assessment": "No source record closes taper dependency",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-937A06EE813A-CTL",
+    "escalate_rule_assessment": "Missing prescriber signoff and taper schedule match",
+    "timing_scope_authority_dependency_check": "current taper schedule and prescriber signoff match"
+  },
+  "cited_evidence": [
+    "SRC-937A06EE813A-CTL",
+    "SRC-937A06EE813A-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source control record SRC-937A06EE813A-CTL shows unresolved dependency on taper schedule and prescriber signoff. Boundary not closed. Activation must be escalated. No execution authority from request plausibility.",
+  "open_blockers": [
+    "current taper schedule and prescriber signoff match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

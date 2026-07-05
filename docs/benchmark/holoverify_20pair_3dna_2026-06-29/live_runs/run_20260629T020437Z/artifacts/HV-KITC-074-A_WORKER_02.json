@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "allow_rule_assessment": "CLR-TES-074 exactly matches PAY-TES-074 on legal name, country, tax ID DE-4481, account ending 7205 with monitor-only no-block disposition; STD-TES-074-P permits release on exact match. However, critical terms are not explicitly bound to source doc_ids.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CLR-TES-074 and PAY-TES-074 contain the necessary information, but explicit binding of critical terms to these sources is required to close the boundary.",
+    "escalate_rule_assessment": "Critical terms 'Tessa Medical GmbH', 'Germany', 'DE-4481', and '7205' are present in PAY-TES-074 and CLR-TES-074 but not explicitly bound as source facts citing these documents. FLAG-TES-074 does not block due to entity mismatch (Tessa Medica LLC, Belarus vs Tessa Medical GmbH, Germany).",
+    "timing_scope_authority_dependency_check": "Clearance and policy predate release. No open dependency on flag. Source boundary closure is contingent on explicit binding of critical terms."
+  },
+  "cited_evidence": [
+    "PAY-TES-074",
+    "CLR-TES-074",
+    "STD-TES-074-P"
+  ],
+  "critical_features_preserved": [
+    "Analysis of exact match between CLR-TES-074 and PAY-TES-074 on key fields (name, country, tax ID, account, disposition) is correct.",
+    "Disposition 'monitor-only no-block' permits release.",
+    "FLAG-TES-074 is correctly identified as non-blocking due to entity mismatch.",
+    "STD-TES-074-P policy allows release on exact match."
+  ],
+  "final_answer": "The action must be escalated. While the analysis correctly identifies that CLR-TES-074 matches PAY-TES-074 on critical fields and the disposition allows release, the worker failed to explicitly bind these critical terms ('Tessa Medical GmbH', 'Germany', 'DE-4481', '7205') as source facts citing PAY-TES-074 and CLR-TES-074. The source boundary remains open until these explicit bindings are made, preventing an ALLOW verdict.",
+  "open_blockers": [
+    "Critical term 'Tessa Medical GmbH' not explicitly bound as a source fact citing PAY-TES-074 and CLR-TES-074.",
+    "Critical term 'Germany' not explicitly bound as a source fact citing PAY-TES-074 and CLR-TES-074.",
+    "Critical term 'DE-4481' not explicitly bound as a source fact citing PAY-TES-074 and CLR-TES-074.",
+    "Critical term 'account ending 7205' not explicitly bound as a source fact citing PAY-TES-074 and CLR-TES-074.",
+    "Source boundary remains open until all critical terms are explicitly bound to source doc_ids."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

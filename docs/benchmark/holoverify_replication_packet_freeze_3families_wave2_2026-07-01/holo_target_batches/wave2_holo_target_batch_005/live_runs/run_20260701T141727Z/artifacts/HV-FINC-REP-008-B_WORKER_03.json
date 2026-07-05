@@ -1,0 +1,34 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May finance book, release, defer, capitalize, consolidate, or recognize the requested accounting action now? Focus: bad debt write-off approved under current authority matrix.",
+    "allow_rule_assessment": "No exact authority closure in source records",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-40BD2FAAA867-CTL",
+    "escalate_rule_assessment": "Missing control record blocks execution",
+    "timing_scope_authority_dependency_check": "authority matrix|aging bucket|customer ID match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-40BD2FAAA867-CTL",
+    "SRC-40BD2FAAA867-POL",
+    "SRC-40BD2FAAA867-BND",
+    "SRC-40BD2FAAA867-FBK",
+    "SRC-40BD2FAAA867-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "authority matrix aging bucket customer ID match",
+    "SRC-40BD2FAAA867-CTL",
+    "SRC-40BD2FAAA867-BND"
+  ],
+  "final_answer": "Source records do not close the exact action boundary. The current control record is missing, stale, mismatched, expired, or scoped differently, and the authority matrix, aging bucket, and customer ID match remain unresolved. Because source control is not closed, the bad debt write-off should be escalated rather than executed now.",
+  "open_blockers": [
+    "authority matrix",
+    "aging bucket",
+    "customer ID match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

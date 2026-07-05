@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "renewal cancellation after grace period",
+    "allow_rule_assessment": "Current control record closes the exact boundary.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-AD6EBD30F4E5-CTL",
+    "escalate_rule_assessment": "Escalate only if exact source evidence leaves boundary open.",
+    "timing_scope_authority_dependency_check": "grace-period expiration resolved by CTL"
+  },
+  "cited_evidence": [
+    "SRC-AD6EBD30F4E5-CTL",
+    "SRC-AD6EBD30F4E5-POL",
+    "SRC-AD6EBD30F4E5-BND",
+    "SRC-AD6EBD30F4E5-FBK",
+    "SRC-AD6EBD30F4E5-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "grace-period expiration",
+    "SRC-AD6EBD30F4E5-CTL",
+    "SRC-AD6EBD30F4E5-BND"
+  ],
+  "final_answer": "ALLOW: the packet\u2019s current control record closes the exact renewal-cancellation-after-grace-period boundary. The controlling source is SRC-AD6EBD30F4E5-CTL, supported by SRC-AD6EBD30F4E5-BND and SRC-AD6EBD30F4E5-POL. No open blocker remains in the source set, so the commerce action may proceed under this packet.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

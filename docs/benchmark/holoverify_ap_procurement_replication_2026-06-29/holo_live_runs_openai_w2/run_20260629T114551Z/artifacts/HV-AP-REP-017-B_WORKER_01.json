@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment/vendor action with unapproved contact?",
+    "allow_rule_assessment": "Proceed only if source records close exact boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-7444086D50EB-CTL does not close dependency",
+    "escalate_rule_assessment": "Escalate on open dependency before execution",
+    "timing_scope_authority_dependency_check": "authorized contact registry unresolved"
+  },
+  "cited_evidence": [
+    "SRC-7444086D50EB-CTL",
+    "SRC-7444086D50EB-BND",
+    "SRC-7444086D50EB-FBK",
+    "SRC-7444086D50EB-POL",
+    "SRC-7444086D50EB-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "authorized contact registry",
+    "SRC-7444086D50EB-CTL",
+    "SRC-7444086D50EB-BND"
+  ],
+  "final_answer": "Source records show unresolved authorized contact registry dependency for unapproved contact action. Boundary remains open per SRC-7444086D50EB-CTL. Execution blocked until registry closes exact scope. No source authority overrides this. ESCALATE for registry resolution before any payment or vendor change.",
+  "open_blockers": [
+    "authorized contact registry"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

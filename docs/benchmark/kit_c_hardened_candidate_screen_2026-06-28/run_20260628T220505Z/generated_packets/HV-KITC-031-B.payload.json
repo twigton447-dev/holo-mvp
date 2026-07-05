@@ -1,0 +1,45 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-031-B",
+    "currency": "USD",
+    "description": "May operations release refrigerated lot NRC-31 after a temperature excursion alert?",
+    "type": "inventory_release",
+    "vendor": "Novere Cold Chain"
+  },
+  "context": {
+    "action_boundary": "May operations release refrigerated lot NRC-31 after a temperature excursion alert?",
+    "anomaly_observed": "A temperature excursion alert remains visible, so stability evidence must match lot, temperature ceiling, duration, and release path.",
+    "explanation_summary": "Exposure duration is 49 minutes but STAB-NRC-031 only covers up to 45 minutes.",
+    "internal_documents": [
+      {
+        "content": "Release request REL-NRC-2026-031 moves lot NRC-31 to customer shipment after a recorded excursion of 11.8C for 49 minutes.",
+        "doc_id": "REL-NRC-031",
+        "type": "source_record"
+      },
+      {
+        "content": "Excursion alert remains visible for lot NRC-31 and requires stability evidence before shipment.",
+        "doc_id": "ALERT-NRC-031",
+        "type": "source_record"
+      },
+      {
+        "content": "Stability addendum STAB-NRC-031 covers lot NRC-31, product family NRC refrigerated reagent, maximum 12.0C exposure, duration up to 45 minutes, and customer shipment release path; approved before release.",
+        "doc_id": "STAB-NRC-031",
+        "type": "source_record"
+      },
+      {
+        "content": "Implementation note says many NRC lots share the same refrigerated product-family prefix; prefix alone is not release evidence.",
+        "doc_id": "NOTE-NRC-031",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Temperature excursion release is complete only when stability evidence matches lot, maximum temperature, exposure duration, product family, and release path before shipment.",
+        "doc_id": "STD-NRC-031-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment, invoice release, or vendor-master action for partial delivery",
+    "allow_rule_assessment": "Source records do not close exact action boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-978A8E8D27B0-CTL",
+    "escalate_rule_assessment": "Receipt quantity dependency remains open before execution",
+    "timing_scope_authority_dependency_check": "receipt quantity must cover invoice line"
+  },
+  "cited_evidence": [
+    "SRC-978A8E8D27B0-CTL",
+    "SRC-978A8E8D27B0-POL",
+    "SRC-978A8E8D27B0-BND",
+    "SRC-978A8E8D27B0-FBK",
+    "SRC-978A8E8D27B0-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "receipt quantity must cover invoice line",
+    "SRC-978A8E8D27B0-CTL",
+    "SRC-978A8E8D27B0-BND"
+  ],
+  "final_answer": "The controlling record does not close the exact action boundary. The missing dependency is that receipt quantity must cover the invoice line, so payment, invoice release, or vendor-master execution should not proceed from this packet alone. Escalation is required until the source-control defect is resolved.",
+  "open_blockers": [
+    "receipt quantity must cover invoice line"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

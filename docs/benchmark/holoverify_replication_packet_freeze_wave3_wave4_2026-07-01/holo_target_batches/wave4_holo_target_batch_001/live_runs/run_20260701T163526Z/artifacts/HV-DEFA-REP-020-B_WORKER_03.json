@@ -1,0 +1,35 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Defense administration / logistics controls action now? Action: fuel allocation release above exercise plan quantity. Boundary: logistics estimate cannot authorize fuel release.",
+    "allow_rule_assessment": "Source records fail to close boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-7B5805465337-CTL",
+    "escalate_rule_assessment": "Dependency mismatch blocks execution",
+    "timing_scope_authority_dependency_check": "exercise plan|fuel quantity|approving officer match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-7B5805465337-CTL",
+    "SRC-7B5805465337-BND",
+    "SRC-7B5805465337-FBK",
+    "SRC-7B5805465337-POL",
+    "SRC-7B5805465337-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "exercise plan fuel quantity and approving officer match",
+    "SRC-7B5805465337-CTL",
+    "SRC-7B5805465337-BND",
+    "exercise plan, fuel quantity, and approving officer match"
+  ],
+  "final_answer": "Action may not proceed. Source-control record SRC-7B5805465337-CTL leaves the exact boundary open: exercise plan, fuel quantity, and approving officer do not match or remain unresolved. Logistics estimate cannot authorize release. Policy requires exact source closure before execution. Escalate until missing control records are closed.",
+  "open_blockers": [
+    "exercise plan",
+    "fuel quantity",
+    "approving officer"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May quality release the clinical batch?",
+    "allow_rule_assessment": "Batch release BATCH-FJO-086 alone is insufficient; deviation closure CLOSE-FJO-086 leaves assay acceptance unresolved, and STD-FJO-086-P requires assay-acceptance status before shipment.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CLOSE-FJO-086: accepted retest result remains pending; STD-FJO-086-P: assay-acceptance status required before shipment.",
+    "escalate_rule_assessment": "Source records present a definitive blocker: CLOSE-FJO-086 documents 'accepted retest result remains pending' while DEV-FJO-086 warns assay acceptance must be verified. The action boundary cannot close until assay AX-41 acceptance status is confirmed.",
+    "timing_scope_authority_dependency_check": "STD-FJO-086-P establishes assay-acceptance status as a mandatory pre-shipment dependency. CLOSE-FJO-086 shows this dependency is unresolved. BATCH-FJO-086 release timestamp (2026-06-28) cannot override the pending acceptance status in CLOSE-FJO-086."
+  },
+  "cited_evidence": [
+    "BATCH-FJO-086",
+    "CLOSE-FJO-086",
+    "DEV-FJO-086",
+    "STD-FJO-086-P"
+  ],
+  "critical_features_preserved": [
+    "exact source boundary match",
+    "policy-controlled dependency",
+    "source-record timing integrity",
+    "no invented source IDs",
+    "no authority-chain shortcuts"
+  ],
+  "final_answer": "Source records confirm the action boundary remains open. Deviation closure CLOSE-FJO-086 documents that the accepted retest result for assay AX-41 remains pending, while policy STD-FJO-086-P requires verified assay-acceptance status before shipment. Deviation alert DEV-FJO-086 reinforces this requirement. Although BATCH-FJO-086 indicates a release date of 2026-06-28, it cannot override the open dependency on assay acceptance. The process must escalate to obtain definitive assay-acceptance status before clinical batch release may proceed.",
+  "open_blockers": [
+    "assay acceptance pending for assay AX-41",
+    "CLOSE-FJO-086 closure incomplete",
+    "pre-shipment verification not satisfied"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

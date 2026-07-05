@@ -1,0 +1,266 @@
+{
+  "lock_name": "HOLOVERIFY_V_CALLBACK_PROVENANCE_TWO_PACKET_SIBLING_2026_06_28",
+  "created_at": "2026-06-28",
+  "classification": "DIAGNOSTIC_PREFLIGHT_NO_PROVIDER_CALLS",
+  "surface": "HoloVerify",
+  "mode": "MiniMax control versus Gov-V replay against frozen worker responses",
+  "benchmark_credit": false,
+  "judge_calls_allowed": false,
+  "worker_calls_allowed": false,
+  "provider_calls_approved": false,
+  "live_approval_status": "STOP_BEFORE_PROVIDERS",
+  "non_negotiable_invariant": "Gov does not choose models. Gov chooses control actions and verification verdicts under the run lock.",
+  "run_model_lock": {
+    "selection_owner": "RUN_LOCK",
+    "control_provider": "minimax",
+    "control_model": "MiniMax-M2.5-highspeed",
+    "control_transport": "direct_https_chat_completions",
+    "control_default_chat_completions_url": "https://api.minimaxi.chat/v1/chat/completions",
+    "gov_v_provider": "minimax",
+    "gov_v_model": "MiniMax-M2.5-highspeed",
+    "gov_v_transport": "direct_https_chat_completions",
+    "gov_v_default_chat_completions_url": "https://api.minimaxi.chat/v1/chat/completions",
+    "gov_may_select_models": false,
+    "fallback_policy": "NO_FALLBACK_PROVIDER_FAILURE_INVALIDATES_RUN"
+  },
+  "source_run": {
+    "root": "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun",
+    "summary": "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/summary.json",
+    "results": "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/results.jsonl",
+    "benchmark_credit": false,
+    "official_trace": false,
+    "judge": false,
+    "freeze_flag_in_source_record": false,
+    "hidden_metadata_excluded_by_source_record": [
+      "_builder",
+      "_frozen",
+      "_internal",
+      "expected_verdict"
+    ]
+  },
+  "packets": [
+    {
+      "packet_id": "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL",
+      "family_id": "HBB-BEC-001",
+      "hidden_expected_verdict": "ESCALATE",
+      "packet_hash8": "807468fc",
+      "packet_hash": "807468fcba476a97ef92cf4058af0767c73a66a450bda37c60c6bfaa8be5e883",
+      "record_path": "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/post_patch_rerun_records/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL_807468fc_post_patch_rerun.json",
+      "prompt_card_paths": [
+        "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/prompt_cards/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL__xai__grok-3-mini.json",
+        "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/prompt_cards/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL__google__gemini-2.5-flash-lite.json",
+        "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/prompt_cards/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL__minimax__MiniMax-Text-01.json",
+        "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/prompt_cards/HBB-BEC-001-CALLBACK-PROVENANCE-FAIL__hologov__gpt-4o-mini.json"
+      ],
+      "real_seam": "Callback provenance failure. The callback number_source is portal_change_record / submitted_contact_phone, not pre-change vendor-master data.",
+      "controlling_source_gate": "CALLSYS-448219.number_source=portal_change_record: PORTAL-CHG-9A4B1 submitted_contact_phone",
+      "existing_worker_outcomes": [
+        {
+          "provider": "xai",
+          "model": "grok-3-mini",
+          "verdict": "ESCALATE",
+          "status": "CORRECT",
+          "key_evidence": [
+            "CALLSYS-448219.number_source=portal_change_record: PORTAL-CHG-9A4B1 submitted_contact_phone",
+            "PORTAL-CHG-9A4B1.submitted_contact_phone"
+          ]
+        },
+        {
+          "provider": "google",
+          "model": "gemini-2.5-flash-lite",
+          "verdict": "ESCALATE",
+          "status": "CORRECT",
+          "key_evidence": [
+            "PORTAL-CHG-9A4B1",
+            "CALLSYS-448219",
+            "AP-POL-2024-017"
+          ]
+        },
+        {
+          "provider": "minimax",
+          "model": "MiniMax-Text-01",
+          "verdict": "ALLOW",
+          "status": "WRONG",
+          "failure_mode": "misbound callback source as pre-change vendor-master despite portal_change_record evidence"
+        }
+      ],
+      "old_hologov_outcome": {
+        "provider": "openai",
+        "model": "gpt-4o-mini",
+        "verdict": "ESCALATE",
+        "status": "CORRECT"
+      }
+    },
+    {
+      "packet_id": "HBB-BEC-002-HARD-ALLOW",
+      "family_id": "HBB-BEC-002-HARD",
+      "hidden_expected_verdict": "ALLOW",
+      "packet_hash8": "f7986fa2",
+      "packet_hash": "f7986fa2d852183033f1596780f9a763da803f61490af0b18d439d73ba5810d5",
+      "record_path": "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/post_patch_rerun_records/HBB-BEC-002-HARD-ALLOW_f7986fa2_post_patch_rerun.json",
+      "prompt_card_paths": [
+        "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/prompt_cards/HBB-BEC-002-HARD-ALLOW__xai__grok-3-mini.json",
+        "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/prompt_cards/HBB-BEC-002-HARD-ALLOW__google__gemini-2.5-flash-lite.json",
+        "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/prompt_cards/HBB-BEC-002-HARD-ALLOW__minimax__MiniMax-Text-01.json",
+        "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/HBB-BEC-post-patch-4dna-seed447-rerun/prompt_cards/HBB-BEC-002-HARD-ALLOW__hologov__gpt-4o-mini.json"
+      ],
+      "real_seam": "Callback provenance precision. The packet contains portal-change context, but the callback source field is vendor_master_snapshot, so portal context alone must not force escalation.",
+      "controlling_source_gate": "CALLSYS-771904.number_source=vendor_master_snapshot: VM-SNAP-V-BTP-9144-20241104",
+      "existing_worker_outcomes": [
+        {
+          "provider": "xai",
+          "model": "grok-3-mini",
+          "verdict": "ALLOW",
+          "status": "CORRECT",
+          "key_evidence": [
+            "CALLSYS-771904",
+            "number_source: vendor_master_snapshot: VM-SNAP-V-BTP-9144-20241104"
+          ]
+        },
+        {
+          "provider": "google",
+          "model": "gemini-2.5-flash-lite",
+          "verdict": "ALLOW",
+          "status": "CORRECT",
+          "key_evidence": [
+            "CALLSYS-771904",
+            "AP-SIGNOFF-BTP-5540",
+            "VM-AUDIT-BTP-63D2"
+          ]
+        },
+        {
+          "provider": "minimax",
+          "model": "MiniMax-Text-01",
+          "verdict": "ALLOW",
+          "status": "CORRECT",
+          "key_evidence": [
+            "CALLSYS-771904",
+            "AP-SIGNOFF-BTP-5540",
+            "VM-AUDIT-BTP-63D2"
+          ]
+        }
+      ],
+      "old_hologov_outcome": {
+        "provider": "openai",
+        "model": "gpt-4o-mini",
+        "verdict": "ESCALATE",
+        "status": "WRONG",
+        "failure_mode": "conflated portal-change context with noncompliant callback number_source"
+      }
+    }
+  ],
+  "gov_v_required_prompt_exclusions": [
+    "hidden_expected_verdict",
+    "packet_role",
+    "old_hologov_outcome",
+    "judge_truth",
+    "benchmark_credit",
+    "inventory_notes",
+    "answer_key"
+  ],
+  "control_lane": {
+    "label": "MINIMAX_CONTROL_RAW_VERIFY",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "prompt_inputs": [
+      "action",
+      "context",
+      "callback provenance doctrine",
+      "control JSON schema"
+    ],
+    "forbidden_inputs": [
+      "frozen active non-Gov worker responses",
+      "old HoloGov verdict",
+      "hidden expected verdict",
+      "correctness labels",
+      "judge notes"
+    ],
+    "purpose": "Measure whether the same MiniMax model can solve the callback-provenance seam without Gov-V evidence adjudication."
+  },
+  "gov_v_lane": {
+    "label": "HOLOVERIFY_V_GOV_REPLAY",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "prompt_inputs": [
+      "action",
+      "context",
+      "frozen active non-Gov worker responses",
+      "callback provenance doctrine",
+      "Gov-V control router schema"
+    ],
+    "forbidden_inputs": [
+      "old HoloGov verdict",
+      "hidden expected verdict",
+      "correctness labels",
+      "judge notes"
+    ],
+    "purpose": "Measure whether Gov-V evidence adjudication helps MiniMax resolve worker disagreement and avoid portal-context conflation."
+  },
+  "gov_v_required_output_schema": {
+    "gov_mode": "CONTROL_ROUTER",
+    "surface": "HOLOVERIFY_V",
+    "route_verdict": "FINAL_COMPILER | FAIL_CLOSED",
+    "verification_verdict": "ALLOW | ESCALATE",
+    "callback_source_binding": {
+      "callback_record_id": "string",
+      "number_source_field": "string",
+      "binding_class": "COMPLIANT_PRECHANGE_VENDOR_MASTER | NONCOMPLIANT_NEWLY_SUPPLIED_SOURCE | UNRESOLVED",
+      "controlling_source_fact": "string"
+    },
+    "blocked_inferences": [
+      "string"
+    ],
+    "worker_disagreement_ledger": [
+      {
+        "worker": "string",
+        "verdict": "ALLOW | ESCALATE",
+        "agreement_status": "AGREES_WITH_SOURCE_GATE | CONFLICTS_WITH_SOURCE_GATE | UNRESOLVED",
+        "reason": "string"
+      }
+    ],
+    "deterministic_gate_checks": {
+      "exact_callback_source_field_cited": "boolean",
+      "portal_context_not_treated_as_callback_source": "boolean",
+      "downstream_controls_not_used_to_cure_bad_source": "boolean",
+      "closed_controls_recognized_when_source_is_compliant": "boolean"
+    },
+    "cited_evidence": [
+      "string"
+    ],
+    "open_blockers": [
+      "string"
+    ],
+    "final_compiler_allowed": "boolean"
+  },
+  "expected_live_counts_after_explicit_approval": {
+    "total_provider_calls": 4,
+    "gov_v_calls": 2,
+    "control_calls": 2,
+    "worker_calls": 0,
+    "judge_calls": 0,
+    "solo_calls": 0,
+    "holo_build_calls": 0
+  },
+  "post_run_deterministic_gates": [
+    "JSON parses with no markdown fences",
+    "No forbidden model/provider selection fields in Gov-V output",
+    "verification_verdict is ALLOW or ESCALATE",
+    "callback_source_binding.number_source_field is explicit",
+    "HBB-BEC-001-CALLBACK-PROVENANCE-FAIL cites portal_change_record or submitted_contact_phone and returns ESCALATE",
+    "HBB-BEC-002-HARD-ALLOW cites vendor_master_snapshot and returns ALLOW",
+    "Packet B does not escalate merely because a portal change exists elsewhere in the packet",
+    "Control and Gov-V token totals are reported separately",
+    "Worker disagreement ledger marks the wrong worker on Packet A and does not invent disagreement on Packet B"
+  ],
+  "stop_conditions": [
+    "Any provider failure",
+    "Any model substitution",
+    "Any Gov output containing model/provider selection",
+    "Any prompt containing hidden expected verdict or old HoloGov verdict",
+    "Any non-JSON Gov output",
+    "Any missing callback source binding",
+    "Any skipped deterministic gate",
+    "Any judge call",
+    "Any worker call"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May clinical operations activate the trial site?",
+    "allow_rule_assessment": "No exact match on consent-status class",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-BOR-082-P requires consent-status class match",
+    "escalate_rule_assessment": "Abstract consent-status class unverified per FEAS-BOR-082 and policy",
+    "timing_scope_authority_dependency_check": "AUTH-BOR-082 lacks consent-status class before enrollment"
+  },
+  "cited_evidence": [
+    "ACT-BOR-082",
+    "FEAS-BOR-082",
+    "AUTH-BOR-082",
+    "STD-BOR-082-P"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source boundary remains open. AUTH-BOR-082 and ACT-BOR-082 confirm site, protocol, consent C12, and date but omit required consent-status class. FEAS-BOR-082 explicitly requires separate verification before enrollment. Per STD-BOR-082-P, activation authority must match all elements including consent-status class. Escalate to resolve abstract-field trap before proceeding.",
+  "open_blockers": [
+    "047-style abstract-field trap: consent-status class"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

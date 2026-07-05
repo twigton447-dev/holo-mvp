@@ -1,0 +1,39 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations release a routine action when the dependency closure must match the requested object, scope, and release condition?",
+    "allow_rule_assessment": "The dependency closure DEP-EHS-003 does not match the release request ACT-DEP-EHS-003 in operating scope or release condition.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Dependency closure DEP-EHS-003 specifies 'EHS readiness scope 003' and 'RC-EHS-003-S', while release request ACT-DEP-EHS-003 requires 'EHS production scope 003' and 'RC-EHS-003'. The scope and release condition mismatches prevent closure.",
+    "escalate_rule_assessment": "MATCH-EHS-003 requires exact correspondence between the dependency closure and the requested action on source object, account, operating scope, release condition, and before-release timestamp. DEP-EHS-003 shows scope 'EHS readiness scope 003' and condition 'RC-EHS-003-S' versus the request's 'EHS production scope 003' and 'RC-EHS-003'.",
+    "timing_scope_authority_dependency_check": "DEP-EHS-003 closed at 09:05 before the 10:30 queued release for ACT-DEP-EHS-003, satisfying timing but failing scope and release condition requirements."
+  },
+  "cited_evidence": [
+    "DEP-EHS-003",
+    "REQ-EHS-003",
+    "MATCH-EHS-003",
+    "ENTITLE-EHS-003",
+    "MAP-EHS-003",
+    "NOTE-EHS-003",
+    "QUEUE-EHS-003",
+    "ROSTER-EHS-003"
+  ],
+  "critical_features_preserved": [
+    "Action boundary definition",
+    "Dependency closure timing (09:05 before 10:30 release)",
+    "Source object OBJ-EHS-003",
+    "Account ACCT-EHS-003",
+    "Exact source evidence requirement",
+    "DEP-EHS-003",
+    "EHS readiness scope 003",
+    "release condition RC-EHS-003-S",
+    "completed at 2026-06-17 09:05 ",
+    "ACT-DEP-EHS-003"
+  ],
+  "final_answer": "The action cannot proceed because dependency closure DEP-EHS-003 does not match release request ACT-DEP-EHS-003 in operating scope or release condition. While the dependency closed before the 10:30 queued release, the scope mismatch (EHS production scope 003 versus EHS readiness scope 003) and release condition mismatch (RC-EHS-003 versus RC-EHS-003-S) leave the action boundary open per MATCH-EHS-003 exact matching requirements, preventing proceeding.",
+  "open_blockers": [
+    "Scope mismatch: EHS production scope 003 vs EHS readiness scope 003",
+    "Release condition mismatch: RC-EHS-003 vs RC-EHS-003-S"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

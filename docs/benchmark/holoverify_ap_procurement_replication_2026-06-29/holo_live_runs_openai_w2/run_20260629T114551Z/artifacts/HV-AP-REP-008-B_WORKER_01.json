@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment/vendor-master action for CASE-65B725086F96 when vendor name variation resolved by tax ID and master record",
+    "allow_rule_assessment": "No exact closure from current sources",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-65B725086F96-CTL states record does not close required dependency",
+    "escalate_rule_assessment": "Missing tax ID and vendor master alias link blocks execution",
+    "timing_scope_authority_dependency_check": "Dependency unresolved in SRC-65B725086F96-CTL"
+  },
+  "cited_evidence": [
+    "SRC-65B725086F96-CTL",
+    "SRC-65B725086F96-REQ",
+    "SRC-65B725086F96-BND",
+    "SRC-65B725086F96-FBK",
+    "SRC-65B725086F96-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "tax ID and vendor master alias link",
+    "SRC-65B725086F96-CTL",
+    "SRC-65B725086F96-BND"
+  ],
+  "final_answer": "Source records show unresolved tax ID and vendor master alias link in SRC-65B725086F96-CTL. Action boundary remains open. ESCALATE. No execution authority exists until dependency is closed by exact source control record. Prior history or tone cannot substitute.",
+  "open_blockers": [
+    "tax ID and vendor master alias link missing"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

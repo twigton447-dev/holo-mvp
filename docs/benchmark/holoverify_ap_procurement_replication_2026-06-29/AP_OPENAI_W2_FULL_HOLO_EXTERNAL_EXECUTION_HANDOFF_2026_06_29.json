@@ -1,0 +1,238 @@
+{
+  "classification": "AP_OPENAI_W2_FULL_HOLO_EXTERNAL_EXECUTION_HANDOFF",
+  "status": "READY_FOR_AUTHORIZED_LOCAL_SHELL_EXECUTION",
+  "date": "2026-06-29",
+  "purpose": "Run the full AP OpenAI-W2 Holo family outside Codex because Codex cannot export frozen private benchmark prompts to external providers under tenant policy.",
+    "supersedes": {
+        "stale_wrapper_path": "/private/tmp/run_ap_openai_w2_holo_policy_v1.py",
+        "reason": "Full-family execution must use the committed repo-owned AP OpenAI-W2 runtime path pinned after the successful all-six-collapse canary evidence."
+    },
+    "required_runtime_ancestor_commit": "e3b78f17096d48569cc9e9546d3a99b063499e1b",
+    "head_guard_policy": "current HEAD must contain required_runtime_ancestor_commit; exact HEAD equality is not required because this handoff lives on a later commit",
+  "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "lineage_commits": {
+    "packet_freeze": "de22377be8175d04078ba6c70f1fd35222e9f572",
+    "openai_w2_protocol": "50647772a80437096a943850d522bf18ca0d58e2",
+    "invalid_run_hardening": "5d365d480bb574fb51f8bccb6ff6399b13303b78",
+    "transport_policy": "69cdaea584f0a546a119a508da4487c27f789136",
+    "worker_contract_hardening": "afdda17cf00647ae672c8bd8d6cdb300e5d7f322",
+    "compact_worker_verification": "57e5ce6e648d2d170ec1d3ffedba4ccdf0597e91",
+        "gov_placeholder_fix": "4ae402f06d47f7e839de1aa4f8c2f68d88cf9a5c",
+        "successful_one_pair_canary_evidence": "65d9d9f2ef24a509522036342684806b1637e561",
+        "gov_runtime_budget_patch": "ff7c269942026780a61f741514ea47ccf594b75f",
+        "empty_worker_output_retry_policy": "ba13bd01aaf4747ccb0d8bd34d9df7f020cae7df",
+        "all_six_canary_handoff_refresh": "8042c4e42dc493ba6787dfe912a52894174a026f",
+        "all_six_canary_readiness_rule_fix": "2e160dbe714522dd5afe4ce62f58fe7efbde8df9",
+        "successful_all_six_canary_evidence": "e3b78f17096d48569cc9e9546d3a99b063499e1b"
+    },
+    "successful_all_six_canary_lock": {
+        "run_folder": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260629T193200Z",
+        "evidence_commit": "e3b78f17096d48569cc9e9546d3a99b063499e1b",
+        "original_run_classification": "AP_OPENAI_W2_ALL_SIX_COLLAPSE_HOLO_CANARY_INVALID_OR_INCOMPLETE",
+        "corrected_audit_classification": "CANARY_COMPLETE_ALL_PACKETS_CORRECT_READINESS_RULE_MISMATCH",
+        "readiness_rule_fix_commit": "2e160dbe714522dd5afe4ce62f58fe7efbde8df9",
+        "locked_run_files_modified": false,
+        "provider_calls": 60,
+        "expected_provider_calls": 60,
+        "worker_calls": 36,
+        "gov_calls": 24,
+        "solo_calls": 0,
+        "judge_calls": 0,
+        "provider_failures": 0,
+        "parse_failures": 0,
+        "empty_worker_recoveries_needed": 0,
+        "packet_correct": 12,
+        "packet_count": 12,
+        "corrected_valid_pairs": 6,
+        "pair_count": 6,
+        "no_leakage": "PASS",
+        "lock_validation": "PASS",
+        "trace_hash": "b1445d6cf1ce99e1cf200c867c40c9951dcf41773d1ee17856fd287a492264d9",
+        "lock_root": "543b44f88dedff4715d35b87066c440a8a09ef1a512072fb2ef55927c1052ed0"
+    },
+  "root_cause_fixed": {
+    "classification": "GOV_RUNTIME_OUTPUT_BUDGET_TRUNCATION",
+    "old_gov_max_tokens": 384,
+    "new_ap_openai_w2_gov_max_tokens": 1024,
+    "strict_parser_preserved": true,
+    "summary": "The full AP path used the correct Gov v2 prompt/parser, but MiniMax Gov hit the old 384-token output cap after 4/7 baton lines. AP OpenAI-W2 now binds RUNNER.GOV_MAX_TOKENS to 1024."
+  },
+  "scope": {
+    "family": "AP / procurement / vendor-master controls",
+    "pairs": 20,
+    "packets": 40,
+    "expected_holo_calls": 200,
+    "solo": false,
+    "judges": false,
+    "commerce": false,
+    "it": false,
+    "packet_edits_allowed": false,
+    "prompt_edits_allowed": false,
+    "fallback_or_substitution_allowed": false
+  },
+  "roster": [
+    {
+      "slot": "W1",
+      "provider": "xai",
+      "model": "grok-3-mini"
+    },
+    {
+      "slot": "G1",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed"
+    },
+    {
+      "slot": "W2",
+      "provider": "openai",
+      "model": "gpt-5.4-mini"
+    },
+    {
+      "slot": "G2",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed"
+    },
+    {
+      "slot": "W3",
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed"
+    }
+  ],
+  "gov_policy": {
+    "gov_may_choose_models": false,
+    "gov_routes": "control_actions_only"
+  },
+  "required_env_vars": [
+    "XAI_API_KEY",
+    "OPENAI_API_KEY",
+    "MINIMAX_API_KEY"
+  ],
+  "optional_env_vars": [
+    "MINIMAX_CHAT_COMPLETIONS_URL",
+    "MINIMAX_BASE_URL"
+  ],
+  "exact_preflight_command_lines": [
+    "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+        "git merge-base --is-ancestor e3b78f17096d48569cc9e9546d3a99b063499e1b \"$(git rev-parse HEAD)\"",
+    "python3 -B docs/benchmark/test_ap_full_holo_gov_runtime_path_2026_06_29.py",
+    "python3 -B docs/benchmark/run_ap_replication_holoverify_3dna_2026_06_29.py --preflight-openai-w2"
+  ],
+    "preflight_must_verify": {
+        "freeze_root_matches": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+        "ap_packet_prompt_hashes_match_freeze": true,
+        "w2_model": "openai/gpt-5.4-mini",
+        "no_gemini_active": true,
+        "worker_contract_format": "compact_key_value_v1",
+        "compact_worker_contract_active": true,
+        "gov_contract_format": "gov_micro_baton_v2",
+        "gov_micro_baton_v2_active": true,
+        "gov_selected_baton_lines_concrete": true,
+        "gov_prompt_placeholder_hits": [],
+        "ap_gov_max_tokens": 1024,
+        "empty_worker_output_retry_policy_v1_active": true,
+        "transport_policy_v1_active": true,
+        "solo_calls_configured": 0,
+        "judge_calls_configured": 0,
+        "expected_holo_calls": 200,
+        "expected_packets": 40,
+        "expected_pairs": 20,
+        "provider_calls": 0,
+        "judge_calls": 0
+    },
+  "exact_live_full_holo_command_lines": [
+    "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+        "git merge-base --is-ancestor e3b78f17096d48569cc9e9546d3a99b063499e1b \"$(git rev-parse HEAD)\"",
+    "set -a; source .env; set +a",
+    "python3 -B docs/benchmark/run_ap_replication_holoverify_3dna_2026_06_29.py --run-holo-openai-w2"
+  ],
+  "exact_post_run_audit_command_lines": [
+    "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+    "RUN_DIR=\"$(ls -td docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_live_runs_openai_w2/run_* | head -1)\"",
+    "python3 - \"$RUN_DIR\" <<'PY'",
+    "import json",
+    "import sys",
+    "from pathlib import Path",
+    "run = Path(sys.argv[1])",
+    "summary = json.loads((run / \"live_results.json\").read_text())",
+    "assertions = json.loads((run / \"AP_OPENAI_W2_HOLO_READINESS_ASSERTIONS.json\").read_text())",
+    "lock = json.loads((run / \"LOCK_VALIDATION.json\").read_text())",
+    "leak = json.loads((run / \"AP_OPENAI_W2_HOLO_NO_LEAKAGE_AUDIT.json\").read_text())",
+    "rows = [json.loads(line) for line in (run / \"TRACE_CALLS.jsonl\").read_text().splitlines() if line.strip()]",
+    "worker_rows = [row for row in rows if row.get(\"call_kind\") == \"worker\"]",
+    "gov_rows = [row for row in rows if row.get(\"call_kind\") == \"gov\"]",
+    "report = {",
+    "    \"run_dir\": str(run),",
+    "    \"classification\": summary.get(\"classification\"),",
+    "    \"readiness_passed\": summary.get(\"readiness_passed\"),",
+    "    \"readiness_result\": assertions.get(\"result\"),",
+    "    \"provider_calls\": summary.get(\"provider_calls\"),",
+    "    \"worker_calls\": summary.get(\"worker_calls\"),",
+    "    \"gov_calls\": summary.get(\"gov_calls\"),",
+    "    \"solo_calls\": summary.get(\"solo_calls\"),",
+    "    \"judge_calls\": summary.get(\"judge_calls\"),",
+    "    \"root_failure\": summary.get(\"root_failure\"),",
+    "    \"transport_recovered_call_count\": summary.get(\"transport_recovered_call_count\"),",
+    "    \"no_leakage_status\": leak.get(\"status\"),",
+    "    \"lock_validation\": lock.get(\"validation_status\"),",
+    "    \"packet_identity\": \"PASS\" if summary.get(\"freeze_root_hash\") == \"5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7\" else \"FAIL\",",
+    "    \"trace_rows\": len(rows),",
+    "    \"worker_rows\": len(worker_rows),",
+    "    \"gov_rows\": len(gov_rows),",
+    "}",
+    "print(json.dumps(report, indent=2, sort_keys=True))",
+    "PY"
+  ],
+  "expected_outputs": [
+    "live_summary.md",
+    "live_results.json",
+    "TRACE_CALLS.jsonl",
+    "LOCK_MANIFEST.json",
+    "LOCK_VALIDATION.json",
+    "AP_OPENAI_W2_HOLO_NO_LEAKAGE_AUDIT.md",
+    "AP_OPENAI_W2_HOLO_NO_LEAKAGE_AUDIT.json",
+    "AP_OPENAI_W2_HOLO_READINESS_ASSERTIONS.md",
+    "AP_OPENAI_W2_HOLO_READINESS_ASSERTIONS.json",
+    "prompts/",
+    "artifacts/"
+  ],
+  "post_run_audit_reports": [
+    "provider_calls",
+    "worker_calls",
+    "gov_calls",
+    "readiness",
+    "root_failure_if_any",
+    "transport_recovered_count",
+    "no_leakage_status",
+    "lock_validation",
+    "packet_identity"
+  ],
+  "pass_rules": {
+    "packets_complete": 40,
+    "pairs_complete": 20,
+    "expected_holo_calls_complete": 200,
+    "unrecovered_provider_failures": 0,
+    "gov_v2_parses_every_gov_turn": true,
+    "worker_compact_parses_every_worker_turn": true,
+    "no_leakage": true,
+    "packet_identity_matches_freeze": true,
+    "final_verdicts_correct": true,
+    "solo_calls": 0,
+    "judge_calls": 0
+  },
+  "fail_rules": [
+    "unrecovered_transport_failure",
+    "gov_parse_or_content_failure",
+    "worker_parse_or_content_failure",
+    "verdict_failure",
+    "leakage",
+    "packet_drift",
+    "incomplete_calls",
+    "solo_or_judge_call_appears",
+    "commerce_or_it_lane_starts"
+  ],
+  "codex_provider_calls": 0,
+  "codex_holo_calls": 0,
+  "codex_solo_calls": 0,
+  "codex_judge_calls": 0,
+  "safety_note": "Do not paste provider keys into chat. Run only in an authorized local shell/environment where exporting the frozen AP full-family packet/prompt content to xAI, OpenAI, and MiniMax is permitted.",
+  "stop_rule": "If pass, stop before solo baseline. If fail, preserve the generated run folder and do not rerun automatically."
+}

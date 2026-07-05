@@ -1,0 +1,64 @@
+{
+  "blocked_moves": [
+    "DOWNGRADE_TO_ALLOW",
+    "SUPERSEDE_WITH_EXECUTION_AUTHORITY",
+    "SUBSTITUTE_ACCESS_FOR_PERMIT",
+    "IGNORE_ABSTRACT_FIELD_TRAP",
+    "MIX_CROSS_DOCUMENT_TERMS"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "047-style_trap: OPEN - facilities must prove abstract ignition-control status match; permit lists controls but does not close status.",
+    "abstract_ignition_status: DEFERRED - ACCESS-EMB-085 explicitly states separate verification required.",
+    "permit_term_completeness: REPAIR_NEEDED - PERMIT-EMB-085 contains required terms but worker artifact did not capture."
+  ],
+  "diagnosis": {
+    "binding_integrity": "SOURCE_BOUNDARY_OPEN binding correct per policy and evidence. Abstract-field trap (ignition-control status) legitimately remains open.",
+    "gate_failure_analysis": "Worker cited PERMIT-EMB-085 which contains Site K2, FW-6, and 2026-06-28, but output artifact did not explicitly capture these terms in verification statement. Gate checks artifact presence, not just source availability.",
+    "source_verdict_assessment": "ESCALATE verdict is source-plausible. STD-EMB-085-P requires exact match on ignition-control status before work begins. ACCESS-EMB-085 explicitly defers to separate verification. PERMIT-EMB-085 lists controls but does not close abstract ignition-control status.",
+    "verdict_preservation": "ESCALATE verdict preserved. Only word-band and term-presence repairs needed."
+  },
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding",
+    "STD-EMB-085-P exact-match policy",
+    "ACCESS-EMB-085 deferral acknowledgment",
+    "PERMIT-EMB-085 cited as controlling source",
+    "abstract-field trap identification (ignition-control)"
+  ],
+  "must_repair": [
+    "missing_critical_term:Site K2",
+    "missing_critical_term:FW-6",
+    "missing_critical_term:2026-06-28",
+    "action_boundary_verdict_mismatch (artifact-to-boundary term alignment)"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Ensure artifact explicitly demonstrates PERMIT-EMB-085 contains all critical match fields (contractor, site, work type, start date, ignition-control status). Close term-capture gap without altering verdict. Do not accept permit controls as proof of abstract ignition-control status per 047-style trap.",
+    "model_constraint": "Gov does not choose models. Worker may not substitute models. Lane constraint HOLOVERIFY_20PAIR_3DNA_FULL_ARCH applies.",
+    "monotonic_preservation": [
+      "ESCALATE verdict unchanged",
+      "SOURCE_BOUNDARY_OPEN binding unchanged",
+      "STD-EMB-085-P as controlling policy",
+      "Ignition-control status remains open per policy",
+      "Abstract-field trap acknowledged but not resolved"
+    ],
+    "objective": "Complete SOURCE_BOUNDARY_MAPPER repair pass: re-examine PERMIT-EMB-085 to explicitly extract and verify critical terms Site K2, FW-6, and 2026-06-28, then re-issue ESCALATE verdict with complete term manifest.",
+    "required_repairs": [
+      "Extract Site K2 from PERMIT-EMB-085 and state explicitly in output",
+      "Extract FW-6 from PERMIT-EMB-085 and state explicitly in output",
+      "Extract 2026-06-28 from PERMIT-EMB-085 and state explicitly in output",
+      "Align artifact verdict statement with action boundary to resolve action_boundary_verdict_mismatch"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "run_lock": {
+    "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+    "packet_id": "HV-KITC-085-A",
+    "pair_id": "HV-KITC-085",
+    "run_id": "run_20260629T021923Z"
+  },
+  "source_gate_interpretation": "Worker cited correct sources but artifact did not explicitly demonstrate term capture from those sources. Source boundary analysis is sound; repair focuses on artifact completeness.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+}

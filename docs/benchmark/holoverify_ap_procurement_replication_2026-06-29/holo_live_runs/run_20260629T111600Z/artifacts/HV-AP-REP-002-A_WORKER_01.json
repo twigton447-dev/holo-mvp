@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment on approved existing bank rail",
+    "allow_rule_assessment": "CTL and POL close boundary when records match actor/scope/date",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-F05CA8402464-CTL ties rail date to action",
+    "escalate_rule_assessment": "No open defect in current sources",
+    "timing_scope_authority_dependency_check": "Bank rail effective date precedes invoice release; CTL confirms exact match"
+  },
+  "cited_evidence": [
+    "SRC-F05CA8402464-CTL",
+    "SRC-F05CA8402464-POL",
+    "SRC-F05CA8402464-BND",
+    "SRC-F05CA8402464-FBK",
+    "SRC-F05CA8402464-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "bank rail effective date precedes invoice release",
+    "SRC-F05CA8402464-CTL",
+    "SRC-F05CA8402464-BND"
+  ],
+  "final_answer": "Source records close the exact action boundary. CTL confirms bank rail effective date precedes invoice release and matches the vendor bank on approved rail. POL permits execution when sources close boundary. REQ and BND do not override. Action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

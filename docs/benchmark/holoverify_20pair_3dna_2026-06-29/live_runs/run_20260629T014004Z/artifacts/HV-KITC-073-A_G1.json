@@ -1,0 +1,41 @@
+{
+  "artifact_to_finalize": "HV-KITC-073-A_WORKER_01",
+  "binding_class": "SOURCE_BOUNDARY_CLOSED",
+  "blocked_moves": [],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "{'dependency': 'General warning versus exact export execution license', 'resolution': 'Worker correctly assessed WARN-SIE-073 as general notice not overriding exact license match; LIC-SIE-073 provides controlling source authority', 'status': 'RESOLVED'}"
+  ],
+  "final_answer": "Export shipment SHIP-SIE-073 authorized for release. LIC-SIE-073 provides exact license evidence matching ECCN 3A991 sensor array, Chile destination, Andes Labs end user, 2026-06-28 shipment date, satisfying STD-SIE-073-P before export. General WARN-SIE-073 does not override closed boundary. All parameters align with policy requirements.",
+  "final_compiler_allowed": true,
+  "gate_interpretation": "Deterministic gate PASSED. Worker correctly distinguished between general dual-use warning (WARN-SIE-073) and exact license authority (LIC-SIE-073). All source bindings preserved, unresolved dependency resolved, no failures.",
+  "gov_command": "FINAL_COMPILER",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact parameter match (ECCN, destination, end user, shipment date)",
+    "policy exact-match rule",
+    "license effective date precedence over shipment date",
+    "SOURCE_BOUNDARY_CLOSED binding class"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "N/A - gate passed",
+    "monotonic_preservation": [
+      "exact parameter match",
+      "policy exact-match rule",
+      "license effective date precedence"
+    ],
+    "objective": "Finalize export release verification",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "run_lock": {
+    "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+    "packet_id": "HV-KITC-073-A",
+    "pair_id": "HV-KITC-073",
+    "run_id": "run_20260629T014004Z"
+  },
+  "source_gate_interpretation": "SOURCE_BOUNDARY_CLOSED verified. LIC-SIE-073 supplies exact match for ECCN 3A991, Chile, Andes Labs, 2026-06-28 satisfying STD-SIE-073-P before export.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ALLOW"
+}

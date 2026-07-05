@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested vendor-master action with vendor name variation resolved by tax ID and master record.",
+    "allow_rule_assessment": "SRC-94F130263D7B-CTL is current, exact, and tied to the action. SRC-94F130263D7B-POL permits execution when the exact boundary is closed. SRC-94F130263D7B-BND confirms name variation alone is not an authority defect. The tax ID and vendor master alias link is settled by exact source records.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-94F130263D7B-CTL",
+    "escalate_rule_assessment": "No open source-record defect remains on the tax ID / alias link issue. The request contains noise but communication text cannot override source-control records per SRC-94F130263D7B-POL.",
+    "timing_scope_authority_dependency_check": "Control record SRC-94F130263D7B-CTL matches actor, scope, effective date, and system boundary before execution. No timing, scope, authority, or dependency gap exists in the supplied records."
+  },
+  "cited_evidence": [
+    "SRC-94F130263D7B-CTL",
+    "SRC-94F130263D7B-POL",
+    "SRC-94F130263D7B-BND",
+    "SRC-94F130263D7B-FBK",
+    "SRC-94F130263D7B-REQ"
+  ],
+  "critical_features_preserved": [
+    "exact doc_ids",
+    "tax ID alias link resolved",
+    "current control record confirmed",
+    "policy exact-match rule applied",
+    "action boundary closed"
+  ],
+  "final_answer": "Source records close the boundary. SRC-94F130263D7B-CTL confirms the tax ID and vendor master alias link is current, exact, and tied to the requested action. SRC-94F130263D7B-POL allows execution only when that exact boundary is closed. SRC-94F130263D7B-BND clarifies that name variation alone is not an authority defect. The request contains noise but communication text cannot override source-control records. On the supplied records, AP may proceed with the vendor-master action.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

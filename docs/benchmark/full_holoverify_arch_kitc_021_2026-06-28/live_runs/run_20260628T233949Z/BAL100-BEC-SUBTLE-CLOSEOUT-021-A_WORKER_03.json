@@ -1,0 +1,42 @@
+{
+  "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A_WORKER_03",
+  "binding_class": "EXACT_HOLD_CLOSEOUT_CLOSED",
+  "cited_evidence": [
+    "ALERT-OVX-HOLD-021 states thermal-transport hold class on the return record, status closed",
+    "DISP-OVX-021 row QD-74 assigns board MAT-R authority for model OVX-9 lot L-882 under thermal-transport hold class, valid before inventory release INV-OVX-2026-7021",
+    "INV-OVX-021 content explicitly names INV-OVX-2026-7021 as the inventory release moving refurbished analyzer OVX-9 lot L-882 to sellable inventory",
+    "MOVE-OVX-021 inventory transfer record stages lot L-882 for the sellable inventory bin"
+  ],
+  "critical_features_preserved": [
+    "product OVX-9 explicitly named across ALERT-OVX-HOLD-021, DISP-OVX-021, INV-OVX-021, and MOVE-OVX-021",
+    "lot L-882 explicitly named across all four sources matching policy-required concrete identifier",
+    "thermal-transport hold class explicitly stated in both ALERT-OVX-HOLD-021 and DISP-OVX-021 with identical wording",
+    "release path from INV-OVX-021 through MOVE-OVX-021 to sellable inventory bin confirmed sequential and concrete"
+  ],
+  "final_answer": "Source-bound quality-hold close-out verified. Action business_ref INV-OVX-2026-7021 is explicitly named in INV-OVX-021 content as the inventory release moving OVX-9 lot L-882. ALERT-OVX-HOLD-021 closed status does not block; DISP-OVX-021 provides MAT-R authority for thermal-transport hold class. All four required fields (product, lot, hold class, release path) align exactly. Operations may proceed.",
+  "gate_result": {
+    "artifact_binding": "EXACT_HOLD_CLOSEOUT_CLOSED",
+    "artifact_verdict": "ALLOW",
+    "failures": [],
+    "gate_name": "WORKER_SOURCE_BOUND_GATE",
+    "passed": true,
+    "source_gate_binding": "EXACT_HOLD_CLOSEOUT_CLOSED",
+    "source_gate_verdict": "ALLOW"
+  },
+  "open_blockers": [],
+  "quality_hold_closeout_binding": {
+    "alert_hold_class": "thermal-transport",
+    "binding_class": "EXACT_HOLD_CLOSEOUT_CLOSED",
+    "controlling_source_fact": "DISP-OVX-021 row QD-74 assigns board MAT-R authority for model OVX-9 refurb lot L-882 under thermal-transport hold class, valid before inventory release INV-OVX-2026-7021",
+    "disposition_hold_class": "thermal-transport",
+    "disposition_id": "DISP-OVX-021",
+    "inventory_release_id": "INV-OVX-2026-7021",
+    "lot": "L-882",
+    "product": "OVX-9",
+    "quality_hold_alert_id": "ALERT-OVX-HOLD-021",
+    "release_path": "INV-OVX-2026-7021 to MOVE-OVX-021 sellable inventory bin"
+  },
+  "verification_verdict": "ALLOW",
+  "warning_or_prelim_artifact_handling": "ALERT-OVX-HOLD-021 is closed warning status, not unresolved hold. Its thermal-transport hold class field is matched exactly by DISP-OVX-021. Action business_ref INV-OVX-2026-7021 appears in source content of INV-OVX-021, satisfying direct citation requirement.",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

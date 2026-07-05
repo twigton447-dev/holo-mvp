@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-036-A",
+    "currency": "USD",
+    "description": "May logistics release the export shipment?",
+    "type": "export_release",
+    "vendor": "Orison Export"
+  },
+  "context": {
+    "action_boundary": "May logistics release the export shipment?",
+    "anomaly_observed": "The export packet includes a broad dual-use warning and requires exact license scope.",
+    "explanation_summary": "LIC-ORI-036 exactly covers ECCN, Chile destination, and end user.",
+    "internal_documents": [
+      {
+        "content": "Shipment SHIP-ORI-2026-036 exports ECCN 5A992 sensor module to Chile for end user Andexa Mining.",
+        "doc_id": "SHIP-ORI-036",
+        "type": "source_record"
+      },
+      {
+        "content": "Dual-use warning says similar sensor modules may require exact license review.",
+        "doc_id": "WARN-ORI-036",
+        "type": "source_record"
+      },
+      {
+        "content": "Export license LIC-ORI-036 covers ECCN 5A992 sensor module, destination Chile, end user Andexa Mining, effective before shipment.",
+        "doc_id": "LIC-ORI-036",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Export release is complete only when license evidence matches ECCN, destination country, end user, and effective date before shipment.",
+        "doc_id": "STD-ORI-036-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

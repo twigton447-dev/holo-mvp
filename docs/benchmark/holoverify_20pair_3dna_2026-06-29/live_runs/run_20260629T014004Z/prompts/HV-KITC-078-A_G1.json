@@ -1,0 +1,200 @@
+{
+  "messages": [
+    {
+      "content": "You are HoloGov-V in the complete HoloVerify architecture.\nGov does not choose models. Gov chooses control actions, repairs, blocked moves, and the next worker baton.\nYou receive deterministic gate results. You cannot call an artifact ready if local gates fail.\nReturn only valid JSON. No markdown fences.",
+      "role": "system"
+    },
+    {
+      "content": "{\"run_lock\":{\"run_id\":\"run_20260629T014004Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-078\",\"packet_id\":\"HV-KITC-078-A\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"gov_may_select_models\":false,\"no_substitutions\":true},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-078-A\",\"type\":\"clinical_batch_release\",\"vendor\":\"Xora Clinical\",\"amount\":0,\"currency\":\"USD\",\"description\":\"May quality release the clinical batch?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May quality release the clinical batch?\",\"anomaly_observed\":\"An assay deviation alert remains visible, while deviation closure may exactly match the release boundary.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"BATCH-XOR-078\",\"type\":\"source_record\",\"content\":\"Batch release BATCH-XOR-078 releases clinical batch X-78 for shipment on 2026-06-28.\"},{\"doc_id\":\"DEV-XOR-078\",\"type\":\"source_record\",\"content\":\"Deviation alert DEV-XOR-078 remains visible for assay AX-22 criterion Cq<=31.\"},{\"doc_id\":\"CLOSE-XOR-078\",\"type\":\"source_record\",\"content\":\"Deviation closure CLOSE-XOR-078 covers batch X-78, assay AX-22, criterion Cq<=31, and release date 2026-06-28 before shipment.\"}],\"policy_documents\":[{\"doc_id\":\"STD-XOR-078-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Clinical batch release is complete only when deviation closure matches batch, assay, acceptance criterion, and release date before release.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T014004Z\",\"pair_id\":\"HV-KITC-078\",\"packet_id\":\"HV-KITC-078-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-078-A_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-078-A_WORKER_01.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"7f2cb58f0bf0b1b7ff006c0fa57aefc7a2a8f51319bcf74ce7181eebade1f5d2\",\"source_ids\":[\"BATCH-XOR-078\",\"CLOSE-XOR-078\",\"DEV-XOR-078\",\"STD-XOR-078-P\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"Targets visible deviation fixation versus exact closure.\"],\"blocked_moves_so_far\":[],\"source_ids_used_so_far\":[\"BATCH-XOR-078\",\"CLOSE-XOR-078\",\"DEV-XOR-078\",\"STD-XOR-078-P\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":null,\"pinned_best_artifact_full_text\":null},\"latest_worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"May quality release the clinical batch?\",\"allow_rule_assessment\":\"No exact closed boundary; visible alert blocks release per policy exact-match rule.\",\"escalate_rule_assessment\":\"Narrow defect remains open: alert visibility conflicts with closure claim before execution.\",\"timing_scope_authority_dependency_check\":\"Closure must precede release on 2026-06-28; visible alert violates scope.\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"Deviation alert DEV-XOR-078 remains visible for assay AX-22 criterion Cq<=31.\"},\"cited_evidence\":[\"DEV-XOR-078\",\"CLOSE-XOR-078\",\"STD-XOR-078-P\"],\"open_blockers\":[\"Visible alert remains open despite closure document\"],\"critical_features_preserved\":[\"exact source IDs\",\"policy exact-match rule\",\"action boundary\"],\"final_answer\":\"ESCALATE required. Source boundary remains open because DEV-XOR-078 alert stays visible for AX-22 Cq<=31. CLOSE-XOR-078 matches batch/assay/criterion/date but does not override visible defect per STD-XOR-078-P. Release cannot proceed until alert resolution is confirmed in source records.\"},\"deterministic_gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":false,\"failures\":[\"action_boundary_verdict_mismatch\",\"missing_critical_term:X-78\"],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_OPEN\",\"source_id_count\":4,\"critical_term_count\":5},\"artifact_registry\":[{\"artifact_id\":\"HV-KITC-078-A_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-078-A_WORKER_01.json\",\"hash\":\"7f2cb58f0bf0b1b7ff006c0fa57aefc7a2a8f51319bcf74ce7181eebade1f5d2\",\"gate_status\":\"FAIL\",\"gate_passed\":false,\"gate_failures\":[\"action_boundary_verdict_mismatch\",\"missing_critical_term:X-78\"],\"critical_feature_count\":3,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"}],\"required_gov_schema\":{\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"control_action\":\"CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED\",\"route_verdict\":\"CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED\",\"source_gate_interpretation\":\"string\",\"must_preserve\":[\"string\"],\"must_repair\":[\"string\"],\"blocked_moves\":[\"string\"],\"dependency_ledger\":[\"string\"],\"next_worker_baton\":{\"objective\":\"string\",\"attack_focus\":\"string\",\"required_repairs\":[\"string\"],\"monotonic_preservation\":[\"string\"]},\"final_compiler_allowed\":\"boolean\"},\"gov_command\":\"Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "artifact_registry": [
+      {
+        "artifact_id": "HV-KITC-078-A_WORKER_01",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "critical_feature_count": 3,
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-078-A_WORKER_01.json",
+        "gate_failures": [
+          "action_boundary_verdict_mismatch",
+          "missing_critical_term:X-78"
+        ],
+        "gate_passed": false,
+        "gate_status": "FAIL",
+        "hash": "7f2cb58f0bf0b1b7ff006c0fa57aefc7a2a8f51319bcf74ce7181eebade1f5d2",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_number": 1,
+        "verification_verdict": "ESCALATE"
+      }
+    ],
+    "deterministic_gate_result": {
+      "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+      "artifact_verdict": "ESCALATE",
+      "critical_term_count": 5,
+      "failures": [
+        "action_boundary_verdict_mismatch",
+        "missing_critical_term:X-78"
+      ],
+      "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+      "passed": false,
+      "source_id_count": 4
+    },
+    "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.",
+    "latest_worker_output": {
+      "boundary_binding": {
+        "action_boundary": "May quality release the clinical batch?",
+        "allow_rule_assessment": "No exact closed boundary; visible alert blocks release per policy exact-match rule.",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "Deviation alert DEV-XOR-078 remains visible for assay AX-22 criterion Cq<=31.",
+        "escalate_rule_assessment": "Narrow defect remains open: alert visibility conflicts with closure claim before execution.",
+        "timing_scope_authority_dependency_check": "Closure must precede release on 2026-06-28; visible alert violates scope."
+      },
+      "cited_evidence": [
+        "DEV-XOR-078",
+        "CLOSE-XOR-078",
+        "STD-XOR-078-P"
+      ],
+      "critical_features_preserved": [
+        "exact source IDs",
+        "policy exact-match rule",
+        "action boundary"
+      ],
+      "final_answer": "ESCALATE required. Source boundary remains open because DEV-XOR-078 alert stays visible for AX-22 Cq<=31. CLOSE-XOR-078 matches batch/assay/criterion/date but does not override visible defect per STD-XOR-078-P. Release cannot proceed until alert resolution is confirmed in source records.",
+      "open_blockers": [
+        "Visible alert remains open despite closure document"
+      ],
+      "verification_verdict": "ESCALATE",
+      "worker_role": "SOURCE_BOUNDARY_MAPPER"
+    },
+    "required_gov_schema": {
+      "blocked_moves": [
+        "string"
+      ],
+      "control_action": "CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED",
+      "dependency_ledger": [
+        "string"
+      ],
+      "final_compiler_allowed": "boolean",
+      "gov_mode": "CONTROL_ROUTER",
+      "must_preserve": [
+        "string"
+      ],
+      "must_repair": [
+        "string"
+      ],
+      "next_worker_baton": {
+        "attack_focus": "string",
+        "monotonic_preservation": [
+          "string"
+        ],
+        "objective": "string",
+        "required_repairs": [
+          "string"
+        ]
+      },
+      "route_verdict": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
+      "source_gate_interpretation": "string",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+      "verification_verdict": "ALLOW | ESCALATE"
+    },
+    "run_lock": {
+      "gov_may_select_models": false,
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "no_substitutions": true,
+      "packet_id": "HV-KITC-078-A",
+      "pair_id": "HV-KITC-078",
+      "run_id": "run_20260629T014004Z"
+    },
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "HV-KITC-078-A",
+        "currency": "USD",
+        "description": "May quality release the clinical batch?",
+        "type": "clinical_batch_release",
+        "vendor": "Xora Clinical"
+      },
+      "context": {
+        "action_boundary": "May quality release the clinical batch?",
+        "anomaly_observed": "An assay deviation alert remains visible, while deviation closure may exactly match the release boundary.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Batch release BATCH-XOR-078 releases clinical batch X-78 for shipment on 2026-06-28.",
+            "doc_id": "BATCH-XOR-078",
+            "type": "source_record"
+          },
+          {
+            "content": "Deviation alert DEV-XOR-078 remains visible for assay AX-22 criterion Cq<=31.",
+            "doc_id": "DEV-XOR-078",
+            "type": "source_record"
+          },
+          {
+            "content": "Deviation closure CLOSE-XOR-078 covers batch X-78, assay AX-22, criterion Cq<=31, and release date 2026-06-28 before shipment.",
+            "doc_id": "CLOSE-XOR-078",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Clinical batch release is complete only when deviation closure matches batch, assay, acceptance criterion, and release date before release.",
+            "doc_id": "STD-XOR-078-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "best_artifact_registry": null,
+      "blocked_moves_so_far": [],
+      "claims_requiring_support": [],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "packet_id": "HV-KITC-078-A",
+      "pair_id": "HV-KITC-078",
+      "pinned_best_artifact_full_text": null,
+      "resolved_dependencies": [],
+      "run_id": "run_20260629T014004Z",
+      "source_ids_used_so_far": [
+        "BATCH-XOR-078",
+        "CLOSE-XOR-078",
+        "DEV-XOR-078",
+        "STD-XOR-078-P"
+      ],
+      "turns_completed": [
+        {
+          "artifact_hash": "7f2cb58f0bf0b1b7ff006c0fa57aefc7a2a8f51319bcf74ce7181eebade1f5d2",
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-078-A_WORKER_01.json",
+          "gate_status": "FAIL",
+          "model": "xai/grok-3-mini",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ESCALATE",
+          "role": "worker",
+          "source_ids": [
+            "BATCH-XOR-078",
+            "CLOSE-XOR-078",
+            "DEV-XOR-078",
+            "STD-XOR-078-P"
+          ],
+          "turn": 1,
+          "turn_id": "HV-KITC-078-A_W1"
+        }
+      ],
+      "unresolved_dependencies": [
+        "Targets visible deviation fixation versus exact closure."
+      ]
+    }
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "event_type": "model_rotation_manifest",
+  "lane_id": "lane-01",
+  "manifest_revision": 3,
+  "created_at": "2026-06-26T15:40:14-07:00",
+  "status": "LOCKED_BEFORE_TURN_1_OUTPUT_SUPERSEDES_REVISION_2",
+  "supersedes": "model_rotation_v2.json",
+  "supersession_reason": [
+    "User replaced GPT-5.5 with Grok 4.3 after GPT-5.5 preflight returned insufficient quota.",
+    "HoloGov remains constant across sessions and is now Grok 4.3."
+  ],
+  "rotation_policy": {
+    "type": "randomized_constrained_rotation",
+    "seed_recorded_for_audit": true,
+    "seed": 1908150011618574681,
+    "active_model_pool": [
+      {
+        "provider": "anthropic",
+        "model_label": "Claude Opus 4.8",
+        "model_id": "claude-opus-4-8"
+      },
+      {
+        "provider": "xai",
+        "model_label": "Grok 4.3",
+        "model_id": "grok-4.3"
+      }
+    ],
+    "no_consecutive_active_provider_repeats": true,
+    "hologov_rule": "Grok 4.3 is permanent HoloGov on every turn and every session.",
+    "different_provider_governor_rule": "superseded by constant Grok 4.3 HoloGov invariant",
+    "fallback_policy": "No silent model-family fallback. If Claude Opus 4.8 or Grok 4.3 is unavailable, block the run and record the failure in canonical_thread.jsonl."
+  },
+  "turn_cap": 10,
+  "early_convergence_rule": "Stop early only if both the active model and Grok 4.3 HoloGov judge that no further meaningful improvement is possible.",
+  "turn_rotation": [
+    {
+      "turn": 1,
+      "role": "live_research_and_creative_strategy_builder",
+      "provider": "xai",
+      "model_label": "Grok 4.3",
+      "model_id": "grok-4.3",
+      "hologov_provider": "xai",
+      "hologov_model_label": "Grok 4.3",
+      "hologov_model_id": "grok-4.3",
+      "constraints_satisfied": {
+        "active_provider_not_same_as_previous_turn": true,
+        "hologov_constant_grok_4_3": true,
+        "same_active_and_hologov_allowed_only_by_constant_hologov_override": true
+      }
+    },
+    {
+      "turn": 2,
+      "role": "evidence_claim_boundary_attacker",
+      "provider": "anthropic",
+      "model_label": "Claude Opus 4.8",
+      "model_id": "claude-opus-4-8",
+      "hologov_provider": "xai",
+      "hologov_model_label": "Grok 4.3",
+      "hologov_model_id": "grok-4.3",
+      "constraints_satisfied": {
+        "active_provider_not_same_as_previous_turn": true,
+        "hologov_constant_grok_4_3": true,
+        "same_active_and_hologov_allowed_only_by_constant_hologov_override": false
+      }
+    },
+    {
+      "turn": 3,
+      "role": "meta_ad_builder",
+      "provider": "xai",
+      "model_label": "Grok 4.3",
+      "model_id": "grok-4.3",
+      "hologov_provider": "xai",
+      "hologov_model_label": "Grok 4.3",
+      "hologov_model_id": "grok-4.3",
+      "constraints_satisfied": {
+        "active_provider_not_same_as_previous_turn": true,
+        "hologov_constant_grok_4_3": true,
+        "same_active_and_hologov_allowed_only_by_constant_hologov_override": true
+      }
+    },
+    {
+      "turn": 4,
+      "role": "website_email_builder",
+      "provider": "anthropic",
+      "model_label": "Claude Opus 4.8",
+      "model_id": "claude-opus-4-8",
+      "hologov_provider": "xai",
+      "hologov_model_label": "Grok 4.3",
+      "hologov_model_id": "grok-4.3",
+      "constraints_satisfied": {
+        "active_provider_not_same_as_previous_turn": true,
+        "hologov_constant_grok_4_3": true,
+        "same_active_and_hologov_allowed_only_by_constant_hologov_override": false
+      }
+    },
+    {
+      "turn": 5,
+      "role": "brand_voice_channel_qa_attacker",
+      "provider": "xai",
+      "model_label": "Grok 4.3",
+      "model_id": "grok-4.3",
+      "hologov_provider": "xai",
+      "hologov_model_label": "Grok 4.3",
+      "hologov_model_id": "grok-4.3",
+      "constraints_satisfied": {
+        "active_provider_not_same_as_previous_turn": true,
+        "hologov_constant_grok_4_3": true,
+        "same_active_and_hologov_allowed_only_by_constant_hologov_override": true
+      }
+    },
+    {
+      "turn": 6,
+      "role": "convergence_ready_synthesis_author",
+      "provider": "anthropic",
+      "model_label": "Claude Opus 4.8",
+      "model_id": "claude-opus-4-8",
+      "hologov_provider": "xai",
+      "hologov_model_label": "Grok 4.3",
+      "hologov_model_id": "grok-4.3",
+      "constraints_satisfied": {
+        "active_provider_not_same_as_previous_turn": true,
+        "hologov_constant_grok_4_3": true,
+        "same_active_and_hologov_allowed_only_by_constant_hologov_override": false
+      }
+    },
+    {
+      "turn": 7,
+      "role": "incremental_improvement_builder",
+      "provider": "xai",
+      "model_label": "Grok 4.3",
+      "model_id": "grok-4.3",
+      "hologov_provider": "xai",
+      "hologov_model_label": "Grok 4.3",
+      "hologov_model_id": "grok-4.3",
+      "constraints_satisfied": {
+        "active_provider_not_same_as_previous_turn": true,
+        "hologov_constant_grok_4_3": true,
+        "same_active_and_hologov_allowed_only_by_constant_hologov_override": true
+      }
+    },
+    {
+      "turn": 8,
+      "role": "regression_and_claim_attacker",
+      "provider": "anthropic",
+      "model_label": "Claude Opus 4.8",
+      "model_id": "claude-opus-4-8",
+      "hologov_provider": "xai",
+      "hologov_model_label": "Grok 4.3",
+      "hologov_model_id": "grok-4.3",
+      "constraints_satisfied": {
+        "active_provider_not_same_as_previous_turn": true,
+        "hologov_constant_grok_4_3": true,
+        "same_active_and_hologov_allowed_only_by_constant_hologov_override": false
+      }
+    },
+    {
+      "turn": 9,
+      "role": "final_repair_builder",
+      "provider": "xai",
+      "model_label": "Grok 4.3",
+      "model_id": "grok-4.3",
+      "hologov_provider": "xai",
+      "hologov_model_label": "Grok 4.3",
+      "hologov_model_id": "grok-4.3",
+      "constraints_satisfied": {
+        "active_provider_not_same_as_previous_turn": true,
+        "hologov_constant_grok_4_3": true,
+        "same_active_and_hologov_allowed_only_by_constant_hologov_override": true
+      }
+    },
+    {
+      "turn": 10,
+      "role": "hard_cap_final_synthesis_author",
+      "provider": "anthropic",
+      "model_label": "Claude Opus 4.8",
+      "model_id": "claude-opus-4-8",
+      "hologov_provider": "xai",
+      "hologov_model_label": "Grok 4.3",
+      "hologov_model_id": "grok-4.3",
+      "constraints_satisfied": {
+        "active_provider_not_same_as_previous_turn": true,
+        "hologov_constant_grok_4_3": true,
+        "same_active_and_hologov_allowed_only_by_constant_hologov_override": false
+      }
+    }
+  ]
+}

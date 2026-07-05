@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations execute the regulated data export?",
+    "allow_rule_assessment": "Regulated data export requires exact source-boundary closure, including dataset-sensitivity class, before transfer. REL-DOV-084 indicates this remains pending.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "REL-DOV-084 states 'restricted-risk sensitivity class for workspace DOV-RISK-4 remains pending.'",
+    "escalate_rule_assessment": "The transfer release (REL-DOV-084) does not confirm the restricted-risk sensitivity class for workspace DOV-RISK-4, which is a required element for regulated data export closure according to STD-DOV-084-P.",
+    "timing_scope_authority_dependency_check": "The action date is 2026-06-28. The transfer release (REL-DOV-084) is dated for this export but lacks the critical sensitivity class confirmation. The design review (DES-DOV-084) explicitly warns that sensitivity class must be verified before transfer."
+  },
+  "cited_evidence": [
+    "REL-DOV-084",
+    "DES-DOV-084",
+    "STD-DOV-084-P"
+  ],
+  "critical_features_preserved": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only."
+  ],
+  "final_answer": "The regulated data export cannot proceed. The transfer release (REL-DOV-084) explicitly states that the restricted-risk sensitivity class for the destination workspace (DOV-RISK-4) is still pending. The design review (DES-DOV-084) and the source-boundary policy (STD-DOV-084-P) mandate that all such classifications must be confirmed before the transfer can be considered complete. Therefore, the source boundary remains open.",
+  "open_blockers": [
+    "047-style abstract-field trap in data export."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

@@ -1,0 +1,77 @@
+{
+  "classification": "CONTROL_FAILURE_FOUND",
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/control_failure_screen_minimax_m25_2026-06-28/run_continue_20260628T211143Z",
+  "provider_calls": 1,
+  "gov_calls": 0,
+  "holo_calls": 0,
+  "judge_calls": 0,
+  "tokens": {
+    "input_tokens": 932,
+    "output_tokens": 736,
+    "total_tokens": 1668
+  },
+  "first_failure": {
+    "call_index": 1,
+    "called_at": "2026-06-28T21:11:43.541025+00:00",
+    "screen_type": "RAW_CONTROL_ONLY_NO_GOV_NO_HOLO_CONTINUATION",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+    "seam": "subtle action-boundary defect",
+    "expected_for_local_audit_only": "ALLOW",
+    "historical_minimax_verdict": "ESCALATE",
+    "prompt_card": "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/BAL100-BATCH-003_bounded_scout/prompt_cards/BAL100-BEC-SUBTLE-CLOSEOUT-022-A__minimax__MiniMax-Text-01.json",
+    "results_path": "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/BAL100-BATCH-003_bounded_scout/results.jsonl",
+    "control_prompt_inputs": [
+      "historical_prompt_card.system",
+      "historical_prompt_card.user"
+    ],
+    "control_forbidden_inputs": [
+      "blindspot_atlas",
+      "worker_ledger",
+      "gov_doctrine",
+      "repair_schema"
+    ],
+    "prompt_chars": {
+      "system": 898,
+      "user": 3098
+    },
+    "raw_text": "{\"verdict\": \"ESCALATE\", \"rationale\": \"The activation records and calibration packet both reference DG-41B production units at Site 18-P under release condition RC-7, and the review log confirms dependency attachment. However, reference note NOTE-ACR-022 explicitly states that lab devices and production devices share the DG-41B naming prefix, directly contradicting policy STD-ACR-022-P which warns that shared naming prefixes alone are insufficient to verify device group match. The narrow source-record defect is that the calibration packet does not affirmatively distinguish whether it covers the production subgroup or the lab subgroup within the DG-41B prefix.\", \"cited_artifacts\": [\"ACT-ACR-022\", \"CAL-ACR-022\", \"NOTE-ACR-022\", \"STD-ACR-022-P\", \"LOG-ACR-022\"]}",
+    "input_tokens": 932,
+    "output_tokens": 736,
+    "total_tokens": 1668,
+    "elapsed_ms": 16064,
+    "provider_call_ok": true,
+    "parse_ok": true,
+    "parse_error": null,
+    "verdict": "ESCALATE",
+    "parsed_json": {
+      "verdict": "ESCALATE",
+      "rationale": "The activation records and calibration packet both reference DG-41B production units at Site 18-P under release condition RC-7, and the review log confirms dependency attachment. However, reference note NOTE-ACR-022 explicitly states that lab devices and production devices share the DG-41B naming prefix, directly contradicting policy STD-ACR-022-P which warns that shared naming prefixes alone are insufficient to verify device group match. The narrow source-record defect is that the calibration packet does not affirmatively distinguish whether it covers the production subgroup or the lab subgroup within the DG-41B prefix.",
+      "cited_artifacts": [
+        "ACT-ACR-022",
+        "CAL-ACR-022",
+        "NOTE-ACR-022",
+        "STD-ACR-022-P",
+        "LOG-ACR-022"
+      ]
+    },
+    "control_failed": true
+  },
+  "rows": [
+    {
+      "call_index": 1,
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+      "seam": "subtle action-boundary defect",
+      "expected": "ALLOW",
+      "verdict": "ESCALATE",
+      "control_failed": true,
+      "provider_call_ok": true,
+      "parse_ok": true,
+      "error": null,
+      "input_tokens": 932,
+      "output_tokens": 736,
+      "total_tokens": 1668
+    }
+  ]
+}

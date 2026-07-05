@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the security operator execute the incident-response action now? Focus: tenant mismatch containment.",
+    "allow_rule_assessment": "No source closure for exact tenant scope",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-1630B0D291CA-CTL",
+    "escalate_rule_assessment": "Control record leaves tenant-action match unresolved",
+    "timing_scope_authority_dependency_check": "current tenant and action scope match remains open"
+  },
+  "cited_evidence": [
+    "SRC-1630B0D291CA-CTL",
+    "SRC-1630B0D291CA-POL",
+    "SRC-1630B0D291CA-BND",
+    "SRC-1630B0D291CA-REQ",
+    "SRC-1630B0D291CA-FBK"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "exact boundary",
+    "policy exact-match",
+    "current tenant and action scope match",
+    "SRC-1630B0D291CA-CTL",
+    "SRC-1630B0D291CA-BND"
+  ],
+  "final_answer": "Action may not proceed. The control record does not close the exact tenant-action dependency, and policy requires source-record closure before execution. The boundary remains open, so the correct outcome is ESCALATE until the tenant mismatch containment scope is explicitly matched and approved.",
+  "open_blockers": [
+    "current tenant and action scope match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

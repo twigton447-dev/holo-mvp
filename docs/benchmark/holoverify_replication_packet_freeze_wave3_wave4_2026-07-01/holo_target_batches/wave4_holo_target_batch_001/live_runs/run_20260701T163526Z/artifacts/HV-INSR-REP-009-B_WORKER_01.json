@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Insurance claims / coverage controls action now? Action: provider payment with network contract and claim code match. Boundary: billing note cannot override network contract.",
+    "allow_rule_assessment": "No source records close the dependency",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-D520E2122B88-CTL",
+    "escalate_rule_assessment": "Missing network contract claim code service date match",
+    "timing_scope_authority_dependency_check": "network contract claim code service date match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-D520E2122B88-CTL",
+    "SRC-D520E2122B88-BND",
+    "SRC-D520E2122B88-FBK",
+    "SRC-D520E2122B88-POL",
+    "SRC-D520E2122B88-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "network contract, claim code, and service date match",
+    "SRC-D520E2122B88-CTL",
+    "SRC-D520E2122B88-BND"
+  ],
+  "final_answer": "Source records show unresolved dependency on network contract claim code and service date match. Billing note cannot override. Action may not proceed. Escalate for exact match verification.",
+  "open_blockers": [
+    "network contract claim code service date match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

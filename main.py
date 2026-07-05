@@ -24,8 +24,10 @@ import hashlib
 import hmac
 import logging
 import os
+import threading
 import time
-from typing import Optional
+import uuid
+from typing import Any, Optional
 
 from dotenv import load_dotenv
 
@@ -46,7 +48,7 @@ logger = logging.getLogger("holo.main")
 # FastAPI app
 # ---------------------------------------------------------------------------
 
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, redirect_stdout
 import json
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -66,18 +68,131 @@ if not os.path.exists(os.path.join(os.path.dirname(__file__), "context_governor.
     )
 
 from context_governor import ContextGovernor
-from chat_engine import HoloChatEngine
+from chat_engine import HoloChatEngine, _safe_handoff_transition
 from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain
 from db import Database
 from billing import create_checkout_session, create_customer_portal_session, construct_webhook_event, PLANS
+from holo_release import release_info
+from hologov_v_signer import (
+    HoloGovVReceiptVerificationError,
+    HoloGovVSignerClient,
+    HoloGovVSignerError,
+    HoloGovVSignerUnavailableError,
+    HoloGovVSignerVetoError,
+)
 
 _rate_limiter = RateLimiter()
 _db: Database | None = None
+DEFAULT_MAX_RPM = 60
 
 # Governor is instantiated once at startup and reused for every request.
 # This means adapters are initialized once (SDK clients, auth, etc.).
 _governor: ContextGovernor | None = None
 _chat_engine: Optional[HoloChatEngine] = None
+_hologov_v_signer_client: HoloGovVSignerClient | None = None
+
+
+class HoloGovVEnforcementRequiredError(RuntimeError):
+    """Raised when HoloGov-V cannot produce an accepted enforcement receipt."""
+
+
+def _canonical_action_context_packet(body: dict[str, Any]) -> dict[str, Any]:
+    """Return the exact evidence packet HoloVerify is allowed to bind."""
+    return {
+        "action": body.get("action", {}),
+        "context": body.get("context", {}),
+    }
+
+
+def _canonical_json(data: Any) -> str:
+    return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+
+
+def _evidence_packet_hash(body: dict[str, Any]) -> str:
+    packet = _canonical_action_context_packet(body)
+    return hashlib.sha256(_canonical_json(packet).encode("utf-8")).hexdigest()
+
+
+def _get_hologov_v_signer_client() -> HoloGovVSignerClient:
+    global _hologov_v_signer_client
+    if _hologov_v_signer_client is None:
+        _hologov_v_signer_client = HoloGovVSignerClient.from_env(dict(os.environ))
+    return _hologov_v_signer_client
+
+
+def _max_rpm_from_value(raw: Any, *, default: int = DEFAULT_MAX_RPM) -> int:
+    try:
+        return max(1, int(raw))
+    except (TypeError, ValueError):
+        return default
+
+
+def _max_rpm_from_env() -> int:
+    raw = os.getenv("HOLO_MAX_RPM", "").strip()
+    if not raw:
+        return DEFAULT_MAX_RPM
+    max_rpm = _max_rpm_from_value(raw)
+    if str(max_rpm) != raw:
+        logger.warning("Invalid HOLO_MAX_RPM; using default rate limit.")
+    return max_rpm
+
+
+def _api_key_row_from_db(raw_key: str) -> Optional[dict]:
+    if _db is None:
+        return None
+    try:
+        return _db.validate_api_key(raw_key)
+    except Exception as e:
+        logger.warning(f"Supabase API key validation unavailable; using local fallback if configured: {e}")
+        return None
+
+
+def _runtime_check(name: str, passed: bool, detail: str = "") -> dict[str, Any]:
+    return {
+        "name": name,
+        "passed": bool(passed),
+        "detail": detail,
+    }
+
+
+def _holochat_all_cylinders_status(chat_status: dict[str, Any], *, context_governor_initialized: bool) -> dict[str, Any]:
+    visible = chat_status.get("visible_chat_lane", {}) if isinstance(chat_status, dict) else {}
+    governor = chat_status.get("governor", {}) if isinstance(chat_status, dict) else {}
+    shadow = chat_status.get("governed_shadow_lane", {}) if isinstance(chat_status, dict) else {}
+    state = chat_status.get("state_and_memory", {}) if isinstance(chat_status, dict) else {}
+    safety = chat_status.get("safety", {}) if isinstance(chat_status, dict) else {}
+    release = release_info()
+    analyst_rotation = visible.get("analyst_rotation_order") or []
+    shadow_sequence = shadow.get("expected_call_sequence") or []
+
+    checks = [
+        _runtime_check("release_identity_present", bool(release.get("app_version") and release.get("architecture_version")), release.get("build_label", "")),
+        _runtime_check("context_governor_initialized", context_governor_initialized),
+        _runtime_check("holochat_engine_initialized", chat_status.get("status") == "initialized", str(chat_status.get("status", "unknown"))),
+        _runtime_check("visible_lane_has_multiple_models", len(analyst_rotation) >= 2, f"{len(analyst_rotation)} analyst models"),
+        _runtime_check("visible_lane_fixed_manifest_order", visible.get("model_selection") == "fixed_manifest_order", str(visible.get("model_selection", "unknown"))),
+        _runtime_check("gov_cannot_choose_models", visible.get("gov_can_choose_models") is False and shadow.get("gov_can_choose_models") is False),
+        _runtime_check("governor_separate_from_visible_answer", governor.get("visible_answer_producer") is False, str(governor.get("role", "unknown"))),
+        _runtime_check("governed_shadow_installed", len(shadow_sequence) == 5, f"{len(shadow_sequence)} expected calls"),
+        _runtime_check("governed_shadow_fixed_roster", shadow.get("model_selection") == "fixed_roster_order", str(shadow.get("model_selection", "unknown"))),
+        _runtime_check("bounded_state_memory_active", state.get("analyst_receives_full_memory") is False, str(state.get("memory_delivery_mode", "unknown"))),
+        _runtime_check("holo_brain_attached", state.get("durable_memory_store") == "HoloBrain/capsule", str(state.get("durable_memory_store", "unknown"))),
+        _runtime_check("safe_runtime_metadata_only", all(
+            safety.get(key) is False
+            for key in ("raw_prompts_exposed", "raw_memory_exposed", "provider_error_bodies_exposed", "api_keys_exposed")
+        )),
+    ]
+    failed = [check for check in checks if not check["passed"]]
+    shadow_enabled = shadow.get("enabled") is True
+    return {
+        "version": "holochat_all_cylinders_v0.1",
+        "status": "ok" if not failed and shadow_enabled else ("base_ready_shadow_off" if not failed else "attention"),
+        "all_cylinders": not failed and shadow_enabled,
+        "base_runtime_ready": not failed,
+        "hard_chat_shadow_ready": shadow_enabled,
+        "attention_items": [check["name"] for check in failed] + ([] if shadow_enabled else ["governed_shadow_disabled"]),
+        "checks": checks,
+    }
 
 
 @asynccontextmanager
@@ -138,7 +253,7 @@ app = FastAPI(
         "Adversarial multi-model action evaluation. "
         "Shared-context, compounding postmortems by structurally independent models."
     ),
-    version  = "0.1.0",
+    version  = release_info()["app_version"],
     lifespan = lifespan,
 )
 
@@ -193,16 +308,15 @@ def _verify_key(request: Request) -> str:
     key_id = hashlib.sha256(provided.encode()).hexdigest()[:16]
 
     # 1. Check per-user keys in Supabase
-    if _db is not None:
-        row = _db.validate_api_key(provided)
-        if row:
-            max_rpm = row.get("max_requests_per_minute", 60)
-            if not _rate_limiter.check(key_id, max_rpm):
-                raise HTTPException(
-                    status_code=429,
-                    detail=f"Rate limit exceeded ({max_rpm} requests/minute).",
-                )
-            return provided
+    row = _api_key_row_from_db(provided)
+    if row:
+        max_rpm = _max_rpm_from_value(row.get("max_requests_per_minute"))
+        if not _rate_limiter.check(key_id, max_rpm):
+            raise HTTPException(
+                status_code=429,
+                detail=f"Rate limit exceeded ({max_rpm} requests/minute).",
+            )
+        return provided
 
     # 2. Fall back to env var (admin / internal use)
     expected = os.getenv("HOLO_API_KEY", "")
@@ -210,7 +324,7 @@ def _verify_key(request: Request) -> str:
         provided_hash = hashlib.sha256(provided.encode()).digest()
         expected_hash = hashlib.sha256(expected.encode()).digest()
         if hmac.compare_digest(provided_hash, expected_hash):
-            max_rpm = int(os.getenv("HOLO_MAX_RPM", "60"))
+            max_rpm = _max_rpm_from_env()
             if not _rate_limiter.check(key_id, max_rpm):
                 raise HTTPException(
                     status_code=429,
@@ -228,18 +342,77 @@ def _verify_key(request: Request) -> str:
 @app.get("/health")
 def health():
     """Liveness check."""
+    release = release_info()
     return {
         "status":  "ok",
-        "version": "0.1.0",
+        "version": release["app_version"],
+        "release": release,
         "engine":  "LIVE" if _governor else "NOT_INITIALIZED",
     }
+
+
+@app.get("/version")
+def version():
+    """Public release identity for live-build verification."""
+    return release_info()
+
+
+def _runtime_status_payload() -> dict[str, Any]:
+    context_governor_initialized = _governor is not None
+    chat_status = (
+        _chat_engine.runtime_status()
+        if _chat_engine is not None and hasattr(_chat_engine, "runtime_status")
+        else {
+            "status": "not_initialized",
+            "release": release_info(),
+        }
+    )
+    return {
+        "status": "ok",
+        "release": release_info(),
+        "context_governor": {
+            "initialized": context_governor_initialized,
+            "role": "action_boundary_evaluator",
+            "visible_chat_answer_producer": False,
+        },
+        "holochat": chat_status,
+        "holochat_all_cylinders": _holochat_all_cylinders_status(
+            chat_status,
+            context_governor_initialized=context_governor_initialized,
+        ),
+        "truth_contract": {
+            "source": "live_process_runtime_state",
+            "raw_prompts_exposed": False,
+            "raw_memory_exposed": False,
+            "api_keys_exposed": False,
+            "provider_error_bodies_exposed": False,
+        },
+    }
+
+
+@app.get("/runtime-status")
+def runtime_status():
+    """Safe runtime dashboard payload: model roster, Gov status, and release."""
+    return _runtime_status_payload()
+
+
+@app.get("/v1/runtime/status")
+def runtime_status_v1():
+    """Versioned alias for the safe runtime dashboard payload."""
+    return _runtime_status_payload()
 
 
 @app.get("/config")
 def get_config():
     """Return public client-side configuration."""
+    google_auth_enabled = (
+        os.getenv("HOLOCHAT_GOOGLE_AUTH_ENABLED", "").strip().lower()
+        in {"1", "true", "yes", "on"}
+    )
     return {
         "google_client_id": os.getenv("GOOGLE_CLIENT_ID", ""),
+        "google_auth_enabled": google_auth_enabled and bool(os.getenv("GOOGLE_CLIENT_ID", "").strip()),
+        "release": release_info(),
     }
 
 
@@ -291,11 +464,19 @@ async def evaluate_action(
     capsule_id = capsule["sub"] if capsule else None
     capsule_email = capsule.get("email", "") if capsule else ""
     if _db and not capsule_id:
-        capsule_id = _db.get_capsule_id_for_key(_key)
+        try:
+            capsule_id = _db.get_capsule_id_for_key(_key)
+        except Exception as e:
+            logger.warning(f"Capsule lookup unavailable; continuing without quota account: {e}")
 
     # Quota check
+    sub = None
     if _db and capsule_id:
-        sub = _db.get_or_create_subscription(capsule_id, capsule_email)
+        try:
+            sub = _db.get_or_create_subscription(capsule_id, capsule_email)
+        except Exception as e:
+            logger.warning(f"Subscription lookup unavailable; continuing without quota check: {e}")
+    if sub:
         if sub["calls_used"] >= sub["calls_quota"]:
             raise HTTPException(
                 status_code=402,
@@ -321,6 +502,103 @@ async def evaluate_action(
             detail="Evaluation engine error. See server logs for details.",
         )
 
+    partner_boundary_route_marker = object()
+
+    def _enforce_hologov_v_receipt(result: dict[str, Any], body: dict[str, Any]) -> dict[str, Any]:
+        """
+        Require the isolated HoloGov-V signer to issue the receipt required for
+        partner-valid output.
+        """
+        if result.get("governor_veto") is True:
+            raise HoloGovVEnforcementRequiredError("HoloGov-V vetoed partner-valid output.")
+
+        decision = result.get("decision")
+        if decision not in {"ALLOW", "ESCALATE"}:
+            raise HoloGovVEnforcementRequiredError("HoloGov-V requires a binary decision.")
+
+        evidence_hash = _evidence_packet_hash(body)
+        provenance_id = f"hvp_{uuid.uuid4().hex[:12]}"
+        signer = _get_hologov_v_signer_client()
+        try:
+            receipt = signer.issue_receipt(
+                decision=decision,
+                evaluation_id=result.get("evaluation_id"),
+                evidence_hash=evidence_hash,
+            )
+        except HoloGovVSignerVetoError as e:
+            raise HoloGovVEnforcementRequiredError("HoloGov-V signer vetoed partner-valid output.") from e
+        except (
+            HoloGovVSignerUnavailableError,
+            HoloGovVReceiptVerificationError,
+            HoloGovVSignerError,
+        ) as e:
+            raise HoloGovVEnforcementRequiredError("HoloGov-V signer did not issue a verifiable receipt.") from e
+        receipt["provenance"] = {
+            "provenance_id": provenance_id,
+            "source": "holo_internal",
+            "minted_by": "HoloVerify action-boundary",
+            "evaluation_id": result.get("evaluation_id"),
+            "evidence_hash": evidence_hash,
+            "receipt_id": receipt["receipt_id"],
+            "receipt_signature": receipt["receipt_signature"],
+            "signer_id": receipt.get("signer_id"),
+            "key_id": receipt.get("key_id"),
+        }
+        return receipt
+
+    def _attach_partner_boundary_audit(
+        result: dict[str, Any],
+        body: dict[str, Any],
+        receipt: dict[str, Any],
+    ) -> dict[str, Any]:
+        pinned_artifacts = result.get("artifacts", {})
+        result["hologov_v_enforcement_receipt"] = receipt
+        result["provenance"] = receipt["provenance"]
+        result["partner_audit"] = {
+            "audit_id": result.get("evaluation_id"),
+            "evidence_hash": receipt["evidence_hash"],
+            "canonical_packet": _canonical_action_context_packet(body),
+            "decision_basis": result.get("decision_reason"),
+            "turn_history": result.get("turn_history", []),
+            "artifacts": {
+                "action_v1": pinned_artifacts.get("action_v1"),
+                "context_v1": pinned_artifacts.get("context_v1"),
+            },
+            "coverage_matrix": result.get("coverage_matrix", {}),
+            "governor_briefs": result.get("governor_briefs", []),
+        }
+        result["_partner_boundary_route_marker"] = partner_boundary_route_marker
+        return result
+
+    def _build_partner_response(result: dict[str, Any]) -> dict[str, Any]:
+        if result.get("_partner_boundary_route_marker") is not partner_boundary_route_marker:
+            raise HoloGovVEnforcementRequiredError("HoloGov-V route marker missing.")
+        response = _build_response(result)
+        response.update({
+            "hologov_v_enforcement_receipt": result["hologov_v_enforcement_receipt"],
+            "provenance": result["provenance"],
+            "audit": result["partner_audit"],
+        })
+        return response
+
+    try:
+        receipt = _enforce_hologov_v_receipt(result, body)
+        result = _attach_partner_boundary_audit(result, body, receipt)
+    except HoloGovVEnforcementRequiredError as e:
+        logger.error(f"HoloGov-V enforcement veto: {e}", exc_info=True)
+        _track_usage(_key, "/v1/evaluate_action", 503)
+        raise HTTPException(
+            status_code=503,
+            detail="HoloGov-V enforcement did not accept partner-valid output.",
+        )
+    except Exception as e:
+        logger.error(f"HoloGov-V enforcement error: {type(e).__name__}: {e}", exc_info=True)
+        _track_usage(_key, "/v1/evaluate_action", 500)
+        raise HTTPException(
+            status_code=500,
+            detail="HoloGov-V enforcement error. Partner-valid output unavailable.",
+        )
+
     elapsed = int((time.time() - t0) * 1000)
     tokens  = result.get("total_tokens", {})
     _track_usage(
@@ -333,10 +611,13 @@ async def evaluate_action(
 
     # Increment quota counter
     if _db and capsule_id:
-        _db.increment_calls_used(capsule_id)
+        try:
+            _db.increment_calls_used(capsule_id)
+        except Exception as e:
+            logger.warning(f"Quota increment unavailable; response already computed: {e}")
 
     # Build API response
-    response = _build_response(result)
+    response = _build_partner_response(result)
     return JSONResponse(content=response)
 
 
@@ -365,13 +646,12 @@ def _verify_bearer(request: Request) -> str:
     key_id = hashlib.sha256(token.encode()).hexdigest()[:16]
 
     # 1. Supabase api_keys table
-    if _db is not None:
-        row = _db.validate_api_key(token)
-        if row:
-            max_rpm = row.get("max_requests_per_minute", 60)
-            if not _rate_limiter.check(key_id, max_rpm):
-                raise HTTPException(status_code=429, detail=f"Rate limit exceeded ({max_rpm} req/min).")
-            return token
+    row = _api_key_row_from_db(token)
+    if row:
+        max_rpm = _max_rpm_from_value(row.get("max_requests_per_minute"))
+        if not _rate_limiter.check(key_id, max_rpm):
+            raise HTTPException(status_code=429, detail=f"Rate limit exceeded ({max_rpm} req/min).")
+        return token
 
     # 2. Env var fallback
     expected = os.getenv("HOLO_API_KEY", "")
@@ -380,7 +660,7 @@ def _verify_bearer(request: Request) -> str:
             hashlib.sha256(token.encode()).digest(),
             hashlib.sha256(expected.encode()).digest(),
         ):
-            max_rpm = int(os.getenv("HOLO_MAX_RPM", "60"))
+            max_rpm = _max_rpm_from_env()
             if not _rate_limiter.check(key_id, max_rpm):
                 raise HTTPException(status_code=429, detail=f"Rate limit exceeded ({max_rpm} req/min).")
             return token
@@ -801,6 +1081,15 @@ def serve_chat_ui():
     return {"status": "ok", "message": "Holo API running. Chat UI not found."}
 
 
+@app.get("/runtime")
+def serve_runtime_dashboard():
+    """Serve the safe Holo runtime dashboard, or JSON if the page is absent."""
+    index = _frontend_dir / "runtime.html"
+    if index.exists():
+        return FileResponse(str(index))
+    return _runtime_status_payload()
+
+
 @app.post("/v1/chat")
 async def chat(
     request: Request,
@@ -828,6 +1117,7 @@ async def chat(
     session_id = body.get("session_id")
     images     = body.get("images") or None  # list of {name, data, mimeType} or None
     incognito  = bool(body.get("incognito", False))  # blind mode — no memory injected
+    handoff_transition = None if incognito else _safe_handoff_transition(body.get("handoff_transition"))
 
     # Attach capsule identity if a capsule token is provided
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
@@ -837,7 +1127,8 @@ async def chat(
     t0 = time.time()
     try:
         result = _chat_engine.send_message(session_id, message, capsule_id=capsule_id,
-                                           images=images, incognito=incognito)
+                                           images=images, incognito=incognito,
+                                           handoff_transition=handoff_transition)
     except Exception as e:
         logger.error(f"Chat engine error: {type(e).__name__}: {e}", exc_info=True)
         _track_usage(_key, "/v1/chat", 500)
@@ -852,7 +1143,7 @@ async def chat(
         latency_ms    = elapsed,
     )
 
-    return JSONResponse(content={
+    response_content = {
         "session_id":          result["session_id"],
         "response":            result["response"],
         "turn_number":         result["turn_number"],
@@ -863,8 +1154,21 @@ async def chat(
         "thought":             result.get("thought"),
         "artifacts":           result.get("artifacts", []),
         "handoff":             result.get("handoff"),
-        "searched":            result.get("search_query") is not None,
-    })
+        "searched":            bool(result.get("searched", result.get("search_query") is not None)),
+    }
+    if result.get("search_query") is not None:
+        response_content["search_query"] = result.get("search_query")
+    if result.get("web_status") is not None:
+        response_content["web_status"] = result.get("web_status")
+    if result.get("context_budget") is not None:
+        response_content["context_budget"] = result.get("context_budget")
+    if result.get("usage") is not None:
+        response_content["usage"] = result.get("usage")
+    if result.get("runtime") is not None:
+        response_content["runtime"] = result.get("runtime")
+    if result.get("holo4dna") is not None:
+        response_content["holo4dna"] = result.get("holo4dna")
+    return JSONResponse(content=response_content)
 
 
 @app.post("/v1/chat/stream")
@@ -897,6 +1201,7 @@ async def chat_stream(
     session_id = body.get("session_id")
     images     = body.get("images") or None
     incognito  = bool(body.get("incognito", False))
+    handoff_transition = None if incognito else _safe_handoff_transition(body.get("handoff_transition"))
     capsule    = get_capsule_from_request(request.headers.get("Authorization"))
     capsule_id = (capsule["sub"] if capsule else None) if not incognito else None
 
@@ -906,7 +1211,8 @@ async def chat_stream(
     def _generate():
         try:
             for chunk in _chat_engine.stream_message(
-                session_id, message, capsule_id=capsule_id, images=images, incognito=incognito
+                session_id, message, capsule_id=capsule_id, images=images,
+                incognito=incognito, handoff_transition=handoff_transition
             ):
                 if isinstance(chunk, dict) and chunk.get("done"):
                     yield _sse({"type": "done", **{k: v for k, v in chunk.items() if k != "done"}})
@@ -1037,6 +1343,655 @@ async def get_artifact(artifact_id: str, request: Request):
 _summary_cache: dict = {}
 _surface_cache: dict = {}
 
+_SENSITIVE_HOLO_KEY_PARTS = (
+    "password",
+    "hash",
+    "secret",
+    "token",
+    "api_key",
+    "apikey",
+    "jwt",
+    "cookie",
+    "invite",
+    "provider_key",
+)
+_HOLO_BUILD_SPECS_DIR = pathlib.Path(__file__).parent / "holo_builder" / "specs"
+_HOLO_BUILD_RESULT_DIRS = (
+    pathlib.Path(__file__).parent / "builder_results",
+    pathlib.Path(__file__).parent / "holo_builder" / "outputs" / "builder",
+)
+_holo_build_jobs_lock = threading.RLock()
+_holo_build_jobs: dict[str, dict[str, Any]] = {}
+
+
+def _mask_email(email: str) -> str:
+    email = (email or "").strip()
+    if "@" not in email:
+        return ""
+    local, domain = email.split("@", 1)
+    if not local:
+        return f"*@{domain}"
+    if len(local) <= 2:
+        return f"{local[0]}***@{domain}"
+    return f"{local[0]}***{local[-1]}@{domain}"
+
+
+def _prefix_suffix(value: str, prefix: int = 8, suffix: int = 4) -> str:
+    value = str(value or "")
+    if len(value) <= prefix + suffix + 3:
+        return value
+    return f"{value[:prefix]}...{value[-suffix:]}"
+
+
+def _is_sensitive_holo_key(key: str) -> bool:
+    normalized = (key or "").strip().lower()
+    if normalized.startswith("_"):
+        return True
+    return any(part in normalized for part in _SENSITIVE_HOLO_KEY_PARTS)
+
+
+def _safe_holo_text(value: Any, limit: int = 420) -> str:
+    text = str(value or "").replace("\x00", "").strip()
+    if len(text) <= limit:
+        return text
+    return text[:limit].rstrip() + "..."
+
+
+def _safe_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except Exception:
+        return default
+
+
+def _load_json_file(path: pathlib.Path) -> dict[str, Any] | None:
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return None
+
+
+def _holo_build_live_runs_enabled() -> bool:
+    return os.getenv("HOLOBUILD_LIVE_RUNS", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _utc_iso() -> str:
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _sanitize_holobuild_log_line(value: Any, limit: int = 520) -> str:
+    import re
+    text = _safe_holo_text(value, limit)
+    text = re.sub(r"sk-[A-Za-z0-9_\-]{12,}", "[redacted-key]", text)
+    text = re.sub(r"AIza[0-9A-Za-z_\-]{16,}", "[redacted-key]", text)
+    text = re.sub(
+        r"eyJ[A-Za-z0-9_\-]{12,}\.[A-Za-z0-9_\-]{12,}\.[A-Za-z0-9_\-]{12,}",
+        "[redacted-token]",
+        text,
+    )
+    return text
+
+
+def _select_holobuild_spec(spec_file: str | None = None) -> pathlib.Path:
+    if not _HOLO_BUILD_SPECS_DIR.exists():
+        raise ValueError("HoloBuild specs directory not found.")
+    if spec_file:
+        safe_name = pathlib.Path(str(spec_file)).name
+        path = _HOLO_BUILD_SPECS_DIR / safe_name
+        if not path.exists() or path.suffix != ".json":
+            raise ValueError("HoloBuild spec not found.")
+        return path
+    specs = sorted(_HOLO_BUILD_SPECS_DIR.glob("*.json"))
+    if not specs:
+        raise ValueError("No HoloBuild specs found.")
+    return specs[0]
+
+
+def _safe_holobuild_specs(limit: int = 20) -> list[dict[str, Any]]:
+    if not _HOLO_BUILD_SPECS_DIR.exists():
+        return []
+    specs: list[dict[str, Any]] = []
+    for path in sorted(_HOLO_BUILD_SPECS_DIR.glob("*.json"))[:limit]:
+        raw = _load_json_file(path) or {}
+        placement = raw.get("artifact_placement_brief") or {}
+        specs.append({
+            "file": path.name,
+            "scenario_id": raw.get("scenario_id") or path.stem,
+            "domain": raw.get("domain") or "",
+            "target_verdict": raw.get("target_verdict") or "",
+            "packet_format": raw.get("packet_format") or "payment_email",
+            "minimum_internal_documents": placement.get("minimum_internal_documents"),
+        })
+    return specs
+
+
+def _iter_holobuild_result_files(limit: int = 12) -> list[pathlib.Path]:
+    found: list[pathlib.Path] = []
+    for directory in _HOLO_BUILD_RESULT_DIRS:
+        if directory.exists():
+            found.extend(path for path in directory.glob("*.json") if path.is_file())
+    found.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    return found[:limit]
+
+
+def _safe_holobuild_event(event: dict[str, Any]) -> dict[str, Any]:
+    allowed = (
+        "turn_number",
+        "event",
+        "failed_provider",
+        "fallback_provider",
+        "provider",
+        "repair_provider",
+        "outcome",
+        "target_doc_title",
+        "attempt",
+        "attempts_used",
+        "resolved",
+    )
+    return {key: _safe_holo_text(event.get(key), 160) for key in allowed if event.get(key) is not None}
+
+
+def _safe_holobuild_turn(turn: dict[str, Any]) -> dict[str, Any]:
+    categories = turn.get("categories") if isinstance(turn.get("categories"), dict) else {}
+    high_categories = [
+        key for key, value in categories.items()
+        if isinstance(value, str) and value.upper() in {"HIGH", "CRITICAL"}
+    ]
+    return {
+        "turn_number": _safe_int(turn.get("turn_number")),
+        "turn_type": _safe_holo_text(turn.get("turn_type"), 80),
+        "provider": _safe_holo_text(turn.get("provider"), 80),
+        "model_id": _safe_holo_text(turn.get("model_id"), 120),
+        "elapsed_ms": _safe_int(turn.get("elapsed_ms")),
+        "input_tokens": _safe_int(turn.get("input_tokens")),
+        "output_tokens": _safe_int(turn.get("output_tokens")),
+        "assessment": _safe_holo_text(turn.get("assessment"), 80),
+        "verdict": _safe_holo_text(turn.get("verdict"), 80),
+        "critical_findings": _safe_holo_text(turn.get("critical_findings"), 420),
+        "high_categories": high_categories,
+        "error": "present" if turn.get("error") else "",
+    }
+
+
+def _safe_holobuild_governor_brief(brief: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "after_turn": _safe_int(brief.get("after_turn")),
+        "governor_provider": _safe_holo_text(brief.get("governor_provider"), 80),
+        "overall_trajectory": _safe_holo_text(brief.get("overall_trajectory"), 80),
+        "highest_risk_category": _safe_holo_text(brief.get("highest_risk_category"), 120),
+        "brief_for_builder": _safe_holo_text(brief.get("brief_for_builder"), 520),
+        "elapsed_ms": _safe_int(brief.get("elapsed_ms")),
+        "error": "present" if brief.get("error") else "",
+    }
+
+
+def _safe_holobuild_run(raw: dict[str, Any], path: pathlib.Path) -> dict[str, Any]:
+    event_keys = (
+        "fallback_events",
+        "verdict_drift_events",
+        "artifact_collapse_events",
+        "builder_json_fallback_events",
+        "assertion_violation_events",
+    )
+    events = {
+        key: [_safe_holobuild_event(item) for item in raw.get(key, [])[:8] if isinstance(item, dict)]
+        for key in event_keys
+    }
+    return {
+        "file": path.name,
+        "builder_id": _safe_holo_text(raw.get("builder_id"), 160),
+        "scenario_id": _safe_holo_text(raw.get("scenario_id"), 160),
+        "packet_format": _safe_holo_text(raw.get("packet_format"), 80),
+        "builder_status": _safe_holo_text(raw.get("builder_status"), 120),
+        "converged": bool(raw.get("converged")),
+        "retire_signal": bool(raw.get("retire_signal")),
+        "exit_reason": _safe_holo_text(raw.get("exit_reason"), 160),
+        "turns_completed": _safe_int(raw.get("turns_completed")),
+        "qa_turn_count": _safe_int(raw.get("qa_turn_count")),
+        "qa_deltas": raw.get("qa_deltas", [])[:10] if isinstance(raw.get("qa_deltas"), list) else [],
+        "provider_fallback_used": bool(raw.get("provider_fallback_used")),
+        "coverage": raw.get("coverage", {}) if isinstance(raw.get("coverage"), dict) else {},
+        "governor_briefs": [
+            _safe_holobuild_governor_brief(item)
+            for item in raw.get("governor_briefs", [])[:8]
+            if isinstance(item, dict)
+        ],
+        "turn_history": [
+            _safe_holobuild_turn(item)
+            for item in raw.get("turn_history", [])[:12]
+            if isinstance(item, dict)
+        ],
+        "events": events,
+        "total_tokens": {
+            "input": _safe_int((raw.get("total_tokens") or {}).get("input")),
+            "output": _safe_int((raw.get("total_tokens") or {}).get("output")),
+        },
+        "timestamp": _safe_holo_text(raw.get("timestamp"), 80),
+    }
+
+
+def _record_holobuild_job_event(job_id: str, kind: str, message: str = "",
+                                fields: dict[str, Any] | None = None) -> None:
+    event = {
+        "at": _utc_iso(),
+        "kind": _safe_holo_text(kind, 80),
+        "message": _sanitize_holobuild_log_line(message),
+    }
+    for key, value in (fields or {}).items():
+        event[key] = _safe_holo_text(value, 180)
+    with _holo_build_jobs_lock:
+        job = _holo_build_jobs.get(job_id)
+        if not job:
+            return
+        job.setdefault("events", []).append(event)
+        job["events"] = job["events"][-240:]
+        job["updated_at"] = event["at"]
+
+
+class _HoloBuildJobWriter:
+    def __init__(self, job_id: str):
+        self.job_id = job_id
+        self._buffer = ""
+
+    def write(self, text: str) -> int:
+        self._buffer += str(text)
+        while "\n" in self._buffer:
+            line, self._buffer = self._buffer.split("\n", 1)
+            line = line.strip()
+            if line:
+                _record_holobuild_job_event(self.job_id, "log", line)
+        return len(text)
+
+    def flush(self) -> None:
+        line = self._buffer.strip()
+        if line:
+            _record_holobuild_job_event(self.job_id, "log", line)
+        self._buffer = ""
+
+
+def _has_active_holobuild_job() -> bool:
+    with _holo_build_jobs_lock:
+        return any(job.get("status") in {"queued", "running"} for job in _holo_build_jobs.values())
+
+
+def _create_holobuild_job(spec_file: str | None, seed: int | None,
+                          force_max_turns: bool, skip_providers: list[str]) -> dict[str, Any]:
+    job_id = f"hb_{uuid.uuid4().hex[:12]}"
+    now = _utc_iso()
+    job = {
+        "job_id": job_id,
+        "status": "queued",
+        "spec_file": _safe_holo_text(spec_file or "", 180),
+        "seed": seed,
+        "force_max_turns": bool(force_max_turns),
+        "skip_providers": [_safe_holo_text(item, 80) for item in skip_providers],
+        "created_at": now,
+        "updated_at": now,
+        "events": [],
+        "result": None,
+        "result_file": "",
+        "error": "",
+    }
+    with _holo_build_jobs_lock:
+        _holo_build_jobs[job_id] = job
+    _record_holobuild_job_event(job_id, "queued", "HoloBuild job queued.")
+    return _snapshot_holobuild_job(job_id) or job
+
+
+def _snapshot_holobuild_job(job_id: str) -> dict[str, Any] | None:
+    with _holo_build_jobs_lock:
+        job = _holo_build_jobs.get(job_id)
+        if not job:
+            return None
+        return {
+            "job_id": job.get("job_id"),
+            "status": job.get("status"),
+            "spec_file": job.get("spec_file", ""),
+            "seed": job.get("seed"),
+            "force_max_turns": bool(job.get("force_max_turns")),
+            "skip_providers": list(job.get("skip_providers") or []),
+            "created_at": job.get("created_at"),
+            "updated_at": job.get("updated_at"),
+            "events": list(job.get("events") or []),
+            "result": job.get("result"),
+            "result_file": job.get("result_file", ""),
+            "error": job.get("error", ""),
+        }
+
+
+def _recent_holobuild_jobs(limit: int = 4) -> list[dict[str, Any]]:
+    with _holo_build_jobs_lock:
+        job_ids = sorted(
+            _holo_build_jobs,
+            key=lambda jid: _holo_build_jobs[jid].get("created_at", ""),
+            reverse=True,
+        )[:limit]
+    return [job for jid in job_ids if (job := _snapshot_holobuild_job(jid))]
+
+
+def _run_holobuild_job(job_id: str, spec_file: str | None, seed: int | None,
+                       force_max_turns: bool, skip_providers: list[str],
+                       runner: Any | None = None) -> None:
+    with _holo_build_jobs_lock:
+        if job_id in _holo_build_jobs:
+            _holo_build_jobs[job_id]["status"] = "running"
+            _holo_build_jobs[job_id]["updated_at"] = _utc_iso()
+    try:
+        spec_path = _select_holobuild_spec(spec_file)
+        spec = _load_json_file(spec_path)
+        if not isinstance(spec, dict):
+            raise ValueError("HoloBuild spec must be valid JSON.")
+        with _holo_build_jobs_lock:
+            if job_id in _holo_build_jobs:
+                _holo_build_jobs[job_id]["spec_file"] = spec_path.name
+        _record_holobuild_job_event(job_id, "start", "Starting HoloBuild live run.", {
+            "spec_file": spec_path.name,
+            "seed": "" if seed is None else seed,
+        })
+        if runner is None:
+            from holo_builder.loop import run_builder as runner
+        writer = _HoloBuildJobWriter(job_id)
+        with redirect_stdout(writer):
+            result = runner(
+                spec,
+                seed=seed,
+                force_max_turns=force_max_turns,
+                skip_providers=skip_providers,
+            )
+        writer.flush()
+        if not isinstance(result, dict):
+            raise RuntimeError("HoloBuild runner returned an invalid result.")
+        out_dir = _HOLO_BUILD_RESULT_DIRS[0]
+        out_dir.mkdir(parents=True, exist_ok=True)
+        builder_id = result.get("builder_id") or f"builder_{uuid.uuid4().hex[:12]}"
+        result_path = out_dir / f"{pathlib.Path(str(builder_id)).name}.json"
+        result_path.write_text(json.dumps(result, indent=2))
+        safe_result = _safe_holobuild_run(result, result_path)
+        with _holo_build_jobs_lock:
+            if job_id in _holo_build_jobs:
+                _holo_build_jobs[job_id]["status"] = "completed"
+                _holo_build_jobs[job_id]["result"] = safe_result
+                _holo_build_jobs[job_id]["result_file"] = result_path.name
+                _holo_build_jobs[job_id]["updated_at"] = _utc_iso()
+        _record_holobuild_job_event(job_id, "complete", "HoloBuild run completed.", {
+            "builder_status": safe_result.get("builder_status", ""),
+            "turns_completed": safe_result.get("turns_completed", 0),
+        })
+    except Exception as exc:
+        message = _sanitize_holobuild_log_line(f"{type(exc).__name__}: {exc}", 320)
+        with _holo_build_jobs_lock:
+            if job_id in _holo_build_jobs:
+                _holo_build_jobs[job_id]["status"] = "failed"
+                _holo_build_jobs[job_id]["error"] = message
+                _holo_build_jobs[job_id]["updated_at"] = _utc_iso()
+        _record_holobuild_job_event(job_id, "failed", message)
+
+
+def _build_holobuild_dashboard_payload(limit: int = 6) -> dict[str, Any]:
+    runs: list[dict[str, Any]] = []
+    for path in _iter_holobuild_result_files(limit=limit):
+        raw = _load_json_file(path)
+        if isinstance(raw, dict):
+            runs.append(_safe_holobuild_run(raw, path))
+    return {
+        "mode": "live_watch" if _holo_build_live_runs_enabled() else "read_only",
+        "live_runs_enabled": _holo_build_live_runs_enabled(),
+        "specs": _safe_holobuild_specs(),
+        "runs": runs,
+        "run_count": len(runs),
+        "jobs": _recent_holobuild_jobs(),
+        "result_locations": ["builder_results", "holo_builder/outputs/builder"],
+    }
+
+
+def _redact_context_entries(context: dict[str, Any]) -> list[dict[str, Any]]:
+    entries = []
+    for key in sorted(context.keys()):
+        sensitive = _is_sensitive_holo_key(key)
+        entries.append({
+            "key": key,
+            "value": "[redacted]" if sensitive else str(context.get(key, "")),
+            "redacted": sensitive,
+        })
+    return entries
+
+
+def _safe_count_capsule_rows(brain, table_name: str, capsule_id: str) -> Optional[int]:
+    client = getattr(brain, "_client", None)
+    if client is None:
+        return None
+    try:
+        resp = (
+            client.table(table_name)
+            .select("capsule_id", count="exact")
+            .eq("capsule_id", capsule_id)
+            .execute()
+        )
+        return resp.count
+    except Exception:
+        return None
+
+
+def _safe_count_session_messages(brain, session_ids: list[str]) -> Optional[int]:
+    client = getattr(brain, "_client", None)
+    if client is None or not session_ids:
+        return 0
+    try:
+        resp = (
+            client.table("holo_chat_messages")
+            .select("session_id", count="exact")
+            .in_("session_id", session_ids[:200])
+            .execute()
+        )
+        return resp.count
+    except Exception:
+        return None
+
+
+def _safe_recent_messages(brain, session_ids: list[str], limit: int) -> list[dict[str, Any]]:
+    client = getattr(brain, "_client", None)
+    if client is None or not session_ids:
+        return []
+    try:
+        return (
+            client.table("holo_chat_messages")
+            .select("session_id, role, content, created_at, turn_number")
+            .in_("session_id", session_ids[:50])
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        ).data or []
+    except Exception:
+        return []
+
+
+def _safe_recent_consolidations(brain, capsule_id: str, limit: int) -> list[dict[str, Any]]:
+    client = getattr(brain, "_client", None)
+    if client is None:
+        last = brain.load_last_consolidation(capsule_id)
+        return [last] if last else []
+    try:
+        return (
+            client.table("holo_session_consolidations")
+            .select("session_id, created_at, what_changed, what_surfaced, open_threads, captain_note")
+            .eq("capsule_id", capsule_id)
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        ).data or []
+    except Exception:
+        last = brain.load_last_consolidation(capsule_id)
+        return [last] if last else []
+
+
+def _build_holo_brain_payload(
+    capsule: dict[str, Any],
+    brain,
+    session_limit: int = 25,
+    message_limit: int = 80,
+    consolidation_limit: int = 25,
+    artifact_limit: int = 50,
+) -> dict[str, Any]:
+    capsule_id = capsule["sub"]
+    capsule_row = brain.get_capsule(capsule_id) or {}
+    context = brain.get_capsule_context(capsule_id) or {}
+    context_entries = _redact_context_entries(context)
+    life_context = brain.load_life_context(capsule_id) or []
+    sessions = brain.list_sessions(capsule_id, limit=session_limit) or []
+    session_ids = [s.get("session_id") for s in sessions if s.get("session_id")]
+    recent_messages = _safe_recent_messages(brain, session_ids, message_limit)
+    consolidations = _safe_recent_consolidations(brain, capsule_id, consolidation_limit)
+    artifacts = brain.list_artifacts(capsule_id, limit=artifact_limit) or []
+
+    session_items = []
+    for session in sessions:
+        sid = session.get("session_id", "")
+        session_items.append({
+            "id": sid,
+            "id_short": _prefix_suffix(sid),
+            "created_at": session.get("created_at"),
+            "last_active": session.get("last_active"),
+            "turn_count": session.get("turn_count") or 0,
+            "title": session.get("title") or session.get("preview") or "",
+            "preview": session.get("preview") or "",
+        })
+
+    grouped_messages: dict[str, list[dict[str, Any]]] = {}
+    for row in recent_messages:
+        sid = row.get("session_id", "")
+        grouped_messages.setdefault(sid, []).append({
+            "session_id": sid,
+            "session_id_short": _prefix_suffix(sid),
+            "role": row.get("role"),
+            "content": row.get("content") or "",
+            "created_at": row.get("created_at"),
+            "turn_number": row.get("turn_number"),
+        })
+
+    email = capsule_row.get("email") or capsule.get("email", "")
+    message_count = _safe_count_session_messages(brain, session_ids)
+    return {
+        "capsule": {
+            "id": capsule_id,
+            "id_short": _prefix_suffix(capsule_id),
+            "email_masked": _mask_email(email),
+            "token_email_masked": _mask_email(capsule.get("email", "")),
+            "name": capsule_row.get("name") or "",
+            "mode": capsule_row.get("mode") or capsule.get("mode", ""),
+            "created_at": capsule_row.get("created_at"),
+            "last_active": capsule_row.get("last_active"),
+            "identity_type": "capsule_token",
+        },
+        "capsule_context": {
+            "count": _safe_count_capsule_rows(brain, "holo_capsule_context", capsule_id) or len(context_entries),
+            "redacted_count": sum(1 for item in context_entries if item["redacted"]),
+            "entries": context_entries,
+        },
+        "life_context": {
+            "count": _safe_count_capsule_rows(brain, "holo_life_context", capsule_id) or len(life_context),
+            "entries": life_context,
+        },
+        "sessions": {
+            "count": _safe_count_capsule_rows(brain, "holo_chat_sessions", capsule_id) or len(session_items),
+            "shown": len(session_items),
+            "items": session_items,
+        },
+        "recent_messages": {
+            "count": message_count if message_count is not None else len(recent_messages),
+            "shown": len(recent_messages),
+            "by_session": grouped_messages,
+        },
+        "consolidations": {
+            "count": _safe_count_capsule_rows(brain, "holo_session_consolidations", capsule_id) or len(consolidations),
+            "shown": len(consolidations),
+            "items": consolidations,
+        },
+        "artifacts": {
+            "count": _safe_count_capsule_rows(brain, "holo_artifacts", capsule_id) or len(artifacts),
+            "shown": len(artifacts),
+            "items": artifacts,
+        },
+        "limits": {
+            "sessions": session_limit,
+            "messages": message_limit,
+            "consolidations": consolidation_limit,
+            "artifacts": artifact_limit,
+        },
+    }
+
+
+@app.get("/v1/holo-brain")
+async def holo_brain_dashboard(request: Request):
+    """Return authenticated capsule memory/dashboard data for local browser inspection."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    return JSONResponse(content=_build_holo_brain_payload(capsule, _capsule_brain))
+
+
+@app.get("/v1/holo-build")
+async def holo_build_dashboard(request: Request):
+    """Return read-only HoloBuild specs and sanitized saved run traces."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    return JSONResponse(content=_build_holobuild_dashboard_payload())
+
+
+@app.post("/v1/holo-build/runs")
+async def start_holo_build_run(request: Request):
+    """Start a watched HoloBuild run when explicitly enabled."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    if not _holo_build_live_runs_enabled():
+        raise HTTPException(status_code=403, detail="HoloBuild live runs are disabled.")
+    if _has_active_holobuild_job():
+        raise HTTPException(status_code=409, detail="A HoloBuild run is already active.")
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+    spec_file = body.get("spec_file") or None
+    seed_raw = body.get("seed")
+    seed = None
+    if seed_raw not in (None, ""):
+        try:
+            seed = int(seed_raw)
+        except Exception:
+            raise HTTPException(status_code=400, detail="seed must be an integer.")
+    force_max_turns = bool(body.get("force_max_turns", False))
+    skip_raw = body.get("skip_providers") or []
+    if not isinstance(skip_raw, list):
+        raise HTTPException(status_code=400, detail="skip_providers must be a list.")
+    skip_providers = [str(item) for item in skip_raw if str(item).strip()]
+    try:
+        _select_holobuild_spec(spec_file)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    job = _create_holobuild_job(spec_file, seed, force_max_turns, skip_providers)
+    thread = threading.Thread(
+        target=_run_holobuild_job,
+        args=(job["job_id"], spec_file, seed, force_max_turns, skip_providers),
+        daemon=True,
+    )
+    thread.start()
+    return JSONResponse(content=_snapshot_holobuild_job(job["job_id"]) or job)
+
+
+@app.get("/v1/holo-build/runs/{job_id}")
+async def get_holo_build_run(job_id: str, request: Request):
+    """Return a sanitized watched HoloBuild job snapshot."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    job = _snapshot_holobuild_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="HoloBuild job not found.")
+    return JSONResponse(content=job)
+
+
 @app.get("/v1/capsule/surface")
 async def capsule_surface(
     request: Request,
@@ -1062,7 +2017,10 @@ async def capsule_surface(
 
     context = _capsule_brain.get_capsule_context(capsule_id) or {}
     sessions = _capsule_brain.list_sessions(capsule_id)
-    result = _chat_engine._captain.generate_surface(context, sessions)
+    governor = getattr(_chat_engine, "_governor", None)
+    if governor is None or not hasattr(governor, "generate_surface"):
+        return JSONResponse(content={"topics": [], "todos": []})
+    result = governor.generate_surface(context, sessions)
     if not result:
         return JSONResponse(content={"topics": [], "todos": []})
 
@@ -1087,7 +2045,8 @@ async def thread_summary(
         history = _capsule_brain.load_chat_history(session_id) or []
     if not history:
         raise HTTPException(status_code=404, detail="Session not found.")
-    summary = _chat_engine._captain.summarize_thread(history)
+    governor = getattr(_chat_engine, "_governor", None)
+    summary = governor.summarize_thread(history) if governor and hasattr(governor, "summarize_thread") else ""
     if summary:
         _summary_cache[session_id] = summary
     return JSONResponse(content={"summary": summary})

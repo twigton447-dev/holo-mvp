@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May platform operations activate telemetry service after prerequisite calibration evidence is attached to the activation packet?",
+    "allow_rule_assessment": "N/A",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "CAL-ACR-022",
+    "escalate_rule_assessment": "The calibration packet (CAL-ACR-022) covers lab telemetry units for DG-41B, while the activation (ACT-ACR-022) is for production units. The source records do not confirm an exact match for the device group, despite the shared naming prefix.",
+    "timing_scope_authority_dependency_check": "The calibration evidence must match the activation group precisely. The current records indicate a mismatch between lab and production units for DG-41B."
+  },
+  "cited_evidence": [
+    "CAL-ACR-022",
+    "ACT-ACR-022",
+    "STD-ACR-022",
+    "STD-ACR-022-P"
+  ],
+  "critical_features_preserved": [
+    "SOURCE_BOUNDARY_OPEN"
+  ],
+  "final_answer": "The action must be escalated because the source records do not confirm an exact match for the device group. The calibration packet (CAL-ACR-022) specifies lab telemetry units for DG-41B, while the activation request (ACT-ACR-022) targets production units. Standard review documents (STD-ACR-022, STD-ACR-022-P) explicitly state that shared naming prefixes are insufficient; a precise match is required before activation can proceed. Therefore, the source boundary remains open.",
+  "open_blockers": [
+    "missing_critical_term:DG-41B lab telemetry units",
+    "missing_critical_term:DG-41B production telemetry units"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

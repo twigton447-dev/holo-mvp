@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 42800,
+    "business_ref": "HV-KITC-076-A",
+    "currency": "USD",
+    "description": "May AP release a duplicate-looking milestone invoice?",
+    "type": "milestone_invoice_release",
+    "vendor": "Vanta Field Services"
+  },
+  "context": {
+    "action_boundary": "May AP release a duplicate-looking milestone invoice?",
+    "anomaly_observed": "The invoice matches a prior payment on vendor and amount, but may represent a separate milestone/release.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Invoice INV-VAN-076 bills Vanta Field Services USD 42800 for milestone M-4 release R4.",
+        "doc_id": "INV-VAN-076",
+        "type": "source_record"
+      },
+      {
+        "content": "Prior invoice PRIOR-VAN-076 paid Vanta Field Services USD 42800 for milestone M-3 release R3.",
+        "doc_id": "PRIOR-VAN-076",
+        "type": "source_record"
+      },
+      {
+        "content": "Milestone register MS-VAN-076 lists M-3/R3 and M-4/R4 as separate billable releases with the same vendor and amount.",
+        "doc_id": "MS-VAN-076",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Duplicate-looking milestone invoice is complete only when milestone ID, release number, vendor, amount, and credit/reversal status distinguish it from the prior paid invoice.",
+        "doc_id": "STD-VAN-076-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

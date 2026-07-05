@@ -1,0 +1,85 @@
+{
+  "policy_id": "HOLOVERIFY_EMPTY_WORKER_OUTPUT_RETRY_POLICY_V1_2026_06_29",
+  "date": "2026-06-29",
+  "status": "REGISTERED_NO_PROVIDER",
+  "scope": "prospective_holoverify_worker_exact_empty_output_only",
+  "retroactive_application_allowed": false,
+  "allowed_retry_class": {
+    "class": "EMPTY_WORKER_TEXT_ZERO_OUTPUT_TOKENS",
+    "call_kind": "worker",
+    "provider_call_returned_response_object": true,
+    "text_exactly_empty": true,
+    "output_tokens_exactly": 0,
+    "finish_reason_length_allowed": false,
+    "parsed_worker_content_exists": false
+  },
+  "non_retryable_classes": [
+    "WRONG_VERDICT",
+    "NON_EMPTY_PARSE_FAILURE",
+    "MARKDOWN_WRAPPED_OUTPUT",
+    "MALFORMED_JSON",
+    "MALFORMED_COMPACT_KEY_VALUE_OUTPUT",
+    "EMPTY_GOV_TEXT",
+    "MALFORMED_GOV_BATON",
+    "FINISH_REASON_LENGTH_EMPTY_OR_INCOMPLETE_OUTPUT",
+    "SCHEMA_OR_ADMISSIBILITY_FAILURE",
+    "DETERMINISTIC_GATE_FAILURE",
+    "INVENTED_SOURCE_IDS"
+  ],
+  "retry_invariance": {
+    "same_packet": true,
+    "same_prompt": true,
+    "same_model": true,
+    "same_provider": true,
+    "same_temperature_settings": true,
+    "same_worker_role": true,
+    "same_turn_id_lineage": true,
+    "same_max_output_tokens": true,
+    "feedback_about_prior_failed_attempt_forbidden": true,
+    "repair_instruction_forbidden": true,
+    "changed_prompt_forbidden": true,
+    "changed_max_tokens_forbidden": true,
+    "changed_model_forbidden": true,
+    "fallback_provider_forbidden": true
+  },
+  "retry_budget": {
+    "max_retries_per_exact_empty_worker_call": 2,
+    "max_attempts_including_original": 3,
+    "backoff_seconds": [1, 2],
+    "all_attempts_logged": true,
+    "trace_fields": [
+      "empty_worker_output_retry_policy_version",
+      "empty_worker_output_attempt_count",
+      "empty_worker_output_recovered",
+      "empty_worker_output_retry_failures"
+    ]
+  },
+  "if_retry_succeeds": {
+    "mark_empty_worker_output_recovered": true,
+    "preserve_failed_empty_attempt_metadata": true,
+    "run_may_continue": true,
+    "final_evidence_reports_recovered_empty_worker_count": true
+  },
+  "if_retries_fail": {
+    "run_fails_closed": true,
+    "preserve_invalid_run": true,
+    "solo_baseline_allowed": false
+  },
+  "implementation_boundary": {
+    "retry_layer": "after_provider_transport_before_worker_content_parse",
+    "worker_calls_only": true,
+    "gov_calls_excluded": true,
+    "content_failures_with_non_empty_text_remain_non_retryable": true,
+    "deterministic_gate_failures_remain_non_retryable": true
+  },
+  "required_local_validation": {
+    "py_compile": "REQUIRED",
+    "exact_empty_worker_retry_fixtures": "REQUIRED",
+    "malformed_worker_non_retry_fixtures": "REQUIRED",
+    "worker_retry_exhaustion_fail_closed_fixture": "REQUIRED",
+    "ap_packet_hashes_match_freeze": "REQUIRED",
+    "ap_prompt_hashes_match_freeze": "REQUIRED",
+    "provider_calls": 0,
+    "judge_calls": 0
+  }
+}

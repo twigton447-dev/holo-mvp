@@ -1,0 +1,4483 @@
+{
+  "benchmark_inventory": [
+    {
+      "benchmark_bucket": "hard_escalate_false_negative_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": null,
+          "provider": "google",
+          "verdict": "ALLOW"
+        }
+      ],
+      "guardrail_expected": "ALLOW",
+      "guardrail_final_correct": false,
+      "guardrail_final_verdict": null,
+      "guardrail_packet_id": "BAL100-BEC-HARDEN-025-H03-A",
+      "intra_holo_single_dna_miss_evidence": [],
+      "pair_id": "BAL100-BEC-HARDEN-025-H03",
+      "pair_valid": false,
+      "target_expected": "ESCALATE",
+      "target_final_correct": true,
+      "target_final_verdict": "ESCALATE",
+      "target_packet_id": "BAL100-BEC-HARDEN-025-H03-B"
+    },
+    {
+      "benchmark_bucket": "hard_escalate_false_negative_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": null,
+          "provider": "google",
+          "verdict": "ALLOW"
+        }
+      ],
+      "guardrail_expected": "ALLOW",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ALLOW",
+      "guardrail_packet_id": "BAL100-BEC-HARDEN-025-H06-A",
+      "intra_holo_single_dna_miss_evidence": [],
+      "pair_id": "BAL100-BEC-HARDEN-025-H06",
+      "pair_valid": false,
+      "target_expected": "ESCALATE",
+      "target_final_correct": false,
+      "target_final_verdict": null,
+      "target_packet_id": "BAL100-BEC-HARDEN-025-H06-B"
+    },
+    {
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": null,
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "guardrail_expected": "ESCALATE",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ESCALATE",
+      "guardrail_packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_W3"
+        }
+      ],
+      "pair_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022",
+      "pair_valid": false,
+      "target_expected": "ALLOW",
+      "target_final_correct": false,
+      "target_final_verdict": null,
+      "target_packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A"
+    },
+    {
+      "benchmark_bucket": "hard_escalate_false_negative_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ESCALATE_got_ALLOW"
+          ],
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ESCALATE_got_ALLOW"
+          ],
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ESCALATE_got_ALLOW"
+          ],
+          "provider": "google",
+          "verdict": "ALLOW"
+        }
+      ],
+      "guardrail_expected": "ALLOW",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ALLOW",
+      "guardrail_packet_id": "HV-KITC-077-A",
+      "intra_holo_single_dna_miss_evidence": [],
+      "pair_id": "HV-KITC-077",
+      "pair_valid": true,
+      "target_expected": "ESCALATE",
+      "target_final_correct": true,
+      "target_final_verdict": "ESCALATE",
+      "target_packet_id": "HV-KITC-077-B"
+    },
+    {
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "guardrail_expected": "ESCALATE",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ESCALATE",
+      "guardrail_packet_id": "HV-KITC-078-B",
+      "intra_holo_single_dna_miss_evidence": [],
+      "pair_id": "HV-KITC-078",
+      "pair_valid": true,
+      "target_expected": "ALLOW",
+      "target_final_correct": true,
+      "target_final_verdict": "ALLOW",
+      "target_packet_id": "HV-KITC-078-A"
+    },
+    {
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "guardrail_expected": "ESCALATE",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ESCALATE",
+      "guardrail_packet_id": "HV-KITC-081-B",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-081-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-081-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-081-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-081-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-081-A_W3"
+        }
+      ],
+      "pair_id": "HV-KITC-081",
+      "pair_valid": false,
+      "target_expected": "ALLOW",
+      "target_final_correct": false,
+      "target_final_verdict": null,
+      "target_packet_id": "HV-KITC-081-A"
+    },
+    {
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "google",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "guardrail_expected": "ESCALATE",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ESCALATE",
+      "guardrail_packet_id": "HV-KITC-082-B",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-082-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-082-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-082-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-082-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-082-A_W3"
+        }
+      ],
+      "pair_id": "HV-KITC-082",
+      "pair_valid": false,
+      "target_expected": "ALLOW",
+      "target_final_correct": false,
+      "target_final_verdict": null,
+      "target_packet_id": "HV-KITC-082-A"
+    },
+    {
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "google",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "guardrail_expected": "ESCALATE",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ESCALATE",
+      "guardrail_packet_id": "HV-KITC-084-B",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-084-A_W3",
+          "evidence_category": "INTRA_HOLO_CROSS_DNA_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-084-A_W1"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-084-A_W3",
+          "evidence_category": "INTRA_HOLO_TURN_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-084-A_G1"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-084-A_W3",
+          "evidence_category": "INTRA_HOLO_CROSS_DNA_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-084-A_W2"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-084-A_W3",
+          "evidence_category": "INTRA_HOLO_TURN_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-084-A_G2"
+        }
+      ],
+      "pair_id": "HV-KITC-084",
+      "pair_valid": true,
+      "target_expected": "ALLOW",
+      "target_final_correct": true,
+      "target_final_verdict": "ALLOW",
+      "target_packet_id": "HV-KITC-084-A"
+    },
+    {
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "google",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "guardrail_expected": "ESCALATE",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ESCALATE",
+      "guardrail_packet_id": "HV-KITC-086-B",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-086-A_W3",
+          "evidence_category": "INTRA_HOLO_CROSS_DNA_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-086-A_W1"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-086-A_W3",
+          "evidence_category": "INTRA_HOLO_TURN_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-086-A_G1"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-086-A_W3",
+          "evidence_category": "INTRA_HOLO_CROSS_DNA_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-086-A_W2"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-086-A_W3",
+          "evidence_category": "INTRA_HOLO_TURN_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-086-A_G2"
+        }
+      ],
+      "pair_id": "HV-KITC-086",
+      "pair_valid": true,
+      "target_expected": "ALLOW",
+      "target_final_correct": true,
+      "target_final_verdict": "ALLOW",
+      "target_packet_id": "HV-KITC-086-A"
+    },
+    {
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "google",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "guardrail_expected": "ESCALATE",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ESCALATE",
+      "guardrail_packet_id": "HV-KITC-087-B",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-087-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-087-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-087-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-087-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-087-A_W3"
+        }
+      ],
+      "pair_id": "HV-KITC-087",
+      "pair_valid": false,
+      "target_expected": "ALLOW",
+      "target_final_correct": false,
+      "target_final_verdict": null,
+      "target_packet_id": "HV-KITC-087-A"
+    },
+    {
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "google",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "guardrail_expected": "ESCALATE",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ESCALATE",
+      "guardrail_packet_id": "HV-KITC-088-B",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-088-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-088-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-088-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-088-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-088-A_W3"
+        }
+      ],
+      "pair_id": "HV-KITC-088",
+      "pair_valid": false,
+      "target_expected": "ALLOW",
+      "target_final_correct": false,
+      "target_final_verdict": null,
+      "target_packet_id": "HV-KITC-088-A"
+    },
+    {
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "guardrail_expected": "ESCALATE",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ESCALATE",
+      "guardrail_packet_id": "HV-KITC-089-B",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-089-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-089-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-089-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-089-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-089-A_W3"
+        }
+      ],
+      "pair_id": "HV-KITC-089",
+      "pair_valid": false,
+      "target_expected": "ALLOW",
+      "target_final_correct": false,
+      "target_final_verdict": null,
+      "target_packet_id": "HV-KITC-089-A"
+    },
+    {
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "guardrail_expected": "ESCALATE",
+      "guardrail_final_correct": true,
+      "guardrail_final_verdict": "ESCALATE",
+      "guardrail_packet_id": "HV-KITC-090-B",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-090-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-090-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-090-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-090-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-090-A_W3"
+        }
+      ],
+      "pair_id": "HV-KITC-090",
+      "pair_valid": false,
+      "target_expected": "ALLOW",
+      "target_final_correct": false,
+      "target_final_verdict": null,
+      "target_packet_id": "HV-KITC-090-A"
+    }
+  ],
+  "benchmark_law_validation": {
+    "benchmark_valid": true,
+    "classification": "OFFICIAL_HOLO_BENCHMARK_LAWS_VALID",
+    "current_best_state_preserved": true,
+    "failures": [],
+    "full_context_governor_audit": false,
+    "gov_models": [
+      "minimax/MiniMax-M2.5-highspeed"
+    ],
+    "gov_tokens": 23468,
+    "gov_worker_token_ratio": 0.108196,
+    "official_valid": true,
+    "receipt_code": "HOLO_BENCHMARK_LAWS_PASS",
+    "score_valid": true,
+    "warnings": [],
+    "worker_model_count": 3,
+    "worker_models": [
+      "google/gemini-2.5-flash-lite",
+      "minimax/MiniMax-M2.5-highspeed",
+      "xai/grok-3-mini"
+    ],
+    "worker_tokens": 216903
+  },
+  "benchmark_locked": false,
+  "benchmark_valid": false,
+  "call_count_complete": false,
+  "classification": "HOLOVERIFY_20PAIR_3DNA_INCOMPLETE_OR_REPAIR_REQUIRED",
+  "current_best_state_preserved": true,
+  "expected_provider_calls": 200,
+  "expected_provider_calls_semantics": "exact_fixed_full_sequence",
+  "gov_calls": 51,
+  "judge_calls": 0,
+  "law_receipt_code": "HOLO_BENCHMARK_LAWS_PASS",
+  "model_roster_audit": {
+    "actual_distinct_dna": [
+      "google",
+      "minimax",
+      "xai"
+    ],
+    "actual_distinct_dna_count": 3,
+    "actual_gov_turns": [
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-078-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-078-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-078-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-078-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-081-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-081-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-081-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-081-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-082-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-082-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-082-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-082-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-084-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-084-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-084-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-084-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-086-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-086-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-086-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-086-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-087-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-087-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-087-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-087-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-088-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-088-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-088-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-088-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-089-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-089-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-089-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-089-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-090-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-090-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-090-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-090-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-077-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-077-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-077-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-077-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-HARDEN-025-H03-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-HARDEN-025-H03-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-HARDEN-025-H03-B_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-HARDEN-025-H03-B_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-HARDEN-025-H06-A_G1"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 2,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-HARDEN-025-H06-A_G2"
+      },
+      {
+        "dna": "minimax",
+        "gov_index": 1,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-HARDEN-025-H06-B_G1"
+      }
+    ],
+    "actual_worker_turns": [
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-078-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-078-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-078-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-078-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-078-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-078-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-081-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-081-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-081-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-081-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-081-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-081-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-082-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-082-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-082-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-082-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-082-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-082-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-084-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-084-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-084-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-084-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-084-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-084-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-086-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-086-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-086-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-086-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-086-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-086-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-087-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-087-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-087-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-087-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-087-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-087-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-088-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-088-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-088-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-088-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-088-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-088-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-089-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-089-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-089-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-089-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-089-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-089-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-090-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-090-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-090-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-090-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-090-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-090-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-077-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-077-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-077-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "HV-KITC-077-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "HV-KITC-077-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "HV-KITC-077-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "BAL100-BEC-HARDEN-025-H03-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "BAL100-BEC-HARDEN-025-H03-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-HARDEN-025-H03-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "BAL100-BEC-HARDEN-025-H03-B_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "BAL100-BEC-HARDEN-025-H03-B_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-HARDEN-025-H03-B_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "BAL100-BEC-HARDEN-025-H06-A_W1",
+        "worker_index": 1
+      },
+      {
+        "dna": "google",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google",
+        "turn_id": "BAL100-BEC-HARDEN-025-H06-A_W2",
+        "worker_index": 2
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "turn_id": "BAL100-BEC-HARDEN-025-H06-A_W3",
+        "worker_index": 3
+      },
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_id": "BAL100-BEC-HARDEN-025-H06-B_W1",
+        "worker_index": 1
+      }
+    ],
+    "all_3_dna_participated": true,
+    "declared_model_roster": {
+      "distinct_dna_required": 3,
+      "fallback_policy": "NO_FALLBACK_PROVIDER_FAILURE_INVALIDATES_RUN",
+      "gov": {
+        "dna": "minimax",
+        "gov_may_select_models": false,
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax"
+      },
+      "worker_sequence": [
+        {
+          "dna": "xai",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "role_name": "SOURCE_BOUNDARY_MAPPER",
+          "worker_index": 1
+        },
+        {
+          "dna": "google",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "role_name": "ADVERSARIAL_SCOPE_CHALLENGER",
+          "worker_index": 2
+        },
+        {
+          "dna": "minimax",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "role_name": "FINAL_COMPILER",
+          "worker_index": 3
+        }
+      ]
+    },
+    "declared_roster_matches_actual_calls": true,
+    "mismatches": []
+  },
+  "packet_results": [
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-078-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 2,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-078-A_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "09cf33cb0499ffb049c233b927cfbbc90fcf2dfb623bd39885da8bbf17336557",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ALLOW"
+        },
+        {
+          "artifact_id": "HV-KITC-078-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-078-A_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "a936dc8c67a5c6d74d3239c403c2bb61b02eea6dda24a0c5973cbe0d7b87ae83",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ALLOW"
+        },
+        {
+          "artifact_id": "HV-KITC-078-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-078-A_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "b3c85b62b465cf6522f531677e0c2cb2ef55f349f898f78a043b7849db12feae",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ALLOW"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_CLOSED",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-078-A_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ALLOW",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-KITC-078-A",
+      "pair_id": "HV-KITC-078",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-078-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 2,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-078-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "d14223c0d00add6f308b88b597d522133e752e9e1e2aff6d8e01a407b6685443",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-078-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 2,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-078-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "ae7bdcb03bc5483fe8e5aaf0bd42bb41efcf4890e25092aa0caea7432ed6ebae",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-078-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-078-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "79bd82625a1adcd7ba7aae27e5e57599d30f6d58f35d22aca61d0f64bc81ee48",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-078-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-KITC-078-B",
+      "pair_id": "HV-KITC-078",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-081-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-081-A_WORKER_01.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:0-20",
+            "missing_critical_term:Facility R9",
+            "missing_critical_term:cabinet/handler|handler controls"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "9777c51b2705c90f8679d33ebe33339a22ad369d9cb8fa5510256d9e4e5fe89f",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-081-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-081-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:AS-44",
+            "missing_critical_term:0-20",
+            "missing_critical_term:Facility R9",
+            "missing_critical_term:PO-AST-081"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "a4bfaad874592927159310bc0033c6c1d1cd697fd7d2e4859b7eb8a91108abc8",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-081-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-081-A_WORKER_03.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:Facility R9"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "3949056761e07fbc08e41dd942bf14bebed2605ab1326e0834d670b44e0c0cfb",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": false,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "NO_ADMISSIBLE_ARTIFACT"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-081-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-081-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-081-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-081-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-081-A_W3"
+        }
+      ],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-KITC-081-A",
+      "pair_id": "HV-KITC-081",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-081-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-081-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "2fb50d7462d84ba5be7d195dba0f050bb31db74edcd216e259641d0b9feeb98b",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-081-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-081-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "fb17d92d642855e70d34ef3d352a2940f99496951946d6afcd7e8e4b422d533d",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-081-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-081-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "ebe86839a3aee6d91c02e98440c7708860717099a1c6303f0976218f26c9ec31",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-081-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-KITC-081-B",
+      "pair_id": "HV-KITC-081",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-082-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-082-A_WORKER_01.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:B-18",
+            "missing_critical_term:P8.1",
+            "missing_critical_term:current IRB-approved|IRB-approved"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "bfc53781d353f248e640d5e39f959143a9d5de446e17cf677d4a764095386350",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-082-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-082-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:current IRB-approved|IRB-approved"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "172f604cd9280dd02ac5e5c7acc8106e641a51218300467e2e4f9dbef3335785",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-082-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 0,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-082-A_WORKER_03.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "word_band_final_answer:0",
+            "missing_required_section:critical_features_preserved"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "a5274aeb0f77d9e4b197a6391a24edc1ef4d8fb5e255878da92b2a0888cbaf59",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": false,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "google",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "NO_ADMISSIBLE_ARTIFACT"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-082-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-082-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-082-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-082-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-082-A_W3"
+        }
+      ],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-KITC-082-A",
+      "pair_id": "HV-KITC-082",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-082-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-082-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "51396193a8e1cf1a6aa24a4489e832bdedb255ae02b244ee95271b3f0d262101",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-082-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-082-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "c85db7313a885de11fb3be03b727810a321f0d4593493c15f92c6e863ca27d4a",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-082-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-082-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "f01557c4d013e575feb650c0cf5969e6cd0855e473072bbf5229c04b10261372",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-082-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-KITC-082-B",
+      "pair_id": "HV-KITC-082",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-084-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-084-A_WORKER_01.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:DS-84",
+            "missing_critical_term:DOV-RISK-4",
+            "missing_critical_term:Dovetail Analytics",
+            "missing_critical_term:restricted-risk|restricted risk"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "9e2b3b1782ff2edae62530fe14b055a34e98022dfadaf53f7c77da35a0be6a7e",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-084-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-084-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:DS-84",
+            "missing_critical_term:DOV-RISK-4",
+            "missing_critical_term:Dovetail Analytics",
+            "missing_critical_term:restricted-risk|restricted risk"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "c84fde4e70a970c5573d84849273af4f327ac73908fdb03e901c789f2d84b38c",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-084-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-084-A_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "fe059a213ca8d05e42ccf5869cc61bdd975119899dac944d2bafbdf606bbee37",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ALLOW"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "google",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_CLOSED",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-084-A_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ALLOW",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-084-A_W3",
+          "evidence_category": "INTRA_HOLO_CROSS_DNA_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-084-A_W1"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-084-A_W3",
+          "evidence_category": "INTRA_HOLO_TURN_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-084-A_G1"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-084-A_W3",
+          "evidence_category": "INTRA_HOLO_CROSS_DNA_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-084-A_W2"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-084-A_W3",
+          "evidence_category": "INTRA_HOLO_TURN_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-084-A_G2"
+        }
+      ],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-KITC-084-A",
+      "pair_id": "HV-KITC-084",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-084-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-084-B_WORKER_01.json",
+          "gate_failures": [
+            "missing_critical_term:restricted-risk"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "55a93e88e9b87bf7723513914cadcf9b95cbd1b75339ba4d7f010d90cbc8a9e7",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-084-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-084-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "e776215274d858c3d07587c40acd9d1b0fcd66c01bb6e4838a5a27148baa1412",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-084-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-084-B_WORKER_03.json",
+          "gate_failures": [
+            "missing_boundary_binding:escalate_rule_assessment"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "d20f3f1bc7592e4b516bb31b61d64aa727565e29e7e9d6ba556b444593a9434c",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-084-B_WORKER_02",
+        "selection_reason": "FINAL_REGRESSED_SELECTED_BEST_PRIOR"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-KITC-084-B",
+      "pair_id": "HV-KITC-084",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-086-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-086-A_WORKER_01.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:FJ-86",
+            "missing_critical_term:AX-41",
+            "missing_critical_term:Cq<=31",
+            "missing_critical_term:accepted retest|retest result"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "d9e2f033f34665fb7670b3f281ffde220541a2719828a0b0e03cc0fc8c3fea8c",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-086-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-086-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "b9c4851012376efae022f82e55aea5f8ee601316647add489f6ba50fa41c00eb",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-086-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-086-A_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "aa8f17f85e54dc7ca5ebc471591ee3f53972ebce90d08b229a3084d7fbadd160",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ALLOW"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "google",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_CLOSED",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-086-A_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ALLOW",
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-086-A_W3",
+          "evidence_category": "INTRA_HOLO_CROSS_DNA_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-086-A_W1"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-086-A_W3",
+          "evidence_category": "INTRA_HOLO_TURN_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-086-A_G1"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-086-A_W3",
+          "evidence_category": "INTRA_HOLO_CROSS_DNA_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-086-A_W2"
+        },
+        {
+          "corrected_by_model": "minimax/MiniMax-M2.5-highspeed",
+          "corrected_by_turn_id": "HV-KITC-086-A_W3",
+          "evidence_category": "INTRA_HOLO_TURN_RESCUE",
+          "final_holoverify_correct": true,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-086-A_G2"
+        }
+      ],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-KITC-086-A",
+      "pair_id": "HV-KITC-086",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-086-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-086-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "0b7dc4c7201d352ed6ca18879828b02c97e69a6b19ae4697fc6fb4cffd6c1b23",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-086-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-086-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "5123d2460141dbcec7d4e1a08d338ba00ea5dea7ed5af2a62e101392eccbfa71",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-086-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-086-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "0c2b14ca9c62a999de44b272d354a436c599f2264e35f86698c574ab9e5085d4",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-086-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-KITC-086-B",
+      "pair_id": "HV-KITC-086",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-087-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-087-A_WORKER_01.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:Site P2",
+            "missing_critical_term:QA-approved|calibration pack"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "2433b5b4a2414be57d22b3699abedad6208015770dc2f3f6f83bbbd0ef11b281",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-087-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-087-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:GD-4",
+            "missing_critical_term:Site P2",
+            "missing_critical_term:RC-12"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "dde4102362f82125adad52c258634db29faecf239450d853f8ed050b80debc80",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-087-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-087-A_WORKER_03.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:QA-approved|calibration pack"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "b8f7f5e0d5c7df9df67350a6276b2de9d58f4f6c31071b4098e076ae77545a43",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": false,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "google",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "NO_ADMISSIBLE_ARTIFACT"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-087-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-087-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-087-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-087-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-087-A_W3"
+        }
+      ],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-KITC-087-A",
+      "pair_id": "HV-KITC-087",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-087-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 2,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-087-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "03c7ace75a768b31ffc34099da61aee4fecbb420361ee7810b394eac07acaeec",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-087-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-087-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "5dbdd2d10dd8575dc9d2327c60635315bedc09cf6208190c2c792a6ad4f110e0",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-087-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-087-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "5b737f7c20b3633d2a6a6bf693d127bb4e1c2dfa7b3ee1bbdda2141d5a49acb6",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-087-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-KITC-087-B",
+      "pair_id": "HV-KITC-087",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-088-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-088-A_WORKER_01.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:HDS-8",
+            "missing_critical_term:HEL-RISK-5",
+            "missing_critical_term:Helio Analytics",
+            "missing_critical_term:restricted personal-data|personal-data"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "5ffc0bc2dec257c00a193659c294eedbc3575f7ba70155d629e3ee5855de71ee",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-088-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 1,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-088-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:HDS-8",
+            "missing_critical_term:HEL-RISK-5",
+            "missing_critical_term:Helio Analytics",
+            "missing_critical_term:restricted personal-data|personal-data"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "4a62813a81dd641a7772116ab87ccdf9a20b4df5c5a1c8592595f764f8fb9271",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-088-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-088-A_WORKER_03.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:HDS-8",
+            "missing_critical_term:HEL-RISK-5",
+            "missing_critical_term:Helio Analytics",
+            "missing_critical_term:restricted personal-data|personal-data"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "24b8b8d05b0540def507ee931ac2007495ec08bf5b7aa0c8e2320722506837c4",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": false,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "google",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "NO_ADMISSIBLE_ARTIFACT"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-088-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-088-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-088-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-088-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-088-A_W3"
+        }
+      ],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-KITC-088-A",
+      "pair_id": "HV-KITC-088",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-088-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-088-B_WORKER_01.json",
+          "gate_failures": [
+            "missing_critical_term:privacy status"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "d5b3cad55179a4e684fed0d5d4b48bb2559c5c715e4cb7cf97e33d4f9eeb5534",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-088-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 1,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-088-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "a5aa938594cb09ca101d415a717d211a3f0f09d8ffd531912d6ffaca163bbce6",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-088-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 1,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-088-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "ab62b7ee721d17deafc8107b1be614d2961efe3980c183b2a7ccaad3b1ad1945",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-088-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-KITC-088-B",
+      "pair_id": "HV-KITC-088",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-089-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-089-A_WORKER_01.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:Iris Installers",
+            "missing_critical_term:Site 4Q",
+            "missing_critical_term:umbrella liability",
+            "missing_critical_term:currently bound|CE-12"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "c2ab507fef2a1cdd7f5ea90ded3d003db5bc7a769e305d1d26f04cead149dd77",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-089-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-089-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:umbrella liability",
+            "missing_critical_term:currently bound|CE-12"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "9afde293979ba5fe3c4d415f9023cee18fbd2194cdbbfd7cadd329f4be1057a1",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-089-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-089-A_WORKER_03.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "b10e95ed354ab4a7264f50d58fa811186763bf1257d71590b791755db616f223",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": false,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "NO_ADMISSIBLE_ARTIFACT"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-089-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-089-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-089-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-089-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-089-A_W3"
+        }
+      ],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-KITC-089-A",
+      "pair_id": "HV-KITC-089",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-089-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-089-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "211852e4eec5b1174e0dd944dfe5eddbf361b5dbc558fe418d4b839b49c2bc60",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-089-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-089-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "e2d86eb079cbb68acad1fc2bf7fe31db560be2604d46d2b266493ad4d83020bf",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-089-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-089-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "a892311939ac0efacfec6a5575776406f55dfec87a48273cedf299f14116d478",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-089-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-KITC-089-B",
+      "pair_id": "HV-KITC-089",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-090-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-090-A_WORKER_01.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:Jade University",
+            "missing_critical_term:Texas",
+            "missing_critical_term:lab equipment"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "1c815d11794fe5e66521398681c1ae72429f64afe618db62b6b48ff2ebbce7b3",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-090-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-090-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:Jade University",
+            "missing_critical_term:Texas",
+            "missing_critical_term:lab equipment",
+            "missing_critical_term:state-approved|TX-44"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "a938c27c6d53121ccff4b0df8d262be48d0beaad035779b31caf6d711f95e5e6",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-090-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-090-A_WORKER_03.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "f7eebbfb8ab10215feed85ed4e3052106f6a44d6e45987dcee1026396adb5c06",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": false,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ALLOW_got_ESCALATE"
+          ],
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "NO_ADMISSIBLE_ARTIFACT"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-090-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-090-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-090-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "HV-KITC-090-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "HV-KITC-090-A_W3"
+        }
+      ],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-KITC-090-A",
+      "pair_id": "HV-KITC-090",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-090-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-090-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "c54cbc1dc7f1d2771553da0a018c241ab5286b999a645fe86e4cf6aa2adcfa90",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-090-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-090-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "13664a8c048677a8b7611e649f2ecf99b3e0c29017c88ab622c9c1a4160047d4",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-090-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-090-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "bb13e3e8da7bcb3346c325ba77a8ec6822229a9c149f9657b48223fab56abad5",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-090-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-KITC-090-B",
+      "pair_id": "HV-KITC-090",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/BAL100-BEC-SUBTLE-CLOSEOUT-022-A_WORKER_01.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:DG-41B production telemetry units",
+            "missing_critical_term:ACT-ACR-2026-8022"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "74db6ddc1c9bac1072c9a59e9c4b10fb1bf8d883dd97983aee9e51ff5d7cb045",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/BAL100-BEC-SUBTLE-CLOSEOUT-022-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "missing_critical_term:DG-41B production telemetry units"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "81742953500efc5c3ebcb3586a13b8f2015a0a75d845e64a4c562bb369f0ae56",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/BAL100-BEC-SUBTLE-CLOSEOUT-022-A_WORKER_03.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "80c4db724d993e47530a518fdd3d894758d3de931c3ab5957f96828d04a1d0d4",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": false,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": null,
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "NO_ADMISSIBLE_ARTIFACT"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "xai",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "xai/grok-3-mini",
+          "miss_role": "worker",
+          "miss_turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_W1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_G1"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A_W3"
+        }
+      ],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-A",
+      "pair_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 2,
+          "dna": "xai",
+          "full_output_ref": "artifacts/BAL100-BEC-SUBTLE-CLOSEOUT-022-B_WORKER_01.json",
+          "gate_failures": [
+            "missing_critical_term:DG-41B lab telemetry units",
+            "missing_critical_term:DG-41B production telemetry units"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "ba5dd095c1881d24fa6fd9e96e88992ec0ded7ce0e24131c3281a03ffd9ac4ef",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/BAL100-BEC-SUBTLE-CLOSEOUT-022-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "c323c434faff0463dee8973986a510916ffd02e27b813cd377cdd429687567e6",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/BAL100-BEC-SUBTLE-CLOSEOUT-022-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "eb855170ac3ddac238c1d19e7efb255479e321bfe0e6fc2f43502f37ec51639c",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_allow_false_positive_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022-B",
+      "pair_id": "BAL100-BEC-SUBTLE-CLOSEOUT-022",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-077-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-077-A_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "4a83f65a9529d05a1049fb1440f6bfc6da5ba306c53f82153993c8fa035ae392",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ALLOW"
+        },
+        {
+          "artifact_id": "HV-KITC-077-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 3,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-077-A_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "4aadfac9a02bc281ef4f2c33b639c3d8f334b1ce34d4424fc2cd8ed463474963",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ALLOW"
+        },
+        {
+          "artifact_id": "HV-KITC-077-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-077-A_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "cfd0b8e4007cae1056eb17ec2e6e548edb1ae655812437886675f3246d269190",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ALLOW"
+        }
+      ],
+      "benchmark_bucket": "hard_escalate_false_negative_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_CLOSED",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-077-A_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ALLOW",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "HV-KITC-077-A",
+      "pair_id": "HV-KITC-077",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "HV-KITC-077-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 2,
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-077-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "b4bdea753e09793ffbab4acb8b0066a8cbc5ba287cb0f65ef79cf7eace1e1a68",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-077-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-077-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "ee8a000ed856e2b0427b83e9bda9e12d845eb7741066e736932a521f753a26e4",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "HV-KITC-077-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 4,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-077-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "bc5cdf289d435fc7b238b68dfb98ae75b5465ea4023e3ad03e7d6abfe0256748",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_escalate_false_negative_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "MiniMax-M2.5-highspeed",
+          "notes": [
+            "expected_ESCALATE_got_ALLOW"
+          ],
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "grok-3-mini",
+          "notes": [
+            "expected_ESCALATE_got_ALLOW"
+          ],
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": [
+            "expected_ESCALATE_got_ALLOW"
+          ],
+          "provider": "google",
+          "verdict": "ALLOW"
+        }
+      ],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "HV-KITC-077-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "HV-KITC-077-B",
+      "pair_id": "HV-KITC-077",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "BAL100-BEC-HARDEN-025-H03-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/BAL100-BEC-HARDEN-025-H03-A_WORKER_01.json",
+          "gate_failures": [
+            "missing_critical_term:ACT-PAX25-H03"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "d817fba733ef4ea3f808fd97ec85347e04e09bc63b5b1a79cd1c9ebf45a4492f",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ALLOW"
+        },
+        {
+          "artifact_id": "BAL100-BEC-HARDEN-025-H03-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 4,
+          "dna": "google",
+          "full_output_ref": "artifacts/BAL100-BEC-HARDEN-025-H03-A_WORKER_02.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "escalate_requires_source_boundary_open"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "0376605db4fc7f898b8545d32ad23671f5b912e58fb638a6e2e1d6613922c440",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "BAL100-BEC-HARDEN-025-H03-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/BAL100-BEC-HARDEN-025-H03-A_WORKER_03.json",
+          "gate_failures": [
+            "action_boundary_verdict_mismatch",
+            "escalate_requires_source_boundary_open"
+          ],
+          "gate_passed": false,
+          "gate_status": "FAIL",
+          "hash": "6e5c912bcdc96210ad24359126c1e3831bc621506a9b686bad94232e70eeef66",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_escalate_false_negative_rescue",
+      "best_artifact_registry_present": false,
+      "external_solo_failure_evidence": [],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "NO_ADMISSIBLE_ARTIFACT"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "google",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "google/gemini-2.5-flash-lite",
+          "miss_role": "worker",
+          "miss_turn_id": "BAL100-BEC-HARDEN-025-H03-A_W2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "gov",
+          "miss_turn_id": "BAL100-BEC-HARDEN-025-H03-A_G2"
+        },
+        {
+          "corrected_by_model": null,
+          "corrected_by_turn_id": "final_selector_or_gate",
+          "evidence_category": "INTRA_HOLO_SINGLE_DNA_MISS",
+          "final_holoverify_correct": false,
+          "miss_dna": "minimax",
+          "miss_local_verdict": "ESCALATE",
+          "miss_model": "minimax/MiniMax-M2.5-highspeed",
+          "miss_role": "worker",
+          "miss_turn_id": "BAL100-BEC-HARDEN-025-H03-A_W3"
+        }
+      ],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "BAL100-BEC-HARDEN-025-H03-A",
+      "pair_id": "BAL100-BEC-HARDEN-025-H03",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "BAL100-BEC-HARDEN-025-H03-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 2,
+          "dna": "xai",
+          "full_output_ref": "artifacts/BAL100-BEC-HARDEN-025-H03-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "f92e20b3b99d836fb27bf9ef9f20b521e83b7908aeffaf473a4f7166a43581b1",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "BAL100-BEC-HARDEN-025-H03-B_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 2,
+          "dna": "google",
+          "full_output_ref": "artifacts/BAL100-BEC-HARDEN-025-H03-B_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "f642fae39b5c0e2d531fcc6ee7073923e6385a8c6023b80048d0217777141879",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "BAL100-BEC-HARDEN-025-H03-B_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 3,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/BAL100-BEC-HARDEN-025-H03-B_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "32178dff2ad04d1532acab5b92fc8fefe0382abc55a48220e319dd1d481a2c65",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_escalate_false_negative_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": null,
+          "provider": "google",
+          "verdict": "ALLOW"
+        }
+      ],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_OPEN",
+      "final_selector": {
+        "selected_artifact_id": "BAL100-BEC-HARDEN-025-H03-B_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ESCALATE",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "BAL100-BEC-HARDEN-025-H03-B",
+      "pair_id": "BAL100-BEC-HARDEN-025-H03",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "BAL100-BEC-HARDEN-025-H06-A_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 3,
+          "dna": "xai",
+          "full_output_ref": "artifacts/BAL100-BEC-HARDEN-025-H06-A_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "d1cb35155e6d2a3b7c9a9bb88d8c7e40aa399f7fa8f85e994e4236520ed14408",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ALLOW"
+        },
+        {
+          "artifact_id": "BAL100-BEC-HARDEN-025-H06-A_WORKER_02",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 3,
+          "dna": "google",
+          "full_output_ref": "artifacts/BAL100-BEC-HARDEN-025-H06-A_WORKER_02.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "25b3b508975bb6cbc73adc5aea8977ae19f10067085e6a47509c09e92fb3f7ea",
+          "model": "gemini-2.5-flash-lite",
+          "provider": "google",
+          "turn_number": 2,
+          "verification_verdict": "ALLOW"
+        },
+        {
+          "artifact_id": "BAL100-BEC-HARDEN-025-H06-A_WORKER_03",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "critical_feature_count": 5,
+          "dna": "minimax",
+          "full_output_ref": "artifacts/BAL100-BEC-HARDEN-025-H06-A_WORKER_03.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "c62df0e6136bad68a59f32cfd765f1fbeaeed1785f5f48f561b7c3cd6152a487",
+          "model": "MiniMax-M2.5-highspeed",
+          "provider": "minimax",
+          "turn_number": 3,
+          "verification_verdict": "ALLOW"
+        }
+      ],
+      "benchmark_bucket": "hard_escalate_false_negative_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [],
+      "final_admissible": true,
+      "final_binding": "SOURCE_BOUNDARY_CLOSED",
+      "final_selector": {
+        "selected_artifact_id": "BAL100-BEC-HARDEN-025-H06-A_WORKER_03",
+        "selection_reason": "FINAL_ARTIFACT_ADMISSIBLE"
+      },
+      "final_verdict": "ALLOW",
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": true,
+      "is_target_packet": false,
+      "packet_id": "BAL100-BEC-HARDEN-025-H06-A",
+      "pair_id": "BAL100-BEC-HARDEN-025-H06",
+      "suffix": "A",
+      "valid_rescue_evidence_present": true
+    },
+    {
+      "artifact_registry": [
+        {
+          "artifact_id": "BAL100-BEC-HARDEN-025-H06-B_WORKER_01",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "critical_feature_count": 2,
+          "dna": "xai",
+          "full_output_ref": "artifacts/BAL100-BEC-HARDEN-025-H06-B_WORKER_01.json",
+          "gate_failures": [],
+          "gate_passed": true,
+          "gate_status": "PASS",
+          "hash": "9bee04d45d6dde8cf2bf78fbaa2459f4d25cac8590ef820f869a5b08b2d46443",
+          "model": "grok-3-mini",
+          "provider": "xai",
+          "turn_number": 1,
+          "verification_verdict": "ESCALATE"
+        }
+      ],
+      "benchmark_bucket": "hard_escalate_false_negative_rescue",
+      "best_artifact_registry_present": true,
+      "external_solo_failure_evidence": [
+        {
+          "evidence_category": "EXTERNAL_SOLO_RESCUE",
+          "model": "gemini-2.5-flash-lite",
+          "notes": null,
+          "provider": "google",
+          "verdict": "ALLOW"
+        }
+      ],
+      "final_admissible": false,
+      "final_binding": null,
+      "final_selector": {
+        "selected_artifact_id": null,
+        "selection_reason": "GOV_FAILURE"
+      },
+      "final_verdict": null,
+      "intra_holo_single_dna_miss_evidence": [],
+      "is_guardrail_sibling": false,
+      "is_target_packet": true,
+      "packet_id": "BAL100-BEC-HARDEN-025-H06-B",
+      "pair_id": "BAL100-BEC-HARDEN-025-H06",
+      "suffix": "B",
+      "valid_rescue_evidence_present": true
+    }
+  ],
+  "packet_results_complete": false,
+  "pre_run_root_signature": "41e981fafa3cd2259c44c21d2e0d6149ab19b5462d74d228bb9e1a92eac9ac80",
+  "provider_calls": 127,
+  "provider_failures": [],
+  "readiness_assertions": {
+    "artifact_registry_present": "PASS",
+    "best_artifact_registry_present": "FAIL",
+    "complete_governance_enforcement": "PASS",
+    "declared_roster_matches_actual_calls": "PASS",
+    "deterministic_gate_after_every_worker": "PASS",
+    "external_and_intra_holo_evidence_separated": "PASS",
+    "final_selector_present": "PASS",
+    "fixed_gov_model_law": "PASS",
+    "gov_receives_gate_results": "PASS",
+    "gov_worker_token_ratio_law": "PASS",
+    "guardrail_sibling_correct_for_all_pairs": "FAIL",
+    "hard_allow_valid_pairs": 3,
+    "hard_escalate_valid_pairs": 1,
+    "holo_benchmark_laws": "PASS",
+    "invalid_runs_preserved": "PASS",
+    "monotonic_preservation_enforced": "FAIL",
+    "pinned_best_artifact_present": "PASS",
+    "three_dna_inside_holoverify": "PASS",
+    "total_valid_pairs": 4,
+    "worker_prompt_sequence_law": "PASS",
+    "worker_rotation_law": "PASS"
+  },
+  "readiness_passed": false,
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_20pair_3dna_2026-06-29/live_runs/run_20260629T042132Z",
+  "score_valid": false,
+  "totals": {
+    "input_tokens": 165293,
+    "output_tokens": 59663,
+    "total_tokens": 240371
+  },
+  "trace_hash": "f6c9a02324dca17bc33959ac499a93d46ad9d412d012f4532ccbf7174860e024",
+  "worker_calls": 76
+}

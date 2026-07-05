@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment, invoice release, or vendor-master action? Payment rail unchanged though remittance email text changed.",
+    "allow_rule_assessment": "Exact source boundary remains open.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-66C5F7F73D1D-CTL",
+    "escalate_rule_assessment": "Payment rail fingerprint lacks vendor-master match.",
+    "timing_scope_authority_dependency_check": "Required match not closed in current records."
+  },
+  "cited_evidence": [
+    "SRC-66C5F7F73D1D-CTL",
+    "SRC-66C5F7F73D1D-POL",
+    "SRC-66C5F7F73D1D-BND",
+    "SRC-66C5F7F73D1D-FBK",
+    "SRC-66C5F7F73D1D-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "payment rail fingerprint must match vendor master",
+    "SRC-66C5F7F73D1D-CTL",
+    "SRC-66C5F7F73D1D-BND"
+  ],
+  "final_answer": "Source records do not close the exact action boundary. The controlling control record requires a payment rail fingerprint match to vendor master, and this dependency is missing, stale, or mismatched in current records. Remittance text, urgency, and prior history provide no execution authority; the request must be escalated.",
+  "open_blockers": [
+    "payment rail fingerprint must match vendor master"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

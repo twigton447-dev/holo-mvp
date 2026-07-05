@@ -1,0 +1,27 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the security operator execute the incident-response action now? Focus: forensics image release.",
+    "allow_rule_assessment": "Source records do not close the exact boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-F0B74FC7BD26-CTL",
+    "escalate_rule_assessment": "Control record leaves dependency open before execution",
+    "timing_scope_authority_dependency_check": "current chain-of-custody and recipient authorization match"
+  },
+  "cited_evidence": [
+    "SRC-F0B74FC7BD26-CTL",
+    "SRC-F0B74FC7BD26-BND",
+    "SRC-F0B74FC7BD26-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "The action may not proceed. The controlling control record states the required dependency is still open, and the policy requires the exact source boundary to be closed before execution. Source records here support escalation, not release, so the security operator should wait for closure of the chain-of-custody and recipient authorization match.",
+  "open_blockers": [
+    "current chain-of-custody and recipient authorization match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

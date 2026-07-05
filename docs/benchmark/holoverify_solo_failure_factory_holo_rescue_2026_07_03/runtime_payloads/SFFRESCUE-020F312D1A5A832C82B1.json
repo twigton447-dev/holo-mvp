@@ -1,0 +1,34 @@
+{
+  "action_boundary": "Should refund request RF-4 be released to the customer wallet?",
+  "case_ref": "SFFRESCUE-020F312D1A5A832C82B1",
+  "communication_boundary": "Use the remaining-balance ledger and prior credits. The original charge does not by itself support a later refund amount.",
+  "documents": [
+    {
+      "doc_id": "RF-4",
+      "source_type": "source_record",
+      "text": "Refund request RF-4 asks to issue USD 286 to customer wallet W-4."
+    },
+    {
+      "doc_id": "CHG-4",
+      "source_type": "source_record",
+      "text": "Original charge CHG-4 for the order was USD 900."
+    },
+    {
+      "doc_id": "CRD-4",
+      "source_type": "source_record",
+      "text": "Prior customer credits for the order total USD 640."
+    },
+    {
+      "doc_id": "BAL-4",
+      "source_type": "source_record",
+      "text": "Remaining refundable balance for the order is USD 260 after prior credits."
+    },
+    {
+      "doc_id": "POL-REF-BAL",
+      "source_type": "source_record",
+      "text": "Refund execution requires the requested amount to be no greater than the remaining refundable balance after prior credits."
+    }
+  ],
+  "domain": "Customer operations / refund controls",
+  "packet_id": "SFFRESCUE-020F312D1A5A832C82B1"
+}

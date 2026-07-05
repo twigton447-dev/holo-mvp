@@ -1,0 +1,45 @@
+{
+  "action": {
+    "action_date": "2026-06-24",
+    "amount": 126000,
+    "business_ref": "HV-KITC-041-A",
+    "currency": "USD",
+    "description": "May AP release payment after a vendor bank-account update?",
+    "type": "payment_release",
+    "vendor": "Marlo Components"
+  },
+  "context": {
+    "action_boundary": "May AP release payment after a vendor bank-account update?",
+    "anomaly_observed": "A vendor-master update exists, but payment execution requires separate release authority and callback provenance.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Payment PAY-MAR-041 releases USD 126000 to Marlo Components account ending 8821 on 2026-06-24.",
+        "doc_id": "PAY-MAR-041",
+        "type": "source_record"
+      },
+      {
+        "content": "Vendor-master approval VM-MAR-041 approves Marlo Components account ending 8821 before 2026-06-24.",
+        "doc_id": "VM-MAR-041",
+        "type": "source_record"
+      },
+      {
+        "content": "Callback CALL-MAR-041 used the pre-change vendor-master phone source and confirmed account ending 8821 for Marlo Components.",
+        "doc_id": "CALL-MAR-041",
+        "type": "source_record"
+      },
+      {
+        "content": "Payment-release authority REL-MAR-041 approves Marlo Components, USD 126000, account ending 8821, release date 2026-06-24, before payment.",
+        "doc_id": "REL-MAR-041",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Payment after bank-account update is complete only when vendor-master approval, independent callback provenance, and payment-release authority each match vendor, account, amount, and release date before payment.",
+        "doc_id": "STD-MAR-041-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

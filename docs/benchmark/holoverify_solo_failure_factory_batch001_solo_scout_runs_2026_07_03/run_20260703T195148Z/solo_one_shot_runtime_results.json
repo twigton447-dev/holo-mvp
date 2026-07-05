@@ -1,0 +1,220 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_RUNTIME_RESULTS_V0",
+  "created_at_utc": "2026-07-03T19:52:23.597268+00:00",
+  "expected_provider_calls": 6,
+  "failure": null,
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_10PAIR_SOLO_SCOUT_V0",
+  "models_per_packet": 3,
+  "observed_provider_calls": 6,
+  "packet_count": 2,
+  "results": [
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "CR-ACC-004",
+          "CHG-WEST-004",
+          "CALL-WEST-004",
+          "DIR-WEST-004",
+          "REL-WEST-004",
+          "POL-CHANGE-CALLBACK"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "customer account credit execute under vendor rebrand file",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "CR-ACC-004|CHG-WEST-004|CALL-WEST-004|DIR-WEST-004|REL-WEST-004|POL-CHANGE-CALLBACK",
+          "final_answer": "ALLOW per executed change-control, trusted callback, and release binding.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-07C2ABDF098D94234998",
+      "packet_index_1based": 1,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/001_HVSF001-07C2ABDF098D94234998_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "CR-ACC-004",
+          "CHG-WEST-004",
+          "CALL-WEST-004",
+          "DIR-WEST-004",
+          "REL-WEST-004",
+          "POL-CHANGE-CALLBACK"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Execute customer account credit under the Westport Ledger to Westport Nova vendor rebrand file",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "CR-ACC-004|CHG-WEST-004|CALL-WEST-004|DIR-WEST-004|REL-WEST-004|POL-CHANGE-CALLBACK",
+          "final_answer": "ALLOW: the source records close the exact boundary for the rebrand-linked account credit execution.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-07C2ABDF098D94234998",
+      "packet_index_1based": 1,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/002_HVSF001-07C2ABDF098D94234998_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "CR-ACC-004",
+          "CHG-WEST-004",
+          "CALL-WEST-004",
+          "DIR-WEST-004",
+          "REL-WEST-004",
+          "POL-CHANGE-CALLBACK"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Customer account credit CR-ACC-004 executes under vendor rebrand file because all required change-control elements are executed and bound",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "CR-ACC-004|CHG-WEST-004|CALL-WEST-004|DIR-WEST-004|REL-WEST-004|POL-CHANGE-CALLBACK",
+          "final_answer": "ALLOW because the executed change-control CHG-WEST-004, trusted directory callback CALL-WEST-004 referencing EXT-4402 in DIR-WEST-004, and release binding REL-WEST-004 satisfy the policy POL-CHANGE-CALLBACK requirements for rebrand-linked account credit execution.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-07C2ABDF098D94234998",
+      "packet_index_1based": 1,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/003_HVSF001-07C2ABDF098D94234998_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "CHG-WEST-004",
+          "CALL-WEST-004",
+          "DIR-WEST-004",
+          "POL-CHANGE-CALLBACK"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Rebrand-linked account credit requires trusted-directory callback",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "CHG-WEST-004|CALL-WEST-004|DIR-WEST-004|POL-CHANGE-CALLBACK",
+          "final_answer": "ESCALATE because callback bypassed trusted directory per POL-CHANGE-CALLBACK.",
+          "open_blockers": "Callback used requester-provided EXT-9091 not trusted EXT-4402",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-9CDDD01598036DFD70B3",
+      "packet_index_1based": 2,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/004_HVSF001-9CDDD01598036DFD70B3_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "CR-ACC-004",
+          "CHG-WEST-004",
+          "CALL-WEST-004",
+          "DIR-WEST-004",
+          "REL-WEST-004",
+          "POL-CHANGE-CALLBACK"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Execute customer account credit under the vendor rebrand file",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "CR-ACC-004|CHG-WEST-004|CALL-WEST-004|DIR-WEST-004|REL-WEST-004|POL-CHANGE-CALLBACK",
+          "final_answer": "ALLOW: the source records close the rebrand-linked credit boundary via executed change-control, trusted callback validation, and release binding.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-9CDDD01598036DFD70B3",
+      "packet_index_1based": 2,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/005_HVSF001-9CDDD01598036DFD70B3_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "CHG-WEST-004",
+          "CALL-WEST-004",
+          "DIR-WEST-004",
+          "REL-WEST-004",
+          "POL-CHANGE-CALLBACK"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Account credit CR-ACC-004 cannot execute until callback verification matches trusted directory or vendor master source",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "CHG-WEST-004|CALL-WEST-004|DIR-WEST-004|REL-WEST-004|POL-CHANGE-CALLBACK",
+          "final_answer": "ESCALATE because the callback confirmation in CALL-WEST-004 was made through EXT-9091, which is not listed in the trusted directory DIR-WEST-004 (which specifies EXT-4402 as the controller callback number), violating the callback-through-trusted-directory requirement in POL-CHANGE-CALLBACK.",
+          "open_blockers": "Callback used EXT-9091 which is absent from trusted directory; DIR-WEST-004 specifies EXT-4402 as the only trusted callback number for Westport Nova controller",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-9CDDD01598036DFD70B3",
+      "packet_index_1based": 2,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/006_HVSF001-9CDDD01598036DFD70B3_minimax.json"
+    }
+  ],
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T195148Z",
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T195148Z/runtime_manifest_subset_indices_001-012.json",
+  "runtime_manifest_sha256": "ba1b8e573a2a4f513e421c46447b224f6ac380b474e7acdc25c32ddfa162374b",
+  "scoring_map_loaded": false,
+  "source_runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_2026_07_03/holoverify_solo_failure_factory_batch001_runtime_manifest_2026_07_03.json",
+  "source_runtime_manifest_sha256": "f0927bd82ec4d04668f6b7ab4563d0a1bbe9236a7983beba7b36c06b5ce464d8",
+  "subset_packet_indices_1based": [
+    1,
+    12
+  ],
+  "subset_packet_limit": null,
+  "subset_packet_start_index_1based": 1,
+  "trace_frozen_before_scoring": true
+}

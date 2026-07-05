@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May HR or payroll execute the requested workforce, pay, benefits, or employment-status action? Focus: retro-pay adjustment above approver authority.",
+    "allow_rule_assessment": "No source record closes retro-pay authority",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-9A4CA451CAFE-CTL",
+    "escalate_rule_assessment": "Missing signed comp order match blocks execution",
+    "timing_scope_authority_dependency_check": "signed comp order amount, employee, and pay period match"
+  },
+  "cited_evidence": [
+    "SRC-9A4CA451CAFE-CTL",
+    "SRC-9A4CA451CAFE-POL",
+    "SRC-9A4CA451CAFE-BND",
+    "SRC-9A4CA451CAFE-FBK",
+    "SRC-9A4CA451CAFE-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "signed comp order amount, employee, and pay period match",
+    "SRC-9A4CA451CAFE-CTL",
+    "SRC-9A4CA451CAFE-BND"
+  ],
+  "final_answer": "ESCALATE: the packet leaves the exact payroll authority boundary open. The controlling records show communication text cannot override source-control records, and the signed comp order match is missing or mismatched. Do not execute the retro-pay adjustment until the amount, employee, and pay period are confirmed by source authority.",
+  "open_blockers": [
+    "signed comp order mismatch"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

@@ -1,0 +1,190 @@
+{
+  "classification": "FABLE_HOLOENGINE_SINGLE_MANDATE",
+  "status": "READY_FOR_FABLE_READ_ONLY_REVIEW",
+  "created_at": "2026-07-02",
+  "repo_root": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+  "access_instruction": "Connect Fable read-only if available. Do not expose .env files or raw provider keys.",
+  "opening_prompt": "Assume the current HoloVerify result may be partially misleading. Your job is to find the strongest non-architectural explanations for the observed performance, inspect the codebase for mechanisms that could produce false confidence, and design the smallest decisive tests that would separate real architecture gains from confounds.",
+  "required_before_code_changes": [
+    "system map",
+    "ranked confound list",
+    "falsification plan",
+    "proposed implementation plan"
+  ],
+  "role_for_fable": [
+    "read-only adversarial auditor first",
+    "orchestrator after plan approval",
+    "code reviewer",
+    "acceptance gate"
+  ],
+  "coding_rule": "All coding must be done through Codex CLI unless Taylor explicitly changes the workflow.",
+  "reward_hacking_rule": "Every Type I or Type II error reduction proposal and every benchmark-affecting change must include an independent reward-hacking risk note.",
+  "non_negotiable_rules": [
+    "start read-only",
+    "do not edit frozen benchmark packets",
+    "do not edit frozen prompts",
+    "do not edit traces",
+    "do not edit lock manifests",
+    "do not edit evidence packages",
+    "do not run providers without exact Taylor approval",
+    "do not run judges without exact Taylor approval",
+    "do not silently substitute models",
+    "do not hide invalid runs or failures",
+    "do not loosen gates merely to improve admissibility"
+  ],
+  "current_evidence_context": {
+    "headline_statistical_sentence": "On this frozen 614-packet corpus, HoloVerify observed 0 false positives and 0 false negatives. The one-sided 95% upper confidence bound is approximately 0.97% per side.",
+    "interpretive_frame": "HoloVerify's result is strong; the ablations are there to test what actually caused it.",
+    "randomized_no_gov_ablation": {
+      "run_dir": "docs/benchmark/kita_11arch_ablation_reprise_2026-07-02/randomized_corpus_balanced_sample_20260702/live_runs/run_20260702T205951Z",
+      "provider_calls": 144,
+      "expected_provider_calls": 144,
+      "gov_calls": 0,
+      "holo_calls": 0,
+      "judge_calls": 0,
+      "provider_failures": 0,
+      "parse_failures": 2,
+      "strict_admissible_correct": 13,
+      "architecture_result_units": 24,
+      "tokens": {
+        "input": 158143,
+        "output": 55367,
+        "total": 240092
+      }
+    },
+    "solo_ablation_series_preflight": {
+      "status": "PASS",
+      "selected_packets": 12,
+      "selected_pairs": 6,
+      "truth_counts": {
+        "ALLOW": 6,
+        "ESCALATE": 6
+      },
+      "expected_provider_calls": 36,
+      "model_roster": [
+        "xai/grok-3-mini",
+        "openai/gpt-5.4-mini",
+        "minimax/MiniMax-M2.5-highspeed"
+      ],
+      "approval_packet_sha256": "48e906a7c9d4527ab69aec45ae0394e6f106e3c885a05c9d6963284ed4483f4d"
+    }
+  },
+  "read_order": [
+    {
+      "order": 1,
+      "name": "Evaluation and benchmark harness",
+      "focus": [
+        "packet loading",
+        "frozen corpus handling",
+        "label adjudication",
+        "scoring logic",
+        "strict-admissible correctness",
+        "FPR/FNR accounting",
+        "result aggregation",
+        "report generation"
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Governor and decision logic",
+      "focus": [
+        "Gov logic",
+        "action-boundary decisions",
+        "deterministic gates",
+        "monotonic preservation",
+        "best-artifact preservation",
+        "final selector behavior",
+        "trace/accounting logic"
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Prompt, policy, and packet orchestration layer",
+      "focus": [
+        "rung-specific prompts",
+        "role prompts",
+        "no-Gov versus Gov differences",
+        "packet freezing",
+        "state injection",
+        "artifact passing",
+        "model routing",
+        "call budgets"
+      ]
+    },
+    {
+      "order": 4,
+      "name": "Runtime, failover, and model orchestration",
+      "focus": [
+        "provider routing",
+        "retries",
+        "failover",
+        "hidden second chances",
+        "timeout handling",
+        "partial result recovery"
+      ]
+    },
+    {
+      "order": 5,
+      "name": "Logging, observability, and trace surfaces",
+      "focus": [
+        "raw decisions",
+        "intermediate artifacts",
+        "rejected outputs",
+        "retries",
+        "state transitions",
+        "benchmark traces",
+        "token accounting"
+      ]
+    },
+    {
+      "order": 6,
+      "name": "HoloChat product surface",
+      "focus": [
+        "runtime labels",
+        "governed shadow",
+        "memory boundaries",
+        "Holo personality and continuity",
+        "user confusion"
+      ]
+    },
+    {
+      "order": 7,
+      "name": "HoloBuild",
+      "focus": [
+        "shared enforcement spine",
+        "real Gov calls",
+        "worker/Gov token accounting",
+        "final artifact selection"
+      ]
+    },
+    {
+      "order": 8,
+      "name": "Public benchmark and whitepaper surface",
+      "focus": [
+        "claim hygiene",
+        "hash lock explanation",
+        "immutable trace value",
+        "enterprise policies and SOPs",
+        "limitations"
+      ]
+    }
+  ],
+  "phase_sequence": [
+    "read-only adversarial audit",
+    "falsification plan",
+    "three-round adversarial review with Codex GPT-5.5 xhigh via CLI if available",
+    "controlled implementation through Codex CLI",
+    "UX and workflow audit",
+    "optional opportunity work"
+  ],
+  "first_deliverable": {
+    "path": "FABLE_READ_ONLY_SYSTEM_MAP_AND_CONFOUND_REGISTER.md",
+    "must_include": [
+      "five most likely ways evidence stack could be fooling us",
+      "where each risk would be confirmed or falsified",
+      "smallest falsification test for each",
+      "whether risk threatens public claims, engineering confidence, or product reliability",
+      "whether code changes are needed or only clearer evidence/reporting"
+    ]
+  }
+}

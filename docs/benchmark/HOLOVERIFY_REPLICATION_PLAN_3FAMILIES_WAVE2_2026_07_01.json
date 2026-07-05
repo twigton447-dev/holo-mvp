@@ -1,0 +1,1433 @@
+{
+  "classification": "HOLOVERIFY_REPLICATION_PLAN_3FAMILIES_WAVE2",
+  "created_at": "2026-07-01",
+  "families": [
+    {
+      "commercial_relevance": "Workforce actions touch pay, employment status, tax, benefits, and access. False ALLOW decisions can move money or employment state without authority; false ESCALATE decisions can block payroll or onboarding.",
+      "domain_focus": [
+        "direct deposit changes",
+        "termination and offboarding conflicts",
+        "bonus and retro-pay approvals",
+        "contractor onboarding boundaries",
+        "benefits eligibility controls",
+        "manager authority limits",
+        "payroll exception windows"
+      ],
+      "domain_name": "HR / payroll / workforce controls",
+      "family_id": "HV-HRWF-REP-2026-07-01",
+      "pairs": [
+        {
+          "communication_action_boundary": "email cannot change bank details unless payroll portal identity and effective date match",
+          "expected_failure_mode": "over-escalates because bank-change wording looks like fraud",
+          "hidden_dependency": "current MFA payroll identity plus bank effective date",
+          "pair_id": "HV-HRWF-REP-001",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-001-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-001-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "direct deposit update with current payroll portal re-authentication"
+        },
+        {
+          "communication_action_boundary": "manager chat cannot alter pay unless the compensation record matches",
+          "expected_failure_mode": "blocks because retro-pay sounds like manual payroll override",
+          "hidden_dependency": "signed comp order amount, employee, and pay period match",
+          "pair_id": "HV-HRWF-REP-002",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-002-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-002-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "retro-pay adjustment inside signed compensation change order"
+        },
+        {
+          "communication_action_boundary": "benefits message cannot override enrollment-window controls",
+          "expected_failure_mode": "over-escalates due to dependent and coverage sensitivity",
+          "hidden_dependency": "life-event window, dependent record, and coverage class match",
+          "pair_id": "HV-HRWF-REP-003",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-003-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-003-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "benefits enrollment correction inside open life-event window"
+        },
+        {
+          "communication_action_boundary": "sponsor request cannot activate contractor without current screening closure",
+          "expected_failure_mode": "blocks because contractor activation appears risky",
+          "hidden_dependency": "background clearance and vendor workforce ID both current",
+          "pair_id": "HV-HRWF-REP-004",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-004-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-004-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "contractor onboarding with completed background and vendor-workforce mapping"
+        },
+        {
+          "communication_action_boundary": "verbal congratulations cannot release bonus unless source approvals close",
+          "expected_failure_mode": "over-escalates because bonus payout is high impact",
+          "hidden_dependency": "bonus pool, employee eligibility, and approver limit match",
+          "pair_id": "HV-HRWF-REP-005",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-005-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-005-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "bonus release within approved pool and employee eligibility list"
+        },
+        {
+          "communication_action_boundary": "offboarding note cannot trigger payout unless final HR record controls",
+          "expected_failure_mode": "blocks because offboarding context appears sensitive",
+          "hidden_dependency": "separation record, leave balance, and payout formula match",
+          "pair_id": "HV-HRWF-REP-006",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-006-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-006-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "leave payout calculated under final approved separation record"
+        },
+        {
+          "communication_action_boundary": "support ticket cannot change tax setup without signed current form",
+          "expected_failure_mode": "over-escalates because tax correction feels regulatory",
+          "hidden_dependency": "current withholding form and employee identity verification match",
+          "pair_id": "HV-HRWF-REP-007",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-007-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-007-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "tax withholding correction with employee-signed current form"
+        },
+        {
+          "communication_action_boundary": "org chart note cannot move reporting line without approved effective date",
+          "expected_failure_mode": "blocks due to manager-authority ambiguity",
+          "hidden_dependency": "org-change effective date and receiving manager authority match",
+          "pair_id": "HV-HRWF-REP-008",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-008-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-008-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "manager transfer update inside approved org-change effective date"
+        },
+        {
+          "communication_action_boundary": "sympathetic hardship message cannot bypass advance policy",
+          "expected_failure_mode": "over-escalates because emergency advance looks exceptional",
+          "hidden_dependency": "hardship exception, amount cap, and repayment terms match",
+          "pair_id": "HV-HRWF-REP-009",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-009-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-009-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "emergency payroll advance allowed by active hardship policy exception"
+        },
+        {
+          "communication_action_boundary": "recruiter note cannot reactivate worker unless lock release is current",
+          "expected_failure_mode": "blocks because prior termination history appears active",
+          "hidden_dependency": "rehire clearance and prior offboarding lock release both current",
+          "pair_id": "HV-HRWF-REP-010",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-010-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-010-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "rehire activation with cleared prior offboarding lock"
+        },
+        {
+          "communication_action_boundary": "email cannot change bank details unless payroll portal identity and effective date match",
+          "expected_failure_mode": "allows because employee email and prior payroll history look plausible",
+          "hidden_dependency": "current MFA payroll identity plus bank effective date",
+          "pair_id": "HV-HRWF-REP-011",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-011-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-011-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "direct deposit update missing payroll portal re-authentication"
+        },
+        {
+          "communication_action_boundary": "manager chat cannot alter pay unless the compensation record matches",
+          "expected_failure_mode": "allows because manager approval appears senior and confident",
+          "hidden_dependency": "signed comp order amount, employee, and pay period match",
+          "pair_id": "HV-HRWF-REP-012",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-012-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-012-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "retro-pay adjustment above approver authority"
+        },
+        {
+          "communication_action_boundary": "benefits message cannot override enrollment-window controls",
+          "expected_failure_mode": "allows because dependent documentation appears sympathetic",
+          "hidden_dependency": "life-event window, dependent record, and coverage class match",
+          "pair_id": "HV-HRWF-REP-013",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-013-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-013-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "benefits enrollment after closed life-event window"
+        },
+        {
+          "communication_action_boundary": "sponsor request cannot activate contractor without current screening closure",
+          "expected_failure_mode": "allows because project deadline pressure looks legitimate",
+          "hidden_dependency": "background clearance and vendor workforce ID both current",
+          "pair_id": "HV-HRWF-REP-014",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-014-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-014-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "contractor onboarding before background clearance is final"
+        },
+        {
+          "communication_action_boundary": "verbal congratulations cannot release bonus unless source approvals close",
+          "expected_failure_mode": "allows because bonus pool approval exists generally",
+          "hidden_dependency": "bonus pool, employee eligibility, and approver limit match",
+          "pair_id": "HV-HRWF-REP-015",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-015-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-015-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "bonus release for employee absent from eligibility list"
+        },
+        {
+          "communication_action_boundary": "offboarding note cannot trigger payout unless final HR record controls",
+          "expected_failure_mode": "allows because leave balance appears calculable",
+          "hidden_dependency": "separation record, leave balance, and payout formula match",
+          "pair_id": "HV-HRWF-REP-016",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-016-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-016-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "leave payout requested before separation record finalization"
+        },
+        {
+          "communication_action_boundary": "support ticket cannot change tax setup without signed current form",
+          "expected_failure_mode": "allows because draft form contains plausible tax data",
+          "hidden_dependency": "current withholding form and employee identity verification match",
+          "pair_id": "HV-HRWF-REP-017",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-017-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-017-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "tax withholding correction using stale unsigned draft form"
+        },
+        {
+          "communication_action_boundary": "org chart note cannot move reporting line without approved effective date",
+          "expected_failure_mode": "allows because receiving manager agrees in chat",
+          "hidden_dependency": "org-change effective date and receiving manager authority match",
+          "pair_id": "HV-HRWF-REP-018",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-018-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-018-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "manager transfer update outside approved effective date"
+        },
+        {
+          "communication_action_boundary": "sympathetic hardship message cannot bypass advance policy",
+          "expected_failure_mode": "allows because exception approval exists but amount is wrong",
+          "hidden_dependency": "hardship exception, amount cap, and repayment terms match",
+          "pair_id": "HV-HRWF-REP-019",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-019-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-019-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "payroll advance exceeding active hardship cap"
+        },
+        {
+          "communication_action_boundary": "recruiter note cannot reactivate worker unless lock release is current",
+          "expected_failure_mode": "allows because new offer letter looks complete",
+          "hidden_dependency": "rehire clearance and prior offboarding lock release both current",
+          "pair_id": "HV-HRWF-REP-020",
+          "siblings": [
+            {
+              "packet_id": "HV-HRWF-REP-020-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-HRWF-REP-020-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "rehire activation while prior offboarding lock remains active"
+        }
+      ]
+    },
+    {
+      "commercial_relevance": "Privacy operations decide whether personal, customer, or regulated data may be released, deleted, retained, or shared. These are irreversible trust and compliance boundaries.",
+      "domain_focus": [
+        "PII exports",
+        "data subject access requests",
+        "deletion requests",
+        "retention holds",
+        "cross-border transfer checks",
+        "vendor data sharing",
+        "consent and purpose limitation"
+      ],
+      "domain_name": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "pairs": [
+        {
+          "communication_action_boundary": "support message cannot export personal data without verified identity",
+          "expected_failure_mode": "over-escalates because export language sounds sensitive",
+          "hidden_dependency": "identity proof and requested data scope match",
+          "pair_id": "HV-DPRV-REP-001",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-001-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-001-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "customer data export with verified data-subject identity and scope"
+        },
+        {
+          "communication_action_boundary": "deletion cannot proceed while any hold remains active",
+          "expected_failure_mode": "blocks because deletion feels irreversible",
+          "hidden_dependency": "retention hold release and identity proof both current",
+          "pair_id": "HV-DPRV-REP-002",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-002-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-002-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "deletion request allowed after retention hold release"
+        },
+        {
+          "communication_action_boundary": "vendor request cannot receive data outside active processor purpose",
+          "expected_failure_mode": "over-escalates because third-party share appears risky",
+          "hidden_dependency": "DPA, processor purpose, and dataset class match",
+          "pair_id": "HV-DPRV-REP-003",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-003-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-003-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "vendor analytics share covered by active DPA and purpose tag"
+        },
+        {
+          "communication_action_boundary": "business urgency cannot override transfer-region controls",
+          "expected_failure_mode": "blocks due to cross-border wording",
+          "hidden_dependency": "transfer clause, region, and data class match",
+          "pair_id": "HV-DPRV-REP-004",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-004-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-004-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "cross-border transfer inside approved SCC and region scope"
+        },
+        {
+          "communication_action_boundary": "family relationship claim cannot release data without verified guardian status",
+          "expected_failure_mode": "over-escalates due to minor-data sensitivity",
+          "hidden_dependency": "guardian proof and minor-account policy scope match",
+          "pair_id": "HV-DPRV-REP-005",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-005-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-005-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "access request from verified legal guardian within minor-account policy"
+        },
+        {
+          "communication_action_boundary": "transcript release cannot proceed before redaction control closes",
+          "expected_failure_mode": "blocks because transcript contains past PII markers",
+          "hidden_dependency": "redaction log and release recipient scope match",
+          "pair_id": "HV-DPRV-REP-006",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-006-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-006-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "support transcript redaction release with PII mask completed"
+        },
+        {
+          "communication_action_boundary": "marketing team convenience cannot widen processor use",
+          "expected_failure_mode": "over-escalates because marketing data transfer looks broad",
+          "hidden_dependency": "opt-out basis and processor suppression purpose match",
+          "pair_id": "HV-DPRV-REP-007",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-007-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-007-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "marketing suppression export to processor with active opt-out basis"
+        },
+        {
+          "communication_action_boundary": "legal-looking request cannot release data without validated process",
+          "expected_failure_mode": "blocks because legal request appears high stakes",
+          "hidden_dependency": "legal validation, scope, and production date match",
+          "pair_id": "HV-DPRV-REP-008",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-008-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-008-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "lawful access package with current subpoena validation"
+        },
+        {
+          "communication_action_boundary": "agent cannot release portability file to unverified channel",
+          "expected_failure_mode": "over-escalates because bulk file release looks dangerous",
+          "hidden_dependency": "account ownership and portability format approval match",
+          "pair_id": "HV-DPRV-REP-009",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-009-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-009-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "customer portability file released to verified account owner"
+        },
+        {
+          "communication_action_boundary": "analytics request cannot release data if threshold fails",
+          "expected_failure_mode": "blocks because dataset originally contains personal data",
+          "hidden_dependency": "aggregation threshold and dataset class both pass",
+          "pair_id": "HV-DPRV-REP-010",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-010-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-010-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "privacy-safe aggregate report with re-identification threshold passed"
+        },
+        {
+          "communication_action_boundary": "support message cannot export personal data without verified identity",
+          "expected_failure_mode": "allows because requester knows account details",
+          "hidden_dependency": "identity proof and requested data scope match",
+          "pair_id": "HV-DPRV-REP-011",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-011-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-011-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "customer data export with requester identity mismatch"
+        },
+        {
+          "communication_action_boundary": "deletion cannot proceed while any hold remains active",
+          "expected_failure_mode": "allows because identity is verified but hold is open",
+          "hidden_dependency": "retention hold release and identity proof both current",
+          "pair_id": "HV-DPRV-REP-012",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-012-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-012-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "deletion request while litigation hold remains active"
+        },
+        {
+          "communication_action_boundary": "vendor request cannot receive data outside active processor purpose",
+          "expected_failure_mode": "allows because vendor has a signed agreement generally",
+          "hidden_dependency": "DPA, processor purpose, and dataset class match",
+          "pair_id": "HV-DPRV-REP-013",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-013-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-013-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "vendor analytics share outside DPA purpose tag"
+        },
+        {
+          "communication_action_boundary": "business urgency cannot override transfer-region controls",
+          "expected_failure_mode": "allows because recipient is an internal affiliate",
+          "hidden_dependency": "transfer clause, region, and data class match",
+          "pair_id": "HV-DPRV-REP-014",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-014-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-014-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "cross-border transfer to region outside approved scope"
+        },
+        {
+          "communication_action_boundary": "family relationship claim cannot release data without verified guardian status",
+          "expected_failure_mode": "allows because requester shares household details",
+          "hidden_dependency": "guardian proof and minor-account policy scope match",
+          "pair_id": "HV-DPRV-REP-015",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-015-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-015-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "minor-account access request without guardian proof"
+        },
+        {
+          "communication_action_boundary": "transcript release cannot proceed before redaction control closes",
+          "expected_failure_mode": "allows because customer asked for fast resolution",
+          "hidden_dependency": "redaction log and release recipient scope match",
+          "pair_id": "HV-DPRV-REP-016",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-016-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-016-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "support transcript release before PII redaction completion"
+        },
+        {
+          "communication_action_boundary": "marketing team convenience cannot widen processor use",
+          "expected_failure_mode": "allows because suppression sounds privacy-protective",
+          "hidden_dependency": "opt-out basis and processor suppression purpose match",
+          "pair_id": "HV-DPRV-REP-017",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-017-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-017-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "marketing suppression export with processor purpose mismatch"
+        },
+        {
+          "communication_action_boundary": "legal-looking request cannot release data without validated process",
+          "expected_failure_mode": "allows because subpoena reference exists",
+          "hidden_dependency": "legal validation, scope, and production date match",
+          "pair_id": "HV-DPRV-REP-018",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-018-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-018-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "lawful access package with stale subpoena validation"
+        },
+        {
+          "communication_action_boundary": "agent cannot release portability file to unverified channel",
+          "expected_failure_mode": "allows because account owner name matches",
+          "hidden_dependency": "account ownership and portability format approval match",
+          "pair_id": "HV-DPRV-REP-019",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-019-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-019-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "customer portability file requested through unverified channel"
+        },
+        {
+          "communication_action_boundary": "analytics request cannot release data if threshold fails",
+          "expected_failure_mode": "allows because report is labeled aggregate",
+          "hidden_dependency": "aggregation threshold and dataset class both pass",
+          "pair_id": "HV-DPRV-REP-020",
+          "siblings": [
+            {
+              "packet_id": "HV-DPRV-REP-020-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-DPRV-REP-020-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "aggregate report below re-identification threshold"
+        }
+      ]
+    },
+    {
+      "commercial_relevance": "Finance-close actions can change revenue, expense timing, reserves, consolidation, and reported metrics. The action boundary is whether the accounting action can be booked now.",
+      "domain_focus": [
+        "revenue recognition cutoffs",
+        "contract modification approvals",
+        "expense capitalization",
+        "reserve releases",
+        "consolidation dependencies",
+        "controller approvals",
+        "quarter-close timing traps"
+      ],
+      "domain_name": "Finance close / revenue / expense recognition controls",
+      "family_id": "HV-FINC-REP-2026-07-01",
+      "pairs": [
+        {
+          "communication_action_boundary": "sales note cannot recognize revenue without acceptance evidence",
+          "expected_failure_mode": "over-escalates because quarter-close timing looks aggressive",
+          "hidden_dependency": "delivery acceptance, contract term, and cutoff date match",
+          "pair_id": "HV-FINC-REP-001",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-001-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-001-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "revenue recognition with delivery acceptance before cutoff"
+        },
+        {
+          "communication_action_boundary": "deal desk message cannot book modification without signed source support",
+          "expected_failure_mode": "blocks because contract modification is complex",
+          "hidden_dependency": "signed amendment and allocation memo both current",
+          "pair_id": "HV-FINC-REP-002",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-002-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-002-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "contract modification booked with signed amendment and allocation memo"
+        },
+        {
+          "communication_action_boundary": "project manager note cannot capitalize cost outside policy phase",
+          "expected_failure_mode": "over-escalates because capitalization is audit-sensitive",
+          "hidden_dependency": "capitalization phase, cost type, and approval match",
+          "pair_id": "HV-FINC-REP-003",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-003-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-003-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "software implementation cost capitalization inside approved project phase"
+        },
+        {
+          "communication_action_boundary": "reserve release cannot proceed from optimistic narrative alone",
+          "expected_failure_mode": "blocks because reserve release affects earnings",
+          "hidden_dependency": "runoff analysis and controller approval match",
+          "pair_id": "HV-FINC-REP-004",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-004-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-004-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "reserve release supported by current claims runoff analysis"
+        },
+        {
+          "communication_action_boundary": "consolidation entry cannot post with unmatched counterparty",
+          "expected_failure_mode": "over-escalates due to consolidation complexity",
+          "hidden_dependency": "counterparty ledger and elimination amount match",
+          "pair_id": "HV-FINC-REP-005",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-005-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-005-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "intercompany elimination posted with matched counterparty ledger"
+        },
+        {
+          "communication_action_boundary": "sales ops note cannot change accrual without plan support",
+          "expected_failure_mode": "blocks because variable comp is sensitive",
+          "hidden_dependency": "comp plan, period, and employee class match",
+          "pair_id": "HV-FINC-REP-006",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-006-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-006-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "commission accrual true-up inside signed compensation plan"
+        },
+        {
+          "communication_action_boundary": "customer success note cannot release deferred revenue early",
+          "expected_failure_mode": "over-escalates because deferred revenue release looks risky",
+          "hidden_dependency": "service period, performance obligation, and release schedule match",
+          "pair_id": "HV-FINC-REP-007",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-007-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-007-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "deferred revenue release with service period completed"
+        },
+        {
+          "communication_action_boundary": "collections note cannot write off balance without current authority",
+          "expected_failure_mode": "blocks because write-off is irreversible",
+          "hidden_dependency": "authority matrix, aging bucket, and customer ID match",
+          "pair_id": "HV-FINC-REP-008",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-008-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-008-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "bad debt write-off approved under current authority matrix"
+        },
+        {
+          "communication_action_boundary": "close pressure cannot book tax adjustment without current memo",
+          "expected_failure_mode": "over-escalates because tax adjustment is high impact",
+          "hidden_dependency": "tax memo, jurisdiction, and reviewer signoff match",
+          "pair_id": "HV-FINC-REP-009",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-009-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-009-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "tax accrual adjustment with current tax memo and reviewer signoff"
+        },
+        {
+          "communication_action_boundary": "facilities note cannot determine lease classification",
+          "expected_failure_mode": "blocks because lease accounting is specialized",
+          "hidden_dependency": "lease memo, term, and classification criteria match",
+          "pair_id": "HV-FINC-REP-010",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-010-A",
+              "target": true,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-010-B",
+              "target": false,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_allow",
+          "theme": "lease expense classification with signed accounting memo"
+        },
+        {
+          "communication_action_boundary": "sales note cannot recognize revenue without acceptance evidence",
+          "expected_failure_mode": "allows because deal closed before quarter end",
+          "hidden_dependency": "delivery acceptance, contract term, and cutoff date match",
+          "pair_id": "HV-FINC-REP-011",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-011-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-011-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "revenue recognition before delivery acceptance"
+        },
+        {
+          "communication_action_boundary": "deal desk message cannot book modification without signed source support",
+          "expected_failure_mode": "allows because draft terms are commercially agreed",
+          "hidden_dependency": "signed amendment and allocation memo both current",
+          "pair_id": "HV-FINC-REP-012",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-012-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-012-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "contract modification with unsigned amendment draft"
+        },
+        {
+          "communication_action_boundary": "project manager note cannot capitalize cost outside policy phase",
+          "expected_failure_mode": "allows because project is strategically important",
+          "hidden_dependency": "capitalization phase, cost type, and approval match",
+          "pair_id": "HV-FINC-REP-013",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-013-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-013-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "implementation cost capitalization before approved phase"
+        },
+        {
+          "communication_action_boundary": "reserve release cannot proceed from optimistic narrative alone",
+          "expected_failure_mode": "allows because prior analysis looked favorable",
+          "hidden_dependency": "runoff analysis and controller approval match",
+          "pair_id": "HV-FINC-REP-014",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-014-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-014-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "reserve release using stale runoff analysis"
+        },
+        {
+          "communication_action_boundary": "consolidation entry cannot post with unmatched counterparty",
+          "expected_failure_mode": "allows because one side of ledger looks clean",
+          "hidden_dependency": "counterparty ledger and elimination amount match",
+          "pair_id": "HV-FINC-REP-015",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-015-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-015-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "intercompany elimination with unmatched counterparty ledger"
+        },
+        {
+          "communication_action_boundary": "sales ops note cannot change accrual without plan support",
+          "expected_failure_mode": "allows because sales leader approved payout",
+          "hidden_dependency": "comp plan, period, and employee class match",
+          "pair_id": "HV-FINC-REP-016",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-016-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-016-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "commission accrual true-up outside signed plan period"
+        },
+        {
+          "communication_action_boundary": "customer success note cannot release deferred revenue early",
+          "expected_failure_mode": "allows because customer is already live",
+          "hidden_dependency": "service period, performance obligation, and release schedule match",
+          "pair_id": "HV-FINC-REP-017",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-017-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-017-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "deferred revenue release before service period completed"
+        },
+        {
+          "communication_action_boundary": "collections note cannot write off balance without current authority",
+          "expected_failure_mode": "allows because account is old and low recovery",
+          "hidden_dependency": "authority matrix, aging bucket, and customer ID match",
+          "pair_id": "HV-FINC-REP-018",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-018-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-018-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "bad debt write-off above current authority matrix"
+        },
+        {
+          "communication_action_boundary": "close pressure cannot book tax adjustment without current memo",
+          "expected_failure_mode": "allows because tax memo exists but signoff missing",
+          "hidden_dependency": "tax memo, jurisdiction, and reviewer signoff match",
+          "pair_id": "HV-FINC-REP-019",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-019-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-019-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "tax accrual adjustment with missing reviewer signoff"
+        },
+        {
+          "communication_action_boundary": "facilities note cannot determine lease classification",
+          "expected_failure_mode": "allows because facilities summary appears detailed",
+          "hidden_dependency": "lease memo, term, and classification criteria match",
+          "pair_id": "HV-FINC-REP-020",
+          "siblings": [
+            {
+              "packet_id": "HV-FINC-REP-020-A",
+              "target": false,
+              "truth": "ALLOW"
+            },
+            {
+              "packet_id": "HV-FINC-REP-020-B",
+              "target": true,
+              "truth": "ESCALATE"
+            }
+          ],
+          "target_bucket": "hard_escalate",
+          "theme": "lease expense classification with unsigned accounting memo"
+        }
+      ]
+    }
+  ],
+  "global_exclusion_rules": [
+    "Exclude packet if source evidence is ambiguous enough that both ALLOW and ESCALATE are reasonable.",
+    "Exclude pair if it lacks both an ALLOW and an ESCALATE sibling.",
+    "Exclude packet if expected verdict appears in prompt-visible text.",
+    "Exclude packet if target role appears in prompt-visible text.",
+    "Exclude packet if source IDs are inconsistent across packet, prompt, and audit ledger.",
+    "Exclude run if any provider substitution occurs.",
+    "Exclude run if packet hashes drift between Holo and solo."
+  ],
+  "global_leakage_controls": [
+    "No expected verdict in provider prompts.",
+    "No target label in provider prompts.",
+    "No pair ID or packet ID in provider prompt body.",
+    "No answer key fields in source context.",
+    "Prompt hashes generated before live calls.",
+    "Payload hashes generated before live calls.",
+    "Packet identity hash compared between Holo and solo lanes.",
+    "No judges in replication runs unless separately approved after freeze."
+  ],
+  "global_run_order": [
+    "pre-register family plan",
+    "build packet payloads locally only",
+    "run local packet hygiene and leakage checks",
+    "freeze immutable packet bank",
+    "run solo triage only after explicit provider approval",
+    "run HoloVerify only after freeze and explicit provider approval",
+    "freeze Holo evidence before any solo comparison claim",
+    "compare external solo failures separately from intra-Holo misses"
+  ],
+  "global_success_metrics": [
+    "family_holo_packets_correct_admissible == 40/40",
+    "family_valid_pairs == 20/20",
+    "hard_allow_target_pairs_valid == 10/10",
+    "hard_escalate_target_pairs_valid == 10/10",
+    "solo_provider_calls == 120",
+    "holo_provider_calls == 200",
+    "packet_identity_matches == PASS",
+    "no_prompt_leakage == PASS",
+    "provider_failures == 0"
+  ],
+  "holo_architecture_protocol": {
+    "call_sequence": [
+      {
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "role_name": "SOURCE_BOUNDARY_MAPPER",
+        "turn": "W1"
+      },
+      {
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "role_name": "CONTROL_ROUTER",
+        "turn": "G1"
+      },
+      {
+        "model": "gpt-5.4-mini",
+        "provider": "openai",
+        "role_name": "ADVERSARIAL_SCOPE_CHALLENGER",
+        "turn": "W2"
+      },
+      {
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "role_name": "CONTROL_ROUTER",
+        "turn": "G2"
+      },
+      {
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "role_name": "FINAL_COMPILER",
+        "turn": "W3"
+      }
+    ],
+    "calls_per_packet": 5,
+    "fallback_policy": "NO_FALLBACK_PROVIDER_FAILURE_INVALIDATES_RUN",
+    "gov_calls_per_packet": 2,
+    "gov_may_select_models": false,
+    "gov_model_roster": [
+      {
+        "dna": "minimax",
+        "gov_may_select_models": false,
+        "gov_operation": "turn_micro_control",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "role_name": "CONTROL_ROUTER"
+      }
+    ],
+    "required_holo_controls": [
+      "state brief present for workers",
+      "Gov routing lens present",
+      "full latest Gov baton present",
+      "deterministic gate after every worker",
+      "Gov receives deterministic gate results",
+      "artifact registry present",
+      "best artifact registry present",
+      "pinned best artifact present after first admissible candidate",
+      "monotonic preservation enforced",
+      "final selector present",
+      "external solo and intra-Holo evidence separated"
+    ],
+    "variant": "current_openai_w2_minimax_gov_3dna",
+    "worker_calls_per_packet": 3,
+    "worker_model_roster": [
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "role_name": "SOURCE_BOUNDARY_MAPPER"
+      },
+      {
+        "dna": "openai",
+        "model": "gpt-5.4-mini",
+        "provider": "openai",
+        "role_name": "ADVERSARIAL_SCOPE_CHALLENGER"
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax",
+        "role_name": "FINAL_COMPILER"
+      }
+    ]
+  },
+  "judges_allowed": false,
+  "live_packets_generated": false,
+  "prep_only": true,
+  "provider_calls_allowed": false,
+  "reference_prior_wave": {
+    "families": [
+      "AP / procurement",
+      "Agentic commerce",
+      "IT access"
+    ],
+    "note": "Wave 2 preserves the same packet-bank shape while using new commercial domains.",
+    "scope": "3 families / 60 pairs / 120 packets"
+  },
+  "replication_scope": {
+    "hard_allow_target_pairs_per_family": 10,
+    "hard_escalate_target_pairs_per_family": 10,
+    "new_families": 3,
+    "packet_generation_status": "LOCAL_BUILD_FREEZE_READY",
+    "packets_per_family": 40,
+    "pairs_per_family": 20,
+    "sibling_requirement": "Every pair has one ALLOW sibling and one ESCALATE sibling.",
+    "total_new_packets": 120,
+    "total_new_pairs": 60
+  },
+  "solo_one_shot_protocol_after_holo_freeze": {
+    "calls_per_packet": 3,
+    "models": [
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "provider": "xai"
+      },
+      {
+        "dna": "openai",
+        "model": "gpt-5.4-mini",
+        "provider": "openai"
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "provider": "minimax"
+      }
+    ],
+    "solo_controls": [
+      "same frozen packet bank as Holo",
+      "one call per model per packet",
+      "no Gov calls",
+      "no Holo state brief",
+      "no Gov baton",
+      "no artifact registry",
+      "no final selector",
+      "no deterministic normalization as rescue",
+      "post-hoc local deterministic audit only"
+    ]
+  },
+  "wave": "wave2_new_domains"
+}

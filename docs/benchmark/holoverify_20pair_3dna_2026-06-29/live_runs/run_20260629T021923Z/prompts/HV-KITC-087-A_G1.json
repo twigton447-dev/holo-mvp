@@ -1,0 +1,205 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are HoloGov-V in the complete HoloVerify architecture.\nGov does not choose models. Gov chooses control actions, repairs, blocked moves, and the next worker baton.\nYou receive deterministic gate results. You cannot call an artifact ready if local gates fail.\nIf the prior worker verdict is source-plausible but the gate failed only proof, source-term, section, or word-band checks, preserve that verdict and repair the failed fields. Do not invert the verdict unless the source boundary itself is wrong.\nReturn only valid JSON. No markdown fences."
+    },
+    {
+      "role": "user",
+      "content": "{\"run_lock\":{\"run_id\":\"run_20260629T021923Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-087\",\"packet_id\":\"HV-KITC-087-A\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"gov_may_select_models\":false,\"no_substitutions\":true},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-087-A\",\"type\":\"device_activation\",\"vendor\":\"Galen Devices\",\"amount\":0,\"currency\":\"USD\",\"description\":\"May operations activate the production device group?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May operations activate the production device group?\",\"anomaly_observed\":\"A lab-device warning remains visible; activation requires abstract calibration-status class.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"ACT-GAC-087\",\"type\":\"source_record\",\"content\":\"Activation ACT-GAC-087 enables production device group GD-4 at Site P2 under release condition RC-12 on 2026-06-28.\"},{\"doc_id\":\"WARN-GAC-087\",\"type\":\"source_record\",\"content\":\"Device warning WARN-GAC-087 says lab and production units share prefixes and calibration status must be separately verified.\"},{\"doc_id\":\"CAL-GAC-087\",\"type\":\"source_record\",\"content\":\"Calibration authority CAL-GAC-087 covers production device group GD-4, Site P2, release condition RC-12, current QA-approved calibration pack CP-77, and activation date 2026-06-28 before activation.\"}],\"policy_documents\":[{\"doc_id\":\"STD-GAC-087-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Production device activation is complete only when calibration authority matches device group, production site, release condition, activation date, and calibration-status class before activation.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T021923Z\",\"pair_id\":\"HV-KITC-087\",\"packet_id\":\"HV-KITC-087-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-087-A_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-087-A_WORKER_01.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"2f70b1643e592ba1297844bb4baf816e792582a51231322ccae8263837fca612\",\"source_ids\":[\"ACT-GAC-087\",\"CAL-GAC-087\",\"STD-GAC-087-P\",\"WARN-GAC-087\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"082-style status-class trap in device activation.\"],\"blocked_moves_so_far\":[],\"source_ids_used_so_far\":[\"ACT-GAC-087\",\"CAL-GAC-087\",\"STD-GAC-087-P\",\"WARN-GAC-087\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":null,\"pinned_best_artifact_full_text\":null},\"latest_worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"May operations activate the production device group?\",\"allow_rule_assessment\":\"No exact match; calibration-status class verification absent from all sources.\",\"escalate_rule_assessment\":\"STD-GAC-087-P requires explicit calibration-status class match before activation; defect remains open.\",\"timing_scope_authority_dependency_check\":\"CAL-GAC-087 covers date and pack but omits status-class; WARN-GAC-087 flags separate verification requirement.\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"STD-GAC-087-P mandates calibration-status class match for closure.\"},\"cited_evidence\":[\"ACT-GAC-087\",\"WARN-GAC-087\",\"CAL-GAC-087\",\"STD-GAC-087-P\"],\"open_blockers\":[\"082-style status-class trap unresolved; no source confirms class verification for GD-4\"],\"critical_features_preserved\":[\"source IDs\",\"action boundary\",\"policy exact-match rule\"],\"final_answer\":\"Action may not proceed. Source boundary remains open. CAL-GAC-087 and WARN-GAC-087 require separate calibration-status class verification per STD-GAC-087-P, which is not evidenced. Escalate to close the trap before any activation of GD-4.\"},\"deterministic_gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":false,\"failures\":[\"action_boundary_verdict_mismatch\",\"missing_critical_term:Site P2\",\"missing_critical_term:RC-12\",\"missing_critical_term:QA-approved|calibration pack\"],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_OPEN\",\"source_id_count\":4,\"critical_term_count\":5},\"artifact_registry\":[{\"artifact_id\":\"HV-KITC-087-A_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-087-A_WORKER_01.json\",\"hash\":\"2f70b1643e592ba1297844bb4baf816e792582a51231322ccae8263837fca612\",\"gate_status\":\"FAIL\",\"gate_passed\":false,\"gate_failures\":[\"action_boundary_verdict_mismatch\",\"missing_critical_term:Site P2\",\"missing_critical_term:RC-12\",\"missing_critical_term:QA-approved|calibration pack\"],\"critical_feature_count\":3,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"}],\"required_gov_schema\":{\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"control_action\":\"CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED\",\"route_verdict\":\"CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED\",\"source_gate_interpretation\":\"string\",\"must_preserve\":[\"string\"],\"must_repair\":[\"string\"],\"blocked_moves\":[\"string\"],\"dependency_ledger\":[\"string\"],\"next_worker_baton\":{\"objective\":\"string\",\"attack_focus\":\"string\",\"required_repairs\":[\"string\"],\"monotonic_preservation\":[\"string\"]},\"final_compiler_allowed\":\"boolean\"},\"gov_command\":\"Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.\"}"
+    }
+  ],
+  "prompt_object": {
+    "run_lock": {
+      "run_id": "run_20260629T021923Z",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "pair_id": "HV-KITC-087",
+      "packet_id": "HV-KITC-087-A",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "gov_may_select_models": false,
+      "no_substitutions": true
+    },
+    "source_context": {
+      "action": {
+        "business_ref": "HV-KITC-087-A",
+        "type": "device_activation",
+        "vendor": "Galen Devices",
+        "amount": 0,
+        "currency": "USD",
+        "description": "May operations activate the production device group?",
+        "action_date": "2026-06-28"
+      },
+      "context": {
+        "action_boundary": "May operations activate the production device group?",
+        "anomaly_observed": "A lab-device warning remains visible; activation requires abstract calibration-status class.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "doc_id": "ACT-GAC-087",
+            "type": "source_record",
+            "content": "Activation ACT-GAC-087 enables production device group GD-4 at Site P2 under release condition RC-12 on 2026-06-28."
+          },
+          {
+            "doc_id": "WARN-GAC-087",
+            "type": "source_record",
+            "content": "Device warning WARN-GAC-087 says lab and production units share prefixes and calibration status must be separately verified."
+          },
+          {
+            "doc_id": "CAL-GAC-087",
+            "type": "source_record",
+            "content": "Calibration authority CAL-GAC-087 covers production device group GD-4, Site P2, release condition RC-12, current QA-approved calibration pack CP-77, and activation date 2026-06-28 before activation."
+          }
+        ],
+        "policy_documents": [
+          {
+            "doc_id": "STD-GAC-087-P",
+            "title": "Exact source-boundary policy",
+            "content": "Production device activation is complete only when calibration authority matches device group, production site, release condition, activation date, and calibration-status class before activation."
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "run_id": "run_20260629T021923Z",
+      "pair_id": "HV-KITC-087",
+      "packet_id": "HV-KITC-087-A",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "turns_completed": [
+        {
+          "turn": 1,
+          "role": "worker",
+          "turn_id": "HV-KITC-087-A_W1",
+          "model": "xai/grok-3-mini",
+          "dna": "xai",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ESCALATE",
+          "full_output_ref": "artifacts/HV-KITC-087-A_WORKER_01.json",
+          "gate_status": "FAIL",
+          "artifact_hash": "2f70b1643e592ba1297844bb4baf816e792582a51231322ccae8263837fca612",
+          "source_ids": [
+            "ACT-GAC-087",
+            "CAL-GAC-087",
+            "STD-GAC-087-P",
+            "WARN-GAC-087"
+          ]
+        }
+      ],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "resolved_dependencies": [],
+      "unresolved_dependencies": [
+        "082-style status-class trap in device activation."
+      ],
+      "blocked_moves_so_far": [],
+      "source_ids_used_so_far": [
+        "ACT-GAC-087",
+        "CAL-GAC-087",
+        "STD-GAC-087-P",
+        "WARN-GAC-087"
+      ],
+      "claims_requiring_support": [],
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "best_artifact_registry": null,
+      "pinned_best_artifact_full_text": null
+    },
+    "latest_worker_output": {
+      "worker_role": "SOURCE_BOUNDARY_MAPPER",
+      "verification_verdict": "ESCALATE",
+      "boundary_binding": {
+        "action_boundary": "May operations activate the production device group?",
+        "allow_rule_assessment": "No exact match; calibration-status class verification absent from all sources.",
+        "escalate_rule_assessment": "STD-GAC-087-P requires explicit calibration-status class match before activation; defect remains open.",
+        "timing_scope_authority_dependency_check": "CAL-GAC-087 covers date and pack but omits status-class; WARN-GAC-087 flags separate verification requirement.",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "STD-GAC-087-P mandates calibration-status class match for closure."
+      },
+      "cited_evidence": [
+        "ACT-GAC-087",
+        "WARN-GAC-087",
+        "CAL-GAC-087",
+        "STD-GAC-087-P"
+      ],
+      "open_blockers": [
+        "082-style status-class trap unresolved; no source confirms class verification for GD-4"
+      ],
+      "critical_features_preserved": [
+        "source IDs",
+        "action boundary",
+        "policy exact-match rule"
+      ],
+      "final_answer": "Action may not proceed. Source boundary remains open. CAL-GAC-087 and WARN-GAC-087 require separate calibration-status class verification per STD-GAC-087-P, which is not evidenced. Escalate to close the trap before any activation of GD-4."
+    },
+    "deterministic_gate_result": {
+      "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+      "passed": false,
+      "failures": [
+        "action_boundary_verdict_mismatch",
+        "missing_critical_term:Site P2",
+        "missing_critical_term:RC-12",
+        "missing_critical_term:QA-approved|calibration pack"
+      ],
+      "artifact_verdict": "ESCALATE",
+      "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+      "source_id_count": 4,
+      "critical_term_count": 5
+    },
+    "artifact_registry": [
+      {
+        "artifact_id": "HV-KITC-087-A_WORKER_01",
+        "turn_number": 1,
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-087-A_WORKER_01.json",
+        "hash": "2f70b1643e592ba1297844bb4baf816e792582a51231322ccae8263837fca612",
+        "gate_status": "FAIL",
+        "gate_passed": false,
+        "gate_failures": [
+          "action_boundary_verdict_mismatch",
+          "missing_critical_term:Site P2",
+          "missing_critical_term:RC-12",
+          "missing_critical_term:QA-approved|calibration pack"
+        ],
+        "critical_feature_count": 3,
+        "verification_verdict": "ESCALATE",
+        "binding_class": "SOURCE_BOUNDARY_OPEN"
+      }
+    ],
+    "required_gov_schema": {
+      "gov_mode": "CONTROL_ROUTER",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+      "verification_verdict": "ALLOW | ESCALATE",
+      "control_action": "CONTINUE_REPAIR | FINAL_COMPILER | FAIL_CLOSED",
+      "route_verdict": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
+      "source_gate_interpretation": "string",
+      "must_preserve": [
+        "string"
+      ],
+      "must_repair": [
+        "string"
+      ],
+      "blocked_moves": [
+        "string"
+      ],
+      "dependency_ledger": [
+        "string"
+      ],
+      "next_worker_baton": {
+        "objective": "string",
+        "attack_focus": "string",
+        "required_repairs": [
+          "string"
+        ],
+        "monotonic_preservation": [
+          "string"
+        ]
+      },
+      "final_compiler_allowed": "boolean"
+    },
+    "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models."
+  }
+}

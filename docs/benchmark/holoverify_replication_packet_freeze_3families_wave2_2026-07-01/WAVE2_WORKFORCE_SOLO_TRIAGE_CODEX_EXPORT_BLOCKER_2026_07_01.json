@@ -1,0 +1,49 @@
+{
+  "classification": "WAVE2_WORKFORCE_SOLO_TRIAGE_CODEX_EXPORT_BLOCKED_NO_PROVIDER_CALLS",
+  "family_id": "HV-HRWF-REP-2026-07-01",
+  "domain": "HR / payroll / workforce controls",
+  "freeze_root_hash": "80d8106d7efe72bee44d2c05648b71814204c08e1f96934afefd3d75d242845f",
+  "packet_count": 40,
+  "pair_count": 20,
+  "truth_counts": {
+    "ALLOW": 20,
+    "ESCALATE": 20
+  },
+  "expected_provider_calls": 120,
+  "provider_calls_made_from_codex": 0,
+  "gov_calls": 0,
+  "holo_calls": 0,
+  "judge_calls": 0,
+  "local_validation": {
+    "py_compile": "PASS",
+    "workforce_preflight": "PASS",
+    "packet_hashes": "PASS",
+    "prompt_hashes": "PASS",
+    "prompt_leakage_rows": [],
+    "no_gov": true,
+    "no_holo_state": true,
+    "no_judges": true,
+    "no_gpt_4o_mini_in_triage_roster": true
+  },
+  "solo_roster": [
+    {
+      "provider": "xai",
+      "model": "grok-3-mini",
+      "env": "XAI_API_KEY"
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "env": "OPENAI_API_KEY"
+    },
+    {
+      "provider": "minimax",
+      "model": "MiniMax-M2.5-highspeed",
+      "env": "MINIMAX_API_KEY"
+    }
+  ],
+  "blocker": "Codex tenant policy blocked export of frozen benchmark packet/prompt content to external providers.",
+  "benchmark_result_created": false,
+  "next_valid_move": "Run WAVE2_WORKFORCE_SOLO_TRIAGE_EXTERNAL_EXECUTION_HANDOFF_2026_07_01 from an authorized local shell."
+}
+

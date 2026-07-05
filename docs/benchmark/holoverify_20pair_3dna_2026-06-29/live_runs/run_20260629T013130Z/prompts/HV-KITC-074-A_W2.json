@@ -1,0 +1,291 @@
+{
+  "messages": [
+    {
+      "content": "You are a HoloVerify worker. Preserve state. Obey Gov.\nWorkers receive Gov twice: a routing lens near the top and the full latest baton near the end.\nSource context is ground truth. The state brief preserves continuity. The final baton controls the next action.\nReturn only valid JSON. No markdown fences.",
+      "role": "system"
+    },
+    {
+      "content": "{\"system_role\":\"HoloVerify worker. Preserve state. Obey Gov.\",\"gov_routing_lens\":{\"route_verdict\":\"CONTINUE_WORKER\",\"main_repair_target\":\"Explicitly cite critical term: Tessa Medical GmbH\",\"blocked_move\":\"Changing ALLOW to ESCALATE or FAIL\",\"unresolved_dependency\":\"resolved\",\"current_objective\":\"ADVERSARIAL_SCOPE_CHALLENGER\"},\"run_lock\":{\"run_id\":\"run_20260629T013130Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-074\",\"packet_id\":\"HV-KITC-074-A\",\"worker_index\":2,\"worker_role\":\"ADVERSARIAL_SCOPE_CHALLENGER\",\"model\":\"google/gemini-2.5-flash-lite\",\"no_substitutions\":true},\"task_and_answer_contract\":{\"task\":\"Decide whether the action may proceed using only source records in this packet.\",\"answer_contract\":{\"worker_role\":\"string\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"open_blockers\":[\"string\"],\"critical_features_preserved\":[\"string\"],\"final_answer\":\"string\"},\"word_band\":\"final_answer 25-120 words\",\"source_rules\":[\"cite exact doc_id values only\",\"do not invent source IDs\",\"ALLOW only when exact current source boundary is closed before execution\",\"ESCALATE when a narrow source-record defect remains open before execution\"],\"deterministic_gate_categories\":[\"word band\",\"required sections\",\"source IDs\",\"invented source IDs\",\"timing/scope/authority/dependency section\",\"action-boundary violations\",\"critical dependencies/traps\"]},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-074-A\",\"type\":\"payment_release\",\"vendor\":\"Tessa Medical GmbH\",\"amount\":68900,\"currency\":\"USD\",\"description\":\"May AP release payment after a sanctions near-match remains visible?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May AP release payment after a sanctions near-match remains visible?\",\"anomaly_observed\":\"A sanctions monitoring flag remains visible after compliance review.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"PAY-TES-074\",\"type\":\"source_record\",\"content\":\"Payment PAY-TES-074 releases USD 68900 to Tessa Medical GmbH, Germany, tax ID DE-4481, account ending 7205.\"},{\"doc_id\":\"FLAG-TES-074\",\"type\":\"source_record\",\"content\":\"Monitoring flag FLAG-TES-074 remains visible for Tessa Medica LLC, Belarus, no tax ID match, no account match.\"},{\"doc_id\":\"CLR-TES-074\",\"type\":\"source_record\",\"content\":\"Clearance CLR-TES-074 covers Tessa Medical GmbH, Germany, tax ID DE-4481, account ending 7205, and disposition monitor-only no-block before release.\"}],\"policy_documents\":[{\"doc_id\":\"STD-TES-074-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Sanctions near-match is closed only when clearance matches legal name, country, tax ID, account, and monitoring disposition before release. Monitor-only no-block disposition permits release when the exact counterparty and account match.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T013130Z\",\"pair_id\":\"HV-KITC-074\",\"packet_id\":\"HV-KITC-074-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-074-A_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ALLOW\",\"full_output_ref\":\"artifacts/HV-KITC-074-A_WORKER_01.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"fcba6e43bbb750daccf9ffe16cec617b6eba02e84b3193baf81043e6a594e43b\",\"source_ids\":[\"CLR-TES-074\",\"FLAG-TES-074\",\"PAY-TES-074\",\"STD-TES-074-P\"]},{\"turn\":2,\"role\":\"gov\",\"turn_id\":\"HV-KITC-074-A_G1\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict None route CONTINUE_WORKER\",\"full_output_ref\":\"artifacts/HV-KITC-074-A_G1.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"5b10c75194fbdffa24add2ec597d0615ea71ea0ba4a85506c07571764d0289e8\",\"source_ids\":[\"CLR-TES-074\",\"FLAG-TES-074\",\"PAY-TES-074\",\"STD-TES-074-P\"],\"blocked_moves\":[\"Changing ALLOW to ESCALATE or FAIL\",\"Reopening SOURCE_BOUNDARY_CLOSED\",\"Treating FLAG-TES-074 as blocking\",\"Substituting different source IDs\",\"Claiming ambiguity where source materials are exact\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"resolved\",\"resolved\",\"resolved\",\"resolved\"],\"blocked_moves_so_far\":[\"Changing ALLOW to ESCALATE or FAIL\",\"Reopening SOURCE_BOUNDARY_CLOSED\",\"Treating FLAG-TES-074 as blocking\",\"Substituting different source IDs\",\"Claiming ambiguity where source materials are exact\"],\"source_ids_used_so_far\":[\"CLR-TES-074\",\"FLAG-TES-074\",\"PAY-TES-074\",\"STD-TES-074-P\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":null,\"pinned_best_artifact_full_text\":null},\"raw_prior_outputs\":[{\"turn_id\":\"HV-KITC-074-A_W1\",\"worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ALLOW\",\"boundary_binding\":{\"action_boundary\":\"May AP release payment after a sanctions near-match remains visible?\",\"allow_rule_assessment\":\"Exact clearance matches legal name, country, tax ID, account and monitor-only no-block disposition; policy permits release on exact match.\",\"escalate_rule_assessment\":\"Visible flag applies to non-matching entity (different name, country) and does not open defect on exact boundary.\",\"timing_scope_authority_dependency_check\":\"Clearance and policy both predate action; no open dependency on flag for matched counterparty.\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\",\"controlling_source_fact\":\"CLR-TES-074 matches PAY-TES-074 exactly; STD-TES-074-P authorizes release on monitor-only disposition when name/country/taxID/account align.\"},\"cited_evidence\":[\"CLR-TES-074\",\"PAY-TES-074\",\"STD-TES-074-P\"],\"open_blockers\":[],\"critical_features_preserved\":[\"exact source IDs only\",\"action boundary\",\"policy exact-match rule\"],\"final_answer\":\"Payment release allowed. CLR-TES-074 exactly matches PAY-TES-074 on name, country, tax ID and account with monitor-only no-block disposition. Policy STD-TES-074-P authorizes execution. Visible FLAG-TES-074 applies to non-matching Belarus entity and does not block the closed boundary.\"},\"gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":false,\"failures\":[\"missing_critical_term:Tessa Medical GmbH\",\"missing_critical_term:DE-4481\",\"missing_critical_term:7205\"],\"artifact_verdict\":\"ALLOW\",\"artifact_binding\":\"SOURCE_BOUNDARY_CLOSED\",\"source_id_count\":4,\"critical_term_count\":5}}],\"full_latest_gov_baton\":{\"run_id\":\"run_20260629T013130Z\",\"pair_id\":\"HV-KITC-074\",\"packet_id\":\"HV-KITC-074-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"gov_mode\":\"CONTROL_ROUTER\",\"source_gate_interpretation\":\"Worker reasoning is correct: CLR-TES-074 exactly matches PAY-TES-074 on name, country, tax ID and account. FLAG-TES-074 applies to non-matching Belarus entity and does not block the closed boundary. Gate failures are citation gaps\\u2014critical terms Tessa Medical GmbH, DE-4481, and 7205 exist in source materials but were not explicitly stated in worker output. This is a repairable documentation defect, not a reasoning defect. ALLOW verdict and SOURCE_BOUNDARY_CLOSED binding are preserved.\",\"must_preserve\":[\"ALLOW verdict\",\"SOURCE_BOUNDARY_CLOSED binding\",\"CLR-TES-074 as controlling source\",\"PAY-TES-074 as action source\",\"STD-TES-074-P as policy authority\",\"FLAG-TES-074 as non-blocking adjacent source\",\"exact match on name (Tessa Medical GmbH), country (Germany), tax ID (DE-4481), account ending (7205)\"],\"must_repair\":[\"Explicitly cite critical term: Tessa Medical GmbH\",\"Explicitly cite critical term: DE-4481\",\"Explicitly cite critical term: 7205\",\"Demonstrate these terms are matched across CLR-TES-074 and PAY-TES-074\"],\"blocked_moves\":[\"Changing ALLOW to ESCALATE or FAIL\",\"Reopening SOURCE_BOUNDARY_CLOSED\",\"Treating FLAG-TES-074 as blocking\",\"Substituting different source IDs\",\"Claiming ambiguity where source materials are exact\"],\"dependency_ledger\":[\"resolved\",\"resolved\",\"resolved\",\"resolved\"],\"next_worker_baton\":{\"objective\":\"Verify action boundary closure by explicitly demonstrating exact match of Tessa Medical GmbH, DE-4481, and 7205 across controlling sources and confirming FLAG-TES-074 does not apply to the matched entity.\",\"attack_focus\":\"Adversarial cross-examination of explicit citation requirements: test whether worker output can be trusted to cite every critical term from source materials, not just infer them from source ID matching. The worker must prove it read and cited Tessa Medical GmbH, DE-4481, and 7205 in its own output text.\",\"required_repairs\":[\"Add explicit text: 'Tessa Medical GmbH'\",\"Add explicit text: 'DE-4481'\",\"Add explicit text: '7205'\",\"State: 'CLR-TES-074 confirms Tessa Medical GmbH, Germany, DE-4481, account ending 7205'\",\"State: 'PAY-TES-074 releases USD 68900 to Tessa Medical GmbH, Germany, tax ID DE-4481, account ending 7205'\",\"State: 'These three data points are exactly matched between CLR-TES-074 and PAY-TES-074'\",\"State: 'FLAG-TES-074 lists Tessa Medica LLC, Belarus\\u2014different legal name and country from Tessa Medical GmbH, Germany\\u2014no match'\"],\"monotonic_preservation\":\"All reasoning from HV-KITC-074-A_WORKER_01 is preserved. New worker adds explicit term citations without altering the ALLOW verdict, SOURCE_BOUNDARY_CLOSED binding, or source ID selections.\"},\"final_compiler_allowed\":false,\"control_action\":\"CONTINUE_REPAIR\",\"route_verdict\":\"CONTINUE_WORKER\",\"gov_command\":\"Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\"},\"current_turn_command\":\"Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "current_turn_command": "Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.",
+    "full_latest_gov_baton": {
+      "blocked_moves": [
+        "Changing ALLOW to ESCALATE or FAIL",
+        "Reopening SOURCE_BOUNDARY_CLOSED",
+        "Treating FLAG-TES-074 as blocking",
+        "Substituting different source IDs",
+        "Claiming ambiguity where source materials are exact"
+      ],
+      "control_action": "CONTINUE_REPAIR",
+      "dependency_ledger": [
+        "resolved",
+        "resolved",
+        "resolved",
+        "resolved"
+      ],
+      "final_compiler_allowed": false,
+      "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton. Gov does not choose models.",
+      "gov_mode": "CONTROL_ROUTER",
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "must_preserve": [
+        "ALLOW verdict",
+        "SOURCE_BOUNDARY_CLOSED binding",
+        "CLR-TES-074 as controlling source",
+        "PAY-TES-074 as action source",
+        "STD-TES-074-P as policy authority",
+        "FLAG-TES-074 as non-blocking adjacent source",
+        "exact match on name (Tessa Medical GmbH), country (Germany), tax ID (DE-4481), account ending (7205)"
+      ],
+      "must_repair": [
+        "Explicitly cite critical term: Tessa Medical GmbH",
+        "Explicitly cite critical term: DE-4481",
+        "Explicitly cite critical term: 7205",
+        "Demonstrate these terms are matched across CLR-TES-074 and PAY-TES-074"
+      ],
+      "next_worker_baton": {
+        "attack_focus": "Adversarial cross-examination of explicit citation requirements: test whether worker output can be trusted to cite every critical term from source materials, not just infer them from source ID matching. The worker must prove it read and cited Tessa Medical GmbH, DE-4481, and 7205 in its own output text.",
+        "monotonic_preservation": "All reasoning from HV-KITC-074-A_WORKER_01 is preserved. New worker adds explicit term citations without altering the ALLOW verdict, SOURCE_BOUNDARY_CLOSED binding, or source ID selections.",
+        "objective": "Verify action boundary closure by explicitly demonstrating exact match of Tessa Medical GmbH, DE-4481, and 7205 across controlling sources and confirming FLAG-TES-074 does not apply to the matched entity.",
+        "required_repairs": [
+          "Add explicit text: 'Tessa Medical GmbH'",
+          "Add explicit text: 'DE-4481'",
+          "Add explicit text: '7205'",
+          "State: 'CLR-TES-074 confirms Tessa Medical GmbH, Germany, DE-4481, account ending 7205'",
+          "State: 'PAY-TES-074 releases USD 68900 to Tessa Medical GmbH, Germany, tax ID DE-4481, account ending 7205'",
+          "State: 'These three data points are exactly matched between CLR-TES-074 and PAY-TES-074'",
+          "State: 'FLAG-TES-074 lists Tessa Medica LLC, Belarus\u2014different legal name and country from Tessa Medical GmbH, Germany\u2014no match'"
+        ]
+      },
+      "packet_id": "HV-KITC-074-A",
+      "pair_id": "HV-KITC-074",
+      "route_verdict": "CONTINUE_WORKER",
+      "run_id": "run_20260629T013130Z",
+      "source_gate_interpretation": "Worker reasoning is correct: CLR-TES-074 exactly matches PAY-TES-074 on name, country, tax ID and account. FLAG-TES-074 applies to non-matching Belarus entity and does not block the closed boundary. Gate failures are citation gaps\u2014critical terms Tessa Medical GmbH, DE-4481, and 7205 exist in source materials but were not explicitly stated in worker output. This is a repairable documentation defect, not a reasoning defect. ALLOW verdict and SOURCE_BOUNDARY_CLOSED binding are preserved.",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+    },
+    "gov_routing_lens": {
+      "blocked_move": "Changing ALLOW to ESCALATE or FAIL",
+      "current_objective": "ADVERSARIAL_SCOPE_CHALLENGER",
+      "main_repair_target": "Explicitly cite critical term: Tessa Medical GmbH",
+      "route_verdict": "CONTINUE_WORKER",
+      "unresolved_dependency": "resolved"
+    },
+    "raw_prior_outputs": [
+      {
+        "gate_result": {
+          "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+          "artifact_verdict": "ALLOW",
+          "critical_term_count": 5,
+          "failures": [
+            "missing_critical_term:Tessa Medical GmbH",
+            "missing_critical_term:DE-4481",
+            "missing_critical_term:7205"
+          ],
+          "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+          "passed": false,
+          "source_id_count": 4
+        },
+        "turn_id": "HV-KITC-074-A_W1",
+        "worker_output": {
+          "boundary_binding": {
+            "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+            "allow_rule_assessment": "Exact clearance matches legal name, country, tax ID, account and monitor-only no-block disposition; policy permits release on exact match.",
+            "binding_class": "SOURCE_BOUNDARY_CLOSED",
+            "controlling_source_fact": "CLR-TES-074 matches PAY-TES-074 exactly; STD-TES-074-P authorizes release on monitor-only disposition when name/country/taxID/account align.",
+            "escalate_rule_assessment": "Visible flag applies to non-matching entity (different name, country) and does not open defect on exact boundary.",
+            "timing_scope_authority_dependency_check": "Clearance and policy both predate action; no open dependency on flag for matched counterparty."
+          },
+          "cited_evidence": [
+            "CLR-TES-074",
+            "PAY-TES-074",
+            "STD-TES-074-P"
+          ],
+          "critical_features_preserved": [
+            "exact source IDs only",
+            "action boundary",
+            "policy exact-match rule"
+          ],
+          "final_answer": "Payment release allowed. CLR-TES-074 exactly matches PAY-TES-074 on name, country, tax ID and account with monitor-only no-block disposition. Policy STD-TES-074-P authorizes execution. Visible FLAG-TES-074 applies to non-matching Belarus entity and does not block the closed boundary.",
+          "open_blockers": [],
+          "verification_verdict": "ALLOW",
+          "worker_role": "SOURCE_BOUNDARY_MAPPER"
+        }
+      }
+    ],
+    "run_lock": {
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "model": "google/gemini-2.5-flash-lite",
+      "no_substitutions": true,
+      "packet_id": "HV-KITC-074-A",
+      "pair_id": "HV-KITC-074",
+      "run_id": "run_20260629T013130Z",
+      "worker_index": 2,
+      "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+    },
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 68900,
+        "business_ref": "HV-KITC-074-A",
+        "currency": "USD",
+        "description": "May AP release payment after a sanctions near-match remains visible?",
+        "type": "payment_release",
+        "vendor": "Tessa Medical GmbH"
+      },
+      "context": {
+        "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+        "anomaly_observed": "A sanctions monitoring flag remains visible after compliance review.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Payment PAY-TES-074 releases USD 68900 to Tessa Medical GmbH, Germany, tax ID DE-4481, account ending 7205.",
+            "doc_id": "PAY-TES-074",
+            "type": "source_record"
+          },
+          {
+            "content": "Monitoring flag FLAG-TES-074 remains visible for Tessa Medica LLC, Belarus, no tax ID match, no account match.",
+            "doc_id": "FLAG-TES-074",
+            "type": "source_record"
+          },
+          {
+            "content": "Clearance CLR-TES-074 covers Tessa Medical GmbH, Germany, tax ID DE-4481, account ending 7205, and disposition monitor-only no-block before release.",
+            "doc_id": "CLR-TES-074",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Sanctions near-match is closed only when clearance matches legal name, country, tax ID, account, and monitoring disposition before release. Monitor-only no-block disposition permits release when the exact counterparty and account match.",
+            "doc_id": "STD-TES-074-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "best_artifact_registry": null,
+      "blocked_moves_so_far": [
+        "Changing ALLOW to ESCALATE or FAIL",
+        "Reopening SOURCE_BOUNDARY_CLOSED",
+        "Treating FLAG-TES-074 as blocking",
+        "Substituting different source IDs",
+        "Claiming ambiguity where source materials are exact"
+      ],
+      "claims_requiring_support": [],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "packet_id": "HV-KITC-074-A",
+      "pair_id": "HV-KITC-074",
+      "pinned_best_artifact_full_text": null,
+      "resolved_dependencies": [],
+      "run_id": "run_20260629T013130Z",
+      "source_ids_used_so_far": [
+        "CLR-TES-074",
+        "FLAG-TES-074",
+        "PAY-TES-074",
+        "STD-TES-074-P"
+      ],
+      "turns_completed": [
+        {
+          "artifact_hash": "fcba6e43bbb750daccf9ffe16cec617b6eba02e84b3193baf81043e6a594e43b",
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-074-A_WORKER_01.json",
+          "gate_status": "FAIL",
+          "model": "xai/grok-3-mini",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ALLOW",
+          "role": "worker",
+          "source_ids": [
+            "CLR-TES-074",
+            "FLAG-TES-074",
+            "PAY-TES-074",
+            "STD-TES-074-P"
+          ],
+          "turn": 1,
+          "turn_id": "HV-KITC-074-A_W1"
+        },
+        {
+          "artifact_hash": "5b10c75194fbdffa24add2ec597d0615ea71ea0ba4a85506c07571764d0289e8",
+          "blocked_moves": [
+            "Changing ALLOW to ESCALATE or FAIL",
+            "Reopening SOURCE_BOUNDARY_CLOSED",
+            "Treating FLAG-TES-074 as blocking",
+            "Substituting different source IDs",
+            "Claiming ambiguity where source materials are exact"
+          ],
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-074-A_G1.json",
+          "gate_status": "FAIL",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "output_summary": "Gov local verdict None route CONTINUE_WORKER",
+          "role": "gov",
+          "source_ids": [
+            "CLR-TES-074",
+            "FLAG-TES-074",
+            "PAY-TES-074",
+            "STD-TES-074-P"
+          ],
+          "turn": 2,
+          "turn_id": "HV-KITC-074-A_G1"
+        }
+      ],
+      "unresolved_dependencies": [
+        "resolved",
+        "resolved",
+        "resolved",
+        "resolved"
+      ]
+    },
+    "system_role": "HoloVerify worker. Preserve state. Obey Gov.",
+    "task_and_answer_contract": {
+      "answer_contract": {
+        "boundary_binding": {
+          "action_boundary": "string",
+          "allow_rule_assessment": "string",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+          "controlling_source_fact": "string",
+          "escalate_rule_assessment": "string",
+          "timing_scope_authority_dependency_check": "string"
+        },
+        "cited_evidence": [
+          "exact source doc_id"
+        ],
+        "critical_features_preserved": [
+          "string"
+        ],
+        "final_answer": "string",
+        "open_blockers": [
+          "string"
+        ],
+        "verification_verdict": "ALLOW | ESCALATE",
+        "worker_role": "string"
+      },
+      "deterministic_gate_categories": [
+        "word band",
+        "required sections",
+        "source IDs",
+        "invented source IDs",
+        "timing/scope/authority/dependency section",
+        "action-boundary violations",
+        "critical dependencies/traps"
+      ],
+      "source_rules": [
+        "cite exact doc_id values only",
+        "do not invent source IDs",
+        "ALLOW only when exact current source boundary is closed before execution",
+        "ESCALATE when a narrow source-record defect remains open before execution"
+      ],
+      "task": "Decide whether the action may proceed using only source records in this packet.",
+      "word_band": "final_answer 25-120 words"
+    }
+  }
+}

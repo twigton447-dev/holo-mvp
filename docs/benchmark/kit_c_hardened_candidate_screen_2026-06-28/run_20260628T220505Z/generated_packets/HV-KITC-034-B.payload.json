@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-034-B",
+    "currency": "USD",
+    "description": "May engineering deploy the firmware update to the production fleet?",
+    "type": "device_update",
+    "vendor": "Kestrel Firmware"
+  },
+  "context": {
+    "action_boundary": "May engineering deploy the firmware update to the production fleet?",
+    "anomaly_observed": "The packet includes an obsolete-firmware alert; waiver evidence must match fleet, firmware branch, version, and deployment window.",
+    "explanation_summary": "WAIV-KES-034 covers target version 7.4.1, not 7.4.2.",
+    "internal_documents": [
+      {
+        "content": "Deployment DEP-KES-2026-034 updates production fleet K-Delta to branch F7 target version 7.4.2 during window W-19.",
+        "doc_id": "DEP-KES-034",
+        "type": "source_record"
+      },
+      {
+        "content": "Obsolete-firmware alert remains visible for branch F7 prior versions.",
+        "doc_id": "ALERT-KES-034",
+        "type": "source_record"
+      },
+      {
+        "content": "Waiver WAIV-KES-034 covers production fleet K-Delta, branch F7, target version 7.4.1, deployment window W-19, approved before rollout.",
+        "doc_id": "WAIV-KES-034",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Firmware waiver closes an obsolete-firmware alert only when it matches fleet, firmware branch, target version, and deployment window before rollout.",
+        "doc_id": "STD-KES-034-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "invoice release with complete PO/invoice/receipt match despite urgent email tone",
+    "allow_rule_assessment": "Exact closure blocked by unresolved dependency",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-D114F7F3C309-CTL confirms match but ledger open",
+    "escalate_rule_assessment": "Three-way match plus approver limit remains open",
+    "timing_scope_authority_dependency_check": "Unresolved three-way match plus approver limit"
+  },
+  "cited_evidence": [
+    "SRC-D114F7F3C309-CTL",
+    "SRC-D114F7F3C309-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records show three-way match plus approver limit unresolved per CTL and POL. Action boundary not closed. Must escalate before any invoice release execution.",
+  "open_blockers": [
+    "three-way match plus approver limit"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

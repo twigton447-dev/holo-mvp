@@ -1,0 +1,141 @@
+{
+  "classification": "HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_PREFLIGHT_V0",
+  "created_at_utc": "2026-07-04T04:14:49Z",
+  "status": "PREFLIGHT_PASS_NO_PROVIDER",
+  "lane_id": "HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_PATCH_VALIDATION_V0",
+  "branch": "codex/ap-publication-integration",
+  "architecture_head": "d41ec047a7cf378065c3d32d849d405e489421b5",
+  "registration_ref": "docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_REGISTRATION_2026_07_04.json",
+  "runtime_only_manifest_path": "docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json",
+  "runtime_only_manifest_sha256": "4f8ec7a398b4b98be98695882ee90554884b2ffd939c6af2a1db41efc2553f60",
+  "live_wrapper_path": "docs/benchmark/run_holoverify_v4_blocker_preservation_small_rescue_live_2026_07_04.py",
+  "exact_live_command": "python3 docs/benchmark/run_holoverify_v4_blocker_preservation_small_rescue_live_2026_07_04.py --run-live --approval-statement \"$APPROVAL\"",
+  "wrapper_preflight_artifacts": {
+    "run_dir": "docs/benchmark/holoverify_v4_blocker_preservation_small_rescue_2026_07_04/live_runs/preflight_20260704T045851Z",
+    "primary_json": "docs/benchmark/holoverify_v4_blocker_preservation_small_rescue_2026_07_04/live_runs/preflight_20260704T045851Z/v4_blocker_preservation_small_rescue_live_preflight.json",
+    "passed": true,
+    "provider_calls_made": 0,
+    "registration_json_live_input": false,
+    "runtime_input_leakage_hits": [],
+    "prompt_probe_leakage_hits": []
+  },
+  "selected_packet_count": 5,
+  "expected_call_count": {
+    "total_provider_calls_if_approved": 25,
+    "calls_per_packet": 5,
+    "slots": [
+      "W1",
+      "G1",
+      "W2",
+      "G2",
+      "W3"
+    ]
+  },
+  "preflight_checks": {
+    "selector_v4_active": {
+      "passed": true,
+      "observed": "SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04",
+      "sha256": "3ed2a01eb16a8ea84bd096e6c1cfd352e6b0f8f9eb7565a5327680f77fa7affe"
+    },
+    "worker_contract_v3_active": {
+      "passed": true,
+      "observed": "WORKER_CONTRACT_V3_BLOCKER_PRESERVATION_2026_07_04",
+      "sha256": "00b692a07b1036f70b0756e16458e811c7aee3afb62c1351893a4722aab9ad5a"
+    },
+    "worker_prompt_includes_active_blocker_ledger": {
+      "passed": true,
+      "probe": "ACTIVE BLOCKER LEDGER"
+    },
+    "worker_required_fields_include_blocker_resolution": {
+      "passed": true,
+      "probe": "blocker_resolution=<empty if no prior blockers or ESCALATE; if ALLOW after blockers, list each blocker_id closed plus source IDs>"
+    },
+    "gov_baton_can_carry_blocker_ledger": {
+      "passed": true,
+      "probe_baton": {
+        "route_verdict": "CONTINUE",
+        "repair_target": "stress-test and preserve blocker ids: ART-001-BLK-PREFLIGHT",
+        "blocked_move": "do not override blocker with consensus unless sources close it",
+        "dependency_ledger": [],
+        "blocker_ledger": [
+          {
+            "blocker_id": "ART-001-BLK-PREFLIGHT",
+            "blocker_text": "preflight source-boundary blocker"
+          }
+        ]
+      }
+    },
+    "selector_criteria_include_blocker_fields": {
+      "passed": true,
+      "required": [
+        "blocker_resolution_clean",
+        "blocker_resolution_complete",
+        "source_boundary_open_with_blocker"
+      ],
+      "observed": [
+        "gate_passed",
+        "parse_valid",
+        "source_ids_valid",
+        "required_sections_present",
+        "contradiction_free",
+        "deterministic_clean",
+        "blocker_resolution_clean",
+        "blocker_resolution_complete",
+        "source_boundary_open_with_blocker",
+        "verdict_consensus_count",
+        "final_turn_consensus_repair",
+        "verdict_corroboration_count",
+        "sections_present",
+        "cited_evidence_count",
+        "earliest_turn"
+      ]
+    },
+    "runtime_only_manifest_schema": {
+      "passed": true,
+      "allowed_top_level_keys": [
+        "classification",
+        "packet_count",
+        "runtime_consumable",
+        "packets"
+      ],
+      "allowed_packet_keys": [
+        "opaque_runtime_id",
+        "runtime_payload_ref",
+        "runtime_payload_sha256"
+      ],
+      "forbidden_metadata_absent": true
+    },
+    "live_command_uses_runtime_only_manifest": {
+      "passed": true,
+      "wrapper_path": "docs/benchmark/run_holoverify_v4_blocker_preservation_small_rescue_live_2026_07_04.py",
+      "runtime_manifest_path": "docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json",
+      "registration_json_live_input": false
+    },
+    "no_scoring_map_before_trace_freeze": {
+      "passed": true,
+      "rule": "Future live runner must consume only the separate runtime-only manifest before trace freeze. The mixed registration JSON is audit/scoring context only and not live runner input."
+    },
+    "no_providers_called": {
+      "passed": true,
+      "observed_provider_calls": 0
+    },
+    "no_holo_live_run": {
+      "passed": true,
+      "observed_holo_live_runs": 0
+    },
+    "no_solo_called": {
+      "passed": true,
+      "observed_solo_calls": 0
+    },
+    "no_judges_called": {
+      "passed": true,
+      "observed_judge_calls": 0
+    },
+    "no_substitutions": {
+      "passed": true,
+      "rule": "Selected opaque runtime IDs and payload SHA-256 values match the Batch016 rescue hash manifest."
+    }
+  },
+  "prompt_probe_excerpt": "REQUIRED OUTPUT LINES EXACTLY:\nworker_role=W3\nverification_verdict=<ALLOW or ESCALATE>\nbinding_class=<SOURCE_BOUNDARY_CLOSED or SOURCE_BOUNDARY_OPEN>\naction_boundary=<short source-grounded boundary statement; max 18 words>\ncited_evidence=<provided source IDs separated by |>\nopen_blockers=<empty if ALLOW; blocker phrase if ESCALATE; max 12 words>\nblocker_resolution=<empty if no prior blockers or ESCALATE; if ALLOW after blockers, list each blocker_id closed plus source IDs>\nfinal_answer=<one sentence using ALLOW or ESCALATE; max 24 words>\nDo not use alternate keys such as decision, boundary_closed, or action_boundary_closed.\nDo not omit verification_verdict.\nIf ACTIVE BLOCKER LEDGER is non-empty and you return ALLOW, blocker_resolution must name every blocker_id and source IDs that close it.\nFirst visible output line must be worker_role=W3.",
+  "live_approval_sentence": "I approve live provider execution for HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_PATCH_VALIDATION_V0 using only runtime-only manifest docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_04.json with SHA-256 4f8ec7a398b4b98be98695882ee90554884b2ffd939c6af2a1db41efc2553f60, selector SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04 hash 3ed2a01eb16a8ea84bd096e6c1cfd352e6b0f8f9eb7565a5327680f77fa7affe, worker contract WORKER_CONTRACT_V3_BLOCKER_PRESERVATION_2026_07_04 hash 00b692a07b1036f70b0756e16458e811c7aee3afb62c1351893a4722aab9ad5a, and exactly 25 provider calls: W1 xai/grok-3-mini x5, G1 minimax/MiniMax-M2.5-highspeed x5, W2 openai/gpt-5.4-mini x5, G2 minimax/MiniMax-M2.5-highspeed x5, W3 minimax/MiniMax-M2.5-highspeed x5. PATCH VALIDATION ONLY for V4 blocker preservation on five Batch016 blocker-drop misses; not benchmark evidence and not public claim material. No solo, no judges, no scoring map before trace freeze, no mixed registration JSON before trace freeze, no substitutions, no public claims."
+}

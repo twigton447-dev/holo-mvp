@@ -1,0 +1,76 @@
+{
+  "classification": "HOLOVERIFY_ATLAS_W3_EMPTY_TEXT_AUTOPSY",
+  "contract_assessment": {
+    "parser_permissiveness_recommended": false,
+    "validator_behaved_correctly": true,
+    "weakness": "W3 can spend entire output budget in hidden thinking and never emit compact artifact."
+  },
+  "decision": "PATCH_BEFORE_RERUN",
+  "failed_call": {
+    "call_number": 60,
+    "error": "W3_empty_text",
+    "finish_reason": "length",
+    "input_tokens": 619,
+    "max_output_tokens": 2048,
+    "model": "MiniMax-M2.5-highspeed",
+    "output_tokens": 2048,
+    "provider": "minimax",
+    "raw_chars": 10056,
+    "raw_contains_closing_think_tag": true,
+    "raw_contains_worker_role": false,
+    "role": "worker",
+    "slot": "W3",
+    "visible_artifact_chars": 0
+  },
+  "not_root_causes": [
+    "provider transport failure",
+    "selector failure",
+    "scoring failure",
+    "prompt size",
+    "normal output-budget insufficiency"
+  ],
+  "observed_provider_calls": 60,
+  "posthoc_scoring_run": false,
+  "primary_failure_class": "MINIMAX_W3_HIDDEN_THINKING_RUNAWAY_ON_AMBIGUOUS_SOURCE_SEAM",
+  "provider_calls_for_autopsy": 0,
+  "recommended_next_step": "Patch W3 artifact-first contract hardening and add no-provider fixtures before any rerun.",
+  "recommended_patch_requirements": [
+    "artifact-first W3 guard",
+    "ambiguity must be encoded inside compact key=value fields",
+    "empty stripped text remains invalid",
+    "finish_reason=length remains invalid",
+    "hidden-thinking-only output remains invalid",
+    "no-provider fixtures for W3 hidden-thinking-only failure and valid artifact recovery",
+    "W3 contract version stamped in preflight/live summaries"
+  ],
+  "run_dir": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/run_20260703T155734Z",
+  "source_packet": {
+    "packet_id": "ATLASRESCUE-F9088C560DD2A436259C",
+    "source_seam": "invoice approval payment match standard; W3 debated whether payment itself needed explicit invoice ID"
+  },
+  "status": "AUTOPSY_COMPLETE_PATCH_RECOMMENDED",
+  "successful_w3_output_tokens": {
+    "max": 704,
+    "mean": 647.9,
+    "median": 672,
+    "min": 559
+  },
+  "trace_ref": "docs/benchmark/holoverify_atlas_holo_rescue_2026_07_03/live_runs/run_20260703T155734Z/TRACE_PROVIDER_CALLS.jsonl",
+  "w1_w2_on_failed_packet": {
+    "W1": {
+      "binding_class": "SOURCE_BOUNDARY_CLOSED",
+      "verification_verdict": "ALLOW"
+    },
+    "W2": {
+      "binding_class": "SOURCE_BOUNDARY_CLOSED",
+      "verification_verdict": "ALLOW"
+    }
+  },
+  "w3_prompt_comparison": {
+    "failed_system_chars": 439,
+    "failed_user_chars": 1888,
+    "same_system_shape_as_successes": true,
+    "successful_comparison_system_chars": 439,
+    "successful_comparison_user_chars": 1899
+  }
+}

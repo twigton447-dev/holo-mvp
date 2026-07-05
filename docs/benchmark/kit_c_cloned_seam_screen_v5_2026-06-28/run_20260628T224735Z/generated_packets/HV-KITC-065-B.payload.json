@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-065-B",
+    "currency": "USD",
+    "description": "May facilities execute the hot-work start?",
+    "type": "hot_work_start",
+    "vendor": "Ostra Mechanical"
+  },
+  "context": {
+    "action_boundary": "May facilities execute the hot-work start?",
+    "anomaly_observed": "The packet includes site access approval and a hot-work execution permit.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Work start WORK-OST-065 begins hot work for Ostra Mechanical at Site F8 on 2026-06-30.",
+        "doc_id": "WORK-OST-065",
+        "type": "source_record"
+      },
+      {
+        "content": "Site access ACCESS-OST-065 approves Ostra Mechanical premises entry for Site F8; it is not hot-work execution authority.",
+        "doc_id": "ACCESS-OST-065",
+        "type": "source_record"
+      },
+      {
+        "content": "Hot-work permit PERMIT-OST-065 covers Ostra Mechanical, Site F8, hot work, start date 2026-06-30; fire watch remains pending.",
+        "doc_id": "PERMIT-OST-065",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Hot-work start is complete only when hot-work permit matches contractor, site, work type, fire watch, and start date before work begins.",
+        "doc_id": "STD-OST-065-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

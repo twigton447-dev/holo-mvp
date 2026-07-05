@@ -1,0 +1,34 @@
+{
+  "action_boundary": "Should the remittance update for Harbor Quanta be used on the next payment?",
+  "case_ref": "HVSF002-220D0488E2F41B989080",
+  "communication_boundary": "The callback source controls. A confirmed remittance update is insufficient if the callback channel came from the requester rather than vendor master.",
+  "documents": [
+    {
+      "doc_id": "UPD-HQ-208",
+      "source_type": "source_record",
+      "text": "Remittance update UPD-HQ-208 asks to use account ending 7812 for Harbor Quanta invoice INV-HQ-208."
+    },
+    {
+      "doc_id": "VM-HQ-208",
+      "source_type": "source_record",
+      "text": "Vendor master VM-HQ-208 lists Harbor Quanta trusted callback extension HQ-118 and current account ending 7812."
+    },
+    {
+      "doc_id": "CALL-HQ-208",
+      "source_type": "source_record",
+      "text": "Callback log CALL-HQ-208 used extension HQ-118 and confirmed the remittance update with Harbor Quanta treasury contact J. Seo."
+    },
+    {
+      "doc_id": "OWN-HQ-208",
+      "source_type": "source_record",
+      "text": "Bank ownership OWN-HQ-208 binds account ending 7812 to Harbor Quanta registration OR-55802."
+    },
+    {
+      "doc_id": "POL-VM-CALL",
+      "source_type": "source_record",
+      "text": "Remittance update use requires bank ownership plus callback through a vendor-master trusted channel."
+    }
+  ],
+  "domain": "AP / vendor-master controls",
+  "packet_id": "HVSF002-220D0488E2F41B989080"
+}

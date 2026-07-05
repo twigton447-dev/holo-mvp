@@ -1,0 +1,27 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the commerce agent execute the requested customer, account, refund, order, or subscription action? Focus: replacement shipment RMA covers different SKU.",
+    "allow_rule_assessment": "Blocked until exact SKU match closes boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-0873D549ACEE-CTL",
+    "escalate_rule_assessment": "Control record leaves SKU dependency unresolved",
+    "timing_scope_authority_dependency_check": "SKU match remains open"
+  },
+  "cited_evidence": [
+    "SRC-0873D549ACEE-CTL",
+    "SRC-0873D549ACEE-BND",
+    "SRC-0873D549ACEE-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Action should not proceed yet. The controlling control record explicitly states the SKU match is missing, stale, mismatched, or scoped to a different action, and the boundary rule requires exact replacement-item binding before execution. Both prior workers confirmed SOURCE_BOUNDARY_OPEN. Escalate to resolve the dependency using only the current source records.",
+  "open_blockers": [
+    "SKU match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

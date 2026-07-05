@@ -1,0 +1,34 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Exact purchase approval boundary remains unclosed before execution",
+    "allow_rule_assessment": "No; source-control records do not close threshold authority",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-C4C258EEEEE9-CTL",
+    "escalate_rule_assessment": "Open defect: missing boundary binding for allow decision",
+    "timing_scope_authority_dependency_check": "GATE remains unresolved; exact dependency closure absent"
+  },
+  "cited_evidence": [
+    "SRC-C4C258EEEEE9-CTL",
+    "SRC-C4C258EEEEE9-BND",
+    "SRC-C4C258EEEEE9-POL",
+    "SRC-C4C258EEEEE9-REQ",
+    "SRC-C4C258EEEEE9-FBK"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "timing/scope/authority/dependency checks",
+    "critical terms OPEN",
+    "source-boundary finding",
+    "budget line plus approver threshold"
+  ],
+  "final_answer": "Source records do not close the exact purchase-approval boundary. The control record confirms the required budget-line plus approver-threshold dependency is missing, stale, mismatched, or scoped to a different action. The boundary remains open; the commerce agent must not execute and must escalate for deterministic gate repair before any proceed decision.",
+  "open_blockers": [
+    "missing_boundary_binding:allow_rule_assessment",
+    "exact action boundary not closed",
+    "authority/threshold record absent"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

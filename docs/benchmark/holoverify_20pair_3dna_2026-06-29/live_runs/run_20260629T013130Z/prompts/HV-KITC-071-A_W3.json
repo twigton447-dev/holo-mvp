@@ -1,0 +1,391 @@
+{
+  "messages": [
+    {
+      "content": "You are a HoloVerify worker. Preserve state. Obey Gov.\nWorkers receive Gov twice: a routing lens near the top and the full latest baton near the end.\nSource context is ground truth. The state brief preserves continuity. The final baton controls the next action.\nReturn only valid JSON. No markdown fences.",
+      "role": "system"
+    },
+    {
+      "content": "{\"system_role\":\"HoloVerify worker. Preserve state. Obey Gov.\",\"gov_routing_lens\":{\"route_verdict\":\"CONTINUE_WORKER\",\"main_repair_target\":\"explicit critical_term:8821 preservation annotation across all source IDs\",\"blocked_move\":\"FINAL_COMPILER disallowed until deterministic gate passes\",\"unresolved_dependency\":\"Repair 041 from prior unresolved dependency: critical_term:8821 tracking requires explicit artifact annotation. This repair must be completed before final verdict. New: Worker 2 ESCALATE verdict mismatch with SOURCE_BOUNDARY_CLOSED binding requires correction to ALLOW once repair complete.\",\"current_objective\":\"FINAL_COMPILER\"},\"run_lock\":{\"run_id\":\"run_20260629T013130Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-071\",\"packet_id\":\"HV-KITC-071-A\",\"worker_index\":3,\"worker_role\":\"FINAL_COMPILER\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"no_substitutions\":true},\"task_and_answer_contract\":{\"task\":\"Decide whether the action may proceed using only source records in this packet.\",\"answer_contract\":{\"worker_role\":\"string\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"open_blockers\":[\"string\"],\"critical_features_preserved\":[\"string\"],\"final_answer\":\"string\"},\"word_band\":\"final_answer 25-120 words\",\"source_rules\":[\"cite exact doc_id values only\",\"do not invent source IDs\",\"ALLOW only when exact current source boundary is closed before execution\",\"ESCALATE when a narrow source-record defect remains open before execution\"],\"deterministic_gate_categories\":[\"word band\",\"required sections\",\"source IDs\",\"invented source IDs\",\"timing/scope/authority/dependency section\",\"action-boundary violations\",\"critical dependencies/traps\"]},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-071-A\",\"type\":\"vendor_bank_update_payment\",\"vendor\":\"Quanta Field Services\",\"amount\":73400,\"currency\":\"USD\",\"description\":\"May AP release payment after the vendor bank update?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May AP release payment after the vendor bank update?\",\"anomaly_observed\":\"The packet includes a bank-change alert, a vendor-master form, a callback record, and a payment-release authority.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"PAY-QUA-071\",\"type\":\"source_record\",\"content\":\"Payment PAY-QUA-071 releases USD 73400 to Quanta Field Services account ending 8821 on 2026-06-28.\"},{\"doc_id\":\"ALERT-QUA-071\",\"type\":\"source_record\",\"content\":\"Bank-change alert remains visible for Quanta Field Services because the account changed this week.\"},{\"doc_id\":\"CALL-QUA-071\",\"type\":\"source_record\",\"content\":\"Callback CALL-QUA-071 used the pre-change vendor master phone source and confirmed account ending 8821 for Quanta Field Services.\"},{\"doc_id\":\"VM-QUA-071\",\"type\":\"source_record\",\"content\":\"Vendor-master approval VM-QUA-071 approves account ending 8821 for Quanta Field Services.\"},{\"doc_id\":\"BANK-QUA-071\",\"type\":\"source_record\",\"content\":\"Bank ownership BANK-QUA-071 confirms account ending 8821 is owned by Quanta Field Services.\"},{\"doc_id\":\"REL-QUA-071\",\"type\":\"source_record\",\"content\":\"Payment-release authority REL-QUA-071 approves Quanta Field Services, USD 73400, account ending 8821, release date 2026-06-28 before payment.\"}],\"policy_documents\":[{\"doc_id\":\"STD-QUA-071-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Payment after bank update is complete when the evidence chain collectively supplies: pre-change callback source, vendor-master account approval, bank ownership validation, and payment-release authority matching vendor, amount, account, and release date before payment. No single record must carry every field if the chain closes all four gates.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T013130Z\",\"pair_id\":\"HV-KITC-071\",\"packet_id\":\"HV-KITC-071-A\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-071-A_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ALLOW\",\"full_output_ref\":\"artifacts/HV-KITC-071-A_WORKER_01.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"d99104c5397e3f51012a080cc9a7e45a09a4cde0e4901817c732f265115c596a\",\"source_ids\":[\"ALERT-QUA-071\",\"BANK-QUA-071\",\"CALL-QUA-071\",\"PAY-QUA-071\",\"REL-QUA-071\",\"STD-QUA-071-P\",\"VM-QUA-071\"]},{\"turn\":2,\"role\":\"gov\",\"turn_id\":\"HV-KITC-071-A_G1\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict None route CONTINUE_WORKER\",\"full_output_ref\":\"artifacts/HV-KITC-071-A_G1.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"1ea2c79dddd4c615d47fbe5a3238199e530439a0048db9065f008a92ce51e874\",\"source_ids\":[\"ALERT-QUA-071\",\"BANK-QUA-071\",\"CALL-QUA-071\",\"PAY-QUA-071\",\"REL-QUA-071\",\"STD-QUA-071-P\",\"VM-QUA-071\"],\"blocked_moves\":[\"FINAL_COMPILER disallowed until gate passes\",\"FAIL_CLOSED inappropriate since source chain is substantively correct\"]},{\"turn\":3,\"role\":\"worker\",\"turn_id\":\"HV-KITC-071-A_W2\",\"model\":\"google/gemini-2.5-flash-lite\",\"dna\":\"google\",\"output_summary\":\"ADVERSARIAL_SCOPE_CHALLENGER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-071-A_WORKER_02.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"268e33382240b253480cf4b782c94f51f62a87b4ca3e49dc6606dacb3c74319b\",\"source_ids\":[\"ALERT-QUA-071\",\"BANK-QUA-071\",\"CALL-QUA-071\",\"PAY-QUA-071\",\"REL-QUA-071\",\"STD-QUA-071-P\",\"VM-QUA-071\"]},{\"turn\":4,\"role\":\"gov\",\"turn_id\":\"HV-KITC-071-A_G2\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict None route CONTINUE_WORKER\",\"full_output_ref\":\"artifacts/HV-KITC-071-A_G2.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"778acc1ab12a8e0c00e10598306b103df7eeea0e9d3a5bceefef2ec02bcdd3a8\",\"source_ids\":[\"ALERT-QUA-071\",\"BANK-QUA-071\",\"CALL-QUA-071\",\"PAY-QUA-071\",\"REL-QUA-071\",\"STD-QUA-071-P\",\"VM-QUA-071\"],\"blocked_moves\":[\"FINAL_COMPILER disallowed until deterministic gate passes\",\"FAIL_CLOSED inappropriate since source chain is substantively correct and all four gates closed\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"Repair 041 from prior unresolved dependency: critical_term:8821 tracking requires explicit artifact annotation. This repair must be completed before final verdict. New: Worker 2 ESCALATE verdict mismatch with SOURCE_BOUNDARY_CLOSED binding requires correction to ALLOW once repair complete.\"],\"blocked_moves_so_far\":[\"FINAL_COMPILER disallowed until gate passes\",\"FAIL_CLOSED inappropriate since source chain is substantively correct\",\"FINAL_COMPILER disallowed until deterministic gate passes\",\"FAIL_CLOSED inappropriate since source chain is substantively correct and all four gates closed\"],\"source_ids_used_so_far\":[\"ALERT-QUA-071\",\"BANK-QUA-071\",\"CALL-QUA-071\",\"PAY-QUA-071\",\"REL-QUA-071\",\"STD-QUA-071-P\",\"VM-QUA-071\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":null,\"pinned_best_artifact_full_text\":null},\"raw_prior_outputs\":[{\"turn_id\":\"HV-KITC-071-A_W1\",\"worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ALLOW\",\"boundary_binding\":{\"action_boundary\":\"May AP release payment after the vendor bank update?\",\"allow_rule_assessment\":\"Chain supplies pre-change callback (CALL-QUA-071), vendor-master approval (VM-QUA-071), bank ownership (BANK-QUA-071), and release authority (REL-QUA-071) matching vendor/amount/account/date before payment per STD-QUA-071-P.\",\"escalate_rule_assessment\":\"No narrow source-record defect remains open; all four gates closed by collective chain.\",\"timing_scope_authority_dependency_check\":\"Release date 2026-06-28 matches REL-QUA-071 and PAY-QUA-071; authority precedes execution.\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\",\"controlling_source_fact\":\"STD-QUA-071-P chain rule satisfied by CALL-QUA-071 + VM-QUA-071 + BANK-QUA-071 + REL-QUA-071\"},\"cited_evidence\":[\"CALL-QUA-071\",\"VM-QUA-071\",\"BANK-QUA-071\",\"REL-QUA-071\",\"STD-QUA-071-P\"],\"open_blockers\":[],\"critical_features_preserved\":[\"exact source IDs\",\"action boundary\",\"policy exact-match rule\"],\"final_answer\":\"Source chain exactly closes the four gates required by STD-QUA-071-P. Pre-change callback, vendor-master approval, bank ownership, and matching release authority are all present. Payment release after bank update is permitted.\"},\"gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":false,\"failures\":[\"missing_critical_term:8821\"],\"artifact_verdict\":\"ALLOW\",\"artifact_binding\":\"SOURCE_BOUNDARY_CLOSED\",\"source_id_count\":7,\"critical_term_count\":6}},{\"turn_id\":\"HV-KITC-071-A_W2\",\"worker_output\":{\"worker_role\":\"ADVERSARIAL_SCOPE_CHALLENGER\",\"verification_verdict\":\"ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"May AP release payment after the vendor bank update?\",\"allow_rule_assessment\":\"The source chain correctly closes the four gates required by STD-QUA-071-P, verifying vendor, amount, currency, date, and account. However, the deterministic gate failed due to incomplete tracking of critical term 8821.\",\"escalate_rule_assessment\":\"The deterministic gate failed because critical term 8821 was not explicitly noted as preserved across all source IDs in the artifact output, as required by the latest Gov baton. This constitutes a narrow source-record defect.\",\"timing_scope_authority_dependency_check\":\"The action date and release date match, and the payment release authority precedes execution. The source chain is substantively correct but requires annotation repair.\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED\",\"controlling_source_fact\":\"The deterministic gate failure on critical term 8821 tracking prevents ALLOW verdict, despite the source chain closing all policy gates.\"},\"cited_evidence\":[\"CALL-QUA-071\",\"VM-QUA-071\",\"BANK-QUA-071\",\"REL-QUA-071\",\"PAY-QUA-071\",\"STD-QUA-071-P\",\"ALERT-QUA-071\"],\"open_blockers\":[\"Repair 041 remains open per previous unresolved dependency; added: missing critical_term:8821 tracking requires explicit artifact annotation.\",\"FINAL_COMPILER disallowed until gate passes\"],\"critical_features_preserved\":[\"exact source IDs\",\"action boundary\",\"policy exact-match rule\",\"SOURCE_BOUNDARY_CLOSED binding class\",\"chain of four gates (pre-change callback + vendor-master approval + bank ownership + release authority)\",\"critical_term:8821 must be explicitly noted as preserved across all source IDs in artifact output\"],\"final_answer\":\"ESCALATE. The source chain correctly closes all policy gates, but the deterministic gate failed due to incomplete explicit tracking of critical term 8821 across cited sources. This requires repair before the action can proceed.\"},\"gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":false,\"failures\":[\"action_boundary_verdict_mismatch\",\"escalate_requires_source_boundary_open\"],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_CLOSED\",\"source_id_count\":7,\"critical_term_count\":6}}],\"full_latest_gov_baton\":{\"gov_command\":\"CONTINUE_WORKER\",\"route_verdict\":\"CONTINUE_WORKER\",\"source_gate_interpretation\":\"The source chain correctly closes all four policy gates per STD-QUA-071-P. CALL-QUA-071 provides pre-change callback, VM-QUA-071 provides vendor-master approval, BANK-QUA-071 provides bank ownership validation, and REL-QUA-071 provides payment-release authority matching vendor Quanta Field Services, amount USD 73400, account ending 8821, and release date 2026-06-28 before payment. ALERT-QUA-071 acknowledges the bank change. The chain is substantively correct. Worker 2 ESCALATE verdict conflicts with SOURCE_BOUNDARY_CLOSED binding class and is not the appropriate response when all gates are closed. ALLOW is the correct final verdict once annotation repairs are complete.\",\"must_preserve\":[\"exact source IDs ALERT-QUA-071, BANK-QUA-071, CALL-QUA-071, PAY-QUA-071, REL-QUA-071, STD-QUA-071-P, VM-QUA-071\",\"action boundary May AP release payment after the vendor bank update\",\"policy STD-QUA-071-P exact-match requirement\",\"chain of four gates closure\",\"binding class SOURCE_BOUNDARY_CLOSED\",\"critical_term 8821 across all cited sources\"],\"must_repair\":[\"explicit critical_term:8821 preservation annotation across all source IDs\",\"verdict-alignment-with-binding-class conflict resolution\",\"deterministic gate failure on action_boundary_verdict_mismatch\",\"deterministic gate failure on escalate_requires_source_boundary_open\"],\"blocked_moves\":[\"FINAL_COMPILER disallowed until deterministic gate passes\",\"FAIL_CLOSED inappropriate since source chain is substantively correct and all four gates closed\"],\"dependency_ledger\":[\"Repair 041 from prior unresolved dependency: critical_term:8821 tracking requires explicit artifact annotation. This repair must be completed before final verdict. New: Worker 2 ESCALATE verdict mismatch with SOURCE_BOUNDARY_CLOSED binding requires correction to ALLOW once repair complete.\"],\"next_worker_baton\":{\"objective\":\"Produce final ALLOW artifact after completing critical_term:8821 explicit annotation repair\",\"attack_focus\":\"Resolve binding-class-to-verdict mismatch by ensuring ALLOW verdict aligns with SOURCE_BOUNDARY_CLOSED when all gates are substantively closed; explicitly track 8821 across all seven cited sources; satisfy deterministic gate requirements\",\"required_repairs\":[\"critical_term:8821 explicit preservation annotation across ALERT-QUA-071, BANK-QUA-071, CALL-QUA-071, PAY-QUA-071, REL-QUA-071, VM-QUA-071\",\"verdict correction from ESCALATE to ALLOW given closed source boundary\",\"deterministic gate pass criteria met\"],\"monotonic_preservation\":[\"exact source IDs\",\"action boundary\",\"policy exact-match\",\"four-gate chain closure\",\"SOURCE_BOUNDARY_CLOSED binding class\"]},\"final_compiler_allowed\":false,\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\"},\"current_turn_command\":\"Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "current_turn_command": "Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.",
+    "full_latest_gov_baton": {
+      "blocked_moves": [
+        "FINAL_COMPILER disallowed until deterministic gate passes",
+        "FAIL_CLOSED inappropriate since source chain is substantively correct and all four gates closed"
+      ],
+      "dependency_ledger": [
+        "Repair 041 from prior unresolved dependency: critical_term:8821 tracking requires explicit artifact annotation. This repair must be completed before final verdict. New: Worker 2 ESCALATE verdict mismatch with SOURCE_BOUNDARY_CLOSED binding requires correction to ALLOW once repair complete."
+      ],
+      "final_compiler_allowed": false,
+      "gov_command": "CONTINUE_WORKER",
+      "gov_mode": "CONTROL_ROUTER",
+      "must_preserve": [
+        "exact source IDs ALERT-QUA-071, BANK-QUA-071, CALL-QUA-071, PAY-QUA-071, REL-QUA-071, STD-QUA-071-P, VM-QUA-071",
+        "action boundary May AP release payment after the vendor bank update",
+        "policy STD-QUA-071-P exact-match requirement",
+        "chain of four gates closure",
+        "binding class SOURCE_BOUNDARY_CLOSED",
+        "critical_term 8821 across all cited sources"
+      ],
+      "must_repair": [
+        "explicit critical_term:8821 preservation annotation across all source IDs",
+        "verdict-alignment-with-binding-class conflict resolution",
+        "deterministic gate failure on action_boundary_verdict_mismatch",
+        "deterministic gate failure on escalate_requires_source_boundary_open"
+      ],
+      "next_worker_baton": {
+        "attack_focus": "Resolve binding-class-to-verdict mismatch by ensuring ALLOW verdict aligns with SOURCE_BOUNDARY_CLOSED when all gates are substantively closed; explicitly track 8821 across all seven cited sources; satisfy deterministic gate requirements",
+        "monotonic_preservation": [
+          "exact source IDs",
+          "action boundary",
+          "policy exact-match",
+          "four-gate chain closure",
+          "SOURCE_BOUNDARY_CLOSED binding class"
+        ],
+        "objective": "Produce final ALLOW artifact after completing critical_term:8821 explicit annotation repair",
+        "required_repairs": [
+          "critical_term:8821 explicit preservation annotation across ALERT-QUA-071, BANK-QUA-071, CALL-QUA-071, PAY-QUA-071, REL-QUA-071, VM-QUA-071",
+          "verdict correction from ESCALATE to ALLOW given closed source boundary",
+          "deterministic gate pass criteria met"
+        ]
+      },
+      "route_verdict": "CONTINUE_WORKER",
+      "source_gate_interpretation": "The source chain correctly closes all four policy gates per STD-QUA-071-P. CALL-QUA-071 provides pre-change callback, VM-QUA-071 provides vendor-master approval, BANK-QUA-071 provides bank ownership validation, and REL-QUA-071 provides payment-release authority matching vendor Quanta Field Services, amount USD 73400, account ending 8821, and release date 2026-06-28 before payment. ALERT-QUA-071 acknowledges the bank change. The chain is substantively correct. Worker 2 ESCALATE verdict conflicts with SOURCE_BOUNDARY_CLOSED binding class and is not the appropriate response when all gates are closed. ALLOW is the correct final verdict once annotation repairs are complete.",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+    },
+    "gov_routing_lens": {
+      "blocked_move": "FINAL_COMPILER disallowed until deterministic gate passes",
+      "current_objective": "FINAL_COMPILER",
+      "main_repair_target": "explicit critical_term:8821 preservation annotation across all source IDs",
+      "route_verdict": "CONTINUE_WORKER",
+      "unresolved_dependency": "Repair 041 from prior unresolved dependency: critical_term:8821 tracking requires explicit artifact annotation. This repair must be completed before final verdict. New: Worker 2 ESCALATE verdict mismatch with SOURCE_BOUNDARY_CLOSED binding requires correction to ALLOW once repair complete."
+    },
+    "raw_prior_outputs": [
+      {
+        "gate_result": {
+          "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+          "artifact_verdict": "ALLOW",
+          "critical_term_count": 6,
+          "failures": [
+            "missing_critical_term:8821"
+          ],
+          "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+          "passed": false,
+          "source_id_count": 7
+        },
+        "turn_id": "HV-KITC-071-A_W1",
+        "worker_output": {
+          "boundary_binding": {
+            "action_boundary": "May AP release payment after the vendor bank update?",
+            "allow_rule_assessment": "Chain supplies pre-change callback (CALL-QUA-071), vendor-master approval (VM-QUA-071), bank ownership (BANK-QUA-071), and release authority (REL-QUA-071) matching vendor/amount/account/date before payment per STD-QUA-071-P.",
+            "binding_class": "SOURCE_BOUNDARY_CLOSED",
+            "controlling_source_fact": "STD-QUA-071-P chain rule satisfied by CALL-QUA-071 + VM-QUA-071 + BANK-QUA-071 + REL-QUA-071",
+            "escalate_rule_assessment": "No narrow source-record defect remains open; all four gates closed by collective chain.",
+            "timing_scope_authority_dependency_check": "Release date 2026-06-28 matches REL-QUA-071 and PAY-QUA-071; authority precedes execution."
+          },
+          "cited_evidence": [
+            "CALL-QUA-071",
+            "VM-QUA-071",
+            "BANK-QUA-071",
+            "REL-QUA-071",
+            "STD-QUA-071-P"
+          ],
+          "critical_features_preserved": [
+            "exact source IDs",
+            "action boundary",
+            "policy exact-match rule"
+          ],
+          "final_answer": "Source chain exactly closes the four gates required by STD-QUA-071-P. Pre-change callback, vendor-master approval, bank ownership, and matching release authority are all present. Payment release after bank update is permitted.",
+          "open_blockers": [],
+          "verification_verdict": "ALLOW",
+          "worker_role": "SOURCE_BOUNDARY_MAPPER"
+        }
+      },
+      {
+        "gate_result": {
+          "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+          "artifact_verdict": "ESCALATE",
+          "critical_term_count": 6,
+          "failures": [
+            "action_boundary_verdict_mismatch",
+            "escalate_requires_source_boundary_open"
+          ],
+          "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+          "passed": false,
+          "source_id_count": 7
+        },
+        "turn_id": "HV-KITC-071-A_W2",
+        "worker_output": {
+          "boundary_binding": {
+            "action_boundary": "May AP release payment after the vendor bank update?",
+            "allow_rule_assessment": "The source chain correctly closes the four gates required by STD-QUA-071-P, verifying vendor, amount, currency, date, and account. However, the deterministic gate failed due to incomplete tracking of critical term 8821.",
+            "binding_class": "SOURCE_BOUNDARY_CLOSED",
+            "controlling_source_fact": "The deterministic gate failure on critical term 8821 tracking prevents ALLOW verdict, despite the source chain closing all policy gates.",
+            "escalate_rule_assessment": "The deterministic gate failed because critical term 8821 was not explicitly noted as preserved across all source IDs in the artifact output, as required by the latest Gov baton. This constitutes a narrow source-record defect.",
+            "timing_scope_authority_dependency_check": "The action date and release date match, and the payment release authority precedes execution. The source chain is substantively correct but requires annotation repair."
+          },
+          "cited_evidence": [
+            "CALL-QUA-071",
+            "VM-QUA-071",
+            "BANK-QUA-071",
+            "REL-QUA-071",
+            "PAY-QUA-071",
+            "STD-QUA-071-P",
+            "ALERT-QUA-071"
+          ],
+          "critical_features_preserved": [
+            "exact source IDs",
+            "action boundary",
+            "policy exact-match rule",
+            "SOURCE_BOUNDARY_CLOSED binding class",
+            "chain of four gates (pre-change callback + vendor-master approval + bank ownership + release authority)",
+            "critical_term:8821 must be explicitly noted as preserved across all source IDs in artifact output"
+          ],
+          "final_answer": "ESCALATE. The source chain correctly closes all policy gates, but the deterministic gate failed due to incomplete explicit tracking of critical term 8821 across cited sources. This requires repair before the action can proceed.",
+          "open_blockers": [
+            "Repair 041 remains open per previous unresolved dependency; added: missing critical_term:8821 tracking requires explicit artifact annotation.",
+            "FINAL_COMPILER disallowed until gate passes"
+          ],
+          "verification_verdict": "ESCALATE",
+          "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+        }
+      }
+    ],
+    "run_lock": {
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "model": "minimax/MiniMax-M2.5-highspeed",
+      "no_substitutions": true,
+      "packet_id": "HV-KITC-071-A",
+      "pair_id": "HV-KITC-071",
+      "run_id": "run_20260629T013130Z",
+      "worker_index": 3,
+      "worker_role": "FINAL_COMPILER"
+    },
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 73400,
+        "business_ref": "HV-KITC-071-A",
+        "currency": "USD",
+        "description": "May AP release payment after the vendor bank update?",
+        "type": "vendor_bank_update_payment",
+        "vendor": "Quanta Field Services"
+      },
+      "context": {
+        "action_boundary": "May AP release payment after the vendor bank update?",
+        "anomaly_observed": "The packet includes a bank-change alert, a vendor-master form, a callback record, and a payment-release authority.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Payment PAY-QUA-071 releases USD 73400 to Quanta Field Services account ending 8821 on 2026-06-28.",
+            "doc_id": "PAY-QUA-071",
+            "type": "source_record"
+          },
+          {
+            "content": "Bank-change alert remains visible for Quanta Field Services because the account changed this week.",
+            "doc_id": "ALERT-QUA-071",
+            "type": "source_record"
+          },
+          {
+            "content": "Callback CALL-QUA-071 used the pre-change vendor master phone source and confirmed account ending 8821 for Quanta Field Services.",
+            "doc_id": "CALL-QUA-071",
+            "type": "source_record"
+          },
+          {
+            "content": "Vendor-master approval VM-QUA-071 approves account ending 8821 for Quanta Field Services.",
+            "doc_id": "VM-QUA-071",
+            "type": "source_record"
+          },
+          {
+            "content": "Bank ownership BANK-QUA-071 confirms account ending 8821 is owned by Quanta Field Services.",
+            "doc_id": "BANK-QUA-071",
+            "type": "source_record"
+          },
+          {
+            "content": "Payment-release authority REL-QUA-071 approves Quanta Field Services, USD 73400, account ending 8821, release date 2026-06-28 before payment.",
+            "doc_id": "REL-QUA-071",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Payment after bank update is complete when the evidence chain collectively supplies: pre-change callback source, vendor-master account approval, bank ownership validation, and payment-release authority matching vendor, amount, account, and release date before payment. No single record must carry every field if the chain closes all four gates.",
+            "doc_id": "STD-QUA-071-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "best_artifact_registry": null,
+      "blocked_moves_so_far": [
+        "FINAL_COMPILER disallowed until gate passes",
+        "FAIL_CLOSED inappropriate since source chain is substantively correct",
+        "FINAL_COMPILER disallowed until deterministic gate passes",
+        "FAIL_CLOSED inappropriate since source chain is substantively correct and all four gates closed"
+      ],
+      "claims_requiring_support": [],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "packet_id": "HV-KITC-071-A",
+      "pair_id": "HV-KITC-071",
+      "pinned_best_artifact_full_text": null,
+      "resolved_dependencies": [],
+      "run_id": "run_20260629T013130Z",
+      "source_ids_used_so_far": [
+        "ALERT-QUA-071",
+        "BANK-QUA-071",
+        "CALL-QUA-071",
+        "PAY-QUA-071",
+        "REL-QUA-071",
+        "STD-QUA-071-P",
+        "VM-QUA-071"
+      ],
+      "turns_completed": [
+        {
+          "artifact_hash": "d99104c5397e3f51012a080cc9a7e45a09a4cde0e4901817c732f265115c596a",
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-071-A_WORKER_01.json",
+          "gate_status": "FAIL",
+          "model": "xai/grok-3-mini",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ALLOW",
+          "role": "worker",
+          "source_ids": [
+            "ALERT-QUA-071",
+            "BANK-QUA-071",
+            "CALL-QUA-071",
+            "PAY-QUA-071",
+            "REL-QUA-071",
+            "STD-QUA-071-P",
+            "VM-QUA-071"
+          ],
+          "turn": 1,
+          "turn_id": "HV-KITC-071-A_W1"
+        },
+        {
+          "artifact_hash": "1ea2c79dddd4c615d47fbe5a3238199e530439a0048db9065f008a92ce51e874",
+          "blocked_moves": [
+            "FINAL_COMPILER disallowed until gate passes",
+            "FAIL_CLOSED inappropriate since source chain is substantively correct"
+          ],
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-071-A_G1.json",
+          "gate_status": "FAIL",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "output_summary": "Gov local verdict None route CONTINUE_WORKER",
+          "role": "gov",
+          "source_ids": [
+            "ALERT-QUA-071",
+            "BANK-QUA-071",
+            "CALL-QUA-071",
+            "PAY-QUA-071",
+            "REL-QUA-071",
+            "STD-QUA-071-P",
+            "VM-QUA-071"
+          ],
+          "turn": 2,
+          "turn_id": "HV-KITC-071-A_G1"
+        },
+        {
+          "artifact_hash": "268e33382240b253480cf4b782c94f51f62a87b4ca3e49dc6606dacb3c74319b",
+          "dna": "google",
+          "full_output_ref": "artifacts/HV-KITC-071-A_WORKER_02.json",
+          "gate_status": "FAIL",
+          "model": "google/gemini-2.5-flash-lite",
+          "output_summary": "ADVERSARIAL_SCOPE_CHALLENGER local verdict ESCALATE",
+          "role": "worker",
+          "source_ids": [
+            "ALERT-QUA-071",
+            "BANK-QUA-071",
+            "CALL-QUA-071",
+            "PAY-QUA-071",
+            "REL-QUA-071",
+            "STD-QUA-071-P",
+            "VM-QUA-071"
+          ],
+          "turn": 3,
+          "turn_id": "HV-KITC-071-A_W2"
+        },
+        {
+          "artifact_hash": "778acc1ab12a8e0c00e10598306b103df7eeea0e9d3a5bceefef2ec02bcdd3a8",
+          "blocked_moves": [
+            "FINAL_COMPILER disallowed until deterministic gate passes",
+            "FAIL_CLOSED inappropriate since source chain is substantively correct and all four gates closed"
+          ],
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-071-A_G2.json",
+          "gate_status": "FAIL",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "output_summary": "Gov local verdict None route CONTINUE_WORKER",
+          "role": "gov",
+          "source_ids": [
+            "ALERT-QUA-071",
+            "BANK-QUA-071",
+            "CALL-QUA-071",
+            "PAY-QUA-071",
+            "REL-QUA-071",
+            "STD-QUA-071-P",
+            "VM-QUA-071"
+          ],
+          "turn": 4,
+          "turn_id": "HV-KITC-071-A_G2"
+        }
+      ],
+      "unresolved_dependencies": [
+        "Repair 041 from prior unresolved dependency: critical_term:8821 tracking requires explicit artifact annotation. This repair must be completed before final verdict. New: Worker 2 ESCALATE verdict mismatch with SOURCE_BOUNDARY_CLOSED binding requires correction to ALLOW once repair complete."
+      ]
+    },
+    "system_role": "HoloVerify worker. Preserve state. Obey Gov.",
+    "task_and_answer_contract": {
+      "answer_contract": {
+        "boundary_binding": {
+          "action_boundary": "string",
+          "allow_rule_assessment": "string",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+          "controlling_source_fact": "string",
+          "escalate_rule_assessment": "string",
+          "timing_scope_authority_dependency_check": "string"
+        },
+        "cited_evidence": [
+          "exact source doc_id"
+        ],
+        "critical_features_preserved": [
+          "string"
+        ],
+        "final_answer": "string",
+        "open_blockers": [
+          "string"
+        ],
+        "verification_verdict": "ALLOW | ESCALATE",
+        "worker_role": "string"
+      },
+      "deterministic_gate_categories": [
+        "word band",
+        "required sections",
+        "source IDs",
+        "invented source IDs",
+        "timing/scope/authority/dependency section",
+        "action-boundary violations",
+        "critical dependencies/traps"
+      ],
+      "source_rules": [
+        "cite exact doc_id values only",
+        "do not invent source IDs",
+        "ALLOW only when exact current source boundary is closed before execution",
+        "ESCALATE when a narrow source-record defect remains open before execution"
+      ],
+      "task": "Decide whether the action may proceed using only source records in this packet.",
+      "word_band": "final_answer 25-120 words"
+    }
+  }
+}

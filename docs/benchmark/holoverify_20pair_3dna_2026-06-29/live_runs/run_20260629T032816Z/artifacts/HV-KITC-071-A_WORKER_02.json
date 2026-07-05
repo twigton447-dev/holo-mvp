@@ -1,0 +1,32 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after the vendor bank update?",
+    "allow_rule_assessment": "The action may proceed if the evidence chain collectively supplies pre-change callback, vendor-master approval, bank ownership validation, and payment-release authority matching vendor, amount, account, and release date before payment.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "The explicit anchoring of critical term 8821 in the cited evidence chain is not fully satisfied, creating an unresolved dependency per Repairs 041.",
+    "escalate_rule_assessment": "The chain-of-records policy requires explicit anchoring of critical terms like the account number (8821) in the cited evidence. This is not fully met as the term is present but not explicitly anchored in a way that satisfies the policy's strictness.",
+    "timing_scope_authority_dependency_check": "The payment release authority (REL-QUA-071) and payment record (PAY-QUA-071) both reference account ending 8821, and the action date is 2026-06-28. The bank update alert (ALERT-QUA-071) indicates a recent change. The evidence chain attempts to close the boundary before execution."
+  },
+  "cited_evidence": [
+    "PAY-QUA-071",
+    "ALERT-QUA-071",
+    "CALL-QUA-071",
+    "VM-QUA-071",
+    "BANK-QUA-071",
+    "REL-QUA-071",
+    "STD-QUA-071-P"
+  ],
+  "critical_features_preserved": [
+    "Gov chooses control actions, not models.",
+    "Source context is ground truth.",
+    "Workers return compact JSON only.",
+    "ALLOW verdict"
+  ],
+  "final_answer": "The action must be escalated. While the evidence chain attempts to satisfy the chain-of-records policy by providing supporting documents for the vendor bank update, a critical dependency remains unresolved. The explicit anchoring of the account number '8821' within the cited evidence does not fully meet the strict requirements of Repairs 041, leaving the source boundary open and preventing the action from proceeding.",
+  "open_blockers": [
+    "Repairs 041: chain-of-records policy explicit",
+    "critical_term:8821 explicit anchoring in evidence"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

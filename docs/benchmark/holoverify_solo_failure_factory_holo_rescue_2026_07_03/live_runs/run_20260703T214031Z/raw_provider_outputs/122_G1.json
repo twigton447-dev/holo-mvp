@@ -1,0 +1,27 @@
+{
+  "call_number": 122,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "82284cbb669374c2d2242bab12ed376b97f9338ed17db894b2ea536da071f0ac",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user says:\n\n\"packet_id=SFFRESCUE-EEBE8A4E22F1B5E62665\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe need to return a plain text record with three key=value lines. The fields: route_verdict, repair_target, blocked_move. In order: route_verdict, repair_target, blocked_move. They gave the values.\n\nWe must not add headings, explanations, JSON, Markdown, or extra lines. Just three lines.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut careful: The user wrote the values exactly: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs. So we output exactly that. Possibly we need to preserve the case, exactly as they gave. The \"route_verdict\" value is \"CONTINUE\". The \"repair_target\" value is \"preserve source-grounded reasoning\". The \"blocked_move\" value is \"do not invent source IDs\". Should we preserve the spaces? It's key=value. For values with spaces, do we need quoting? The instruction says plain text record with three key=value lines. Usually you don't quote. So just key=value. For values with spaces, it's okay as plain text; they are part of value. So output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must not add any extra lines, no headings. Return as is. That's all.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "0149948f7e1ef0b3fecaa0a3b6384b9e5f3d84e1370a723aaf0decf69a5d15ab",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 124,
+    "output_tokens": 390,
+    "raw_text": "<think>\nThe user says:\n\n\"packet_id=SFFRESCUE-EEBE8A4E22F1B5E62665\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe need to return a plain text record with three key=value lines. The fields: route_verdict, repair_target, blocked_move. In order: route_verdict, repair_target, blocked_move. They gave the values.\n\nWe must not add headings, explanations, JSON, Markdown, or extra lines. Just three lines.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut careful: The user wrote the values exactly: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs. So we output exactly that. Possibly we need to preserve the case, exactly as they gave. The \"route_verdict\" value is \"CONTINUE\". The \"repair_target\" value is \"preserve source-grounded reasoning\". The \"blocked_move\" value is \"do not invent source IDs\". Should we preserve the spaces? It's key=value. For values with spaces, do we need quoting? The instruction says plain text record with three key=value lines. Usually you don't quote. So just key=value. For values with spaces, it's okay as plain text; they are part of value. So output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must not add any extra lines, no headings. Return as is. That's all.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0697619a36a5c687e18f2b6c66f8768d",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 514,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

@@ -1,0 +1,43 @@
+{
+  "blocked_moves": [
+    "Treat FEAS-ZEN-080 as enrollment activation authority",
+    "Treat ACT-ZEN-080 as execution authority bypassing enrollment check",
+    "Close action with pending consent authority unresolved"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "AUTH-ZEN-080 C11 enrollment authority pending blocks activation",
+    "STD-ZEN-080-P requires all elements closed before enrollment",
+    "Resolution requires updated AUTH or consent amendment confirming C11 authority"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "AUTH-ZEN-080 as controlling source",
+    "ESCALATE verdict for SOURCE_BOUNDARY_OPEN",
+    "pending consent C11 enrollment authority blocker"
+  ],
+  "must_repair": [
+    "Enrollment authority pending status requires resolution or confirmation of later grant",
+    "Action boundary remains open until C11 authority confirmed",
+    "Cannot close activation without exact-match satisfaction"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Search for updated AUTH or consent amendment confirming enrollment",
+    "monotonic_preservation": [
+      "AUTH-ZEN-080 as controlling source",
+      "SOURCE_BOUNDARY_OPEN verdict unless C11 confirmed",
+      "STD-ZEN-080-P exact-match requirement"
+    ],
+    "objective": "Verify if C11 consent authority was subsequently granted",
+    "required_repairs": [
+      "Locate consent C11 enrollment authority confirmation or amendment",
+      "Confirm C11 authority grant date relative to 2026-06-28",
+      "Report exact-match satisfaction or persistent blockage"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate passed; ESCALATE preserved. AUTH-ZEN-080 pending C11 consent blocks closure per STD-ZEN-080-P exact-match rule.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

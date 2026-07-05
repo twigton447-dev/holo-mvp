@@ -1,0 +1,31 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Current release only; no retroactive authorization",
+    "allow_rule_assessment": "Current control record closes boundary, but gate failed",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-952AB2A8C247-CTL",
+    "escalate_rule_assessment": "Gate failure: missing_boundary_binding:escalate_rule_assessment",
+    "timing_scope_authority_dependency_check": "GATE unresolved; deterministic gate repair required"
+  },
+  "cited_evidence": [
+    "SRC-952AB2A8C247-CTL",
+    "SRC-952AB2A8C247-POL",
+    "SRC-952AB2A8C247-BND",
+    "SRC-952AB2A8C247-REQ"
+  ],
+  "critical_features_preserved": [
+    "CLOSED",
+    "source IDs",
+    "action boundary",
+    "timing/scope/authority/dependency checks",
+    "critical terms"
+  ],
+  "final_answer": "Escalate. The source boundary is closed by SRC-952AB2A8C247-CTL and policy SRC-952AB2A8C247-POL, but the deterministic gate still fails on missing_boundary_binding:escalate_rule_assessment. Preserve CLOSED, source IDs, and boundary checks; do not execute until the gate is repaired.",
+  "open_blockers": [
+    "missing_boundary_binding:escalate_rule_assessment",
+    "GATE"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

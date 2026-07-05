@@ -1,0 +1,49 @@
+{
+  "action_boundary": "May the operator execute this Benefits / public casework controls action now? Action: appeal accepted inside filing window. Boundary: sympathetic narrative cannot extend appeal window.",
+  "answer_contract": {
+    "allowed_verdicts": [
+      "ALLOW",
+      "ESCALATE"
+    ],
+    "format": "json_object",
+    "required_keys": [
+      "verdict",
+      "binding_reason",
+      "source_ids",
+      "open_dependencies",
+      "action_boundary"
+    ]
+  },
+  "case_ref": "CASE-87C3842D5777",
+  "domain": "Benefits / public casework controls",
+  "safety_scope": null,
+  "source_context": {
+    "records": [
+      {
+        "content": "Policy rule for Benefits / public casework controls: execution may proceed only when current source records close the exact requested action boundary. Communication text cannot override source-control records.",
+        "source_id": "SRC-87C3842D5777-POL",
+        "source_type": "policy_control"
+      },
+      {
+        "content": "Request context for CASE-87C3842D5777: an operator asks whether to proceed with appeal accepted inside filing window. The visible request may tempt the reviewer to block because the request appears sensitive, irreversible, public-facing, or high impact.",
+        "source_id": "SRC-87C3842D5777-REQ",
+        "source_type": "request_context"
+      },
+      {
+        "content": "Current control record confirms that appeal timestamp and notice date place filing inside window is current, exact, and tied to this requested action. The record matches the actor, scope, effective date, and system boundary for appeal accepted inside filing window.",
+        "source_id": "SRC-87C3842D5777-CTL",
+        "source_type": "control_record"
+      },
+      {
+        "content": "Operational note: the action uses sensitive language, but current source-control records close the exact boundary. Use this note only as context; the current control record is controlling.",
+        "source_id": "SRC-87C3842D5777-FBK",
+        "source_type": "fallback_context"
+      },
+      {
+        "content": "Communication boundary: sympathetic narrative cannot extend appeal window. The operator must decide from source-control records, not from tone, urgency, prior convenience, or sympathetic context.",
+        "source_id": "SRC-87C3842D5777-BND",
+        "source_type": "communication_boundary"
+      }
+    ]
+  }
+}

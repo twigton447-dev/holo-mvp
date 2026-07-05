@@ -1,0 +1,30 @@
+{
+  "blocked_moves": [],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "EHS-NOV-042 execution-release scheduling is a blocking dependency; PO issuance cannot proceed until EHS-NOV-042 confirms execution release is issued and matched against PO-NOV-042 material, quantity, facility"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "PO-NOV-042, SRC-NOV-042, EHS-NOV-042, STD-NOV-042-P source IDs are not substituted or invented",
+    "NS-55 solvent 18 liters and Facility R2 traced only to PO-NOV-042 and confirmed in EHS-NOV-042",
+    "execution_release_binding EXECUTION_RELEASE_PENDING per EHS-NOV-042 literal language",
+    "sourcing-note scope separated from execution-release scope",
+    "warning tone correctly read as limited-scope per SRC-NOV-042"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "No further worker action required; diagnostic complete; execution-release pending status is deterministic from EHS-NOV-042 source text",
+    "monotonic_preservation": [
+      "All source IDs, material, quantity, facility, and scope bindings from turn 1 worker output",
+      "EXECUTION_RELEASE_PENDING binding class",
+      "Policy STD-NOV-042-P requirement boundary preserved"
+    ],
+    "objective": "Finalize governance verdict",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "WORKER_SOURCE_BOUND_GATE passed; worker correctly distinguished sourcing-note scope from execution-release scope; no source record supplies closed execution release; EHS-NOV-042 explicitly states execution release remains to be scheduled; policy boundary not satisfied; ESCALATE verdict is deterministic and correct",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

@@ -1,0 +1,33 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May HR or payroll execute the requested workforce, pay, benefits, or employment-status action? Focus: retro-pay adjustment inside signed compensation change order.",
+    "allow_rule_assessment": "Source records do not close the exact boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-568E044EFAE0-CTL",
+    "escalate_rule_assessment": "Exact comp order match remains missing or mismatched.",
+    "timing_scope_authority_dependency_check": "signed comp order amount employee pay period match"
+  },
+  "cited_evidence": [
+    "SRC-568E044EFAE0-CTL",
+    "SRC-568E044EFAE0-POL",
+    "SRC-568E044EFAE0-BND",
+    "SRC-568E044EFAE0-FBK",
+    "SRC-568E044EFAE0-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "signed comp order amount employee and pay period match",
+    "SRC-568E044EFAE0-CTL",
+    "SRC-568E044EFAE0-BND",
+    "signed comp order amount, employee, and pay period match"
+  ],
+  "final_answer": "Action may not proceed. The control record and policy show the exact retro-pay boundary is not closed because the signed compensation change order does not match on amount, employee, and pay period. The safe disposition is ESCALATE until the dependency is resolved in current source records.",
+  "open_blockers": [
+    "signed comp order amount employee pay period match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

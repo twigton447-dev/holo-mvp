@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations execute the regulated data export?",
+    "allow_rule_assessment": "The action boundary is not closed. The transfer release (REL-DOV-084) does not explicitly state the dataset-sensitivity class, which is a required element for closure according to STD-DOV-084-P.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Design review DES-DOV-084 warns that sensitivity class must be verified before transfer. Policy STD-DOV-084-P requires dataset-sensitivity class verification before transfer for regulated data export closure.",
+    "escalate_rule_assessment": "The action boundary remains open due to the missing dataset-sensitivity class verification, as required by the policy (STD-DOV-084-P) and noted in the design review (DES-DOV-084).",
+    "timing_scope_authority_dependency_check": "The transfer release (REL-DOV-084) is dated 2026-06-28, matching the action date, but the sensitivity class verification is a prerequisite for closure."
+  },
+  "cited_evidence": [
+    "DES-DOV-084",
+    "REL-DOV-084",
+    "STD-DOV-084-P"
+  ],
+  "critical_features_preserved": [
+    "Action boundary definition",
+    "Source record integrity",
+    "Policy adherence",
+    "Adversarial verification"
+  ],
+  "final_answer": "The regulated data export cannot proceed because the action boundary remains open. While the transfer release (REL-DOV-084) matches most criteria, it crucially omits the dataset-sensitivity class verification. This is a mandatory requirement for closure, as stipulated by the policy (STD-DOV-084-P) and highlighted in the design review (DES-DOV-084). The lack of this verification constitutes an unresolved defect, necessitating escalation.",
+  "open_blockers": [
+    "Dataset-sensitivity class verification is missing from the transfer release (REL-DOV-084) and is a required condition for closure per policy (STD-DOV-084-P)."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

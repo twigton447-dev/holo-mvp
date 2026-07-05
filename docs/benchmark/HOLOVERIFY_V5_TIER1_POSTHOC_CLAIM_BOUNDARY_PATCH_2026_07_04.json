@@ -1,0 +1,50 @@
+{
+  "classification": "HOLOVERIFY_V5_TIER1_POSTHOC_CLAIM_BOUNDARY_PATCH_V0",
+  "created_at_utc": "2026-07-04T06:47:37Z",
+  "status": "NO_PROVIDER_REPORTING_PATCH_COMPLETE",
+  "run_dir": "docs/benchmark/holoverify_v5_blocker_closure_tier1_2026_07_04/live_runs/run_20260704T062142Z",
+  "scope": {
+    "reporting_patch_only": true,
+    "providers_run": 0,
+    "holo_live_rerun": false,
+    "solo_runs": 0,
+    "judge_runs": 0,
+    "runtime_trace_modified": false,
+    "prompts_modified": false,
+    "raw_provider_outputs_modified": false
+  },
+  "original_audit_classification": "POSTHOC_CLAIM_BOUNDARY_DENOMINATOR_DEFECT",
+  "defect": {
+    "run_controls_clean": true,
+    "packet_score_clean": true,
+    "problem": "Post-hoc score artifact used pair-level field/language for a B-side-only Tier 1 patch-validation run.",
+    "bad_fields": [
+      "pair_count counted legacy pair groups instead of complete sibling pairs",
+      "allowed_internal_claim_if_clean said Holo solved both siblings"
+    ]
+  },
+  "corrected_score_fields": {
+    "packet_count": 2,
+    "correct_count": 2,
+    "incorrect_count": 0,
+    "pair_count": 0,
+    "complete_pair_count": 0,
+    "legacy_pair_group_count": 2,
+    "partial_pair_group_count": 2,
+    "pair_count_note": "pair_count means complete sibling pairs only. Legacy pair groups with only one sibling are reported in legacy_pair_group_count and do not create pair-level evidence."
+  },
+  "corrected_allowed_internal_claim": "V5 Tier 1 patch validation passed on 2/2 selected ESCALATE-side false-closure packets after blind runtime execution and post-freeze scoring.",
+  "still_forbidden": [
+    "public error-rate claim",
+    "general model superiority claim",
+    "complete-pair claim",
+    "both-siblings claim",
+    "FPR/FNR claim",
+    "benchmark denominator claim"
+  ],
+  "patched_files": [
+    "docs/benchmark/score_holoverify_solo_failure_factory_batch016_hard_authority_ambiguity_holo_rescue_posthoc_2026_07_04.py",
+    "docs/benchmark/holoverify_v5_blocker_closure_tier1_2026_07_04/live_runs/run_20260704T062142Z/solo_failure_factory_batch016_hard_authority_rescue_posthoc_score_trace_bound_v1.json"
+  ],
+  "post_patch_classification_if_independent_audit_passes": "V5_TIER1_PATCH_VALIDATION_PASSED"
+}

@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "allow_rule_assessment": "Monitor-only no-block disposition permits release only when the exact counterparty and account match. The account mismatch (7205 vs 7025) and the visible FLAG-TES-074 prevent this.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "PAY-TES-074 targets account 7205, CLR-TES-074 covers account 7025, and FLAG-TES-074 is unresolved.",
+    "escalate_rule_assessment": "The account mismatch and the unresolved FLAG-TES-074 leave the source boundary open, preventing release.",
+    "timing_scope_authority_dependency_check": "CLR-TES-074 does not cover the payment target account (7205). FLAG-TES-074 remains visible and unresolved, blocking release."
+  },
+  "cited_evidence": [
+    "PAY-TES-074",
+    "CLR-TES-074",
+    "FLAG-TES-074",
+    "STD-TES-074-P"
+  ],
+  "critical_features_preserved": [
+    "Exact source match rule for name, country, tax ID, account, and disposition.",
+    "Account field specificity as a critical matching criterion.",
+    "FLAG-TES-074 visibility and unresolved status.",
+    "CLR-TES-074 scope limitation to account 7025."
+  ],
+  "final_answer": "ESCALATE. The source boundary remains open due to a critical account mismatch between the payment (7205) and the clearance scope (7025), as well as an unresolved sanctions flag (FLAG-TES-074). The policy STD-TES-074-P requires exact matches, which are not present. Release is not permitted.",
+  "open_blockers": [
+    "Account mismatch: PAY-TES-074 targets account 7205, while CLR-TES-074 covers account 7025.",
+    "Unresolved sanctions flag: FLAG-TES-074 remains visible with no disposition confirmed.",
+    "Dependency: CLR-TES-074 scope does not align with the payment target account."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

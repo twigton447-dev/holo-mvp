@@ -1,0 +1,45 @@
+{
+  "blocked_moves": [
+    "APPROVE release despite visible flag and account discrepancy",
+    "treat CLR-TES-074 partial match as sufficient closure",
+    "infer missing account/tax disposition fields without source evidence",
+    "shortcut policy authority without source-boundary closure"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "CLR-TES-074 disposition monitor-only no-block requires exact account match; FLAG-TES-074 visibility and CLR-TES-074 account ending 7025 conflict with PAY-TES-074 account ending 7205 - boundary remains open until reconciliation"
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "CONTROL_ROUTER",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ESCALATE verdict",
+    "SOURCE_BOUNDARY_OPEN binding",
+    "cited_evidence FLAG-TES-074 and CLR-TES-074",
+    "open_blockers: visible sanctions flag and account number mismatch",
+    "exact source doc_id only",
+    "no invented IDs",
+    "residual compliance flag vs exact clearance distinction"
+  ],
+  "must_repair": [
+    "account number field-level reconciliation (7205 vs 7025)",
+    "monitoring disposition field completeness for FLAG-TES-074",
+    "clear disposition status before release authorization"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "reconcile PAY-TES-074 (7205) vs CLR-TES-074 (7025) account ending; verify whether FLAG-TES-074 disposition field is missing or empty; confirm whether CLR-TES-074 clearance applies to PAY-TES-074 transaction or represents a different account holder",
+    "monotonic_preservation": [
+      "ESCALATE verdict preserved as safety-first; SOURCE_BOUNDARY_OPEN binding preserved until explicit reconciliation evidence; cited evidence doc_ids preserved exactly; open_blockers list preserved until resolved"
+    ],
+    "objective": "resolve account number discrepancy and flag closure status for SOURCE_BOUNDARY_CLOSER verdict",
+    "required_repairs": [
+      "account ending reconciliation between PAY-TES-074 and CLR-TES-074",
+      "FLAG-TES-074 disposition completeness check",
+      "disposition match confirmation against STD-TES-074-P policy"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "SOURCE_BOUNDARY_OPEN - account mismatch (PAY-TES-074:7205 vs CLR-TES-074:7025) and visible flag prevent closure per STD-TES-074-P exact-match policy",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

@@ -1,0 +1,495 @@
+{
+  "classification": "HOLOVERIFY_LIVING_SEAM_ATLAS_AND_ARCHITECTURE_LEDGER",
+  "created_at": "2026-07-05",
+  "callsign": "STATS SUBAGENT",
+  "scope": "Living evidence ledger and Phase 1 sample-size roadmap.",
+  "audit_actions": {
+    "providers_run": false,
+    "holo_live_run": false,
+    "solo_run": false,
+    "judges_run": false,
+    "frozen_runtime_evidence_modified": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "strict_public_denominator": {
+    "current_lane": "blind_holo_lane",
+    "packets": 120,
+    "pairs": 60,
+    "allow_packets": 60,
+    "escalate_packets": 60,
+    "holo_correct": 120,
+    "holo_incorrect": 0,
+    "holo_score": "120/120",
+    "provider_calls_represented": 600,
+    "providers_called_during_scoring": 0,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "old_614_status": "STALE_HISTORICAL_INTERNAL_NOT_CURRENT_PUBLIC_DENOMINATOR",
+    "old_614_exclusion_reason": "The current strict public denominator counts only the blind-120 lane because it has its own blind packet bank, balanced truth split, runtime-manifest separation from scoring map, batch execution lock, trace-bound post-hoc scoring, and current claim boundary. Older 614-era evidence must not be combined with blind-120 for public FPR/FNR or Wilson claims unless re-admitted under the current strict rule."
+  },
+  "phase1_wilson_target": {
+    "target_clean_balanced_packets": 762,
+    "target_allow_packets": 381,
+    "target_escalate_packets": 381,
+    "current_strict_blind_packets": 120,
+    "current_allow_packets": 60,
+    "current_escalate_packets": 60,
+    "remaining_packets": 642,
+    "remaining_allow_packets": 321,
+    "remaining_escalate_packets": 321,
+    "plain_english": "If Holo has zero observed misses, the Wilson 95% upper bound asks how high the true error rate could still plausibly be. With 381 clean packets on one side, the side-specific Wilson 95% upper bound is just under 1%, which is why Phase 1 targets 381 ALLOW and 381 ESCALATE packets.",
+    "workstreams": {
+      "strict_public_denominator_work": {
+        "purpose": "Build clean balanced ALLOW/ESCALATE packets toward 762 total.",
+        "denominator_treatment": "Public denominator only after freeze, clean runtime controls, and trace-bound scoring.",
+        "provider_approval_status": "Requires separate explicit approval per run."
+      },
+      "internal_directional_rescue_work": {
+        "purpose": "Validate V5/V6 behavior on selected solo-failure rescue seams.",
+        "denominator_treatment": "Internal-only; not public FPR/FNR or benchmark denominator.",
+        "provider_approval_status": "V6 Tier 3 selected-lane rerun completed and passed internal repair gate; future live work needs separate explicit approval."
+      },
+      "seam_mining_work": {
+        "purpose": "Find and audit new FN_FALSE_ALLOW / FP_OVERBLOCK candidates.",
+        "denominator_treatment": "Candidate discovery only; no denominator credit by itself.",
+        "provider_approval_status": "No provider approval from mining artifacts alone."
+      }
+    }
+  },
+  "solo_failure_factory": {
+    "pairs_inspected": 210,
+    "pairs_with_at_least_one_solo_failure": 104,
+    "wrong_verdict_pairs": 79,
+    "FP_OVERBLOCK_pairs": 33,
+    "FN_FALSE_ALLOW_pairs": 18,
+    "all_three_solo_collapse_pairs": 18,
+    "mixed_pairs": 27,
+    "parse_admissibility_only_pairs": 25,
+    "quarantined_packet_key_defects": 1,
+    "holo_rescue_runs_attempted": 6,
+    "evidence_class_boundary": {
+      "solo_failure_evidence": "One-shot solo model failures.",
+      "holo_rescue_evidence": "Holo rescue runs.",
+      "holo_failure_evidence": "Holo rescue lanes that completed but failed the rescue objective.",
+      "patch_validation_evidence": "Patch-validation runs only; not fresh benchmark evidence.",
+      "packet_key_defects": "Quarantined and excluded from clean denominators.",
+      "parse_admissibility_only_lane": "Held separately from wrong-verdict denominators."
+    }
+  },
+  "holo_rescue_status": {
+    "tier1_v5": {
+      "status": "V5_TIER1_PATCH_VALIDATION_PASSED",
+      "packet_count": 2,
+      "correct_count": 2,
+      "incorrect_count": 0,
+      "complete_pair_count": 0,
+      "scope": "patch validation only; no public denominator, no FPR/FNR claim, no complete-pair claim"
+    },
+    "tier2_raw": {
+      "provider_calls": "70/70",
+      "provider_failures": 0,
+      "solo_calls": 0,
+      "judge_calls": 0,
+      "trace_frozen_before_scoring": true,
+      "packet_score": "13/14",
+      "pair_score": "6/7",
+      "raw_score_preserved": true,
+      "miss_packet": "HVSF-FACTORY14F-017-B"
+    },
+    "quarantined_packet": {
+      "packet_id": "HVSF-FACTORY14F-017-B",
+      "pair_id": "HVSF-FACTORY14F-017",
+      "status": "PACKET_KEY_DEFECT_CANDIDATE",
+      "reason": "Expected ESCALATE depended on knowing that review cycle 2025-Q3 was stale, but runtime-visible sources did not explicitly define current_cycle=2026-Q3."
+    },
+    "replacement_pair_result": {
+      "pair_id": "HVSF-FACTORY14F-017R",
+      "provider_calls": "10/10",
+      "provider_failures": 0,
+      "packet_score": "2/2",
+      "pair_score": "1/1",
+      "scope": "replacement supplement for quarantined pair; not public benchmark evidence"
+    },
+    "merged_clean_internal_gate": {
+      "clean_diagnostic_after_quarantine": {
+        "packet_score": "13/13",
+        "pair_score": "6/6"
+      },
+      "replacement_supplement": {
+        "packet_score": "2/2",
+        "pair_score": "1/1"
+      },
+      "merged_score_valid_packet_diagnostic": "15/15",
+      "merged_clean_internal_pair_gate": "7/7",
+      "tier2_gate_result": "UNLOCKED_INTERNAL_DIRECTIONAL_FN_RESCUE_ONLY",
+      "tier3_readiness": "V5_LIVE_COMPLETED_SELECTED_GATE_FAILED",
+      "tier3_v5_scope": "Internal directional FN rescue only; not public benchmark evidence and not a global FNR claim.",
+      "tier3_conditions": [
+        "separate preflight",
+        "exact approval",
+        "runtime-only manifest",
+        "trace freeze",
+        "post-hoc scoring"
+      ]
+    },
+    "tier3_fn_eligibility_audit": {
+      "clean_promoted_fn_pairs_currently_eligible": 8,
+      "tier3_target_clean_fn_pairs": 7,
+      "deficit_clean_fn_pairs": 0,
+      "status": "V5_LIVE_COMPLETED_SELECTED_GATE_FAILED_AFTER_PACKAGE_UNLOCK",
+      "tier3_fn_holo_rescue_unlocked_for_package_build": true,
+      "tier3_fn_holo_rescue_live_provider_approval_granted_for_v5_run": true,
+      "future_tier3_or_v6_provider_approval_required": true,
+      "future_provider_approval_granted_by_this_ledger": false,
+      "expected_full_hologov_calls_for_7_pair_package": {
+        "pair_count": 7,
+        "packet_count": 14,
+        "route": [
+          "W1",
+          "G1",
+          "W2",
+          "G2",
+          "W3"
+        ],
+        "W1_calls": 14,
+        "G1_calls": 14,
+        "W2_calls": 14,
+        "G2_calls": 14,
+        "W3_calls": 14,
+        "worker_calls": 42,
+        "gov_calls": 28,
+        "total_provider_calls": 70,
+        "accounting_rule": "Build exactly 7 clean FN pairs / 14 packets unless a separate plan updates the denominator and provider-call math. An 8-pair run requires a new accounting plan."
+      },
+      "latest_targeted_mining_solo_scout": {
+        "commit": "bef1da778 benchmark: preserve tier3 fn solo scout results",
+        "artifacts": [
+          "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_SOLO_ROLLUP_2026_07_05.json",
+          "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_SOLO_ROLLUP_2026_07_05.md"
+        ],
+        "solo_provider_calls_completed": "60/60",
+        "provider_failures": 0,
+        "KNEW_ADMISSIBLE": "58/60",
+        "FALSE_NEGATIVE_ALLOW_ON_ESCALATE": "2/60",
+        "false_positives": 0,
+        "parse_admissibility_failures": 0,
+        "new_useful_fn_pairs": [
+          "T3FN-MINE-006",
+          "T3FN-MINE-010"
+        ],
+        "clean_fn_pool_before_scout": 3,
+        "clean_fn_pool_after_scout": 5,
+        "claim_boundary": "Internal directional mining only; not public benchmark evidence and not a global FNR claim."
+      },
+      "latest_targeted_mining_solo_scout2": {
+        "commit": "cce74288d benchmark: preserve tier3 fn scout2 solo results",
+        "artifacts": [
+          "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_ROLLUP_2026_07_05.json",
+          "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_ROLLUP_2026_07_05.md"
+        ],
+        "solo_provider_calls_completed": "60/60",
+        "provider_failures": 0,
+        "KNEW_ADMISSIBLE": "59/60",
+        "FALSE_NEGATIVE_ALLOW_ON_ESCALATE": "1/60",
+        "false_positives": 0,
+        "parse_admissibility_failures": 0,
+        "new_useful_fn_pairs": [
+          "T3FN2-MINE-003"
+        ],
+        "clean_fn_pool_before_scout": 5,
+        "clean_fn_pool_after_scout": 6,
+        "claim_boundary": "Internal directional mining only; not public benchmark evidence and not a global FNR claim."
+      },
+      "latest_targeted_mining_solo_scout3": {
+        "commit": null,
+        "artifacts": [
+          "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.json",
+          "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.md"
+        ],
+        "solo_provider_calls_completed": "60/60",
+        "provider_failures": 0,
+        "KNEW_ADMISSIBLE": "58/60",
+        "FALSE_NEGATIVE_ALLOW_ON_ESCALATE": "2/60",
+        "false_positives": 0,
+        "parse_admissibility_failures": 0,
+        "promoted_scout3_fn_candidates": [
+          "T3FN3-MINE-003",
+          "T3FN3-MINE-009"
+        ],
+        "clean_fn_pool_before_scout3_promotion": 6,
+        "clean_fn_pool_after_scout3_promotion": 8,
+        "tier3_target_clean_fn_pairs": 7,
+        "deficit_after_scout3_promotion": 0,
+        "claim_boundary": "Internal directional FN rescue only; not public benchmark evidence and not a global FNR claim."
+      },
+      "next_possible_moves": [
+        "rerun the same 7-pair / 14-packet Tier 3 FN rescue lane under V6 after separate explicit approval",
+        "build a broader V6 validation set first before another live rescue run"
+      ],
+      "not_allowed": [
+        "running future Tier 3 FN or V6 live without separate explicit provider approval",
+        "using quarantined packet/key defects in the clean FN denominator",
+        "using the 70-call plan for an 8-pair / 16-packet run",
+        "making public benchmark or global FNR claims from Tier 3 FN rescue"
+      ]
+    },
+    "tier3_v5_fn_holo_rescue_live_run": {
+      "classification": "AUTHORIZED_RUNTIME_VALID_SELECTED_GATE_FAILED",
+      "run_dir": "docs/benchmark/holoverify_tier3_fn_holo_rescue_2026_07_05/live_runs/run_20260704T195236Z",
+      "provider_calls": "70/70",
+      "provider_failures": 0,
+      "runtime_controls": {
+        "trace_frozen_before_scoring": true,
+        "scoring_map_loaded_post_freeze": true
+      },
+      "packet_score": "12/14",
+      "pair_score": "5/7",
+      "failed_packets": [
+        "HVSF-FACTORY16-008-B",
+        "HVSF-FACTORY16-019-B"
+      ],
+      "claim_boundary": "Internal failed rescue evidence only; not a Holo win, not public benchmark evidence, not global FNR, and not FP precision evidence."
+    },
+    "v6_tiny_scope_dependency_patch_validation": {
+      "classification": "V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_PASSED",
+      "commit": "dcf44cd2b benchmark: preserve v6 scope dependency patch validation",
+      "valid_scored_run": "docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014301Z",
+      "failed_dns_network_attempt": {
+        "run": "docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014145Z",
+        "preserved_separately": true,
+        "excluded_from_scoring": true
+      },
+      "valid_run_provider_calls": "20/20",
+      "valid_run_provider_failures": 0,
+      "posthoc_packet_score": "4/4",
+      "posthoc_pair_score": "2/2",
+      "scope": "internal patch-validation only",
+      "not_public_benchmark_evidence": true,
+      "not_global_fnr": true,
+      "not_fp_precision_evidence": true
+    },
+    "v6_tier3_fn_holo_rescue_rerun": {
+      "classification": "V6_TIER3_FN_HOLO_RESCUE_RERUN_SELECTED_LANE_REPAIR_PASSED",
+      "commit": "5c6e70063 benchmark: preserve v6 tier3 fn rerun evidence",
+      "run_folder": "docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z",
+      "provider_calls": "70/70",
+      "provider_failures": 0,
+      "route": "W1 -> G1 -> W2 -> G2 -> W3 x14",
+      "packet_score": "14/14",
+      "pair_score": "7/7",
+      "failed_packets": [],
+      "v5_prior_result_for_same_selected_lane": {
+        "packet_score": "12/14",
+        "pair_score": "5/7"
+      },
+      "v6_repair_result_for_same_selected_lane": {
+        "packet_score": "14/14",
+        "pair_score": "7/7"
+      },
+      "claim_boundary": {
+        "internal_selected_lane_repair_evidence_only": true,
+        "not_public_benchmark_evidence": true,
+        "not_global_fnr": true,
+        "not_fp_precision_evidence": true,
+        "not_general_model_superiority": true
+      }
+    },
+    "v6_meaning": {
+      "patches": "deterministic source-field authority/scope dependency detection",
+      "addresses_tier3_v5_miss_class": "V5_SCOPE_DEPENDENCY_NON_DETECTION",
+      "same_selected_tier3_lane_passes_under_v6": true,
+      "broad_benchmark_claim": false
+    },
+    "current_scorecard": {
+      "strict_public_denominator": "blind-120 only",
+      "old_614": "stale/historical",
+      "tier3_v5_fn_rescue": "failed-live evidence: 12/14 packets and 5/7 pairs",
+      "v6_tiny_validation": "passed on 4 packets / 2 pairs",
+      "v6_tier3_selected_lane_rerun": "passed on the same selected lane: 14/14 packets and 7/7 pairs",
+      "interpretation": "Supports the engineering hardening story, not a public reliability denominator."
+    }
+  },
+  "quarantine_register": {
+    "packet_key_defects": [
+      {
+        "item": "HVSF-FACTORY14F-017-B",
+        "pair_id": "HVSF-FACTORY14F-017",
+        "status": "PACKET_KEY_DEFECT_CANDIDATE",
+        "reason": "Runtime-visible sources omitted explicit current_cycle=2026-Q3 needed by key.",
+        "denominator_treatment": "Excluded from clean packet denominator; entire pair excluded from clean pair denominator."
+      },
+      {
+        "item": "HVSF-FACTORY13X-002 / HVSF-FACTORY13X-002-A",
+        "status": "QUARANTINE_RECOMMENDED",
+        "reason": "Likely packet/key defect: ALLOW unsupported by visible sources.",
+        "denominator_treatment": "Exclude pending review."
+      }
+    ],
+    "underspecified_packets": [
+      {
+        "item": "HVSF-FACTORY14F-017-B",
+        "reason": "Stale-current-cycle trap underspecified because the packet did not expose the current cycle required to score the B-side ESCALATE key cleanly."
+      }
+    ],
+    "tier3_fn_exclusions": [
+      {
+        "item": "HVSF-FACTORY14F-017",
+        "reason": "Original B packet is a PACKET_KEY_DEFECT_CANDIDATE; replacement pair is Tier 2 supplement accounting, not a fresh Tier 3 candidate."
+      },
+      {
+        "item": "HVSF-FACTORY13X-002 / HVSF-FACTORY13X-002-A",
+        "reason": "Quarantine recommended because the ALLOW key appears unsupported by visible sources."
+      },
+      {
+        "item": "HVSF-FACTORY-001",
+        "reason": "Excluded from fresh Tier 3 FN rescue because readiness audit treats it as patch-validation-only, not fresh rescue evidence."
+      }
+    ],
+    "stale_or_invalid_lanes": [
+      {
+        "lane": "old_614_public_denominator_draft",
+        "status": "STALE_FOR_CURRENT_PUBLIC_DENOMINATOR",
+        "treatment": "Do not use as current public FPR/FNR denominator."
+      },
+      {
+        "lane": "blind_120_invalid_full_run_run_20260703T020428Z",
+        "status": "INVALID_FAILED_CLOSED_RUN",
+        "treatment": "Preserved by execution lock; not denominator evidence."
+      },
+      {
+        "lane": "tier2_raw_before_quarantine_and_replacement",
+        "status": "PRESERVED_RAW_NOT_CLEAN_TIER2_PROOF_BY_ITSELF",
+        "treatment": "Use raw score only with quarantine context."
+      },
+      {
+        "lane": "solo_factory_holo_failure_and_patch_validation_lanes",
+        "status": "INTERNAL_ARCHITECTURE_DEBUG_EVIDENCE",
+        "treatment": "Do not promote to public denominator without separate clean-denominator rule."
+      },
+      {
+        "lane": "tier3_v5_fn_holo_rescue_live_run",
+        "status": "AUTHORIZED_RUNTIME_VALID_SELECTED_GATE_FAILED",
+        "treatment": "Internal failed rescue evidence only; not public benchmark evidence."
+      },
+      {
+        "lane": "v6_tiny_patch_validation",
+        "status": "INTERNAL_PATCH_VALIDATION_ONLY",
+        "treatment": "Do not promote to public denominator without a separate clean-denominator rule."
+      },
+      {
+        "lane": "v6_tier3_fn_selected_lane_rerun",
+        "status": "V6_TIER3_FN_HOLO_RESCUE_RERUN_SELECTED_LANE_REPAIR_PASSED",
+        "treatment": "Internal selected-lane repair evidence only; not public benchmark evidence."
+      }
+    ]
+  },
+  "claim_boundary": {
+    "public_safe_claims": [
+      "The current strict public denominator is the blind Holo lane: 120 packets, 60 ALLOW and 60 ESCALATE.",
+      "Holo scored 120/120 on that strict blind lane.",
+      "The Phase 1 target is 762 clean balanced packets: 381 ALLOW and 381 ESCALATE.",
+      "The old 614-packet denominator is historical/stale for current public denominator accounting unless re-admitted under the current strict rule.",
+      "Wilson upper bounds describe uncertainty after observing zero misses; they do not prove the true error rate is zero."
+    ],
+    "internal_only_claims": [
+      "Solo Failure Factory totals and seam counts.",
+      "V5 Tier 1 patch-validation pass.",
+      "V5 Tier 2 raw 13/14, quarantine, replacement supplement, and merged clean internal gate.",
+      "Tier 2 internal gate restoration after the replacement pair.",
+      "Tier 3 V5 FN Holo rescue completed as an authorized runtime-valid selected-gate failure: 12/14 packets and 5/7 pairs.",
+      "V6 tiny scope-dependency patch-validation passed on 4/4 packets and 2/2 pairs.",
+      "V6 addresses the Tier 3 V5 miss class V5_SCOPE_DEPENDENCY_NON_DETECTION within the tiny patch-validation lane and the same selected Tier 3 rerun lane.",
+      "V6 Tier 3 FN rerun passed on the same selected lane that failed under V5: 14/14 packets and 7/7 pairs.",
+      "Tier 3 targeted-mining solo scout found 2 useful FN pairs, T3FN-MINE-006 and T3FN-MINE-010, for internal directional mining only.",
+      "Tier 3 targeted-mining solo Scout 2 found 1 useful FN pair, T3FN2-MINE-003, for internal directional mining only.",
+      "Tier 3 targeted-mining solo Scout 3 promoted 2 FN candidates, T3FN3-MINE-003 and T3FN3-MINE-009, for internal directional mining only.",
+      "Any future 7-pair / 14-packet full HoloGov Tier 3 FN rerun expects 70 provider calls: W1 x14, G1 x14, W2 x14, G2 x14, W3 x14."
+    ],
+    "forbidden_claims": [
+      "The current public denominator is 614.",
+      "The old 614 and blind-120 can be combined for public FPR/FNR.",
+      "The Solo Failure Factory is public benchmark evidence.",
+      "V5 Tier 1 or Tier 2 proves global FPR/FNR.",
+      "Tier 2 rescue evidence proves FP precision.",
+      "The merged V5 Tier 2 internal gate is a public benchmark result.",
+      "HoloVerify has proven production reliability.",
+      "HoloVerify has zero true error rate.",
+      "HoloVerify beats all models.",
+      "Parse/admissibility-only failures are wrong-verdict failures.",
+      "Quarantined packet/key defects can stay in clean denominators.",
+      "Future Tier 3 FN or V6 rescue runs may run live without separate explicit approval.",
+      "Tier 3 FN rescue is public benchmark evidence.",
+      "Tier 3 FN rescue proves global FNR.",
+      "An 8-pair Tier 3 FN run can use the 70-call plan.",
+      "The Tier 2 replacement supplement creates a fresh Tier 3 candidate.",
+      "Five clean promoted FN pairs satisfy the seven-pair Tier 3 target.",
+      "The targeted-mining solo scout is public benchmark evidence.",
+      "The targeted-mining solo scout proves global FNR.",
+      "Scout 2 is public benchmark evidence.",
+      "Scout 2 proves global FNR.",
+      "Six clean promoted FN pairs satisfy the seven-pair Tier 3 target.",
+      "Scout 3 is public benchmark evidence.",
+      "Scout 3 proves global FNR.",
+      "The V6 tiny patch-validation pass is public benchmark evidence.",
+      "The V6 tiny patch-validation pass proves global FNR or FP precision.",
+      "The V6 Tier 3 selected-lane rerun is public benchmark evidence.",
+      "The V6 Tier 3 selected-lane rerun proves global FNR or FP precision.",
+      "The V6 Tier 3 selected-lane rerun proves general model superiority.",
+      "V6 has been validated broadly beyond the tiny patch-validation and selected-lane rerun evidence."
+    ]
+  },
+  "plain_english_status_for_taylor": {
+    "what_is_proven": [
+      "The strict public scorecard is still the blind-120 lane: 120/120 packets, balanced 60 ALLOW and 60 ESCALATE.",
+      "V5 found the selected-lane failure: the Tier 3 FN rescue run was real, authorized, and runtime-valid, but it failed at 12/14 packets and 5/7 pairs.",
+      "V6 patched the failure class and the same selected Tier 3 lane now passes at 14/14 packets and 7/7 pairs."
+    ],
+    "what_is_not_proven": [
+      "V6 has not yet proved a broad benchmark improvement.",
+      "V6 has not created a new public denominator.",
+      "V6 has not proved global FNR reduction, FP precision, or general HoloVerify superiority."
+    ],
+    "what_changed_with_v6": [
+      "The deterministic layer now checks the source-field authority/scope dependency that V5 missed on the two Tier 3 B-side failures.",
+      "The tiny validation passed first, then the full same-set Tier 3 rerun passed under V6.",
+      "This supports the engineering hardening story, not a public reliability denominator."
+    ],
+    "next_two_possible_moves": [
+      "Build a broader V6 validation set first, so the next live run tests the patch beyond the two known miss pairs.",
+      "Keep Phase 1 strict public denominator work separate and continue only with clean blind/balanced packets."
+    ]
+  },
+  "source_map": [
+    "docs/benchmark/HOLOVERIFY_BLIND_120_PACKET_BANK_FREEZE_2026_07_03.json",
+    "docs/benchmark/HOLOVERIFY_BLIND_120_BATCH001_012_POSTHOC_SCORE_CHECKPOINT_2026_07_03.json",
+    "docs/benchmark/HOLOVERIFY_BLIND_120_BATCH_EXECUTION_LOCK_2026_07_03.md",
+    "docs/benchmark/HOLOVERIFY_SOLO_FAILURE_FACTORY_MASTER_SCOREBOARD_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER1_POSTHOC_CLAIM_BOUNDARY_PATCH_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_DENOMINATOR_AUDIT_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_PACKET_DEFECT_REVIEW_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_REPLACEMENT_PAIR_LIVE_ROLLUP_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_MERGED_GATE_UPDATE_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_REPLACEMENT_PAIR_ACCOUNTING_RULE_2026_07_04.json",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_RESCUE_CANDIDATE_READINESS_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_SOLO_ROLLUP_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT_SOLO_ROLLUP_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_ROLLUP_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT2_SOLO_ROLLUP_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_RESCUE_ELIGIBILITY_AUDIT_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_RESCUE_ELIGIBILITY_AUDIT_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_HOLO_RESCUE_ACCOUNTING_CORRECTION_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_HOLO_RESCUE_LIVE_ROLLUP_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_PATCH_REPORT_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_PREFLIGHT_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_POSTLIVE_ARCHITECTURE_AUDIT_2026_07_05.json",
+    "docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014301Z",
+    "docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014145Z",
+    "docs/benchmark/HOLOVERIFY_V6_TIER3_FN_HOLO_RESCUE_RERUN_PREFLIGHT_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V6_TIER3_FN_HOLO_RESCUE_RERUN_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+    "docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z"
+  ]
+}

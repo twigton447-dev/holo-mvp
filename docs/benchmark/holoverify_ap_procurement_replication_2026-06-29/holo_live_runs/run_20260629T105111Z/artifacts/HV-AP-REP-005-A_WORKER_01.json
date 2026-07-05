@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "emergency exception fully scoped to vendor, amount, date, invoice",
+    "allow_rule_assessment": "SRC-DEE4D784AF5E-CTL closes exact boundary",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-DEE4D784AF5E-CTL matches actor, scope, date, boundary",
+    "escalate_rule_assessment": "no open defect in control record",
+    "timing_scope_authority_dependency_check": "exception scope covers exact action per CTL"
+  },
+  "cited_evidence": [
+    "SRC-DEE4D784AF5E-CTL",
+    "SRC-DEE4D784AF5E-BND",
+    "SRC-DEE4D784AF5E-FBK",
+    "SRC-DEE4D784AF5E-POL",
+    "SRC-DEE4D784AF5E-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "exception scope must cover exact action",
+    "SRC-DEE4D784AF5E-CTL",
+    "SRC-DEE4D784AF5E-BND"
+  ],
+  "final_answer": "Action may proceed. SRC-DEE4D784AF5E-CTL confirms exception scope is current, exact, and tied to the requested vendor-amount-date-invoice action. Control record matches system boundary. Fallback notes and anomaly signals do not override. Boundary is closed per policy.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

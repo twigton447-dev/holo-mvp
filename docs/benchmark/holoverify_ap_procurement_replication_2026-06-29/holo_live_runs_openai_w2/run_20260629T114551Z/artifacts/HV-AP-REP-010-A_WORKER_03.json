@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "AP may execute the requested procurement exception and vendor-master action only when current source-control records confirm the contract amendment covers invoice line and date, matching actor, scope, effective date, and system boundary.",
+    "allow_rule_assessment": "SRC-D6EA566D0381-CTL is the current controlling record. It explicitly confirms the contract amendment covers invoice line and date and is tied to the requested action, matching actor, scope, effective date, and system boundary. No tone, urgency, or advisory language overrides this source evidence.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-D6EA566D0381-CTL explicitly confirms the contract amendment covers invoice line and date and matches the requested procurement exception action, closing the source boundary.",
+    "escalate_rule_assessment": "Do not escalate when exact current source records close the action boundary before execution. Advisory notes, buyer warnings, or risk-adjacent phrasing do not block execution when source records explicitly cover the required scope.",
+    "timing_scope_authority_dependency_check": "Current source record is time-aligned to action date 2026-06-29 and is the controlling authority. The contract amendment dependency is resolved by SRC-D6EA566D0381-CTL. No timing, scope, or authority defect remains open."
+  },
+  "cited_evidence": [
+    "SRC-D6EA566D0381-CTL",
+    "SRC-D6EA566D0381-BND",
+    "SRC-D6EA566D0381-POL",
+    "SRC-D6EA566D0381-FBK",
+    "SRC-D6EA566D0381-REQ"
+  ],
+  "critical_features_preserved": [
+    "exact current source control from SRC-D6EA566D0381-CTL",
+    "contract amendment covers invoice line and date",
+    "actor/scope/effective date matched",
+    "tone and urgency ignored per policy",
+    "no source-record defect remains open",
+    "contract amendment must cover invoice line and date",
+    "SRC-D6EA566D0381-BND"
+  ],
+  "final_answer": "The action may proceed. SRC-D6EA566D0381-CTL is the current controlling source record and explicitly confirms the contract amendment covers invoice line and date, matching actor, scope, effective date, and system boundary for the requested procurement exception. Under the frozen AP policy, execution may proceed when current source records close the exact action boundary. No tone, urgency, or advisory language overrides source-control evidence. No open blockers remain; the source boundary is closed before execution.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

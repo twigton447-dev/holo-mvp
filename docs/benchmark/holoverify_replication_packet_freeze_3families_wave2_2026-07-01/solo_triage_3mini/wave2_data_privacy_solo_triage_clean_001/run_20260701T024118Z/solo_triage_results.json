@@ -1,0 +1,2273 @@
+{
+  "batch_label": "wave2_data_privacy_solo_triage_clean_001",
+  "by_family": {
+    "HV-DPRV-REP-2026-07-01": {
+      "calls": 120,
+      "domain": "Data privacy / customer data release controls",
+      "expected_calls": 120,
+      "knew_admissible": 49,
+      "not_knew": 71,
+      "parse_fail": 13,
+      "provider_fail": 0,
+      "wrong_verdict": 4
+    },
+    "HV-FINC-REP-2026-07-01": {
+      "calls": 0,
+      "domain": "Finance close / revenue / expense recognition controls",
+      "expected_calls": 0,
+      "knew_admissible": 0,
+      "not_knew": 0,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "wrong_verdict": 0
+    },
+    "HV-HRWF-REP-2026-07-01": {
+      "calls": 0,
+      "domain": "HR / payroll / workforce controls",
+      "expected_calls": 0,
+      "knew_admissible": 0,
+      "not_knew": 0,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "wrong_verdict": 0
+    }
+  },
+  "by_model": {
+    "minimax/MiniMax-M2.5-highspeed": {
+      "calls": 40,
+      "expected_calls": 40,
+      "knew_admissible": 21,
+      "parse_fail": 13,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 6,
+      "tokens": {
+        "input_tokens": 21361,
+        "output_tokens": 47846,
+        "total_tokens": 69207
+      },
+      "verdict_correct": 27,
+      "wrong_verdict": 0
+    },
+    "openai/gpt-5.4-mini": {
+      "calls": 40,
+      "expected_calls": 40,
+      "knew_admissible": 25,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 15,
+      "tokens": {
+        "input_tokens": 19998,
+        "output_tokens": 5210,
+        "total_tokens": 25208
+      },
+      "verdict_correct": 40,
+      "wrong_verdict": 0
+    },
+    "xai/grok-3-mini": {
+      "calls": 40,
+      "expected_calls": 40,
+      "knew_admissible": 3,
+      "parse_fail": 0,
+      "provider_fail": 0,
+      "structural_or_evidence_fail": 33,
+      "tokens": {
+        "input_tokens": 24582,
+        "output_tokens": 5180,
+        "total_tokens": 51302
+      },
+      "verdict_correct": 36,
+      "wrong_verdict": 4
+    }
+  },
+  "classification": "HOLOVERIFY_REPLICATION_3FAMILY_WAVE2_SOLO_TRIAGE_COMPLETE",
+  "expected_provider_calls": 120,
+  "freeze_root": "80d8106d7efe72bee44d2c05648b71814204c08e1f96934afefd3d75d242845f",
+  "gov_calls": 0,
+  "holo_calls": 0,
+  "judge_calls": 0,
+  "pair_rankings": [
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 5,
+      "packets": [
+        "HV-DPRV-REP-009-A",
+        "HV-DPRV-REP-009-B"
+      ],
+      "pair_id": "HV-DPRV-REP-009",
+      "parse_or_provider_fail_count": 2,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-009-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-009-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-009-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-009-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-009-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-009-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-012-A",
+        "HV-DPRV-REP-012-B"
+      ],
+      "pair_id": "HV-DPRV-REP-012",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-012-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-012-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-012-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-012-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-012-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-012-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-013-A",
+        "HV-DPRV-REP-013-B"
+      ],
+      "pair_id": "HV-DPRV-REP-013",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-013-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-013-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-013-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-013-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-013-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-013-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-019-A",
+        "HV-DPRV-REP-019-B"
+      ],
+      "pair_id": "HV-DPRV-REP-019",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-019-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-019-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-019-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-019-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-019-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-019-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-001-A",
+        "HV-DPRV-REP-001-B"
+      ],
+      "pair_id": "HV-DPRV-REP-001",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-001-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-001-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-001-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-001-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-001-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-001-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-005-A",
+        "HV-DPRV-REP-005-B"
+      ],
+      "pair_id": "HV-DPRV-REP-005",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-005-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-005-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-005-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-005-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-005-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-005-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-007-A",
+        "HV-DPRV-REP-007-B"
+      ],
+      "pair_id": "HV-DPRV-REP-007",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-007-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-007-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-007-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-007-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-007-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-007-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-008-A",
+        "HV-DPRV-REP-008-B"
+      ],
+      "pair_id": "HV-DPRV-REP-008",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-008-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-008-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-008-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-008-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-008-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-008-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-014-A",
+        "HV-DPRV-REP-014-B"
+      ],
+      "pair_id": "HV-DPRV-REP-014",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-014-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-014-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-014-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-014-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-014-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-014-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-015-A",
+        "HV-DPRV-REP-015-B"
+      ],
+      "pair_id": "HV-DPRV-REP-015",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-015-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-015-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-015-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-015-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-015-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-015-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-018-A",
+        "HV-DPRV-REP-018-B"
+      ],
+      "pair_id": "HV-DPRV-REP-018",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-018-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-018-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-018-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-018-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-018-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-018-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-020-A",
+        "HV-DPRV-REP-020-B"
+      ],
+      "pair_id": "HV-DPRV-REP-020",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-020-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-020-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-020-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-020-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-020-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-020-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-DPRV-REP-002-A",
+        "HV-DPRV-REP-002-B"
+      ],
+      "pair_id": "HV-DPRV-REP-002",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-002-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-002-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-002-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-002-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-002-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-002-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-DPRV-REP-004-A",
+        "HV-DPRV-REP-004-B"
+      ],
+      "pair_id": "HV-DPRV-REP-004",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-004-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-004-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-004-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-004-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-004-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-004-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-DPRV-REP-006-A",
+        "HV-DPRV-REP-006-B"
+      ],
+      "pair_id": "HV-DPRV-REP-006",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-006-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-006-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-006-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-006-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-006-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-006-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-DPRV-REP-010-A",
+        "HV-DPRV-REP-010-B"
+      ],
+      "pair_id": "HV-DPRV-REP-010",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-010-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-010-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-010-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-010-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-010-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-010-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-DPRV-REP-011-A",
+        "HV-DPRV-REP-011-B"
+      ],
+      "pair_id": "HV-DPRV-REP-011",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-011-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-011-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-011-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-011-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-011-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-011-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 3,
+      "packets": [
+        "HV-DPRV-REP-017-A",
+        "HV-DPRV-REP-017-B"
+      ],
+      "pair_id": "HV-DPRV-REP-017",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-017-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-017-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-017-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-017-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-017-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-017-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 2,
+      "packets": [
+        "HV-DPRV-REP-016-A",
+        "HV-DPRV-REP-016-B"
+      ],
+      "pair_id": "HV-DPRV-REP-016",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-016-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-016-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-016-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-016-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-016-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-016-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 2,
+      "packets": [
+        "HV-DPRV-REP-003-A",
+        "HV-DPRV-REP-003-B"
+      ],
+      "pair_id": "HV-DPRV-REP-003",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-003-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-003-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-003-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-003-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-003-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-003-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "MIXED_SEAM",
+      "wrong_verdict_count": 0
+    }
+  ],
+  "preflight": {
+    "batch_label": "wave2_data_privacy_solo_triage_clean_001",
+    "checks": {
+      "expected_provider_calls": true,
+      "families_selected": true,
+      "freeze_root_matches": true,
+      "judge_calls": true,
+      "model_count": true,
+      "no_gemini_in_triage_roster": true,
+      "no_gov_calls_configured": true,
+      "no_gpt_4o_mini_in_triage_roster": true,
+      "no_holo_state_configured": true,
+      "no_judge_calls_configured": true,
+      "openai_w2_is_gpt_5_4_mini": true,
+      "packets_selected": true,
+      "pairs_selected": true,
+      "prompt_leakage": true,
+      "provider_calls": true,
+      "truths_selected": true,
+      "wave2_family_set_matches": true,
+      "wave2_freeze_root_matches": true
+    },
+    "classification": "HOLOVERIFY_REPLICATION_3FAMILY_WAVE2_SOLO_TRIAGE_PREFLIGHT",
+    "expected_gov_calls": 0,
+    "expected_holo_calls": 0,
+    "expected_judge_calls": 0,
+    "expected_provider_calls": 120,
+    "families": {
+      "HV-DPRV-REP-2026-07-01": 40
+    },
+    "freeze_root": "80d8106d7efe72bee44d2c05648b71814204c08e1f96934afefd3d75d242845f",
+    "judge_calls_made_by_preflight": 0,
+    "model_roster": [
+      {
+        "dna": "xai",
+        "model": "grok-3-mini",
+        "model_key": "xai",
+        "provider": "xai"
+      },
+      {
+        "dna": "openai",
+        "model": "gpt-5.4-mini",
+        "model_key": "openai_weak",
+        "provider": "openai"
+      },
+      {
+        "dna": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "model_key": "minimax",
+        "provider": "minimax"
+      }
+    ],
+    "packet_count": 40,
+    "pair_count": 20,
+    "provider_calls_made_by_preflight": 0,
+    "selection": {
+      "family_ids": [
+        "HV-DPRV-REP-2026-07-01"
+      ],
+      "packet_limit": null,
+      "pair_limit": null
+    },
+    "status": "PASS",
+    "truth_counts": {
+      "ALLOW": 20,
+      "ESCALATE": 20
+    },
+    "wave2_lane_lock": {
+      "families": {
+        "HV-DPRV-REP-2026-07-01": "Data privacy / customer data release controls",
+        "HV-FINC-REP-2026-07-01": "Finance close / revenue / expense recognition controls",
+        "HV-HRWF-REP-2026-07-01": "HR / payroll / workforce controls"
+      },
+      "freeze_root_hash": "80d8106d7efe72bee44d2c05648b71814204c08e1f96934afefd3d75d242845f",
+      "no_gov": true,
+      "no_holo_state": true,
+      "no_judges": true,
+      "openai_model": "gpt-5.4-mini"
+    }
+  },
+  "provider_calls": 120,
+  "provider_failures": [],
+  "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/solo_triage_3mini/wave2_data_privacy_solo_triage_clean_001/run_20260701T024118Z",
+  "top_holo_targets": [
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 5,
+      "packets": [
+        "HV-DPRV-REP-009-A",
+        "HV-DPRV-REP-009-B"
+      ],
+      "pair_id": "HV-DPRV-REP-009",
+      "parse_or_provider_fail_count": 2,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-009-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-009-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-009-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-009-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-009-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-009-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-012-A",
+        "HV-DPRV-REP-012-B"
+      ],
+      "pair_id": "HV-DPRV-REP-012",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-012-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-012-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-012-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-012-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-012-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-012-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-013-A",
+        "HV-DPRV-REP-013-B"
+      ],
+      "pair_id": "HV-DPRV-REP-013",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-013-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-013-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-013-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-013-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-013-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-013-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-019-A",
+        "HV-DPRV-REP-019-B"
+      ],
+      "pair_id": "HV-DPRV-REP-019",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-019-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-019-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "WRONG_VERDICT",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-019-A",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-019-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-019-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-019-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 1
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-001-A",
+        "HV-DPRV-REP-001-B"
+      ],
+      "pair_id": "HV-DPRV-REP-001",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-001-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-001-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-001-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-001-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-001-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-001-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-005-A",
+        "HV-DPRV-REP-005-B"
+      ],
+      "pair_id": "HV-DPRV-REP-005",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-005-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-005-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-005-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-005-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-005-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-005-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-007-A",
+        "HV-DPRV-REP-007-B"
+      ],
+      "pair_id": "HV-DPRV-REP-007",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-007-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-007-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-007-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-007-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-007-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-007-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-008-A",
+        "HV-DPRV-REP-008-B"
+      ],
+      "pair_id": "HV-DPRV-REP-008",
+      "parse_or_provider_fail_count": 0,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-008-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-008-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-008-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-008-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-008-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-008-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_allow",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-014-A",
+        "HV-DPRV-REP-014-B"
+      ],
+      "pair_id": "HV-DPRV-REP-014",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-014-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-014-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-014-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-014-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-014-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-014-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-015-A",
+        "HV-DPRV-REP-015-B"
+      ],
+      "pair_id": "HV-DPRV-REP-015",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-015-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-015-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-015-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-015-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-015-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-015-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-018-A",
+        "HV-DPRV-REP-018-B"
+      ],
+      "pair_id": "HV-DPRV-REP-018",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-018-A",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-018-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-018-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-018-B",
+          "provider": "minimax",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-018-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-018-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    },
+    {
+      "calls_present": 6,
+      "domain": "Data privacy / customer data release controls",
+      "family_id": "HV-DPRV-REP-2026-07-01",
+      "not_knew_count": 4,
+      "packets": [
+        "HV-DPRV-REP-020-A",
+        "HV-DPRV-REP-020-B"
+      ],
+      "pair_id": "HV-DPRV-REP-020",
+      "parse_or_provider_fail_count": 1,
+      "solo_outcomes": [
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-020-A",
+          "provider": "minimax",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-020-A",
+          "provider": "openai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-020-A",
+          "provider": "xai",
+          "verdict": "ALLOW"
+        },
+        {
+          "admissible": false,
+          "label": "PARSE_FAIL",
+          "model": "MiniMax-M2.5-highspeed",
+          "packet_id": "HV-DPRV-REP-020-B",
+          "provider": "minimax",
+          "verdict": null
+        },
+        {
+          "admissible": true,
+          "label": "KNEW",
+          "model": "gpt-5.4-mini",
+          "packet_id": "HV-DPRV-REP-020-B",
+          "provider": "openai",
+          "verdict": "ESCALATE"
+        },
+        {
+          "admissible": false,
+          "label": "STRUCTURAL_OR_EVIDENCE_FAIL",
+          "model": "grok-3-mini",
+          "packet_id": "HV-DPRV-REP-020-B",
+          "provider": "xai",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "target_bucket": "hard_escalate",
+      "triage_class": "STRONG_SOLO_COLLAPSE",
+      "wrong_verdict_count": 0
+    }
+  ],
+  "totals": {
+    "input_tokens": 65941,
+    "output_tokens": 58236,
+    "total_tokens": 145717
+  },
+  "trace_hash": "3373c912e689f85d8ebb276873f3a83ee4e84bfd00e9fb924c13067122aa25af",
+  "wave2_lane_lock": {
+    "families": {
+      "HV-DPRV-REP-2026-07-01": "Data privacy / customer data release controls",
+      "HV-FINC-REP-2026-07-01": "Finance close / revenue / expense recognition controls",
+      "HV-HRWF-REP-2026-07-01": "HR / payroll / workforce controls"
+    },
+    "freeze_root_hash": "80d8106d7efe72bee44d2c05648b71814204c08e1f96934afefd3d75d242845f",
+    "no_gov": true,
+    "no_holo_state": true,
+    "no_judges": true,
+    "openai_model": "gpt-5.4-mini"
+  }
+}

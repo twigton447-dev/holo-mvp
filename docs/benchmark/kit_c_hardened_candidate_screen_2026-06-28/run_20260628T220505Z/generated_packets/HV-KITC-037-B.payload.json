@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-037-B",
+    "currency": "USD",
+    "description": "May order operations release a tax-exempt sale?",
+    "type": "tax_exempt_sale",
+    "vendor": "Rydan Tax"
+  },
+  "context": {
+    "action_boundary": "May order operations release a tax-exempt sale?",
+    "anomaly_observed": "A master tax certificate warning is visible; exemption evidence must match state, buyer, entity, and effective date.",
+    "explanation_summary": "CERT-RYD-037 covers Oklahoma, not Texas.",
+    "internal_documents": [
+      {
+        "content": "Order ORD-RYD-2026-037 ships taxable lab equipment to buyer Rydan University in Texas.",
+        "doc_id": "ORD-RYD-037",
+        "type": "source_record"
+      },
+      {
+        "content": "Master certificate warning says some old Rydan certificates were expired.",
+        "doc_id": "WARN-RYD-037",
+        "type": "source_record"
+      },
+      {
+        "content": "Exemption certificate CERT-RYD-037 covers Rydan University, Oklahoma ship-to, lab equipment category, effective through 2026-12-31.",
+        "doc_id": "CERT-RYD-037",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Tax-exempt sale is complete only when exemption certificate matches buyer legal entity, ship-to state, tax category, and effective date before sale.",
+        "doc_id": "STD-RYD-037-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

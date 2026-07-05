@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "subscription change requested by non-owner admin",
+    "allow_rule_assessment": "Cannot allow with open billing-owner role",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-7873D13ADD5A-CTL",
+    "escalate_rule_assessment": "Escalate unresolved billing-owner role",
+    "timing_scope_authority_dependency_check": "billing-owner role unresolved"
+  },
+  "cited_evidence": [
+    "SRC-7873D13ADD5A-CTL",
+    "SRC-7873D13ADD5A-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records tie action to billing-owner role but request originates from non-owner admin. Control record confirms role status yet dependency remains open. Policy requires closed boundary before execution. Escalate to resolve ownership match.",
+  "open_blockers": [
+    "billing-owner role"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

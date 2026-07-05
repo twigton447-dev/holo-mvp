@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "vendor-bank change lacks out-of-band callback",
+    "allow_rule_assessment": "Policy requires exact source records close boundary before execution.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-40B537448E4C-CTL states required callback record missing for this action.",
+    "escalate_rule_assessment": "Control record defect remains open: callback must confirm new rail is missing.",
+    "timing_scope_authority_dependency_check": "Dependency unresolved per CTL; no execution authority granted."
+  },
+  "cited_evidence": [
+    "SRC-40B537448E4C-CTL",
+    "SRC-40B537448E4C-POL",
+    "SRC-40B537448E4C-BND"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "callback must confirm new rail",
+    "SRC-40B537448E4C-CTL"
+  ],
+  "final_answer": "Source records indicate an open defect: SRC-40B537448E4C-CTL confirms the required callback confirmation for the new rail is absent for the vendor-bank change. As per SRC-40B537448E4C-POL, execution is only permitted when the source records precisely close the action boundary. Therefore, the action cannot proceed. ESCALATE to resolve this dependency before any payment or master data modification.",
+  "open_blockers": [
+    "missing callback confirmation for vendor-bank change"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

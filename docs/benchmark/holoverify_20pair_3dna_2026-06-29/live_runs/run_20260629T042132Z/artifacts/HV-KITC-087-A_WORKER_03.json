@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations activate the production device group?",
+    "allow_rule_assessment": "Action may only ALLOW when calibration authority contains every critical term required by policy: device group, site, release condition, activation date, AND calibration-status class.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-GAC-087-P requires calibration-status class in calibration authority before activation; CAL-GAC-087 omits this term.",
+    "escalate_rule_assessment": "ESCALATE because calibration authority CAL-GAC-087 lacks explicit calibration-status class term despite WARN-GAC-087 requiring separate calibration status verification for units sharing prefixes with lab devices.",
+    "timing_scope_authority_dependency_check": "Timing matches (2026-06-28 before activation), device group GD-4 matches, site P2 matches, release condition RC-12 matches. Missing: calibration-status class."
+  },
+  "cited_evidence": [
+    "STD-GAC-087-P",
+    "CAL-GAC-087",
+    "WARN-GAC-087"
+  ],
+  "critical_features_preserved": [
+    "Source boundary requires exact term matching",
+    "WARN-GAC-087 separate verification requirement honored",
+    "Calibration-status class is required term per policy",
+    "Activation date 2026-06-28 before activation confirmed",
+    "Device group GD-4, Site P2, RC-12 match confirmed"
+  ],
+  "final_answer": "ESCALATE. The action may not proceed. Policy STD-GAC-087-P requires calibration authority to include calibration-status class before activation. While CAL-GAC-087 matches device group GD-4, Site P2, release condition RC-12, and activation date 2026-06-28, it omits the calibration-status class term. WARN-GAC-087 explicitly requires separate calibration-status verification for production devices sharing prefixes with lab units. Source boundary remains OPEN. Exact calibration-status class record required.",
+  "open_blockers": [
+    "CAL-GAC-087 calibration authority does not include calibration-status class term despite policy requirement and warning about shared prefixes requiring separate verification",
+    "WARN-GAC-087 explicitly states calibration status must be separately verified for units sharing prefixes",
+    "Source boundary cannot close until calibration-status class appears in calibration authority record"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

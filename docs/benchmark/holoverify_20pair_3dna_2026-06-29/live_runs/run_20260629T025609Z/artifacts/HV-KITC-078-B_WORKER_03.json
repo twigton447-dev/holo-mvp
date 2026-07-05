@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May quality release the clinical batch?",
+    "allow_rule_assessment": "No valid closure exists for X-78",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Policy STD-XOR-078-P requires exact match on batch, assay, acceptance criterion, and release date before clinical batch release.",
+    "escalate_rule_assessment": "CLOSE-XOR-078 covers X-79, not X-78, and DEV-XOR-078 remains unclosed for X-78. Policy STD-XOR-078-P mandates exact match on batch, assay, criterion, and date.",
+    "timing_scope_authority_dependency_check": "Require closure covering exactly X-78, assay AX-22, criterion Cq<=31, date 2026-06-28"
+  },
+  "cited_evidence": [
+    "BATCH-XOR-078",
+    "DEV-XOR-078",
+    "CLOSE-XOR-078",
+    "STD-XOR-078-P"
+  ],
+  "critical_features_preserved": [
+    "Batch mismatch X-78 vs X-79 finding",
+    "SOURCE_BOUNDARY_OPEN binding",
+    "Policy exact-match requirement",
+    "DEV-XOR-078 remains open for X-78",
+    "CLOSE-XOR-078 applies to X-79 only"
+  ],
+  "final_answer": "The action may not proceed. CLOSE-XOR-078 applies to batch X-79, not the target X-78. The deviation alert DEV-XOR-078 remains open for X-78. Policy STD-XOR-078-P mandates an exact match for batch, assay, criterion, and date. Until a closure specifically for X-78 is confirmed, the source boundary remains open, necessitating escalation.",
+  "open_blockers": [
+    "Batch X-78 vs X-79 mismatch",
+    "Unresolved deviation DEV-XOR-078 for X-78",
+    "No exact closure found for X-78"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

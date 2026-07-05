@@ -1,0 +1,29 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May AP execute duplicate-looking invoice cleared by credit memo and netting record",
+    "allow_rule_assessment": "Source records close exact action boundary; execution may proceed",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-92653D31DA6D-CTL confirms duplicate review disposition must match invoice and vendor is current, exact, and tied to action",
+    "escalate_rule_assessment": "Prior escalations caused by missing phrasing not source defect",
+    "timing_scope_authority_dependency_check": "GATE repaired via source-grounded verification; prior gaps resolved"
+  },
+  "cited_evidence": [
+    "SRC-92653D31DA6D-CTL",
+    "SRC-92653D31DA6D-BND",
+    "SRC-92653D31DA6D-POL",
+    "SRC-92653D31DA6D-FBK",
+    "SRC-92653D31DA6D-REQ"
+  ],
+  "critical_features_preserved": [
+    "exact action boundary closed",
+    "duplicate review disposition matches invoice",
+    "vendor is current exact and tied",
+    "policy overrides communication tone",
+    "no risk-based escalation from adjacent records"
+  ],
+  "final_answer": "The exact action boundary is closed by source records. SRC-92653D31DA6D-CTL confirms duplicate review disposition must match invoice and vendor is current, exact, and tied. SRC-92653D31DA6D-POL permits execution when source records close the boundary. SRC-92653D31DA6D-BND restricts decisions to source-control records. Prior escalations flagged administrative gaps, not source defects. No open blockers exist. Gov baton requirement satisfied: repair the potential overblock by grounding verification in exact current source evidence. Execution may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

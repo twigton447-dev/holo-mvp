@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "subscription renewal cancellation within grace period",
+    "allow_rule_assessment": "exact source records do not close boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-D64D9E0DAE34-CTL",
+    "escalate_rule_assessment": "grace-period clock and owner request open",
+    "timing_scope_authority_dependency_check": "unresolved grace-period clock and owner request"
+  },
+  "cited_evidence": [
+    "SRC-D64D9E0DAE34-CTL",
+    "SRC-D64D9E0DAE34-REQ",
+    "SRC-D64D9E0DAE34-BND",
+    "SRC-D64D9E0DAE34-FBK",
+    "SRC-D64D9E0DAE34-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "grace-period clock and owner request",
+    "SRC-D64D9E0DAE34-CTL",
+    "SRC-D64D9E0DAE34-BND"
+  ],
+  "final_answer": "Source records show control record fails to close grace-period clock and owner request dependency for subscription cancellation. Boundary remains open. Must escalate per policy requiring exact source closure before execution. No authority from tone or fallback notes.",
+  "open_blockers": [
+    "grace-period clock and owner request"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

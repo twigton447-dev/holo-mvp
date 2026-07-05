@@ -1,0 +1,116 @@
+{
+  "autopsy_id": "AP_ALL_SIX_CANARY_READINESS_RULE_MISMATCH_AUTOPSY_2026_06_29",
+  "date": "2026-06-29",
+  "run_folder": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260629T193200Z",
+  "original_run_classification": "AP_OPENAI_W2_ALL_SIX_COLLAPSE_HOLO_CANARY_INVALID_OR_INCOMPLETE",
+  "corrected_audit_classification": "CANARY_COMPLETE_ALL_PACKETS_CORRECT_READINESS_RULE_MISMATCH",
+  "root_cause": "stale_canary_readiness_rule_used_target_packet_local_rescue_evidence_instead_of_pair_level_all_six_solo_collapse_evidence",
+  "holo_verdict_failure": false,
+  "provider_failure": false,
+  "parse_failure": false,
+  "leakage_failure": false,
+  "locked_run_files_modified": false,
+  "preserved_run_facts": {
+    "provider_calls": 60,
+    "expected_provider_calls": 60,
+    "worker_calls": 36,
+    "gov_calls": 24,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "provider_failures": 0,
+    "parse_failures": 0,
+    "empty_worker_recoveries_needed": 0,
+    "no_leakage": "PASS",
+    "lock_validation": "PASS",
+    "packet_correct": 12,
+    "packet_count": 12,
+    "original_valid_pairs": 2,
+    "corrected_valid_pairs": 6,
+    "pair_count": 6,
+    "tokens": {
+      "input_tokens": 95203,
+      "output_tokens": 22439,
+      "total_tokens": 125468
+    },
+    "trace_hash": "b1445d6cf1ce99e1cf200c867c40c9951dcf41773d1ee17856fd287a492264d9",
+    "lock_root": "543b44f88dedff4715d35b87066c440a8a09ef1a512072fb2ef55927c1052ed0"
+  },
+  "corrected_pair_valid_rule": {
+    "target_final_correct_and_admissible": true,
+    "guardrail_final_correct_and_admissible": true,
+    "solo_triage_class": "ALL_SIX_SOLO_COLLAPSE",
+    "solo_not_knew_count": 6,
+    "solo_calls_present": 6,
+    "evidence_level": "pair_level_frozen_solo_triage"
+  },
+  "pairs": [
+    {
+      "pair_id": "HV-AP-REP-005",
+      "target_final": "ALLOW",
+      "guardrail_final": "ESCALATE",
+      "triage_class": "ALL_SIX_SOLO_COLLAPSE",
+      "not_knew_count": 6,
+      "calls_present": 6,
+      "parse_or_provider_fail_count": 2,
+      "wrong_verdict_count": 0,
+      "corrected_pair_valid": true
+    },
+    {
+      "pair_id": "HV-AP-REP-010",
+      "target_final": "ALLOW",
+      "guardrail_final": "ESCALATE",
+      "triage_class": "ALL_SIX_SOLO_COLLAPSE",
+      "not_knew_count": 6,
+      "calls_present": 6,
+      "parse_or_provider_fail_count": 3,
+      "wrong_verdict_count": 0,
+      "corrected_pair_valid": true
+    },
+    {
+      "pair_id": "HV-AP-REP-011",
+      "target_final": "ESCALATE",
+      "guardrail_final": "ALLOW",
+      "triage_class": "ALL_SIX_SOLO_COLLAPSE",
+      "not_knew_count": 6,
+      "calls_present": 6,
+      "parse_or_provider_fail_count": 4,
+      "wrong_verdict_count": 1,
+      "corrected_pair_valid": true
+    },
+    {
+      "pair_id": "HV-AP-REP-012",
+      "target_final": "ESCALATE",
+      "guardrail_final": "ALLOW",
+      "triage_class": "ALL_SIX_SOLO_COLLAPSE",
+      "not_knew_count": 6,
+      "calls_present": 6,
+      "parse_or_provider_fail_count": 3,
+      "wrong_verdict_count": 1,
+      "corrected_pair_valid": true
+    },
+    {
+      "pair_id": "HV-AP-REP-013",
+      "target_final": "ESCALATE",
+      "guardrail_final": "ALLOW",
+      "triage_class": "ALL_SIX_SOLO_COLLAPSE",
+      "not_knew_count": 6,
+      "calls_present": 6,
+      "parse_or_provider_fail_count": 4,
+      "wrong_verdict_count": 1,
+      "corrected_pair_valid": true
+    },
+    {
+      "pair_id": "HV-AP-REP-019",
+      "target_final": "ESCALATE",
+      "guardrail_final": "ALLOW",
+      "triage_class": "ALL_SIX_SOLO_COLLAPSE",
+      "not_knew_count": 6,
+      "calls_present": 6,
+      "parse_or_provider_fail_count": 3,
+      "wrong_verdict_count": 1,
+      "corrected_pair_valid": true
+    }
+  ],
+  "patched_runner_future_behavior": "all_six_canary_pair_valid_uses_pair_level_solo_triage_evidence",
+  "next_valid_move": "prepare_full_ap_openai_w2_20pair_holo_family_run_after_updated_preflight_and_explicit_approval"
+}

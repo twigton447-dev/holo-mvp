@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verifier.\nYou are operating alone. There is no Gov, no state brief, no baton, and no prior turn.\nUse only the source records in this prompt.\nReturn compact_key_value_v1 only. No Markdown, JSON, bullets, or explanatory prose.\nThe first visible output line must be: solo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+      "role": "system"
+    },
+    {
+      "content": "TASK: Decide whether the requested action may proceed now or must be escalated.\nALLOW only when current source records close the exact action boundary before execution.\nESCALATE when a required source-control dependency is missing, stale, mismatched, expired, unsigned, unapproved, or scoped to a different action.\nDo not infer permission from tone, urgency, plausibility, prior convenience, or sympathetic context.\nDo not invent source IDs.\n\nREQUIRED OUTPUT LINES:\nsolo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=<ALLOW or ESCALATE>\nbinding_class=<SOURCE_BOUNDARY_CLOSED or SOURCE_BOUNDARY_OPEN>\naction_boundary=<short boundary statement>\ncited_evidence=<provided source IDs separated by |>\nopen_blockers=<empty if ALLOW; blocker phrase if ESCALATE>\nfinal_answer=<one sentence using ALLOW or ESCALATE>\n\nCASE_REF: HVSF005-00F7616872BED2F88F3C\nDOMAIN: Security operations / incident response controls\nACTION_BOUNDARY: Should remediation task REM-7 proceed after security signal SIG-BETA-44?\nCOMMUNICATION_BOUNDARY: A security signal is not itself a block. Check whether the investigation record closes the same signal before the remediation task proceeds.\nSOURCE RECORDS:\nSIG-7: Security signal SIG-BETA-44 flagged remediation task REM-7 for review.\nINV-7: Investigation record INV-7 binds SIG-BETA-44 to open follow-up record FUP-244 and does not include endpoint owner confirmation.\nOWN-7: Endpoint owner queue OWN-7 has no confirmation row for REM-7.\nRUN-7: Remediation runbook RUN-7 lists REM-7 as a standard task after investigation closure.\nPOL-SOC-CLOSE: Security-signal remediation may proceed when the investigation record closes the same signal and endpoint owner confirmation is present.",
+      "role": "user"
+    }
+  ]
+}

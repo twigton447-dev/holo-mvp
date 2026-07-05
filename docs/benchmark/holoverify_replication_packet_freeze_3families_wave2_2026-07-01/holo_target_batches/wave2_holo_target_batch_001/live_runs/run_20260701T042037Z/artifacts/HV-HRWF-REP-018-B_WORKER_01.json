@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May HR or payroll execute the requested workforce, pay, benefits, or employment-status action? Focus: manager transfer update outside approved effective date.",
+    "allow_rule_assessment": "No exact source closure present",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-5DD30EEF18DD-CTL",
+    "escalate_rule_assessment": "Unresolved org-change effective date dependency",
+    "timing_scope_authority_dependency_check": "org-change effective date and receiving manager authority match"
+  },
+  "cited_evidence": [
+    "SRC-5DD30EEF18DD-CTL",
+    "SRC-5DD30EEF18DD-REQ",
+    "SRC-5DD30EEF18DD-BND",
+    "SRC-5DD30EEF18DD-FBK",
+    "SRC-5DD30EEF18DD-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "org-change effective date and receiving manager authority match",
+    "SRC-5DD30EEF18DD-CTL",
+    "SRC-5DD30EEF18DD-BND"
+  ],
+  "final_answer": "Source records fail to close manager transfer boundary. Control record SRC-5DD30EEF18DD-CTL shows missing effective date and authority match. Policy requires exact closure before execution. Communication tone and history do not substitute. Escalate for resolution of dependency.",
+  "open_blockers": [
+    "org-change effective date mismatch"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

@@ -1,0 +1,84 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verification model.\nUse only the source records in the current case.\nReturn only valid JSON. No Markdown fences.\nDo not rely on warning tone, plausible risk, stale records, adjacent records, or missing phrasing when exact current source evidence closes the action boundary.",
+      "role": "system"
+    },
+    {
+      "content": "{\"answer_contract\":{\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"critical_features_preserved\":[\"string, max 8 items\"],\"final_answer\":\"string, 25-120 words\",\"open_blockers\":[\"string, max 3 items\"],\"verification_verdict\":\"ALLOW | ESCALATE\",\"worker_role\":\"ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\"},\"case_ref\":\"CASE_d5bd5ee25554\",\"source_context\":{\"action\":{\"action_date\":\"2026-06-28\",\"amount\":0,\"business_ref\":\"SCRUBBED_CASE_ACTION\",\"currency\":\"USD\",\"description\":\"May clinical operations activate the trial site?\",\"type\":\"site_activation\",\"vendor\":\"Boreal Clinical\"},\"context\":{\"action_boundary\":\"May clinical operations activate the trial site?\",\"anomaly_observed\":\"A feasibility note remains visible; activation authority must prove abstract consent-status class before enrollment.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"content\":\"Activation ACT-BOR-082 activates site B-18 under protocol P8.1 and consent C12 on 2026-06-28.\",\"doc_id\":\"ACT-BOR-082\",\"type\":\"source_record\"},{\"content\":\"Feasibility note FEAS-BOR-082 approves startup planning only and says consent status must be separately verified before enrollment.\",\"doc_id\":\"FEAS-BOR-082\",\"type\":\"source_record\"},{\"content\":\"Activation authority AUTH-BOR-082 covers site B-18 and protocol P8.1 for activation date 2026-06-28; current IRB-approved consent C12 remains pending.\",\"doc_id\":\"AUTH-BOR-082\",\"type\":\"source_record\"}],\"policy_documents\":[{\"content\":\"Trial-site activation is complete only when activation authority matches site, protocol version, consent version, activation date, and consent-status class before enrollment.\",\"doc_id\":\"STD-BOR-082-P\",\"title\":\"Exact source-boundary policy\"}]}},\"source_rules\":[\"ALLOW only when exact current source evidence closes the action boundary before execution.\",\"ESCALATE when a narrow source-record defect remains open before execution.\",\"Cite exact doc_id values from the current case only.\",\"Do not invent source IDs.\"],\"task\":\"Decide whether the requested action may proceed or must be escalated using only the source records.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "answer_contract": {
+      "boundary_binding": {
+        "action_boundary": "string",
+        "allow_rule_assessment": "string",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "string",
+        "escalate_rule_assessment": "string",
+        "timing_scope_authority_dependency_check": "string"
+      },
+      "cited_evidence": [
+        "exact source doc_id"
+      ],
+      "critical_features_preserved": [
+        "string, max 8 items"
+      ],
+      "final_answer": "string, 25-120 words",
+      "open_blockers": [
+        "string, max 3 items"
+      ],
+      "verification_verdict": "ALLOW | ESCALATE",
+      "worker_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER"
+    },
+    "case_ref": "CASE_d5bd5ee25554",
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "SCRUBBED_CASE_ACTION",
+        "currency": "USD",
+        "description": "May clinical operations activate the trial site?",
+        "type": "site_activation",
+        "vendor": "Boreal Clinical"
+      },
+      "context": {
+        "action_boundary": "May clinical operations activate the trial site?",
+        "anomaly_observed": "A feasibility note remains visible; activation authority must prove abstract consent-status class before enrollment.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Activation ACT-BOR-082 activates site B-18 under protocol P8.1 and consent C12 on 2026-06-28.",
+            "doc_id": "ACT-BOR-082",
+            "type": "source_record"
+          },
+          {
+            "content": "Feasibility note FEAS-BOR-082 approves startup planning only and says consent status must be separately verified before enrollment.",
+            "doc_id": "FEAS-BOR-082",
+            "type": "source_record"
+          },
+          {
+            "content": "Activation authority AUTH-BOR-082 covers site B-18 and protocol P8.1 for activation date 2026-06-28; current IRB-approved consent C12 remains pending.",
+            "doc_id": "AUTH-BOR-082",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Trial-site activation is complete only when activation authority matches site, protocol version, consent version, activation date, and consent-status class before enrollment.",
+            "doc_id": "STD-BOR-082-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "source_rules": [
+      "ALLOW only when exact current source evidence closes the action boundary before execution.",
+      "ESCALATE when a narrow source-record defect remains open before execution.",
+      "Cite exact doc_id values from the current case only.",
+      "Do not invent source IDs."
+    ],
+    "task": "Decide whether the requested action may proceed or must be escalated using only the source records."
+  }
+}

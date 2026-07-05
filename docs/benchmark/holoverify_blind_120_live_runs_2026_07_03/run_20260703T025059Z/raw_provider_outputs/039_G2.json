@@ -1,0 +1,27 @@
+{
+  "call_number": 39,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "7fe99693144922572ac0eece095a0168f63b5fba8b33eb6d7268c3a7e17e3ff5",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to produce a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. The input already gives values. The user: \"packet_id=BLIND120-119B9B5C891B5C3DA499\" but that field is not one of the three required fields. The user wants \"Return the three-line status record.\" They gave route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs.\n\nThus we produce:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure plain text, no headings, no extra lines. Should we include packet_id? No, they said \"three key=value lines\". So we ignore packet_id. The final answer should be exactly those three lines.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nCheck punctuation: each line \"key=value\". No spaces around equals? It's key=value. Should we preserve spaces after value? The values have spaces within them; that's fine. The output must be plain text. No markdown.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "44f0f91788aa1b0e149e1e69b5b475e87067baff6522557dd1bc36580cf4bd9d",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 122,
+    "output_tokens": 287,
+    "raw_text": "<think>\nWe need to produce a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. The input already gives values. The user: \"packet_id=BLIND120-119B9B5C891B5C3DA499\" but that field is not one of the three required fields. The user wants \"Return the three-line status record.\" They gave route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs.\n\nThus we produce:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure plain text, no headings, no extra lines. Should we include packet_id? No, they said \"three key=value lines\". So we ignore packet_id. The final answer should be exactly those three lines.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nCheck punctuation: each line \"key=value\". No spaces around equals? It's key=value. Should we preserve spaces after value? The values have spaces within them; that's fine. The output must be plain text. No markdown.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0696576bb0d2eb0e2f1c8df6ed30fad9",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 409,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

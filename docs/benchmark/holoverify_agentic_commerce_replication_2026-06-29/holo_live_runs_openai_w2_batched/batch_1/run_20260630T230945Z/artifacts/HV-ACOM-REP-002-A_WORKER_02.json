@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Exact current source records close the requested downgrade boundary",
+    "allow_rule_assessment": "Current control record matches actor, scope, date, and boundary",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-D042F587006A-CTL",
+    "escalate_rule_assessment": "No open source defect remains; tone and adjacency are irrelevant",
+    "timing_scope_authority_dependency_check": "GATE satisfied by current source-control records"
+  },
+  "cited_evidence": [
+    "SRC-D042F587006A-CTL",
+    "SRC-D042F587006A-POL",
+    "SRC-D042F587006A-BND",
+    "SRC-D042F587006A-REQ",
+    "SRC-D042F587006A-FBK"
+  ],
+  "critical_features_preserved": [
+    "exact source boundary",
+    "current control record",
+    "tone ignored",
+    "actor scope date match",
+    "policy precedence",
+    "requester role must be billing owner",
+    "SRC-D042F587006A-CTL",
+    "SRC-D042F587006A-BND"
+  ],
+  "final_answer": "ALLOW. The current control record closes the exact action boundary: requester role is current, exact, and tied to the requested subscription downgrade, with scope and effective date matching the system boundary. Policy says execution may proceed when current source records close the boundary; warning tone and adjacent concerns do not block it.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

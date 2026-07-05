@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-25",
+    "amount": 0,
+    "business_ref": "HV-KITC-046-B",
+    "currency": "USD",
+    "description": "May clinical operations activate a trial site?",
+    "type": "trial_site_activation",
+    "vendor": "Ravel Trial Ops"
+  },
+  "context": {
+    "action_boundary": "May clinical operations activate a trial site?",
+    "anomaly_observed": "A site activation memo exists, but activation authority depends on protocol version and IRB approval scope.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Activation ACT-RAV-046 activates site S-19 under protocol P3.2 and consent C5 on 2026-06-25.",
+        "doc_id": "ACT-RAV-046",
+        "type": "source_record"
+      },
+      {
+        "content": "IRB approval IRB-RAV-046 covers site S-19, protocol P3.1, consent C5, and activation date 2026-06-25 before enrollment.",
+        "doc_id": "IRB-RAV-046",
+        "type": "source_record"
+      },
+      {
+        "content": "Startup memo says site-level feasibility is not a substitute for IRB activation approval.",
+        "doc_id": "MEMO-RAV-046",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Trial-site activation is complete only when IRB approval matches site, protocol version, consent form version, and activation date before enrollment.",
+        "doc_id": "STD-RAV-046-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Current control record closes exact system match for approval.",
+    "allow_rule_assessment": "Exact source record closes the boundary; proceed.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-6456DE475844-CTL",
+    "escalate_rule_assessment": "No open source-record defect remains.",
+    "timing_scope_authority_dependency_check": "GATE satisfied by current control record and policy."
+  },
+  "cited_evidence": [
+    "SRC-6456DE475844-CTL",
+    "SRC-6456DE475844-POL",
+    "SRC-6456DE475844-BND",
+    "SRC-6456DE475844-REQ",
+    "SRC-6456DE475844-FBK"
+  ],
+  "critical_features_preserved": [
+    "source-boundary only",
+    "no tone reliance",
+    "no adjacent-record drift",
+    "exact current record",
+    "system ID must match",
+    "SRC-6456DE475844-CTL"
+  ],
+  "final_answer": "The current control record closes the exact action boundary: it confirms the actor, scope, effective date, and system boundary for the requested admin access approval. Policy allows execution only when current source records close the boundary, and they do. Proceed with ALLOW.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,43 @@
+{
+  "classification": "AP_OPENAI_W2_CANARY_GOV_PLACEHOLDER_AUTOPSY",
+  "date": "2026-06-29",
+  "status": "PATCH_REQUIRED_NO_PROVIDER_RERUN",
+  "preserved_run": {
+    "run_id": "run_20260629T153048Z",
+    "path": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2/run_20260629T153048Z",
+    "calls_completed": 2,
+    "expected_canary_calls": 10,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "provider_failures": 0,
+    "lock_validation": "PASS",
+    "no_leakage_audit": "PASS"
+  },
+  "root_failure": {
+    "turn_id": "HV-AP-REP-001-A_G1",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "provider_call_ok": true,
+    "finish_reason": "stop",
+    "parse_ok": false,
+    "error": "ValueError: gov_micro_v2_unknown_enum:preserve:wb_code",
+    "raw_text": "verdict=CONTINUE\ndep=GATE\nfocus=GATE_REPAIR\nobjective=REPAIR_GATE\npreserve=wb_code\nrepair=VERDICT_BINDING\nblock=FINAL_ON_FAIL"
+  },
+  "root_cause": {
+    "class": "GOV_PROMPT_CONTRACT_PLACEHOLDER_DEFECT",
+    "description": "The Gov v2 prompt used literal placeholder-style examples where concrete enum values were required. MiniMax copied preserve=wb_code, and the strict parser rejected it.",
+    "not_transport_failure": true,
+    "not_provider_outage": true,
+    "not_ap_verdict_failure": true,
+    "parser_behavior_correct": true
+  },
+  "patch_requirements": [
+    "preserve_failed_canary_run_exactly",
+    "do_not_loosen_parser_to_accept_placeholder_values",
+    "pre_materialize_concrete_selected_baton_lines",
+    "remove_preserve_equals_wb_code_and_repair_equals_fail_code_from_provider_facing_prompt",
+    "provider_facing_examples_use_only_allowed_concrete_enum_values",
+    "parser_rejects_placeholder_tokens",
+    "next_live_step_is_one_pair_ap_canary_not_full_ap"
+  ]
+}

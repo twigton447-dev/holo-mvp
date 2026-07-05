@@ -1,0 +1,46 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "HoloGov-V. Return JSON only.\nKeys exactly: verdict,route,final,preserve,repair,block,dep,objective,focus.\nIf g.passed=false: verdict=w.v, route=CONTINUE_WORKER, final=false.\nIf g.passed=true: verdict=w.v, route=FINAL_COMPILER, final=true.\nRepair names the first gate failure, else empty.\nNo model choice. No prose. No markdown. No <think>."
+    },
+    {
+      "role": "user",
+      "content": "{\"id\":\"HV-KITC-078-A\",\"g\":{\"passed\":true,\"failures\":[],\"artifact_verdict\":\"ALLOW\",\"artifact_binding\":\"SOURCE_BOUNDARY_CLOSED\",\"critical_term_count\":5},\"w\":{\"v\":\"ALLOW\",\"b\":\"SOURCE_BOUNDARY_CLOSED\",\"blockers\":[],\"features\":[\"exact match on batch assay criterion date\"]},\"best\":{\"v\":\"ALLOW\",\"b\":\"SOURCE_BOUNDARY_CLOSED\",\"gate\":\"PASS\"},\"schema\":{\"verdict\":\"ALLOW | ESCALATE\",\"route\":\"CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED\",\"final\":\"boolean\",\"preserve\":\"string, max 6 words; empty string if none\",\"repair\":\"string, max 8 words; empty string if none\",\"block\":\"string, max 8 words; empty string if none\",\"dep\":\"string, max 8 words; empty string if none\",\"objective\":\"string, max 5 words\",\"focus\":\"string, max 5 words\"}}"
+    }
+  ],
+  "prompt_object": {
+    "id": "HV-KITC-078-A",
+    "g": {
+      "passed": true,
+      "failures": [],
+      "artifact_verdict": "ALLOW",
+      "artifact_binding": "SOURCE_BOUNDARY_CLOSED",
+      "critical_term_count": 5
+    },
+    "w": {
+      "v": "ALLOW",
+      "b": "SOURCE_BOUNDARY_CLOSED",
+      "blockers": [],
+      "features": [
+        "exact match on batch assay criterion date"
+      ]
+    },
+    "best": {
+      "v": "ALLOW",
+      "b": "SOURCE_BOUNDARY_CLOSED",
+      "gate": "PASS"
+    },
+    "schema": {
+      "verdict": "ALLOW | ESCALATE",
+      "route": "CONTINUE_WORKER | FINAL_COMPILER | FAIL_CLOSED",
+      "final": "boolean",
+      "preserve": "string, max 6 words; empty string if none",
+      "repair": "string, max 8 words; empty string if none",
+      "block": "string, max 8 words; empty string if none",
+      "dep": "string, max 8 words; empty string if none",
+      "objective": "string, max 5 words",
+      "focus": "string, max 5 words"
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "strategy_id": "vesync_turboblaze_live_research_strategy_v0_1",
+  "status": "STAGED_NOT_RUN",
+  "live_research_allowed": true,
+  "live_research_budget": {
+    "max_web_research_seconds_per_turn": 20,
+    "max_elapsed_seconds_per_lane": 120,
+    "max_search_queries_per_lane": 8,
+    "max_pages_opened_per_lane": 12,
+    "max_meta_ads_library_attempt_seconds_per_turn": 20,
+    "fallback_if_budget_exhausted": "Use the existing research packet, do not invent missing evidence, and record the gap in adversarial_notes.missing_evidence."
+  },
+  "canonical_thread_policy": {
+    "holo_build_is_lossless": true,
+    "per_turn_rule": "Every HoloBuild turn after turn 1 must receive the full canonical thread so far, including prior prompts, outputs, critiques, governor briefs, live source records, rejected options, and the current candidate artifact.",
+    "no_summary_substitution": true,
+    "overflow_rule": "If the full thread cannot fit in context, stop and mark the run blocked instead of dropping or summarizing prior turns."
+  },
+  "model_and_convergence_policy": {
+    "active_model_pool": [
+      "Claude Opus 4.8",
+      "Grok 4.3"
+    ],
+    "hologov": "Grok 4.3",
+    "hologov_constant_across_sessions": true,
+    "active_rotation": "randomized constrained; no consecutive active-model repeats",
+    "hard_turn_cap": 10,
+    "early_convergence_rule": "Stop early only if both the active model and Grok 4.3 HoloGov judge that no further meaningful improvement is possible."
+  },
+  "schema_file": "05_output_schema.json",
+  "run_rule": "Generate one schema-compliant JSON artifact for Cosori TurboBlaze Air Fryer only.",
+  "word_count_requirements": {
+    "section_3_email.body": {
+      "min_words": 100,
+      "max_words": 150,
+      "count_excludes": [
+        "subject_line_1",
+        "subject_line_2",
+        "ps"
+      ]
+    }
+  },
+  "universal_strategy": {
+    "assignment_anchor": "Please craft campaign copy that focuses on the product's features and functionalities while highlighting how these innovations contribute to a better, more wellness-forward lifestyle. Each section of copy should creatively position the brand's benefits in a way that resonates with new audiences.",
+    "mandatory_bridge_formula": "feature or functionality -> everyday friction removed -> better routine or lifestyle contribution",
+    "per_section_requirement": "Every Meta ad, website banner, email body, and P.S. must include or reinforce the bridge from functionality to lifestyle. A section that lists features without explaining the lifestyle payoff is incomplete.",
+    "source_rule": "Live research is allowed, but source metadata must be stored for every new factual claim."
+  },
+  "product_lanes": [
+    {
+      "product": "Cosori TurboBlaze Air Fryer",
+      "primary_strategy": "TurboBlaze contributes to a healthier lifestyle by making less-oil home cooking easier to choose repeatedly. The copy should show how speed, 9-in-1 versatility, PFAS-free ceramic coating, dishwasher-safe cleanup, and up to 95% less oil help turn home cooking into a realistic wellness-forward routine.",
+      "allowed_language": [
+        "contributes to a healthier lifestyle",
+        "supports wellness-forward cooking routines",
+        "lighter crispy favorites",
+        "home-cooked habits",
+        "better-for-you snacks",
+        "less-oil cooking"
+      ],
+      "claim_boundaries": [
+        "Do not claim weight loss.",
+        "Do not say guilt-free.",
+        "Do not imply disease prevention or medical benefit.",
+        "Keep 'up to' on 46% faster and 95% less oil.",
+        "Use first-party comparison basis where the format has room."
+      ],
+      "live_research_targets": [
+        "https://cosori.com/products/turboblaze-air-fryer",
+        "https://cosori.com/collections/air-fryers",
+        "current Cosori social or Meta Ad Library examples if available",
+        "selected review or retail pages only for customer-language patterns"
+      ]
+    }
+  ]
+}

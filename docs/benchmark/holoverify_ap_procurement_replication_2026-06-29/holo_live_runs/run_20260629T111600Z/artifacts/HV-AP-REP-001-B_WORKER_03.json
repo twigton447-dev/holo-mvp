@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: invoice release with complete PO/invoice/receipt match despite urgent email tone.",
+    "allow_rule_assessment": "No source record closes the three-way match plus approver limit dependency; execution blocked by policy rule requiring current source records to close exact action boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-D0B364456A0A-CTL explicitly states control record does not close the three-way match plus approver limit dependency scoped to this action.",
+    "escalate_rule_assessment": "Three-way match plus approver limit dependency remains open per SRC-D0B364456A0A-CTL; communication text cannot override source-control records per SRC-D0B364456A0A-POL.",
+    "timing_scope_authority_dependency_check": "Dependency unresolved before execution; SRC-D0B364456A0A-CTL does not close authority for invoice release with complete PO/invoice/receipt match."
+  },
+  "cited_evidence": [
+    "SRC-D0B364456A0A-CTL",
+    "SRC-D0B364456A0A-BND",
+    "SRC-D0B364456A0A-POL",
+    "SRC-D0B364456A0A-FBK",
+    "SRC-D0B364456A0A-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "three-way match plus approver limit dependency",
+    "SRC-D0B364456A0A-CTL",
+    "prior vendor history context limitation"
+  ],
+  "final_answer": "The action may not proceed. Source records confirm the three-way match plus approver limit dependency remains open before execution. SRC-D0B364456A0A-CTL explicitly does not close this dependency for the invoice release action. SRC-D0B364456A0A-BND and SRC-D0B364456A0A-POL prohibit execution from communication text alone. SRC-D0B364456A0A-FBK clarifies prior vendor history is not payment authority. Escalation is required to resolve the open blocker before execution.",
+  "open_blockers": [
+    "three-way match plus approver limit"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

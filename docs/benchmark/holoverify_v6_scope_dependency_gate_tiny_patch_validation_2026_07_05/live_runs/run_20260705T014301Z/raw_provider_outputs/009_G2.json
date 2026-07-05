@@ -1,0 +1,27 @@
+{
+  "call_number": 9,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "dac36bcae6b9433ec4cc319f47fbf9f6b589194be60096bff88981c171ae6b6f",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to understand the request. The user gave:\n\n\"packet_id=HVSF016HA-4FD06F71B9FBAD305E84\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-F6270ED7\nblocked_move=do not silently drop source-grounded blockers\"\n\nThey ask: \"Return the three-line status record.\" They want a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. They say \"Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus we need to output exactly three lines:\n\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-F6270ED7\nblocked_move=do not silently drop source-grounded blockers\n\nCheck: The user gave these values. Must ensure no extra whitespace. Should not include \"packet_id\". They didn't ask to include that. They want three lines with those fields.\n\nThus output exactly these three lines.\n\nPotentially we need to ensure the colon and spaces are correct. The user used colon after key and space after colon? The examples show \"route_verdict=CONTINUE\". The user gave \"route_verdict=CONTINUE\". Good. For repair_target: \"resolve prior blocker ids before ALLOW: ART-001-BLK-F6270ED7\". That is the value. So we output exactly that. For blocked_move: \"do not silently drop source-grounded blockers\". No trailing spaces.\n\nThus final answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-F6270ED7\nblocked_move=do not silently drop source-grounded blockers",
+  "raw_text_sha256": "80af497d49c319fce2b5e86d446441f8beb243b4fec2b3002e4c772e5e1ae3ec",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 138,
+    "output_tokens": 386,
+    "raw_text": "<think>\nWe need to understand the request. The user gave:\n\n\"packet_id=HVSF016HA-4FD06F71B9FBAD305E84\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-F6270ED7\nblocked_move=do not silently drop source-grounded blockers\"\n\nThey ask: \"Return the three-line status record.\" They want a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. They say \"Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nThus we need to output exactly three lines:\n\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-F6270ED7\nblocked_move=do not silently drop source-grounded blockers\n\nCheck: The user gave these values. Must ensure no extra whitespace. Should not include \"packet_id\". They didn't ask to include that. They want three lines with those fields.\n\nThus output exactly these three lines.\n\nPotentially we need to ensure the colon and spaces are correct. The user used colon after key and space after colon? The examples show \"route_verdict=CONTINUE\". The user gave \"route_verdict=CONTINUE\". Good. For repair_target: \"resolve prior blocker ids before ALLOW: ART-001-BLK-F6270ED7\". That is the value. So we output exactly that. For blocked_move: \"do not silently drop source-grounded blockers\". No trailing spaces.\n\nThus final answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-F6270ED7\nblocked_move=do not silently drop source-grounded blockers",
+    "response_id": "0698e9d0781159c7074c86ee6b9d0d83",
+    "text": "route_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-F6270ED7\nblocked_move=do not silently drop source-grounded blockers",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 524,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-F6270ED7\nblocked_move=do not silently drop source-grounded blockers",
+  "text_sha256": "fce8b8f6a805bec5256a5c53dc511f2f92cdc5c1b2e85df00dd87ac4cc428ec3"
+}

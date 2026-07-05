@@ -1,0 +1,38 @@
+{
+  "blocked_moves": [
+    "attempting another SOURCE_BOUNDARY_MAPPER pass when all four fields already pass exactly",
+    "treating GEN-SOR-047 as an independent blocker rather than a conditional caution",
+    "abstracting field-level matches into higher-order status class literals",
+    "re-mapping already verified source bindings without identified failure"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "HV-KITC-047-A_WORKER_01: EXACT_EXCEPTION_CLOSED binding with 4/4 field matches verified and gates passed"
+  ],
+  "final_compiler_allowed": true,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "EXC-SOR-047 as controlling source for exception coverage",
+    "SHIP-SOR-047 as shipment record binding",
+    "STD-SOR-047-P as policy requirement for exact field matching",
+    "four-field exact match verdict (item control, destination, consignee role, shipment date)",
+    "ALLOW verification_verdict from source gate",
+    "EXACT_EXCEPTION_CLOSED binding_class from deterministic gate"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "final_verdict_synthesis",
+    "monotonic_preservation": [
+      "EXC-SOR-047 controlling source fact",
+      "SHIP-SOR-047 shipment binding",
+      "EXACT_EXCEPTION_CLOSED binding class",
+      "four-field exact match across exception and shipment records",
+      "ALLOW gate verdict"
+    ],
+    "objective": "Compile final export decision based on complete source-boundary evidence, preserve monotonic binding, emit final_verdict artifact",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "WORKER_SOURCE_BOUND_GATE passed with EXACT_EXCEPTION_CLOSED binding. All four policy-required fields (item control status, destination, consignee role, shipment date) match exactly between SHIP-SOR-047 and EXC-SOR-047. GEN-SOR-047 resolved as conditional caution satisfied by exact match. No repair required. Ready for final compilation.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

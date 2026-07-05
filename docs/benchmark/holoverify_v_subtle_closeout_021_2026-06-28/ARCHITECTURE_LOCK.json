@@ -1,0 +1,128 @@
+{
+  "lock_name": "HOLOVERIFY_V_SUBTLE_CLOSEOUT_021_RESCUE_SIBLING_2026_06_28",
+  "created_at": "2026-06-28",
+  "classification": "GOV_V_RESCUE_PREFLIGHT_AFTER_CONTROL_FAILURE_FOUND",
+  "surface": "HoloVerify",
+  "mode": "Gov-V replay against frozen failed raw-control baseline",
+  "benchmark_credit": false,
+  "judge_calls_allowed": false,
+  "worker_calls_allowed": false,
+  "control_rerun_allowed": false,
+  "provider_calls_approved": true,
+  "live_approval_status": "APPROVED_BY_USER_OK_GO_AFTER_CONTROL_FAILURE",
+  "non_negotiable_invariant": "Gov does not choose models. Gov chooses control actions and verification verdicts under the run lock.",
+  "frozen_failed_control_baseline": {
+    "run_dir": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/control_failure_screen_minimax_m25_2026-06-28/run_continue_20260628T204437Z",
+    "summary": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/control_failure_screen_minimax_m25_2026-06-28/run_continue_20260628T204437Z/control_screen_summary.json",
+    "trace": "/Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001/docs/benchmark/control_failure_screen_minimax_m25_2026-06-28/run_continue_20260628T204437Z/CONTROL_SCREEN_TRACE.jsonl",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A",
+    "expected_for_local_audit_only": "ALLOW",
+    "control_verdict": "ESCALATE",
+    "control_failed": true,
+    "control_tokens": {
+      "input_tokens": 978,
+      "output_tokens": 823,
+      "total_tokens": 1801
+    }
+  },
+  "run_model_lock": {
+    "selection_owner": "RUN_LOCK",
+    "gov_v_provider": "minimax",
+    "gov_v_model": "MiniMax-M2.5-highspeed",
+    "gov_v_transport": "direct_https_chat_completions",
+    "gov_v_default_chat_completions_url": "https://api.minimaxi.chat/v1/chat/completions",
+    "gov_may_select_models": false,
+    "fallback_policy": "NO_FALLBACK_PROVIDER_FAILURE_INVALIDATES_RUN"
+  },
+  "source_run": {
+    "root": "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/BAL100-BATCH-003_bounded_scout",
+    "results": "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/BAL100-BATCH-003_bounded_scout/results.jsonl",
+    "benchmark_credit": false,
+    "official_trace": false,
+    "judge": false
+  },
+  "packets": [
+    {
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A",
+      "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021",
+      "hidden_expected_verdict": "ALLOW",
+      "packet_role": "FROZEN_CONTROL_FAILURE_RESCUE",
+      "real_seam": "Quality-hold close-out precision. The alert exists, but disposition matrix row QD-74 matches product OVX-9, lot L-882, thermal-transport hold class, and release path before inventory movement.",
+      "controlling_source_gate": "STD-OVX-021-P says quality-hold close-out is complete when source records match product, lot, hold class, and release path before inventory movement. DISP-OVX-021 is the matching source record for 021-A.",
+      "prompt_card_paths": [
+        "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/BAL100-BATCH-003_bounded_scout/prompt_cards/BAL100-BEC-SUBTLE-CLOSEOUT-021-A__minimax__MiniMax-Text-01.json"
+      ],
+      "paired_guardrail_packet": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B"
+    },
+    {
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B",
+      "family_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021",
+      "hidden_expected_verdict": "ESCALATE",
+      "packet_role": "PAIRED_GUARDRAIL_ESCALATE",
+      "real_seam": "Quality-hold close-out mismatch. The release and alert require thermal-transport hold class, but the disposition matrix covers packaging-inspection hold class.",
+      "controlling_source_gate": "STD-OVX-021-P requires exact product, lot, hold class, and release path. DISP-OVX-021 does not match the thermal-transport hold class for 021-B.",
+      "prompt_card_paths": [
+        "/Users/taylorwigton/Desktop/holo-mvp/scout_runs/BAL100-BATCH-003_bounded_scout/prompt_cards/BAL100-BEC-SUBTLE-CLOSEOUT-021-B__minimax__MiniMax-Text-01.json"
+      ],
+      "paired_guardrail_packet": null
+    }
+  ],
+  "gov_v_lane": {
+    "label": "HOLOVERIFY_V_GOV_REPLAY",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "prompt_inputs": [
+      "action",
+      "context",
+      "frozen active non-MiniMax worker responses",
+      "quality-hold close-out blindspot atlas",
+      "Gov-V control router schema"
+    ],
+    "forbidden_inputs": [
+      "hidden expected verdict",
+      "correctness labels",
+      "judge notes",
+      "old HoloGov verdict",
+      "control baseline raw_text"
+    ],
+    "purpose": "Measure whether Gov-V rescues a frozen current MiniMax control false escalation while still escalating the paired hold-class mismatch guardrail."
+  },
+  "expected_live_counts_after_approval": {
+    "total_provider_calls": 2,
+    "gov_v_calls": 2,
+    "control_calls": 0,
+    "worker_calls": 0,
+    "judge_calls": 0
+  },
+  "call_order": [
+    {
+      "call": 1,
+      "lane": "HOLOVERIFY_V_GOV_REPLAY",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-A",
+      "expected_for_local_audit_only": "ALLOW"
+    },
+    {
+      "call": 2,
+      "lane": "HOLOVERIFY_V_GOV_REPLAY",
+      "packet_id": "BAL100-BEC-SUBTLE-CLOSEOUT-021-B",
+      "expected_for_local_audit_only": "ESCALATE"
+    }
+  ],
+  "stop_conditions": [
+    "any provider failure",
+    "any model substitution",
+    "any fallback",
+    "control rerun attempted",
+    "provider prompt includes hidden expected verdict",
+    "provider prompt includes correctness labels",
+    "Gov output includes model-selection keys",
+    "deterministic gates are skipped"
+  ],
+  "post_run_required_artifacts": [
+    "TRACE_CALLS.jsonl",
+    "live_results.json",
+    "live_summary.md"
+  ]
+}

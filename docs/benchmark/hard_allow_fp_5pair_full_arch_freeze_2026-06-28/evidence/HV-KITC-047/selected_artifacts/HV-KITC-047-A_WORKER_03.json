@@ -1,0 +1,32 @@
+{
+  "cited_evidence": [
+    "SHIP-SOR-047: controlled analyzer part C-17 to Canada, service depot role, shipment date 2026-06-23",
+    "EXC-SOR-047: covers controlled analyzer part C-17, destination Canada, service depot role, shipment date 2026-06-23",
+    "STD-SOR-047-P: requires exception evidence to match item control status, destination, consignee role, shipment date before export",
+    "GEN-SOR-047: conditional caution satisfied by exact exception evidence, no concrete mismatch identified"
+  ],
+  "critical_features_preserved": [
+    "EXACT_EXCEPTION_CLOSED binding class preserved from deterministic gate pass",
+    "EXC-SOR-047 and SHIP-SOR-047 source pair binding preserved across source boundary",
+    "All four policy-required fields matched exactly: item control status, destination, consignee role, shipment date",
+    "ALLOW verification verdict maintained from gate pass",
+    "GEN-SOR-047 treated as conditional caution resolved by exact match, not as independent blocker"
+  ],
+  "final_answer": "Final compilation confirms ALLOW verdict with EXACT_EXCEPTION_CLOSED binding. All four policy-required fields match exactly between SHIP-SOR-047 and EXC-SOR-047: controlled analyzer part C-17 item control status, destination Canada, consignee role service depot, shipment date 2026-06-23. The exception record closes the action boundary. The GEN-SOR-047 caution is resolved by the exact field correspondence and does not constitute an independent blocker. No abstract status class substitutes for actual field comparison. The license exception requirement is operationally satisfied. This artifact synthesizes and preserves all critical features from the best prior admissible artifact (HV-KITC-047-A_WORKER_02).",
+  "license_exception_binding": {
+    "binding_class": "EXACT_EXCEPTION_CLOSED",
+    "controlling_source_fact": "EXC-SOR-047 covers all four policy-required fields exactly, satisfying STD-SOR-047-P",
+    "destination": "Canada",
+    "exception_consignee_role": "service depot",
+    "exception_id": "EXC-SOR-047",
+    "general_warning_id": "GEN-SOR-047",
+    "item_control_status": "controlled",
+    "shipment_consignee_role": "service depot",
+    "shipment_date": "2026-06-23",
+    "shipment_id": "SHIP-SOR-047"
+  },
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "warning_or_prelim_artifact_handling": "GEN-SOR-047 posed as conditional caution noting that controlled items may need exact exception evidence. It does not identify any concrete mismatch. EXC-SOR-047 provides exactly matching evidence for all four policy-required fields, operationally satisfying the caution. The warning is resolved by exact source match and does not constitute an independent blocker. Per system atlas guidance: do not let a generic warning override exact current exception evidence.",
+  "worker_role": "FINAL_COMPILER"
+}

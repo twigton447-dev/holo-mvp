@@ -1,0 +1,26 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May quality release the clinical batch?",
+    "allow_rule_assessment": "Closure CLOSE-XOR-078 exactly matches batch X-78, assay AX-22, criterion Cq<=31, and release date 2026-06-28 before shipment per policy STD-XOR-078-P.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "CLOSE-XOR-078 and STD-XOR-078-P",
+    "escalate_rule_assessment": "Visible deviation alert DEV-XOR-078 does not block release because exact closure CLOSE-XOR-078 resolves it before the action boundary.",
+    "timing_scope_authority_dependency_check": "Closure CLOSE-XOR-078 establishes release date 2026-06-28 before the 2026-06-28 shipment in BATCH-XOR-078, satisfying temporal precedence."
+  },
+  "cited_evidence": [
+    "BATCH-XOR-078",
+    "CLOSE-XOR-078",
+    "STD-XOR-078-P"
+  ],
+  "critical_features_preserved": [
+    "exact match on batch X-78",
+    "exact match on assay AX-22",
+    "exact match on criterion Cq<=31",
+    "closure date precedence before shipment",
+    "source boundary closure authority"
+  ],
+  "final_answer": "The clinical batch release may proceed. Source records confirm that deviation closure CLOSE-XOR-078 precisely matches batch X-78, assay AX-22, criterion Cq<=31, and the 2026-06-28 release date, fulfilling policy STD-XOR-078-P. The visible deviation alert DEV-XOR-078 is resolved by this exact closure. All critical features are preserved and the source boundary is definitively closed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,386 @@
+{
+  "checks": {
+    "approval_packet_does_not_self_grant": true,
+    "approval_packet_preserved": true,
+    "commands_passed": true,
+    "control_room_no_failed_checks": true,
+    "control_room_pass": true,
+    "json_artifacts_parse": true,
+    "json_declared_package_hashes_valid": true,
+    "no_batch005_approval_packet": true,
+    "operator_handoff_no_provider": true,
+    "operator_handoff_pass": true,
+    "operator_handoff_selected_target_only": true,
+    "python_ast_parse": true,
+    "statistical_claim_guardrail_no_provider": true,
+    "statistical_claim_guardrail_pass": true,
+    "statistical_claim_guardrail_selected_target_only": true,
+    "validation_generated_without_provider_calls": true
+  },
+  "classification": "WAVE2_NO_PROVIDER_CONTROL_ROOM_VALIDATION_2026_07_01",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_batch004_provider_approval_gate_2026_07_01.py"
+      ],
+      "passed": true,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"approval_packet_sha256\": \"a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd\",\n  \"checked_current_path\": \"retired_packet_cannot_unlock_batch004\",\n  \"checked_locked_paths\": [\n    \"missing_statement_and_hash\",\n    \"wrong_statement\",\n    \"wrong_hash\"\n  ],\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_batch005_full_family_lock_2026_07_01.py"
+      ],
+      "passed": true,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"batch_id\": \"WAVE2_HOLO_TARGET_BATCH_005\",\n  \"checked_lock\": \"provider_approval_packet_required\",\n  \"live_run_dirs_created\": 0,\n  \"provider_calls_made\": 0,\n  \"run_live_error\": \"wave2_holo_provider_approval_gate_locked:['approval_packet_exists', 'approval_packet_status_ready', 'approval_packet_does_not_self_grant', 'approval_packet_batch_matches', 'approval_packet_root_signature_matches_preflight', 'approval_packet_expected_calls_match_preflight', 'approval_statement_provided', 'approval_statement_exact_match', 'approval_packet_sha256_provided']\",\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_domain_control_room_2026_07_01.py"
+      ],
+      "passed": true,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"approval_packet_sha256\": \"a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd\",\n  \"batch004_expected_provider_calls\": 100,\n  \"batch005_blocked_by\": null,\n  \"control_room_package_sha256\": \"18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116\",\n  \"domain_pairs\": 60,\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_domain_operator_handoff_2026_07_01.py"
+      ],
+      "passed": true,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"current_claim\": \"SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF\",\n  \"operator_handoff_sha256\": \"33a369b9c33265fd8f0189f2884d6ced69db8df3f97bcdec84b9ff17215851e3\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_domain_preservation_manifest_2026_07_01.py"
+      ],
+      "passed": true,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"dirty_paths\": 64,\n  \"other_dirty_paths\": 1,\n  \"preservation_manifest_sha256\": \"fb5b364a87f8479c62ab588a9323eb409d9d3373c7fe72574fcbd464990a4387\",\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_domain_selective_staging_plan_2026_07_01.py"
+      ],
+      "passed": true,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"path_count\": 64,\n  \"provider_calls_made\": 0,\n  \"selective_staging_plan_sha256\": \"c0c1bab57dba1b8914e98cfa5e5bb11671207490a4a7cef0fd4c411c327d041b\",\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_statistical_claim_guardrail_2026_07_01.py"
+      ],
+      "passed": true,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"current_claim\": \"SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF\",\n  \"provider_calls_made\": 0,\n  \"statistical_guardrail_sha256\": \"f1234a344da2aedd428a022a2a2190ba77172c6e4a7ffdf06f7c7082ec450474\",\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "docs/benchmark/test_wave2_timestamp_insensitive_hashes_2026_07_01.py"
+      ],
+      "passed": true,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"approval_packet_sha256\": \"a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd\",\n  \"checked_artifacts\": [\n    \"approval_builder\",\n    \"runner_approval_gate\",\n    \"control_room\",\n    \"ledger\",\n    \"ordering\",\n    \"readiness\",\n    \"validation\",\n    \"preservation\",\n    \"completion_audit\",\n    \"selective_staging\",\n    \"operator_handoff\",\n    \"statistical_guardrail\"\n  ],\n  \"provider_calls_made\": 0,\n  \"status\": \"PASS\"\n}\n"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "passed": true,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    }
+  ],
+  "created_at_utc": "2026-07-01T14:05:50.080225+00:00",
+  "gate_summary": {
+    "approval_packet_sha256": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
+    "batch004_expected_provider_calls": 100,
+    "batch004_live_gate": "PASS",
+    "batch004_provider_calls_made": 0,
+    "batch005_blocked_by": null,
+    "batch005_expected_provider_calls": 230,
+    "batch005_live_gate": "PASS",
+    "batch005_provider_calls_made": 0,
+    "current_phase": "POST_BATCH_004_EVIDENCE_LOCKED",
+    "current_scored_pairs": 37,
+    "next_allowed_live_batch": "WAVE2_HOLO_TARGET_BATCH_005",
+    "per_class_n_after_clean_batch004": 37,
+    "per_class_n_after_clean_batch004_and_batch005": 60
+  },
+  "generated_without_provider_calls": true,
+  "json_artifacts": {
+    "batch004_approval_packet": {
+      "classification": "WAVE2_BATCH004_PROVIDER_APPROVAL_PACKET_NO_PROVIDER_2026_07_01",
+      "file_sha256": "44bdc7c86da9af09f275419b8362ca2b907ea104fa182eafed5cd617e18daf79",
+      "package_hash_valid": true,
+      "package_sha256": "a94bb0b83c000e9ce17723526545e240323686fc21da9f9d4f95ec9590f3d5dd",
+      "passed": true,
+      "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_PROVIDER_APPROVAL_PACKET_2026_07_01.json",
+      "status": "NOT_READY"
+    },
+    "batch004_live_preflight": {
+      "classification": "WAVE2_HOLO_TARGET_BATCH_004_LIVE_PREFLIGHT",
+      "file_sha256": "c157e476234297b7fba40799a34d2f0b0aa72b3b16e2cd53e2994fcff277e4ab",
+      "package_hash_valid": null,
+      "package_sha256": null,
+      "passed": true,
+      "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_004/WAVE2_HOLO_TARGET_BATCH_004_LIVE_PREFLIGHT_2026_07_01.json",
+      "status": "PASS"
+    },
+    "batch005_live_preflight": {
+      "classification": "WAVE2_HOLO_TARGET_BATCH_005_LIVE_PREFLIGHT",
+      "file_sha256": "4e494462832c22cc5b4d4c848c0f4f433a4dada72002a2ee033bcbacebe518c3",
+      "package_hash_valid": null,
+      "package_sha256": null,
+      "passed": true,
+      "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/wave2_holo_target_batch_005/WAVE2_HOLO_TARGET_BATCH_005_LIVE_PREFLIGHT_2026_07_01.json",
+      "status": "PASS"
+    },
+    "combined_memo_001_002_003_004": {
+      "classification": "WAVE2_HOLO_TARGET_BATCH_001_002_003_COMBINED_EVIDENCE_MEMO_NO_PROVIDER",
+      "file_sha256": "29f67201321fd69213988ff8629fe483cba15a11b484eb2114abbd8e23d6857a",
+      "package_hash_valid": true,
+      "package_sha256": "d4ad201b4c177154741ec8b3ee7b4929c3db764451a2ef8862e3148d44b0198d",
+      "passed": true,
+      "path": "docs/benchmark/holoverify_replication_packet_freeze_3families_wave2_2026-07-01/holo_target_batches/WAVE2_HOLO_TARGET_BATCH_001_002_003_004_COMBINED_EVIDENCE_MEMO_2026_07_01.json",
+      "status": null
+    },
+    "control_room": {
+      "classification": "WAVE2_DOMAIN_CONTROL_ROOM_NO_PROVIDER_2026_07_01",
+      "file_sha256": "ceebff81f68f78ea79288aff25ba790ca7dc4e7a247f90ff541afbcf8c3aadfb",
+      "package_hash_valid": true,
+      "package_sha256": "18fb7a9a23aee8682cb10bcf98d85ca9d780178a76dc4f708ba20c4e2d945116",
+      "passed": true,
+      "path": "docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_CONTROL_ROOM_2026_07_01.json",
+      "status": "PASS",
+      "summary": {
+        "checks_failed": 0,
+        "checks_passed": 31,
+        "checks_total": 31,
+        "provider_calls_made_by_builder": 0
+      }
+    },
+    "domain_ledger": {
+      "classification": "HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_NO_PROVIDER_2026_07_01",
+      "file_sha256": "0af396c999679fe34a7902cbdcc492dd91600bbfc853452ee464fb15606aca32",
+      "package_hash_valid": true,
+      "package_sha256": "5532559c86db2ae04579e4edff9472f3807a2ba5a5a3866af17802d67c75c63e",
+      "passed": true,
+      "path": "docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_2026_07_01.json",
+      "status": null
+    },
+    "operator_handoff": {
+      "classification": "WAVE2_DOMAIN_OPERATOR_HANDOFF_NO_PROVIDER_2026_07_01",
+      "file_sha256": "98faba2293c80bf26be746a4d46d24e3d3cf00454ff6788e24672dd2b463bcf1",
+      "package_hash_valid": true,
+      "package_sha256": "33a369b9c33265fd8f0189f2884d6ced69db8df3f97bcdec84b9ff17215851e3",
+      "passed": true,
+      "path": "docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_OPERATOR_HANDOFF_2026_07_01.json",
+      "status": "PASS"
+    },
+    "ordering": {
+      "classification": "WAVE2_DOMAIN_ORDERING_VERIFICATION_NO_PROVIDER_2026_07_01",
+      "file_sha256": "d91d34c034487d5fb4918845541bb0bd585cd491128bb0c35f00f701c3af6537",
+      "package_hash_valid": true,
+      "package_sha256": "091aaafaf70ca6413614a54497ddb794be58552aae608635794bbe504abcee2b",
+      "passed": true,
+      "path": "docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/WAVE2_DOMAIN_ORDERING_VERIFICATION_2026_07_01.json",
+      "status": "PASS"
+    },
+    "preservation": {
+      "classification": "WAVE2_DOMAIN_PRESERVATION_MANIFEST_NO_PROVIDER_2026_07_01",
+      "file_sha256": "cb602634c7c3cb80ca1650eaae753fa97392e332bf9c2683016087195a68dd81",
+      "package_hash_valid": true,
+      "package_sha256": "fb5b364a87f8479c62ab588a9323eb409d9d3373c7fe72574fcbd464990a4387",
+      "passed": true,
+      "path": "docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_PRESERVATION_MANIFEST_2026_07_01.json",
+      "status": "PASS"
+    },
+    "readiness": {
+      "classification": "WAVE2_DOMAIN_COMPLETION_READINESS_NO_PROVIDER_2026_07_01",
+      "file_sha256": "1a0f50692695bb5ea589ab24a325abf8a2662f3b9be8c04b8c5b62468450a6c3",
+      "package_hash_valid": true,
+      "package_sha256": "f58e2474d38183addad8b2e93a6c133f4020d584488631333670cadcf10e292f",
+      "passed": true,
+      "path": "docs/benchmark/wave2_domain_completion_readiness_2026_07_01/WAVE2_DOMAIN_COMPLETION_READINESS_2026_07_01.json",
+      "status": "PASS",
+      "summary": {
+        "checks_failed": 0,
+        "checks_passed": 33,
+        "checks_total": 33,
+        "ready_for_batch004_provider_approval": false,
+        "ready_for_batch005_provider_approval": true
+      }
+    },
+    "selective_staging_plan": {
+      "classification": "WAVE2_DOMAIN_SELECTIVE_STAGING_PLAN_NO_PROVIDER_2026_07_01",
+      "file_sha256": "f322f2fb91f777bc29bb64d0519eb52eb8086ea87c35119412239134d39f3f90",
+      "package_hash_valid": true,
+      "package_sha256": "c0c1bab57dba1b8914e98cfa5e5bb11671207490a4a7cef0fd4c411c327d041b",
+      "passed": true,
+      "path": "docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_DOMAIN_SELECTIVE_STAGING_PLAN_2026_07_01.json",
+      "status": "PASS"
+    },
+    "statistical_claim_guardrail": {
+      "claim_boundary": {
+        "allowed_current_claims": [
+          "Batch001-004 selected-target Wave 2 Holo evidence: 37 pairs / 74 packets / 74 correct admissible packets.",
+          "Planning-only statistical lane: 60 per-class target is identified, not currently achieved.",
+          "Batch005 is evidence-unlocked but not live evidence until a separate approval packet and clean live run exist."
+        ],
+        "current_claim": "SELECTED_TARGET_EVIDENCE_ONLY_NOT_FULL_FAMILY_STATISTICAL_PROOF",
+        "disallowed_current_claims": [
+          "all-domain live proof complete",
+          "full-family Wave 2 statistical proof complete",
+          "per-domain statistical proof complete",
+          "Batch005 live evidence counted before explicit provider approval and clean live results"
+        ],
+        "statistical_proof_claim": "NOT_ACHIEVED_BATCH005_NOT_RUN"
+      },
+      "classification": "WAVE2_STATISTICAL_CLAIM_GUARDRAIL_NO_PROVIDER_2026_07_01",
+      "file_sha256": "57e042588c785ff8b32fe21072760afbd2dabb54c6d1d0a0634c5c5b07c69460",
+      "package_hash_valid": true,
+      "package_sha256": "f1234a344da2aedd428a022a2a2190ba77172c6e4a7ffdf06f7c7082ec450474",
+      "passed": true,
+      "path": "docs/benchmark/wave2_domain_control_room_2026_07_01/WAVE2_STATISTICAL_CLAIM_GUARDRAIL_2026_07_01.json",
+      "status": "PASS",
+      "summary": {
+        "checks_failed": 0,
+        "checks_passed": 15,
+        "checks_total": 15,
+        "provider_calls_made_by_guardrail": 0
+      }
+    }
+  },
+  "package_sha256": "241bedcce162595db3fce2760e84364ac3353eb8253dd2a8caa13dd05eb04a24",
+  "python_ast_parse": [
+    {
+      "passed": true,
+      "path": "docs/benchmark/build_holoverify_domain_consolidation_ledger_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/build_wave2_batch004_provider_approval_packet_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/build_wave2_domain_completion_audit_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/build_wave2_domain_completion_readiness_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/build_wave2_domain_control_room_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/build_wave2_domain_operator_handoff_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/build_wave2_domain_preservation_manifest_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/build_wave2_domain_selective_staging_plan_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/build_wave2_statistical_claim_guardrail_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/run_wave2_holo_target_batch_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/test_wave2_batch004_provider_approval_gate_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/test_wave2_batch005_full_family_lock_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/test_wave2_domain_completion_audit_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/test_wave2_domain_control_room_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/test_wave2_domain_operator_handoff_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/test_wave2_domain_preservation_manifest_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/test_wave2_domain_selective_staging_plan_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/test_wave2_statistical_claim_guardrail_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/test_wave2_timestamp_insensitive_hashes_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/validate_wave2_no_provider_control_room_2026_07_01.py"
+    },
+    {
+      "passed": true,
+      "path": "docs/benchmark/verify_wave2_domain_ordering_2026_07_01.py"
+    }
+  ],
+  "status": "PASS",
+  "stop_rules": [
+    "This validation does not approve provider calls.",
+    "This validation does not run Batch 004 or Batch 005 live execution.",
+    "Batch 004 still requires the exact approval statement and current approval packet SHA.",
+    "Batch 005 remains locked behind a separate approval packet even though the Batch 004 evidence gate is complete."
+  ],
+  "summary": {
+    "commands_failed": 0,
+    "commands_total": 9,
+    "json_artifacts_failed": 0,
+    "json_artifacts_total": 12,
+    "provider_calls_made_by_validation": 0,
+    "python_parse_failed": 0,
+    "python_parse_total": 21
+  }
+}

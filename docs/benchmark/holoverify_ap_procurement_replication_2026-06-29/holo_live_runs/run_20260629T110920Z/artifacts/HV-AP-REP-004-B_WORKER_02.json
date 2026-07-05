@@ -1,0 +1,27 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute the requested payment, invoice release, or vendor-master action? Focus: duplicate-looking invoice cleared by credit memo and netting record.",
+    "allow_rule_assessment": "No exact closure from source records.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-E85972F0B8E0-CTL control record does not close duplicate review disposition.",
+    "escalate_rule_assessment": "Duplicate review disposition unmatched.",
+    "timing_scope_authority_dependency_check": "Dependency ledger open on invoice-vendor match."
+  },
+  "cited_evidence": [
+    "SRC-E85972F0B8E0-CTL",
+    "SRC-E85972F0B8E0-BND",
+    "SRC-E85972F0B8E0-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "duplicate review disposition must match invoice and vendor"
+  ],
+  "final_answer": "The action may not proceed. Source records, specifically SRC-E85972F0B8E0-CTL, fail to close the boundary by not matching the duplicate review disposition to the invoice and vendor. This unresolved dependency prevents execution. ESCALATE to ensure exact source document closure before any payment or vendor-master action.",
+  "open_blockers": [
+    "duplicate review disposition must match invoice and vendor"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

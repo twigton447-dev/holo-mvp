@@ -1,0 +1,293 @@
+{
+  "messages": [
+    {
+      "content": "You are a HoloVerify worker. Preserve state. Obey Gov.\nWorkers receive Gov twice: a routing lens near the top and the full latest baton near the end.\nSource context is ground truth. The state brief preserves continuity. The final baton controls the next action.\nReturn only valid JSON. No markdown fences.",
+      "role": "system"
+    },
+    {
+      "content": "{\"system_role\":\"HoloVerify worker. Preserve state. Obey Gov.\",\"gov_routing_lens\":{\"route_verdict\":\"CONTINUE_WORKER\",\"main_repair_target\":\"destination mismatch: SHIP-SIE-073 lists Chile, LIC-SIE-073 authorizes only Peru\",\"blocked_move\":\"treating WARN-SIE-073 as execution authority\",\"unresolved_dependency\":\"Unresolved: destination alignment. End user (Andes Labs) matches. ECCN (3A991) matches. Shipment date (2026-06-28) matches license effective date. Only destination scope (Chile vs Peru) remains open. License effective date timing confirms license is active before export.\",\"current_objective\":\"ADVERSARIAL_SCOPE_CHALLENGER\"},\"run_lock\":{\"run_id\":\"run_20260629T020437Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-073\",\"packet_id\":\"HV-KITC-073-B\",\"worker_index\":2,\"worker_role\":\"ADVERSARIAL_SCOPE_CHALLENGER\",\"model\":\"google/gemini-2.5-flash-lite\",\"no_substitutions\":true},\"task_and_answer_contract\":{\"task\":\"Decide whether the action may proceed using only source records in this packet.\",\"answer_contract\":{\"worker_role\":\"string\",\"verification_verdict\":\"ALLOW | ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"open_blockers\":[\"string\"],\"critical_features_preserved\":[\"string\"],\"final_answer\":\"string\"},\"word_band\":\"final_answer 25-120 words\",\"source_rules\":[\"cite exact doc_id values only\",\"do not invent source IDs\",\"ALLOW only when exact current source boundary is closed before execution\",\"ESCALATE when a narrow source-record defect remains open before execution\"],\"deterministic_gate_categories\":[\"word band\",\"required sections\",\"source IDs\",\"invented source IDs\",\"timing/scope/authority/dependency section\",\"action-boundary violations\",\"critical dependencies/traps\"]},\"source_context\":{\"action\":{\"business_ref\":\"HV-KITC-073-B\",\"type\":\"export_release\",\"vendor\":\"Sierra Instruments\",\"amount\":0,\"currency\":\"USD\",\"description\":\"May logistics release the controlled export shipment?\",\"action_date\":\"2026-06-28\"},\"context\":{\"action_boundary\":\"May logistics release the controlled export shipment?\",\"anomaly_observed\":\"A broad dual-use warning remains visible, while export license evidence may exactly match the current shipment.\",\"explanation_summary\":\"Verify whether the closure evidence exactly matches the action boundary before execution.\",\"internal_documents\":[{\"doc_id\":\"SHIP-SIE-073\",\"type\":\"source_record\",\"content\":\"Shipment SHIP-SIE-073 exports ECCN 3A991 sensor array to Chile for end user Andes Labs on 2026-06-28.\"},{\"doc_id\":\"WARN-SIE-073\",\"type\":\"source_record\",\"content\":\"Dual-use warning WARN-SIE-073 says similar sensor arrays require exact license evidence and should not rely on product family alone.\"},{\"doc_id\":\"LIC-SIE-073\",\"type\":\"source_record\",\"content\":\"Export license LIC-SIE-073 covers ECCN 3A991 sensor array, destination Peru, end user Andes Labs, shipment date 2026-06-28, effective before export.\"}],\"policy_documents\":[{\"doc_id\":\"STD-SIE-073-P\",\"title\":\"Exact source-boundary policy\",\"content\":\"Controlled export is complete only when export license evidence matches ECCN, destination, end user, shipment date, and license effective date before export.\"}]}},\"state_brief\":{\"run_id\":\"run_20260629T020437Z\",\"pair_id\":\"HV-KITC-073\",\"packet_id\":\"HV-KITC-073-B\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"turns_completed\":[{\"turn\":1,\"role\":\"worker\",\"turn_id\":\"HV-KITC-073-B_W1\",\"model\":\"xai/grok-3-mini\",\"dna\":\"xai\",\"output_summary\":\"SOURCE_BOUNDARY_MAPPER local verdict ESCALATE\",\"full_output_ref\":\"artifacts/HV-KITC-073-B_WORKER_01.json\",\"gate_status\":\"PASS\",\"artifact_hash\":\"0a066515c62944afb96056a23b3aae6385c2719d7c759c722e6f6ac01e68ed30\",\"source_ids\":[\"LIC-SIE-073\",\"SHIP-SIE-073\",\"STD-SIE-073-P\",\"WARN-SIE-073\"]},{\"turn\":2,\"role\":\"gov\",\"turn_id\":\"HV-KITC-073-B_G1\",\"model\":\"minimax/MiniMax-M2.5-highspeed\",\"dna\":\"minimax\",\"output_summary\":\"Gov local verdict None route CONTINUE_WORKER\",\"full_output_ref\":\"artifacts/HV-KITC-073-B_G1.json\",\"gate_status\":\"FAIL\",\"artifact_hash\":\"eec4d27750fddf138f4ea5edf94b7d851d4cff8d7971cc71ae6051093fc94603\",\"source_ids\":[\"LIC-SIE-073\",\"SHIP-SIE-073\",\"STD-SIE-073-P\",\"WARN-SIE-073\"],\"blocked_moves\":[\"treating WARN-SIE-073 as execution authority\",\"treating any single record as conclusive without exact match\",\"approving release despite open destination blocker\",\"expanding license scope without documented authorization\"]}],\"current_position\":\"source-bound action verification with adversarial cross-DNA repair\",\"resolved_dependencies\":[],\"unresolved_dependencies\":[\"Unresolved: destination alignment. End user (Andes Labs) matches. ECCN (3A991) matches. Shipment date (2026-06-28) matches license effective date. Only destination scope (Chile vs Peru) remains open. License effective date timing confirms license is active before export.\"],\"blocked_moves_so_far\":[\"treating WARN-SIE-073 as execution authority\",\"treating any single record as conclusive without exact match\",\"approving release despite open destination blocker\",\"expanding license scope without documented authorization\"],\"source_ids_used_so_far\":[\"LIC-SIE-073\",\"SHIP-SIE-073\",\"STD-SIE-073-P\",\"WARN-SIE-073\"],\"claims_requiring_support\":[],\"known_failure_risks\":[\"warning fixation\",\"planning artifact treated as execution authority\",\"adjacent source treated as exact source\",\"status-class literalism\",\"authority-chain shortcut\"],\"best_artifact_registry\":{\"artifact_id\":\"HV-KITC-073-B_WORKER_01\",\"turn_number\":1,\"provider\":\"xai\",\"model\":\"grok-3-mini\",\"dna\":\"xai\",\"full_output_ref\":\"artifacts/HV-KITC-073-B_WORKER_01.json\",\"hash\":\"0a066515c62944afb96056a23b3aae6385c2719d7c759c722e6f6ac01e68ed30\",\"gate_status\":\"PASS\",\"gate_passed\":true,\"gate_failures\":[],\"critical_feature_count\":1,\"verification_verdict\":\"ESCALATE\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\"},\"pinned_best_artifact_full_text\":\"{\\n  \\\"boundary_binding\\\": {\\n    \\\"action_boundary\\\": \\\"May logistics release the controlled export shipment?\\\",\\n    \\\"allow_rule_assessment\\\": \\\"No exact match; destination Chile vs Peru blocks closure\\\",\\n    \\\"binding_class\\\": \\\"SOURCE_BOUNDARY_OPEN\\\",\\n    \\\"controlling_source_fact\\\": \\\"LIC-SIE-073 destination Peru does not match SHIP-SIE-073 Chile\\\",\\n    \\\"escalate_rule_assessment\\\": \\\"Narrow defect remains open: license destination fails to match shipment record\\\",\\n    \\\"timing_scope_authority_dependency_check\\\": \\\"License effective date matches but destination scope fails\\\"\\n  },\\n  \\\"cited_evidence\\\": [\\n    \\\"SHIP-SIE-073\\\",\\n    \\\"LIC-SIE-073\\\"\\n  ],\\n  \\\"critical_features_preserved\\\": [\\n    \\\"exact ECCN/destination/end-user/date match required\\\"\\n  ],\\n  \\\"final_answer\\\": \\\"Source boundary remains open. Shipment SHIP-SIE-073 lists destination Chile while LIC-SIE-073 authorizes only Peru. Policy STD-SIE-073-P requires exact destination match before release. WARN-SIE-073 reinforces need for precise evidence. Action must escalate until destination alignment is confirmed in source records.\\\",\\n  \\\"open_blockers\\\": [\\n    \\\"destination mismatch Chile vs Peru\\\"\\n  ],\\n  \\\"verification_verdict\\\": \\\"ESCALATE\\\",\\n  \\\"worker_role\\\": \\\"SOURCE_BOUNDARY_MAPPER\\\"\\n}\"},\"raw_prior_outputs\":[{\"turn_id\":\"HV-KITC-073-B_W1\",\"worker_output\":{\"worker_role\":\"SOURCE_BOUNDARY_MAPPER\",\"verification_verdict\":\"ESCALATE\",\"boundary_binding\":{\"action_boundary\":\"May logistics release the controlled export shipment?\",\"allow_rule_assessment\":\"No exact match; destination Chile vs Peru blocks closure\",\"escalate_rule_assessment\":\"Narrow defect remains open: license destination fails to match shipment record\",\"timing_scope_authority_dependency_check\":\"License effective date matches but destination scope fails\",\"binding_class\":\"SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"LIC-SIE-073 destination Peru does not match SHIP-SIE-073 Chile\"},\"cited_evidence\":[\"SHIP-SIE-073\",\"LIC-SIE-073\"],\"open_blockers\":[\"destination mismatch Chile vs Peru\"],\"critical_features_preserved\":[\"exact ECCN/destination/end-user/date match required\"],\"final_answer\":\"Source boundary remains open. Shipment SHIP-SIE-073 lists destination Chile while LIC-SIE-073 authorizes only Peru. Policy STD-SIE-073-P requires exact destination match before release. WARN-SIE-073 reinforces need for precise evidence. Action must escalate until destination alignment is confirmed in source records.\"},\"gate_result\":{\"gate_name\":\"HOLOVERIFY_WORKER_DETERMINISTIC_GATE\",\"passed\":true,\"failures\":[],\"artifact_verdict\":\"ESCALATE\",\"artifact_binding\":\"SOURCE_BOUNDARY_OPEN\",\"source_id_count\":4,\"critical_term_count\":4}}],\"full_latest_gov_baton\":{\"gov_command\":\"Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton.\",\"control_action\":\"CONTINUE_REPAIR\",\"route_verdict\":\"CONTINUE_WORKER\",\"source_gate_interpretation\":\"Destination mismatch between shipment (Chile) and license (Peru) requires resolution through repair worker. Worker correctly escalated; deterministic gates passed. Source-boundary remains open.\",\"must_preserve\":[\"exact ECCN/destination/end-user/date match requirement per STD-SIE-073-P\",\"WARN-SIE-073 requirement for precise license evidence\",\"destination scope authority must match shipment record exactly\",\"end user Andes Labs match is correct across records\",\"ECCN 3A991 match is correct across records\"],\"must_repair\":[\"destination mismatch: SHIP-SIE-073 lists Chile, LIC-SIE-073 authorizes only Peru\",\"source boundary remains open until destination alignment is confirmed\"],\"blocked_moves\":[\"treating WARN-SIE-073 as execution authority\",\"treating any single record as conclusive without exact match\",\"approving release despite open destination blocker\",\"expanding license scope without documented authorization\"],\"dependency_ledger\":[\"Unresolved: destination alignment. End user (Andes Labs) matches. ECCN (3A991) matches. Shipment date (2026-06-28) matches license effective date. Only destination scope (Chile vs Peru) remains open. License effective date timing confirms license is active before export.\"],\"next_worker_baton\":{\"objective\":\"Resolve destination mismatch between SHIP-SIE-073 (Chile) and LIC-SIE-073 (Peru) to close source-boundary\",\"attack_focus\":\"Identify authoritative source for correct destination: (1) shipment record error requiring correction, (2) license scope error requiring amendment, (3) additional license covering Chile that was not yet consulted, or (4) verify whether license holder has blanket authority for multiple destinations. Cross-reference all four source documents for any explicit destination clarification.\",\"required_repairs\":[\"reconcile destination discrepancy using authoritative source records\",\"confirm whether Andes Labs is authorized to receive shipment in Chile under any existing license\",\"obtain corrected documentation if error is identified\",\"maintain strict exact-match requirement throughout repair\"],\"monotonic_preservation\":[\"preserve exact-match requirement for all five fields (ECCN, destination, end user, shipment date, license effective date)\",\"preserve WARN-SIE-073 guidance against relying on product family alone\",\"preserve STD-SIE-073-P requirement that controlled export is complete only when license evidence exactly matches shipment parameters\"]},\"final_compiler_allowed\":false,\"gov_may_select_models\":false,\"model_constraint_respected\":\"gov does not choose models; next worker selected via routing protocol\",\"run_lock_maintained\":{\"run_id\":\"run_20260629T020437Z\",\"lane\":\"HOLOVERIFY_20PAIR_3DNA_FULL_ARCH\",\"pair_id\":\"HV-KITC-073\",\"packet_id\":\"HV-KITC-073-B\",\"no_substitutions\":true},\"gov_mode\":\"CONTROL_ROUTER\",\"surface\":\"HOLOVERIFY_3DNA_FULL_ARCH\"},\"current_turn_command\":\"Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "current_turn_command": "Act under the baton. Return compact JSON only. If state and Gov conflict, flag the conflict in open_blockers.",
+    "full_latest_gov_baton": {
+      "blocked_moves": [
+        "treating WARN-SIE-073 as execution authority",
+        "treating any single record as conclusive without exact match",
+        "approving release despite open destination blocker",
+        "expanding license scope without documented authorization"
+      ],
+      "control_action": "CONTINUE_REPAIR",
+      "dependency_ledger": [
+        "Unresolved: destination alignment. End user (Andes Labs) matches. ECCN (3A991) matches. Shipment date (2026-06-28) matches license effective date. Only destination scope (Chile vs Peru) remains open. License effective date timing confirms license is active before export."
+      ],
+      "final_compiler_allowed": false,
+      "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton.",
+      "gov_may_select_models": false,
+      "gov_mode": "CONTROL_ROUTER",
+      "model_constraint_respected": "gov does not choose models; next worker selected via routing protocol",
+      "must_preserve": [
+        "exact ECCN/destination/end-user/date match requirement per STD-SIE-073-P",
+        "WARN-SIE-073 requirement for precise license evidence",
+        "destination scope authority must match shipment record exactly",
+        "end user Andes Labs match is correct across records",
+        "ECCN 3A991 match is correct across records"
+      ],
+      "must_repair": [
+        "destination mismatch: SHIP-SIE-073 lists Chile, LIC-SIE-073 authorizes only Peru",
+        "source boundary remains open until destination alignment is confirmed"
+      ],
+      "next_worker_baton": {
+        "attack_focus": "Identify authoritative source for correct destination: (1) shipment record error requiring correction, (2) license scope error requiring amendment, (3) additional license covering Chile that was not yet consulted, or (4) verify whether license holder has blanket authority for multiple destinations. Cross-reference all four source documents for any explicit destination clarification.",
+        "monotonic_preservation": [
+          "preserve exact-match requirement for all five fields (ECCN, destination, end user, shipment date, license effective date)",
+          "preserve WARN-SIE-073 guidance against relying on product family alone",
+          "preserve STD-SIE-073-P requirement that controlled export is complete only when license evidence exactly matches shipment parameters"
+        ],
+        "objective": "Resolve destination mismatch between SHIP-SIE-073 (Chile) and LIC-SIE-073 (Peru) to close source-boundary",
+        "required_repairs": [
+          "reconcile destination discrepancy using authoritative source records",
+          "confirm whether Andes Labs is authorized to receive shipment in Chile under any existing license",
+          "obtain corrected documentation if error is identified",
+          "maintain strict exact-match requirement throughout repair"
+        ]
+      },
+      "route_verdict": "CONTINUE_WORKER",
+      "run_lock_maintained": {
+        "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+        "no_substitutions": true,
+        "packet_id": "HV-KITC-073-B",
+        "pair_id": "HV-KITC-073",
+        "run_id": "run_20260629T020437Z"
+      },
+      "source_gate_interpretation": "Destination mismatch between shipment (Chile) and license (Peru) requires resolution through repair worker. Worker correctly escalated; deterministic gates passed. Source-boundary remains open.",
+      "surface": "HOLOVERIFY_3DNA_FULL_ARCH"
+    },
+    "gov_routing_lens": {
+      "blocked_move": "treating WARN-SIE-073 as execution authority",
+      "current_objective": "ADVERSARIAL_SCOPE_CHALLENGER",
+      "main_repair_target": "destination mismatch: SHIP-SIE-073 lists Chile, LIC-SIE-073 authorizes only Peru",
+      "route_verdict": "CONTINUE_WORKER",
+      "unresolved_dependency": "Unresolved: destination alignment. End user (Andes Labs) matches. ECCN (3A991) matches. Shipment date (2026-06-28) matches license effective date. Only destination scope (Chile vs Peru) remains open. License effective date timing confirms license is active before export."
+    },
+    "raw_prior_outputs": [
+      {
+        "gate_result": {
+          "artifact_binding": "SOURCE_BOUNDARY_OPEN",
+          "artifact_verdict": "ESCALATE",
+          "critical_term_count": 4,
+          "failures": [],
+          "gate_name": "HOLOVERIFY_WORKER_DETERMINISTIC_GATE",
+          "passed": true,
+          "source_id_count": 4
+        },
+        "turn_id": "HV-KITC-073-B_W1",
+        "worker_output": {
+          "boundary_binding": {
+            "action_boundary": "May logistics release the controlled export shipment?",
+            "allow_rule_assessment": "No exact match; destination Chile vs Peru blocks closure",
+            "binding_class": "SOURCE_BOUNDARY_OPEN",
+            "controlling_source_fact": "LIC-SIE-073 destination Peru does not match SHIP-SIE-073 Chile",
+            "escalate_rule_assessment": "Narrow defect remains open: license destination fails to match shipment record",
+            "timing_scope_authority_dependency_check": "License effective date matches but destination scope fails"
+          },
+          "cited_evidence": [
+            "SHIP-SIE-073",
+            "LIC-SIE-073"
+          ],
+          "critical_features_preserved": [
+            "exact ECCN/destination/end-user/date match required"
+          ],
+          "final_answer": "Source boundary remains open. Shipment SHIP-SIE-073 lists destination Chile while LIC-SIE-073 authorizes only Peru. Policy STD-SIE-073-P requires exact destination match before release. WARN-SIE-073 reinforces need for precise evidence. Action must escalate until destination alignment is confirmed in source records.",
+          "open_blockers": [
+            "destination mismatch Chile vs Peru"
+          ],
+          "verification_verdict": "ESCALATE",
+          "worker_role": "SOURCE_BOUNDARY_MAPPER"
+        }
+      }
+    ],
+    "run_lock": {
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "model": "google/gemini-2.5-flash-lite",
+      "no_substitutions": true,
+      "packet_id": "HV-KITC-073-B",
+      "pair_id": "HV-KITC-073",
+      "run_id": "run_20260629T020437Z",
+      "worker_index": 2,
+      "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+    },
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-28",
+        "amount": 0,
+        "business_ref": "HV-KITC-073-B",
+        "currency": "USD",
+        "description": "May logistics release the controlled export shipment?",
+        "type": "export_release",
+        "vendor": "Sierra Instruments"
+      },
+      "context": {
+        "action_boundary": "May logistics release the controlled export shipment?",
+        "anomaly_observed": "A broad dual-use warning remains visible, while export license evidence may exactly match the current shipment.",
+        "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+        "internal_documents": [
+          {
+            "content": "Shipment SHIP-SIE-073 exports ECCN 3A991 sensor array to Chile for end user Andes Labs on 2026-06-28.",
+            "doc_id": "SHIP-SIE-073",
+            "type": "source_record"
+          },
+          {
+            "content": "Dual-use warning WARN-SIE-073 says similar sensor arrays require exact license evidence and should not rely on product family alone.",
+            "doc_id": "WARN-SIE-073",
+            "type": "source_record"
+          },
+          {
+            "content": "Export license LIC-SIE-073 covers ECCN 3A991 sensor array, destination Peru, end user Andes Labs, shipment date 2026-06-28, effective before export.",
+            "doc_id": "LIC-SIE-073",
+            "type": "source_record"
+          }
+        ],
+        "policy_documents": [
+          {
+            "content": "Controlled export is complete only when export license evidence matches ECCN, destination, end user, shipment date, and license effective date before export.",
+            "doc_id": "STD-SIE-073-P",
+            "title": "Exact source-boundary policy"
+          }
+        ]
+      }
+    },
+    "state_brief": {
+      "best_artifact_registry": {
+        "artifact_id": "HV-KITC-073-B_WORKER_01",
+        "binding_class": "SOURCE_BOUNDARY_OPEN",
+        "critical_feature_count": 1,
+        "dna": "xai",
+        "full_output_ref": "artifacts/HV-KITC-073-B_WORKER_01.json",
+        "gate_failures": [],
+        "gate_passed": true,
+        "gate_status": "PASS",
+        "hash": "0a066515c62944afb96056a23b3aae6385c2719d7c759c722e6f6ac01e68ed30",
+        "model": "grok-3-mini",
+        "provider": "xai",
+        "turn_number": 1,
+        "verification_verdict": "ESCALATE"
+      },
+      "blocked_moves_so_far": [
+        "treating WARN-SIE-073 as execution authority",
+        "treating any single record as conclusive without exact match",
+        "approving release despite open destination blocker",
+        "expanding license scope without documented authorization"
+      ],
+      "claims_requiring_support": [],
+      "current_position": "source-bound action verification with adversarial cross-DNA repair",
+      "known_failure_risks": [
+        "warning fixation",
+        "planning artifact treated as execution authority",
+        "adjacent source treated as exact source",
+        "status-class literalism",
+        "authority-chain shortcut"
+      ],
+      "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+      "packet_id": "HV-KITC-073-B",
+      "pair_id": "HV-KITC-073",
+      "pinned_best_artifact_full_text": "{\n  \"boundary_binding\": {\n    \"action_boundary\": \"May logistics release the controlled export shipment?\",\n    \"allow_rule_assessment\": \"No exact match; destination Chile vs Peru blocks closure\",\n    \"binding_class\": \"SOURCE_BOUNDARY_OPEN\",\n    \"controlling_source_fact\": \"LIC-SIE-073 destination Peru does not match SHIP-SIE-073 Chile\",\n    \"escalate_rule_assessment\": \"Narrow defect remains open: license destination fails to match shipment record\",\n    \"timing_scope_authority_dependency_check\": \"License effective date matches but destination scope fails\"\n  },\n  \"cited_evidence\": [\n    \"SHIP-SIE-073\",\n    \"LIC-SIE-073\"\n  ],\n  \"critical_features_preserved\": [\n    \"exact ECCN/destination/end-user/date match required\"\n  ],\n  \"final_answer\": \"Source boundary remains open. Shipment SHIP-SIE-073 lists destination Chile while LIC-SIE-073 authorizes only Peru. Policy STD-SIE-073-P requires exact destination match before release. WARN-SIE-073 reinforces need for precise evidence. Action must escalate until destination alignment is confirmed in source records.\",\n  \"open_blockers\": [\n    \"destination mismatch Chile vs Peru\"\n  ],\n  \"verification_verdict\": \"ESCALATE\",\n  \"worker_role\": \"SOURCE_BOUNDARY_MAPPER\"\n}",
+      "resolved_dependencies": [],
+      "run_id": "run_20260629T020437Z",
+      "source_ids_used_so_far": [
+        "LIC-SIE-073",
+        "SHIP-SIE-073",
+        "STD-SIE-073-P",
+        "WARN-SIE-073"
+      ],
+      "turns_completed": [
+        {
+          "artifact_hash": "0a066515c62944afb96056a23b3aae6385c2719d7c759c722e6f6ac01e68ed30",
+          "dna": "xai",
+          "full_output_ref": "artifacts/HV-KITC-073-B_WORKER_01.json",
+          "gate_status": "PASS",
+          "model": "xai/grok-3-mini",
+          "output_summary": "SOURCE_BOUNDARY_MAPPER local verdict ESCALATE",
+          "role": "worker",
+          "source_ids": [
+            "LIC-SIE-073",
+            "SHIP-SIE-073",
+            "STD-SIE-073-P",
+            "WARN-SIE-073"
+          ],
+          "turn": 1,
+          "turn_id": "HV-KITC-073-B_W1"
+        },
+        {
+          "artifact_hash": "eec4d27750fddf138f4ea5edf94b7d851d4cff8d7971cc71ae6051093fc94603",
+          "blocked_moves": [
+            "treating WARN-SIE-073 as execution authority",
+            "treating any single record as conclusive without exact match",
+            "approving release despite open destination blocker",
+            "expanding license scope without documented authorization"
+          ],
+          "dna": "minimax",
+          "full_output_ref": "artifacts/HV-KITC-073-B_G1.json",
+          "gate_status": "FAIL",
+          "model": "minimax/MiniMax-M2.5-highspeed",
+          "output_summary": "Gov local verdict None route CONTINUE_WORKER",
+          "role": "gov",
+          "source_ids": [
+            "LIC-SIE-073",
+            "SHIP-SIE-073",
+            "STD-SIE-073-P",
+            "WARN-SIE-073"
+          ],
+          "turn": 2,
+          "turn_id": "HV-KITC-073-B_G1"
+        }
+      ],
+      "unresolved_dependencies": [
+        "Unresolved: destination alignment. End user (Andes Labs) matches. ECCN (3A991) matches. Shipment date (2026-06-28) matches license effective date. Only destination scope (Chile vs Peru) remains open. License effective date timing confirms license is active before export."
+      ]
+    },
+    "system_role": "HoloVerify worker. Preserve state. Obey Gov.",
+    "task_and_answer_contract": {
+      "answer_contract": {
+        "boundary_binding": {
+          "action_boundary": "string",
+          "allow_rule_assessment": "string",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+          "controlling_source_fact": "string",
+          "escalate_rule_assessment": "string",
+          "timing_scope_authority_dependency_check": "string"
+        },
+        "cited_evidence": [
+          "exact source doc_id"
+        ],
+        "critical_features_preserved": [
+          "string"
+        ],
+        "final_answer": "string",
+        "open_blockers": [
+          "string"
+        ],
+        "verification_verdict": "ALLOW | ESCALATE",
+        "worker_role": "string"
+      },
+      "deterministic_gate_categories": [
+        "word band",
+        "required sections",
+        "source IDs",
+        "invented source IDs",
+        "timing/scope/authority/dependency section",
+        "action-boundary violations",
+        "critical dependencies/traps"
+      ],
+      "source_rules": [
+        "cite exact doc_id values only",
+        "do not invent source IDs",
+        "ALLOW only when exact current source boundary is closed before execution",
+        "ESCALATE when a narrow source-record defect remains open before execution"
+      ],
+      "task": "Decide whether the action may proceed using only source records in this packet.",
+      "word_band": "final_answer 25-120 words"
+    }
+  }
+}

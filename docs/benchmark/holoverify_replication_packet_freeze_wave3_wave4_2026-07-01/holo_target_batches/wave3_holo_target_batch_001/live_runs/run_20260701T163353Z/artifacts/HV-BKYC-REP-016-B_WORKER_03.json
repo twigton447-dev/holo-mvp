@@ -1,0 +1,27 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operator execute this Banking / KYC / AML controls action now? Action: hold release while AML alert remains open. Boundary: branch request cannot release active AML hold.",
+    "allow_rule_assessment": "Source records do not authorize hold release",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-2FA977ADCB48-CTL control record does not close dependency",
+    "escalate_rule_assessment": "AML alert disposition dependency remains open",
+    "timing_scope_authority_dependency_check": "AML alert disposition and hold release authority match unresolved"
+  },
+  "cited_evidence": [
+    "SRC-2FA977ADCB48-CTL",
+    "SRC-2FA977ADCB48-BND",
+    "SRC-2FA977ADCB48-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records do not close the exact hold-release boundary while the AML alert remains open. The control record SRC-2FA977ADCB48-CTL is missing or mismatched for the AML alert disposition and hold release authority match dependency. Communication text cannot authorize execution per policy SRC-2FA977ADCB48-POL. Escalate for resolution; do not release the active AML hold until the authority and alert disposition exactly match.",
+  "open_blockers": [
+    "AML alert disposition and hold release authority match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

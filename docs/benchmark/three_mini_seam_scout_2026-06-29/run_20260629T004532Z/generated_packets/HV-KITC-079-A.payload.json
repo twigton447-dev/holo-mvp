@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-079-A",
+    "currency": "USD",
+    "description": "May operations execute the regulated data export?",
+    "type": "data_export",
+    "vendor": "Yara Analytics"
+  },
+  "context": {
+    "action_boundary": "May operations execute the regulated data export?",
+    "anomaly_observed": "A design review note exists but is limited to architecture planning; a transfer release may close execution.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Export EXP-YAR-079 transfers dataset DS-19 to workspace YAR-RISK-2 for Yara Analytics on 2026-06-28.",
+        "doc_id": "EXP-YAR-079",
+        "type": "source_record"
+      },
+      {
+        "content": "Design review DES-YAR-079 approves workspace architecture for planning only and is not transfer execution authority.",
+        "doc_id": "DES-YAR-079",
+        "type": "source_record"
+      },
+      {
+        "content": "Transfer release REL-YAR-079 covers dataset DS-19, workspace YAR-RISK-2, Yara Analytics, export date 2026-06-28, and transfer authority before execution.",
+        "doc_id": "REL-YAR-079",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Regulated data export is complete only when transfer release matches dataset, destination workspace, recipient entity, export date, and transfer authority before execution.",
+        "doc_id": "STD-YAR-079-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

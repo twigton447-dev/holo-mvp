@@ -1,0 +1,170 @@
+{
+  "aa_omniscience_comparison": {
+    "how_to_use": "Use as an external analogy for reliability, calibration, hallucination penalties, and domain variability; do not present as a direct comparison benchmark.",
+    "source_url": "https://artificialanalysis.ai/evaluations/omniscience",
+    "useful_parallel": "AA-Omniscience rewards factual reliability and not guessing when uncertain; HoloVerify rewards source-bound ALLOW/ESCALATE decisions and escalation when action evidence is insufficient."
+  },
+  "classification": "HOLOVERIFY_BENCHMARK_PAGE_DEEP_DIVE_DRAFT_2026_07_01",
+  "current_clean_denominator": {
+    "allow_truths": 307,
+    "correct_packets": 614,
+    "escalate_truths": 307,
+    "false_negatives": 0,
+    "false_positives": 0,
+    "observed_errors": 0,
+    "packets": 614,
+    "sibling_pairs": 307
+  },
+  "current_confidence_bands": {
+    "fpr_fnr_exact_95_upper_percent": 0.971063,
+    "fpr_fnr_wilson_95_upper_percent": 1.235871,
+    "packet_exact_95_upper_percent": 0.486716,
+    "packet_wilson_95_upper_percent": 0.621777
+  },
+  "draft_status": "strategy_memo_no_public_page_mutation",
+  "evidence_sources": {
+    "statistical_appendix": "docs/benchmark/HOLOVERIFY_STATISTICAL_APPENDIX_2026_07_01.md",
+    "wave3_wave4_final_memo": "docs/benchmark/HOLOVERIFY_WAVE3_WAVE4_FINAL_EVIDENCE_MEMO_2026_07_01.md",
+    "wave5_freeze": "docs/benchmark/HOLOVERIFY_REPLICATION_PACKET_FREEZE_WAVE5_7DOMAIN_2026_07_01.md"
+  },
+  "recommended_domains_after_wave5": [
+    {
+      "domain": "Defense logistics / command authorization",
+      "example_boundary": "Whether source authority permits movement, procurement, access, or operational release."
+    },
+    {
+      "domain": "Banking / AML / account freeze controls",
+      "example_boundary": "Whether an account restriction, release, or escalation is justified by current evidence."
+    },
+    {
+      "domain": "Insurance claims / payout authorization",
+      "example_boundary": "Whether payout, denial, or escalation is permitted."
+    },
+    {
+      "domain": "Pharma quality / batch release",
+      "example_boundary": "Whether manufacturing or quality evidence permits product release."
+    },
+    {
+      "domain": "Privacy / data disclosure / consent controls",
+      "example_boundary": "Whether records may be disclosed to a requester."
+    },
+    {
+      "domain": "Education / student record release",
+      "example_boundary": "Whether student records can be released under current consent or authority."
+    },
+    {
+      "domain": "Export control / customs / restricted shipment release",
+      "example_boundary": "Whether shipment can proceed under entity, item, destination, and license evidence."
+    },
+    {
+      "domain": "Real estate / mortgage / escrow release",
+      "example_boundary": "Whether funds, documents, or approvals may be released."
+    },
+    {
+      "domain": "Manufacturing quality hold / supplier substitution",
+      "example_boundary": "Whether an exception can override a quality hold."
+    },
+    {
+      "domain": "Tax / regulatory payment controls",
+      "example_boundary": "Whether a filing, remittance, or exception is currently authorized."
+    },
+    {
+      "domain": "Customer account security / MFA reset",
+      "example_boundary": "Whether identity proof closes the account-change boundary."
+    },
+    {
+      "domain": "Energy trading / credit-limit controls",
+      "example_boundary": "Whether a trade, override, or exposure increase is permitted."
+    },
+    {
+      "domain": "Legal discovery / privilege / litigation hold release",
+      "example_boundary": "Whether documents can be released or must be escalated."
+    },
+    {
+      "domain": "Healthcare claims / prior authorization",
+      "example_boundary": "Whether coverage or authorization evidence closes the payment/action boundary."
+    }
+  ],
+  "recommended_page_version": "7.52",
+  "recommended_reframe": "Rewrite the benchmark page as a reliability ledger for action-boundary decisions, not as a small packet registry or model leaderboard.",
+  "recommended_sections": [
+    "Hero and current reliability ledger",
+    "What ALLOW and ESCALATE mean",
+    "Clean denominator and exclusions",
+    "Confusion matrix and confidence bands",
+    "Domain families",
+    "Matched solo evidence",
+    "Governed architecture under test",
+    "Token cost / safety premium",
+    "Limitations",
+    "Next statistical tier",
+    "Audit vault and hashes"
+  ],
+  "risk_threshold_roadmap": {
+    "current_interpretation": {
+      "overall_packet_error_exact_95_upper_percent": 0.486716,
+      "plain_english": "The current clean ledger has cleared the prior below-1.0% side-specific FP/FN milestone. The next statistical milestone is reducing side-specific FP/FN upper bounds below 0.5%.",
+      "side_specific_fpr_fnr_exact_95_upper_percent": 0.971063
+    },
+    "next_practical_target": "Add roughly 582 additional balanced packets to target side-specific FP/FN upper bounds below 0.5%.",
+    "recommended_policy": "Use tiered deployment thresholds rather than one universal risk number. Treat side-specific FP/FN upper bounds as the main safety bar.",
+    "thresholds": [
+      {
+        "additional_packets_from_current_614": 0,
+        "allow_examples_required": 299,
+        "escalate_examples_required": 299,
+        "recommended_use_tier": "enterprise action recommendation",
+        "target_side_specific_upper_bound_percent": 1.0,
+        "total_packets_required": 598
+      },
+      {
+        "additional_packets_from_current_614": 582,
+        "allow_examples_required": 598,
+        "escalate_examples_required": 598,
+        "recommended_use_tier": "high-stakes irreversible action gating",
+        "target_side_specific_upper_bound_percent": 0.5,
+        "total_packets_required": 1196
+      },
+      {
+        "additional_packets_from_current_614": 1780,
+        "allow_examples_required": 1197,
+        "escalate_examples_required": 1197,
+        "recommended_use_tier": "regulated deployment expansion",
+        "target_side_specific_upper_bound_percent": 0.25,
+        "total_packets_required": 2394
+      },
+      {
+        "additional_packets_from_current_614": 5376,
+        "allow_examples_required": 2995,
+        "escalate_examples_required": 2995,
+        "recommended_use_tier": "safety-critical production autonomy with external review and monitoring",
+        "target_side_specific_upper_bound_percent": 0.1,
+        "total_packets_required": 5990
+      }
+    ]
+  },
+  "wave5_next_tier": {
+    "additional_packets": 280,
+    "additional_pairs": 140,
+    "completed_correct_packets": 280,
+    "completed_packets": 280,
+    "completed_pairs": 140,
+    "domains": [
+      "Medical treatment activation controls",
+      "Treasury / wire controls",
+      "Legal / regulatory filing controls",
+      "Cloud infrastructure controls",
+      "Security operations controls",
+      "Public-sector records controls",
+      "Operational technology / industrial safety controls"
+    ],
+    "fpr_fnr_exact_95_upper_percent": 0.971063,
+    "freeze_root_hash": "3690788df10f817e153113d3eb15f850bb5de2a1a6256253ad8f3031a26238cf",
+    "new_total_packets": 614,
+    "new_total_pairs": 307,
+    "observed_false_negatives": 0,
+    "observed_false_positives": 0,
+    "packet_exact_95_upper_percent": 0.486716,
+    "status": "completed_clean"
+  }
+}

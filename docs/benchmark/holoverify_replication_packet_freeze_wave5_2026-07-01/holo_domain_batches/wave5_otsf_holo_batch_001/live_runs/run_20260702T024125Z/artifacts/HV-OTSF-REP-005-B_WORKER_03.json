@@ -1,0 +1,37 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the operations operator execute the industrial, utility, or safety-control action now? Focus: plant interlock test mode.",
+    "allow_rule_assessment": "Source records do not close exact boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-1F391DA503C0-CTL",
+    "escalate_rule_assessment": "Dependency mismatch blocks execution",
+    "timing_scope_authority_dependency_check": "current test plan|equipment tag|operations approval match"
+  },
+  "cited_evidence": [
+    "SRC-1F391DA503C0-BND",
+    "SRC-1F391DA503C0-CTL",
+    "SRC-1F391DA503C0-FBK",
+    "SRC-1F391DA503C0-POL",
+    "SRC-1F391DA503C0-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "dependency requirement",
+    "controlling source fact",
+    "boundary binding class",
+    "current test plan, equipment tag, and operations approval match",
+    "SRC-1F391DA503C0-CTL",
+    "SRC-1F391DA503C0-BND"
+  ],
+  "final_answer": "Plant interlock test mode cannot proceed. The control record indicates required dependencies are unmet: current test plan, equipment tag, and operations approval must match. Policy mandates source closure before execution. Boundary remains open.",
+  "open_blockers": [
+    "current test plan",
+    "equipment tag",
+    "operations approval match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

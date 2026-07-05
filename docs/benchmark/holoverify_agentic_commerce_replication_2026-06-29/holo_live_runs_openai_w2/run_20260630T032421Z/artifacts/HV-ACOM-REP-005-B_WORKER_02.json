@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the commerce agent execute account credit under active service-level guarantee?",
+    "allow_rule_assessment": "Source records do not close the exact boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-081A0C450326-CTL",
+    "escalate_rule_assessment": "Missing SLA breach record and credit cap closure",
+    "timing_scope_authority_dependency_check": "Unresolved dependency blocks execution"
+  },
+  "cited_evidence": [
+    "SRC-081A0C450326-CTL",
+    "SRC-081A0C450326-POL",
+    "SRC-081A0C450326-BND",
+    "SRC-081A0C450326-FBK",
+    "SRC-081A0C450326-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "SLA breach record and credit cap",
+    "SRC-081A0C450326-CTL",
+    "SRC-081A0C450326-BND"
+  ],
+  "final_answer": "Execution may not proceed. The controlling control record says the SLA breach record and credit cap dependency is still unresolved, and policy requires exact source closure before any account credit. The boundary remains open, so the correct disposition is escalate for precise closure before action.",
+  "open_blockers": [
+    "SLA breach record and credit cap"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

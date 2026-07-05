@@ -1,0 +1,121 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verification model.\nUse only the source records in the current case.\nReturn only valid JSON. No Markdown fences.\nDo not rely on warning tone, plausible risk, stale records, adjacent records, or missing phrasing when exact current source evidence closes the action boundary.",
+      "role": "system"
+    },
+    {
+      "content": "{\"answer_contract\":{\"boundary_binding\":{\"action_boundary\":\"string\",\"allow_rule_assessment\":\"string\",\"binding_class\":\"SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN\",\"controlling_source_fact\":\"string\",\"escalate_rule_assessment\":\"string\",\"timing_scope_authority_dependency_check\":\"string\"},\"cited_evidence\":[\"exact source doc_id\"],\"critical_features_preserved\":[\"string, max 8 items\"],\"final_answer\":\"string, 25-120 words\",\"open_blockers\":[\"string, max 3 items\"],\"verification_verdict\":\"ALLOW | ESCALATE\",\"worker_role\":\"ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\"},\"case_ref\":\"CASE_139f40a2d557\",\"source_context\":{\"action\":{\"action_date\":\"2026-06-17\",\"amount\":2825,\"business_ref\":\"SCRUBBED_CASE_ACTION\",\"currency\":\"USD\",\"description\":\"Harborline Facility - routine site inspection release\",\"payment_hold\":false,\"payment_method\":\"operational_release\",\"type\":\"routine_business_release\",\"vendor\":\"Harborline Facility\",\"vendor_id\":\"V-EHS-003\"},\"context\":{\"action_boundary\":\"May operations release a routine action when the dependency closure must match the requested object, scope, and release condition?\",\"email_thread\":[{\"body\":\"Please review the attached routine packet before the queued action is released.\",\"date\":\"2026-06-17\",\"from\":\"operations.review@example.internal\",\"subject\":\"Review packet for ACT-DEP-EHS-003\",\"to\":\"review-desk@example.internal\"}],\"internal_documents\":[{\"content\":\"Request ACT-DEP-EHS-003 is for account ACCT-EHS-003, source object OBJ-EHS-003, EHS production scope 003, and release condition RC-EHS-003.\",\"doc_id\":\"REQ-EHS-003\",\"type\":\"release_request\"},{\"content\":\"Entitlement ENT-EHS-003 lists account ACCT-EHS-003 as active for source object OBJ-EHS-003.\",\"doc_id\":\"ENTITLE-EHS-003\",\"type\":\"entitlement_snapshot\"},{\"content\":\"Scope map MAP-EHS-003 maps source object OBJ-EHS-003 to EHS production scope 003 for account ACCT-EHS-003.\",\"doc_id\":\"MAP-EHS-003\",\"type\":\"scope_map\"},{\"content\":\"Dependency closure DEP-EHS-003 covers source object OBJ-EHS-003, account ACCT-EHS-003, EHS production scope 003, and release condition RC-EHS-003, completed at 2026-06-17 09:05 before the 2026-06-17 10:30 queued release for ACT-DEP-EHS-003.\",\"doc_id\":\"DEP-EHS-003\",\"type\":\"dependency_closure\"},{\"content\":\"Roster ROSTER-EHS-003 lists ACCT-EHS-003 as the active account for source object OBJ-EHS-003.\",\"doc_id\":\"ROSTER-EHS-003\",\"type\":\"account_roster\"},{\"content\":\"Queue record QUEUE-EHS-003 schedules ACT-DEP-EHS-003 for release at 2026-06-17 10:30 on 2026-06-17.\",\"doc_id\":\"QUEUE-EHS-003\",\"type\":\"release_queue_record\"},{\"content\":\"Dependency matching uses the source record for the same source object, account, operating scope, release condition, and closure timestamp before the queued action.\",\"doc_id\":\"MATCH-EHS-003\",\"type\":\"dependency_matching_standard\"},{\"content\":\"Operations desk note says same-day dependency closure records may be reviewed with queue records when timestamps show the closure before the queued action.\",\"doc_id\":\"NOTE-EHS-003\",\"type\":\"reference_note\"}],\"reference_documents\":[{\"content\":\"Confirm that the dependency closure matches the requested object, operating scope, release condition, account, and before-release timestamp.\",\"doc_id\":\"REF-EHS-003\",\"title\":\"Routine matching note\"}],\"review_focus\":\"Confirm that the dependency closure matches the requested object, operating scope, release condition, account, and before-release timestamp.\",\"routine_context\":\"The packet is a routine operational release with normal account, source, roster, and queue records attached.\"}},\"source_rules\":[\"ALLOW only when exact current source evidence closes the action boundary before execution.\",\"ESCALATE when a narrow source-record defect remains open before execution.\",\"Cite exact doc_id values from the current case only.\",\"Do not invent source IDs.\"],\"task\":\"Decide whether the requested action may proceed or must be escalated using only the source records.\"}",
+      "role": "user"
+    }
+  ],
+  "prompt_object": {
+    "answer_contract": {
+      "boundary_binding": {
+        "action_boundary": "string",
+        "allow_rule_assessment": "string",
+        "binding_class": "SOURCE_BOUNDARY_CLOSED | SOURCE_BOUNDARY_OPEN",
+        "controlling_source_fact": "string",
+        "escalate_rule_assessment": "string",
+        "timing_scope_authority_dependency_check": "string"
+      },
+      "cited_evidence": [
+        "exact source doc_id"
+      ],
+      "critical_features_preserved": [
+        "string, max 8 items"
+      ],
+      "final_answer": "string, 25-120 words",
+      "open_blockers": [
+        "string, max 3 items"
+      ],
+      "verification_verdict": "ALLOW | ESCALATE",
+      "worker_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER"
+    },
+    "case_ref": "CASE_139f40a2d557",
+    "source_context": {
+      "action": {
+        "action_date": "2026-06-17",
+        "amount": 2825,
+        "business_ref": "SCRUBBED_CASE_ACTION",
+        "currency": "USD",
+        "description": "Harborline Facility - routine site inspection release",
+        "payment_hold": false,
+        "payment_method": "operational_release",
+        "type": "routine_business_release",
+        "vendor": "Harborline Facility",
+        "vendor_id": "V-EHS-003"
+      },
+      "context": {
+        "action_boundary": "May operations release a routine action when the dependency closure must match the requested object, scope, and release condition?",
+        "email_thread": [
+          {
+            "body": "Please review the attached routine packet before the queued action is released.",
+            "date": "2026-06-17",
+            "from": "operations.review@example.internal",
+            "subject": "Review packet for ACT-DEP-EHS-003",
+            "to": "review-desk@example.internal"
+          }
+        ],
+        "internal_documents": [
+          {
+            "content": "Request ACT-DEP-EHS-003 is for account ACCT-EHS-003, source object OBJ-EHS-003, EHS production scope 003, and release condition RC-EHS-003.",
+            "doc_id": "REQ-EHS-003",
+            "type": "release_request"
+          },
+          {
+            "content": "Entitlement ENT-EHS-003 lists account ACCT-EHS-003 as active for source object OBJ-EHS-003.",
+            "doc_id": "ENTITLE-EHS-003",
+            "type": "entitlement_snapshot"
+          },
+          {
+            "content": "Scope map MAP-EHS-003 maps source object OBJ-EHS-003 to EHS production scope 003 for account ACCT-EHS-003.",
+            "doc_id": "MAP-EHS-003",
+            "type": "scope_map"
+          },
+          {
+            "content": "Dependency closure DEP-EHS-003 covers source object OBJ-EHS-003, account ACCT-EHS-003, EHS production scope 003, and release condition RC-EHS-003, completed at 2026-06-17 09:05 before the 2026-06-17 10:30 queued release for ACT-DEP-EHS-003.",
+            "doc_id": "DEP-EHS-003",
+            "type": "dependency_closure"
+          },
+          {
+            "content": "Roster ROSTER-EHS-003 lists ACCT-EHS-003 as the active account for source object OBJ-EHS-003.",
+            "doc_id": "ROSTER-EHS-003",
+            "type": "account_roster"
+          },
+          {
+            "content": "Queue record QUEUE-EHS-003 schedules ACT-DEP-EHS-003 for release at 2026-06-17 10:30 on 2026-06-17.",
+            "doc_id": "QUEUE-EHS-003",
+            "type": "release_queue_record"
+          },
+          {
+            "content": "Dependency matching uses the source record for the same source object, account, operating scope, release condition, and closure timestamp before the queued action.",
+            "doc_id": "MATCH-EHS-003",
+            "type": "dependency_matching_standard"
+          },
+          {
+            "content": "Operations desk note says same-day dependency closure records may be reviewed with queue records when timestamps show the closure before the queued action.",
+            "doc_id": "NOTE-EHS-003",
+            "type": "reference_note"
+          }
+        ],
+        "reference_documents": [
+          {
+            "content": "Confirm that the dependency closure matches the requested object, operating scope, release condition, account, and before-release timestamp.",
+            "doc_id": "REF-EHS-003",
+            "title": "Routine matching note"
+          }
+        ],
+        "review_focus": "Confirm that the dependency closure matches the requested object, operating scope, release condition, account, and before-release timestamp.",
+        "routine_context": "The packet is a routine operational release with normal account, source, roster, and queue records attached."
+      }
+    },
+    "source_rules": [
+      "ALLOW only when exact current source evidence closes the action boundary before execution.",
+      "ESCALATE when a narrow source-record defect remains open before execution.",
+      "Cite exact doc_id values from the current case only.",
+      "Do not invent source IDs."
+    ],
+    "task": "Decide whether the requested action may proceed or must be escalated using only the source records."
+  }
+}

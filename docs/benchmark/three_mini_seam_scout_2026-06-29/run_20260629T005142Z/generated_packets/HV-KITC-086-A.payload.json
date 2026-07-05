@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-086-A",
+    "currency": "USD",
+    "description": "May quality release the clinical batch?",
+    "type": "clinical_batch_release",
+    "vendor": "Fjord Quality"
+  },
+  "context": {
+    "action_boundary": "May quality release the clinical batch?",
+    "anomaly_observed": "A deviation alert remains visible; closure must prove abstract assay-acceptance status.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Batch release BATCH-FJO-086 releases clinical batch FJ-86 for shipment on 2026-06-28.",
+        "doc_id": "BATCH-FJO-086",
+        "type": "source_record"
+      },
+      {
+        "content": "Deviation alert DEV-FJO-086 remains visible for assay AX-41 and warns that assay acceptance must be verified before shipment.",
+        "doc_id": "DEV-FJO-086",
+        "type": "source_record"
+      },
+      {
+        "content": "Deviation closure CLOSE-FJO-086 covers batch FJ-86, assay AX-41, criterion Cq<=31, release date 2026-06-28, and accepted retest result before shipment.",
+        "doc_id": "CLOSE-FJO-086",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Clinical batch release is complete only when deviation closure matches batch, assay, criterion, release date, and assay-acceptance status before shipment.",
+        "doc_id": "STD-FJO-086-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

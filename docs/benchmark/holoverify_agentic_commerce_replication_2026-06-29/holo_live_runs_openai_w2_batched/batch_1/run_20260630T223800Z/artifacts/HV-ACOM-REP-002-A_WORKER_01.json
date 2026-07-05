@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "subscription downgrade authorized by workspace owner",
+    "allow_rule_assessment": "Role confirmation required before execution",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-D042F587006A-CTL",
+    "escalate_rule_assessment": "Unresolved billing owner role dependency",
+    "timing_scope_authority_dependency_check": "requester role must be billing owner"
+  },
+  "cited_evidence": [
+    "SRC-D042F587006A-CTL",
+    "SRC-D042F587006A-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source records tie execution to confirmed billing owner role which remains unresolved per CTL and POL. Boundary open. Escalate for exact role match verification before any subscription downgrade. No closure from anomaly notes or fallback text.",
+  "open_blockers": [
+    "requester role must be billing owner"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

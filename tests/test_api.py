@@ -4,6 +4,7 @@ ContextGovernor mocked so no real LLM calls are made.
 """
 import os
 import pytest
+import uuid
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
@@ -26,14 +27,35 @@ def _make_mock_adapters(results):
     return [adapter, adapter, adapter]
 
 
+class _OfflineAcceptedSigner:
+    def issue_receipt(self, *, decision, evaluation_id, evidence_hash):
+        return {
+            "receipt_id": f"hgovv_test_{uuid.uuid4().hex[:8]}",
+            "schema": "hologov_v_receipt_v1",
+            "receipt_version": "1",
+            "lane": "HoloGov-V",
+            "status": "accepted",
+            "enforcement_point": "/v1/evaluate_action",
+            "decision": decision,
+            "evaluation_id": evaluation_id,
+            "evidence_hash": evidence_hash,
+            "signer_id": "offline-test-signer",
+            "key_id": "offline-test-key",
+            "issued_at": "2026-06-26T00:00:00Z",
+            "nonce": uuid.uuid4().hex,
+            "receipt_signature": "offline-test-signature",
+        }
+
+
 @pytest.fixture
 def allow_client():
     """Client wired to return 3x ALLOW / all-LOW turns."""
     results = [make_turn_result(verdict="ALLOW", turn_number=i) for i in range(1, 4)]
-    with patch("context_governor.load_adapters", return_value=_make_mock_adapters(results)):
-        from main import app
-        with TestClient(app, raise_server_exceptions=False) as client:
-            yield client
+    with patch("context_governor.load_adapters", return_value=(_make_mock_adapters(results), [])):
+        import main
+        with patch.object(main, "_hologov_v_signer_client", _OfflineAcceptedSigner()):
+            with TestClient(main.app, raise_server_exceptions=False) as client:
+                yield client
 
 
 @pytest.fixture
@@ -44,10 +66,11 @@ def escalate_client():
         make_turn_result(verdict="ESCALATE", turn_number=2),
         make_turn_result(verdict="ESCALATE", turn_number=3),
     ]
-    with patch("context_governor.load_adapters", return_value=_make_mock_adapters(results)):
-        from main import app
-        with TestClient(app, raise_server_exceptions=False) as client:
-            yield client
+    with patch("context_governor.load_adapters", return_value=(_make_mock_adapters(results), [])):
+        import main
+        with patch.object(main, "_hologov_v_signer_client", _OfflineAcceptedSigner()):
+            with TestClient(main.app, raise_server_exceptions=False) as client:
+                yield client
 
 
 # ---------------------------------------------------------------------------
@@ -66,7 +89,8 @@ class TestHealth:
 
     def test_health_version(self, allow_client):
         data = allow_client.get("/health").json()
-        assert data["version"] == "0.1.0"
+        assert data["version"] == "HC-GOVSHADOW-001"
+        assert data["release"]["build_label"].startswith("HC-GOVSHADOW-001")
 
     def test_health_engine_live(self, allow_client):
         data = allow_client.get("/health").json()
@@ -76,6 +100,40 @@ class TestHealth:
         """Health endpoint must be publicly accessible — no API key needed."""
         resp = allow_client.get("/health")  # no headers
         assert resp.status_code == 200
+
+    def test_version_endpoint_returns_release_identity(self, allow_client):
+        resp = allow_client.get("/version")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["app_version"] == "HC-GOVSHADOW-001"
+        assert data["architecture_version"] == "holochat-governed-shadow-v1"
+        assert data["build_label"].startswith("HC-GOVSHADOW-001")
+
+    def test_runtime_status_reports_safe_all_cylinders_contract(self, allow_client):
+        resp = allow_client.get("/runtime-status")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+        assert data["release"]["app_version"] == "HC-GOVSHADOW-001"
+        assert data["truth_contract"] == {
+            "source": "live_process_runtime_state",
+            "raw_prompts_exposed": False,
+            "raw_memory_exposed": False,
+            "api_keys_exposed": False,
+            "provider_error_bodies_exposed": False,
+        }
+        all_cylinders = data["holochat_all_cylinders"]
+        assert all_cylinders["version"] == "holochat_all_cylinders_v0.1"
+        assert isinstance(all_cylinders["all_cylinders"], bool)
+        assert isinstance(all_cylinders["base_runtime_ready"], bool)
+        assert all_cylinders["checks"]
+        assert "governed_shadow_disabled" in all_cylinders["attention_items"] or all_cylinders["hard_chat_shadow_ready"] is True
+
+    def test_runtime_route_serves_dashboard_or_status(self, allow_client):
+        resp = allow_client.get("/runtime")
+        assert resp.status_code == 200
+        assert "raw prompts" in resp.text.lower()
+        assert "api keys" in resp.text.lower()
 
 
 # ---------------------------------------------------------------------------
@@ -102,6 +160,43 @@ class TestAuthentication:
             json=MINIMAL_PAYLOAD,
             headers=VALID_HEADERS,
         )
+        assert resp.status_code == 200
+
+    def test_valid_env_key_survives_db_validation_error(self, allow_client, monkeypatch):
+        import main
+
+        class BrokenDB:
+            def validate_api_key(self, _raw_key):
+                raise RuntimeError("db unavailable")
+
+            def log_api_usage(self, _row):
+                raise RuntimeError("db unavailable")
+
+        monkeypatch.setattr(main, "_db", BrokenDB())
+        monkeypatch.setenv("HOLO_MAX_RPM", "60")
+        main._rate_limiter._requests.clear()
+
+        resp = allow_client.post(
+            "/v1/evaluate_action",
+            json=MINIMAL_PAYLOAD,
+            headers=VALID_HEADERS,
+        )
+
+        assert resp.status_code == 200
+
+    def test_invalid_holo_max_rpm_falls_back_to_default(self, allow_client, monkeypatch):
+        import main
+
+        monkeypatch.setattr(main, "_db", None)
+        monkeypatch.setenv("HOLO_MAX_RPM", "# Optional: requests-per-minute cap")
+        main._rate_limiter._requests.clear()
+
+        resp = allow_client.post(
+            "/v1/evaluate_action",
+            json=MINIMAL_PAYLOAD,
+            headers=VALID_HEADERS,
+        )
+
         assert resp.status_code == 200
 
     def test_401_detail_does_not_leak_expected_key(self, allow_client):
@@ -189,7 +284,7 @@ class TestResponseShape:
 
     def test_risk_profile_has_all_six_categories(self):
         profile = self.data["risk_profile"]
-        assert set(profile.keys()) == set(BEC_CATEGORIES)
+        assert set(BEC_CATEGORIES).issubset(set(profile.keys()))
 
     def test_risk_profile_category_shape(self):
         for cat, info in self.data["risk_profile"].items():
@@ -206,8 +301,9 @@ class TestResponseShape:
 
     def test_token_usage_present(self):
         usage = self.data["token_usage"]
-        assert "input" in usage
-        assert "output" in usage
+        assert "total" in usage
+        assert "input" in usage["total"]
+        assert "output" in usage["total"]
 
     def test_allow_decision_on_clean_payload(self):
         assert self.data["decision"] == "ALLOW"

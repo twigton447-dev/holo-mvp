@@ -1,0 +1,25 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the security operator execute the incident-response action now? Focus: customer API token revocation.",
+    "allow_rule_assessment": "Source records fail to close boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-30D294018C90-CTL",
+    "escalate_rule_assessment": "Open dependency blocks execution",
+    "timing_scope_authority_dependency_check": "current token ID tenant incident scope match"
+  },
+  "cited_evidence": [
+    "SRC-30D294018C90-CTL",
+    "SRC-30D294018C90-BND"
+  ],
+  "critical_features_preserved": [
+    "exact action boundary",
+    "source control record"
+  ],
+  "final_answer": "Action may not proceed. Source records show unresolved dependency on token ID, tenant, and incident scope match. Policy requires exact boundary closure before execution. Escalate to resolve defect.",
+  "open_blockers": [
+    "current token ID, tenant, and incident scope match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment or vendor action when emergency exception expired before release date",
+    "allow_rule_assessment": "CTL confirms validity window current and tied to action",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-389D141A7151-CTL",
+    "escalate_rule_assessment": "No open defect in source records",
+    "timing_scope_authority_dependency_check": "Exception validity window current per CTL; matches actor/scope/date"
+  },
+  "cited_evidence": [
+    "SRC-389D141A7151-CTL",
+    "SRC-389D141A7151-BND",
+    "SRC-389D141A7151-FBK",
+    "SRC-389D141A7151-POL",
+    "SRC-389D141A7151-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "exception validity window",
+    "SRC-389D141A7151-CTL",
+    "SRC-389D141A7151-BND"
+  ],
+  "final_answer": "Source records close the boundary. CTL establishes exception validity window as current, exact, and matched to the action. Execution may proceed per policy. FBK and BND provide context only; they do not override CTL. Anomaly noise does not alter source closure.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-073-B",
+    "currency": "USD",
+    "description": "May logistics release the controlled export shipment?",
+    "type": "export_release",
+    "vendor": "Sierra Instruments"
+  },
+  "context": {
+    "action_boundary": "May logistics release the controlled export shipment?",
+    "anomaly_observed": "A broad dual-use warning remains visible, while export license evidence may exactly match the current shipment.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Shipment SHIP-SIE-073 exports ECCN 3A991 sensor array to Chile for end user Andes Labs on 2026-06-28.",
+        "doc_id": "SHIP-SIE-073",
+        "type": "source_record"
+      },
+      {
+        "content": "Dual-use warning WARN-SIE-073 says similar sensor arrays require exact license evidence and should not rely on product family alone.",
+        "doc_id": "WARN-SIE-073",
+        "type": "source_record"
+      },
+      {
+        "content": "Export license LIC-SIE-073 covers ECCN 3A991 sensor array, destination Peru, end user Andes Labs, shipment date 2026-06-28, effective before export.",
+        "doc_id": "LIC-SIE-073",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Controlled export is complete only when export license evidence matches ECCN, destination, end user, shipment date, and license effective date before export.",
+        "doc_id": "STD-SIE-073-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "attempt_budget_policy": {
+    "content_failures_are_not_retried": true,
+    "manual_rerun_requires_new_approval_and_preserved_invalid_trace": true,
+    "max_content_contract_attempts_per_packet": 1,
+    "max_live_run_attempts_per_packet": 1,
+    "transport_retries_per_call": 2,
+    "version": "BLIND_RUNTIME_ATTEMPT_BUDGET_V1_2026_07_03"
+  },
+  "classification": "HOLOVERIFY_BLIND_CANARY_LIVE_RUN_SUMMARY_V0",
+  "created_at_utc": "2026-07-03T02:42:25.989651+00:00",
+  "current_head": "caf80c787c098c9006b3699effece99907827a97",
+  "expected_provider_calls": 50,
+  "failure": "G2_gov_contract_missing:route_verdict,repair_target,blocked_move",
+  "final_verdicts_valid": false,
+  "observed_provider_calls": 14,
+  "packet_index": 1,
+  "packet_limit": 10,
+  "passed_runtime_firewall": false,
+  "posthoc_score_ref": null,
+  "posthoc_scoring_command": "python3 -B docs/benchmark/score_holoverify_blind_120_posthoc_2026_07_03.py --run-dir docs/benchmark/holoverify_blind_120_live_runs_2026_07_03/run_20260703T024113Z",
+  "posthoc_scoring_required_after_trace_freeze": true,
+  "provider_failures": [
+    {
+      "call_number": 14,
+      "elapsed_ms": 10438,
+      "error": "G2_gov_contract_missing:route_verdict,repair_target,blocked_move",
+      "finish_reason": "stop",
+      "input_tokens": 156,
+      "max_output_tokens": 1024,
+      "model": "MiniMax-M2.5-highspeed",
+      "output_tokens": 486,
+      "prompt_sha256": "789f50bdffcb45662311478ae9b059fec0fdb298e53a622eea562e37e85ecfd0",
+      "provider": "minimax",
+      "provider_call_ok": false,
+      "raw_output_ref": "raw_provider_outputs/014_G2.json",
+      "raw_text_sha256": "16e5b5eab40faae045f3a772260cb4b436f024603ba1fa1f5a1be9742a58ce4e",
+      "response_id": "069654876727891046d6625f29a65f9a",
+      "role": "gov",
+      "slot": "G2",
+      "text_sha256": "5d0d10b3ea97601b45ae9e7f2e02f20ca6bde73bb106f46167b0260f4a6dda3b",
+      "total_tokens": 642,
+      "transport_attempt_count": 1,
+      "transport_recovered": false,
+      "transport_retry_failures": []
+    }
+  ],
+  "provider_trace_ref": "TRACE_PROVIDER_CALLS.jsonl",
+  "run_dir": "docs/benchmark/holoverify_blind_120_live_runs_2026_07_03/run_20260703T024113Z",
+  "runtime_manifest": "docs/benchmark/holoverify_blind_120_live_runs_2026_07_03/run_20260703T024113Z/runtime_manifest_subset_i001_n010.json",
+  "runtime_manifest_sha256": "329c6f5ba21519f17b9b3445af01adf6fda45f2af2b03df527f5b27209feaf70",
+  "runtime_result_ref": null,
+  "scoring_map_access_control": {
+    "live_wrapper_has_scoring_map_path": false,
+    "live_wrapper_scoring_split_enforced_by": "tests/test_holoverify_blind_120_live_wrapper.py::test_120_live_wrapper_does_not_keep_scoring_map_path_or_posthoc_scorer",
+    "posthoc_scorer_owns_scoring_map_path": "docs/benchmark/score_holoverify_blind_120_posthoc_2026_07_03.py",
+    "preflight_read_guard_enforced_by": "tests/test_holoverify_blind_120_live_wrapper.py::test_preflight_does_not_read_120_scoring_map_bytes"
+  },
+  "source_runtime_manifest_sha256": "c3a2bbe2ff2b4b4a3d2e4da0112489b3ba19d41147c5eff45cc0f36c5ca940a1",
+  "trace_frozen_before_scoring": true
+}

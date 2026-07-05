@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "AP may execute the requested payment, invoice release, or vendor-master action for CASE-92653D31DA6D.",
+    "allow_rule_assessment": "SRC-92653D31DA6D-CTL confirms duplicate review disposition is current, exact, tied, and matches invoice and vendor. SRC-92653D31DA6D-POL permits execution only when current source records close the exact action boundary. SRC-92653D31DA6D-BND confirms payment release depends on duplicate ledger disposition. All conditions satisfied.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-92653D31DA6D-CTL is the controlling source confirming the duplicate review disposition.",
+    "escalate_rule_assessment": "No narrow source-record defect remains open in the controlling records provided. Duplicate review disposition matches invoice and vendor as required.",
+    "timing_scope_authority_dependency_check": "Current control record matches actor, scope, effective date, and system boundary for the duplicate-looking invoice cleared by credit memo and netting record."
+  },
+  "cited_evidence": [
+    "SRC-92653D31DA6D-CTL",
+    "SRC-92653D31DA6D-BND",
+    "SRC-92653D31DA6D-POL",
+    "SRC-92653D31DA6D-REQ",
+    "SRC-92653D31DA6D-FBK"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "exact-match rule",
+    "current control record",
+    "duplicate review disposition matches invoice and vendor",
+    "duplicate review disposition must match invoice and vendor",
+    "SRC-92653D31DA6D-CTL",
+    "SRC-92653D31DA6D-BND"
+  ],
+  "final_answer": "The source boundary is closed. The controlling control record confirms the duplicate review disposition is current, exact, tied, and matches the invoice and vendor. Under the frozen AP policy, source records close the exact action boundary before execution. No open source-record defect remains in the packet. The action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

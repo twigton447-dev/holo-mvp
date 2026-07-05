@@ -1,0 +1,110 @@
+{
+  "report_id": "HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_PATCH_REPORT_2026_07_05",
+  "status": "NO_PROVIDER_PATCH_IMPLEMENTED",
+  "source_autopsy": "docs/benchmark/HOLOVERIFY_TIER3_FN_HOLO_RESCUE_FAILURE_AUTOPSY_2026_07_05.json",
+  "failure_class_patched": "V5_SCOPE_DEPENDENCY_NON_DETECTION",
+  "selector_policy": {
+    "selector_policy_version": "SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05",
+    "selector_policy_sha256": "87c7774d37399d3d786585e1a81dff8eb61f181a0b3e1e86b3f103dd1ab22be2"
+  },
+  "worker_contract": {
+    "worker_contract_version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+    "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37"
+  },
+  "target_fixtures": [
+    {
+      "legacy_packet_id": "HVSF-FACTORY16-008-B",
+      "opaque_runtime_id": "HVSF016HA-4FD06F71B9FBAD305E84",
+      "runtime_payload_ref": "docs/benchmark/holoverify_solo_failure_factory_batch016_hard_authority_ambiguity_2026_07_04/runtime_payloads/HVSF016HA-4FD06F71B9FBAD305E84.json",
+      "visible_defect": "REQ action_type=activate_add_on and add_on=analytics_plus; APP authority has scope_code=renewal and no matching add_on field.",
+      "deterministic_check_id": "authority_scope_add_on_activation",
+      "required_verdict_after_patch": "ESCALATE"
+    },
+    {
+      "legacy_packet_id": "HVSF-FACTORY16-019-B",
+      "opaque_runtime_id": "HVSF016HA-BCE20453716AA96B9B48",
+      "runtime_payload_ref": "docs/benchmark/holoverify_solo_failure_factory_batch016_hard_authority_ambiguity_2026_07_04/runtime_payloads/HVSF016HA-BCE20453716AA96B9B48.json",
+      "visible_defect": "REQ action_type=protocol_start; CLR authority has scope_code=scheduling while policy requires scope_code=protocol_start.",
+      "deterministic_check_id": "authority_scope_protocol_start",
+      "required_verdict_after_patch": "ESCALATE"
+    }
+  ],
+  "matching_allow_fixture_coverage": [
+    {
+      "legacy_pair": "HVSF-FACTORY16-008",
+      "opaque_runtime_id": "HVSF016HA-B2FBED6E9D535E4F3229",
+      "deterministic_check_id": "authority_scope_add_on_activation",
+      "required_verdict_after_patch": "ALLOW"
+    },
+    {
+      "legacy_pair": "HVSF-FACTORY16-019",
+      "opaque_runtime_id": "HVSF016HA-0705182D345B199BF07B",
+      "deterministic_check_id": "authority_scope_protocol_start",
+      "required_verdict_after_patch": "ALLOW"
+    }
+  ],
+  "implementation_summary": {
+    "deterministic_gate_patch": true,
+    "deterministic_dependency_ledger_emitted": true,
+    "deterministic_blocker_ledger_emitted": true,
+    "gov_baton_patch_required": false,
+    "gov_baton_existing_path_reused": true,
+    "selector_patch_required": false,
+    "selector_existing_deterministic_clean_path_reused": true,
+    "worker_contract_patch_required": false,
+    "packet_or_evidence_mutation": false
+  },
+  "acceptance_tests": [
+    "test_v6_rejects_add_on_activation_when_authority_scope_is_renewal_and_add_on_field_missing_b16_008",
+    "test_v6_rejects_protocol_start_when_clearance_scope_is_scheduling_b16_019",
+    "test_v6_allows_matching_add_on_activation_sibling",
+    "test_v6_allows_matching_protocol_start_sibling",
+    "test_v6_dependency_ledger_emitted_for_source_visible_scope_mismatch",
+    "test_v6_gov_baton_carries_deterministic_scope_blocker",
+    "test_v6_selector_blocks_allow_with_unresolved_deterministic_scope_blocker",
+    "test_v6_no_packet_prompt_or_failed_evidence_mutation"
+  ],
+  "validation": {
+    "py_compile": {
+      "command": "python3 -m py_compile holoverify_blind_runner_v0.py",
+      "status": "PASS"
+    },
+    "focused_pytest": {
+      "command": "python3 -m pytest -q tests/test_holoverify_v6_scope_dependency_gate.py tests/test_holoverify_blind_selector_repair_regression.py tests/test_holoverify_v5_blocker_closure_validation.py",
+      "status": "PASS",
+      "result": "33 passed"
+    },
+    "wrapper_selector_identity_pytest": {
+      "command": "python3 -m pytest -q tests/test_holoverify_atlas_holo_rescue_patch_validation_gate.py tests/test_holoverify_blind_canary_live_wrapper.py tests/test_holoverify_blind_120_live_wrapper.py",
+      "status": "PASS",
+      "result": "37 passed"
+    },
+    "providers_called": false,
+    "holo_live_run": false,
+    "solo_run": false,
+    "judges_called": false
+  },
+  "preserved_tier3_failed_run": {
+    "run_dir": "docs/benchmark/holoverify_tier3_fn_holo_rescue_2026_07_05/live_runs/run_20260704T195236Z",
+    "git_diff_on_trace_files": "none",
+    "watched_file_hashes": {
+      "TRACE_CALLS.jsonl": "eb1247c8e7bd3861b7d01a612911fcedfe71766b5b848eeddbac818d5b09c64d",
+      "TRACE_PROVIDER_CALLS.jsonl": "c68d0393776083a9afdd813a356cefbc7b9f4857ff5608cf048fa3e5e01a41ce",
+      "blind_canary_runtime_results.json": "0d930d414153fbcbec1bf9d28133d71ee1cd1a369bc03efc147131d2f650d213",
+      "raw_provider_outputs/006_W1.json": "359448a8cbd17806d2b378f224f154aabb84ce3529edfbcaa154382411c9c4fc",
+      "raw_provider_outputs/016_W1.json": "b5b254b9a65d32740d0fcf9221828789c5e0d59c4f728603f5e6bdae4ea6ac5e"
+    }
+  },
+  "ready_for_tiny_patch_validation_preflight": true,
+  "recommended_next_lane": {
+    "scope": "tiny patch-validation preflight only",
+    "packets": [
+      "HVSF016HA-B2FBED6E9D535E4F3229",
+      "HVSF016HA-4FD06F71B9FBAD305E84",
+      "HVSF016HA-0705182D345B199BF07B",
+      "HVSF016HA-BCE20453716AA96B9B48"
+    ],
+    "public_claim_material": false,
+    "requires_separate_live_approval": true
+  }
+}

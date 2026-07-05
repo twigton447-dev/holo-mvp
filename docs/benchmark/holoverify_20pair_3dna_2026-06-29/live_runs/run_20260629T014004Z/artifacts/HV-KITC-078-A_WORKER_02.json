@@ -1,0 +1,33 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May quality release the clinical batch?",
+    "allow_rule_assessment": "No exact closed boundary; visible alert DEV-XOR-078 remains open, conflicting with closure CLOSE-XOR-078 per STD-XOR-078-P.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "Deviation alert DEV-XOR-078 remains visible for assay AX-22 criterion Cq<=31, despite CLOSE-XOR-078 documentation.",
+    "escalate_rule_assessment": "Narrow defect remains open: visible alert presence conflicts with closure claim before execution, requiring source record verification.",
+    "timing_scope_authority_dependency_check": "Closure CLOSE-XOR-078 must precede release on 2026-06-28. Visible alert DEV-XOR-078 violates scope and requires resolution."
+  },
+  "cited_evidence": [
+    "BATCH-XOR-078",
+    "DEV-XOR-078",
+    "CLOSE-XOR-078",
+    "STD-XOR-078-P"
+  ],
+  "critical_features_preserved": [
+    "Exact source IDs",
+    "Policy exact-match rule (STD-XOR-078-P)",
+    "Action boundary",
+    "Batch ID X-78",
+    "Visible alert DEV-XOR-078 status",
+    "Closure coverage CLOSE-XOR-078",
+    "Release date 2026-06-28",
+    "ESCALATE verdict for SOURCE_BOUNDARY_OPEN"
+  ],
+  "final_answer": "ESCALATE is required. The source boundary remains open because the deviation alert DEV-XOR-078 is still visible for assay AX-22 Cq<=31. Although CLOSE-XOR-078 documents coverage for batch X-78, assay AX-22, criterion Cq<=31, and release date 2026-06-28, it does not override the visible defect per the exact-match policy in STD-XOR-078-P. The critical term X-78 must be added to the artifact output. Release cannot proceed until alert resolution is confirmed in source records.",
+  "open_blockers": [
+    "Visible alert DEV-XOR-078 remains open, directly contradicting the claim of closure in CLOSE-XOR-078, and requires explicit resolution from source records, not inference.",
+    "The critical term X-78, identified as the batch ID, must be explicitly included in the artifact output as per Gov directive."
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

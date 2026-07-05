@@ -1,0 +1,111 @@
+{
+  "attempt_budget_policy": {
+    "content_failures_are_not_retried": true,
+    "manual_rerun_requires_new_approval_and_preserved_invalid_trace": true,
+    "max_content_contract_attempts_per_packet": 1,
+    "max_live_run_attempts_per_packet": 1,
+    "transport_retries_per_call": 2,
+    "version": "BLIND_RUNTIME_ATTEMPT_BUDGET_V1_2026_07_03"
+  },
+  "classification": "HOLOVERIFY_BLIND_CANARY_LIVE_RUN_SUMMARY_V0",
+  "created_at_utc": "2026-07-05T01:41:51.206056+00:00",
+  "current_head": "6e5c61b92cf7bfe38bc696d82925169f62b78d87",
+  "expected_provider_calls": 20,
+  "failure": "slot_message_mismatch:G1",
+  "final_verdicts_valid": false,
+  "observed_provider_calls": 1,
+  "packet_index": null,
+  "packet_limit": null,
+  "passed_runtime_firewall": false,
+  "posthoc_score_ref": null,
+  "posthoc_scoring_command": "python3 -B docs/benchmark/score_holoverify_v6_scope_dependency_gate_tiny_patch_validation_posthoc_2026_07_05.py --run-dir docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014145Z",
+  "posthoc_scoring_required_after_trace_freeze": true,
+  "provider_failures": [
+    {
+      "call_number": 1,
+      "elapsed_ms": 6078,
+      "error": "{\"attempt\": 3, \"body\": \"\", \"class\": \"transient_network_error\", \"error\": \"<urlopen error [Errno 8] nodename nor servname provided, or not known>\", \"error_type\": \"URLError\", \"model\": \"grok-3-mini\", \"provider\": \"xai\", \"retryable\": true, \"status\": null, \"transport_retry_failures\": [{\"attempt\": 1, \"body\": \"\", \"class\": \"transient_network_error\", \"model\": \"grok-3-mini\", \"provider\": \"xai\", \"status\": null}, {\"attempt\": 2, \"body\": \"\", \"class\": \"transient_network_error\", \"model\": \"grok-3-mini\", \"provider\": \"xai\", \"status\": null}]}",
+      "finish_reason": null,
+      "input_tokens": null,
+      "max_output_tokens": 1024,
+      "model": "grok-3-mini",
+      "output_tokens": null,
+      "prompt_sha256": "ca28591a2ccbf42c9dbf11f8bcd4f57cfbe15812645a65b0a850727bddcc5b3c",
+      "provider": "xai",
+      "provider_call_ok": false,
+      "raw_output_ref": "raw_provider_outputs/001_W1.json",
+      "raw_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_id": null,
+      "role": "worker",
+      "slot": "W1",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "total_tokens": null,
+      "transport_attempt_count": null,
+      "transport_recovered": null,
+      "transport_retry_failures": []
+    }
+  ],
+  "provider_trace_ref": "TRACE_PROVIDER_CALLS.jsonl",
+  "run_dir": "docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014145Z",
+  "runtime_manifest": "docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+  "runtime_manifest_sha256": "11281707dff57b5da7ec5c9766a9bb94611b076a5a5badfe7ecd20d3a0aa0f40",
+  "runtime_result_ref": null,
+  "scoring_map_access_control": {
+    "live_wrapper_has_scoring_map_path": false,
+    "live_wrapper_scoring_split_enforced_by": "manual_no_provider_preflight:v6_scope_dependency_gate_tiny_patch_validation_live_wrapper_does_not_keep_mixed_registration_json_path",
+    "posthoc_scorer_owns_scoring_map_path": "docs/benchmark/score_holoverify_v6_scope_dependency_gate_tiny_patch_validation_posthoc_2026_07_05.py",
+    "preflight_read_guard_enforced_by": "manual_no_provider_preflight:v6_scope_dependency_gate_tiny_patch_validation_live_wrapper_uses_runtime_only_manifest_and_does_not_read_scoring_map"
+  },
+  "selector_policy": {
+    "selector_criteria": [
+      "gate_passed",
+      "parse_valid",
+      "source_ids_valid",
+      "required_sections_present",
+      "contradiction_free",
+      "deterministic_clean",
+      "blocker_resolution_clean",
+      "blocker_resolution_complete",
+      "closure_validation_clean",
+      "all_prior_blockers_source_closed",
+      "invalid_closure_count",
+      "unresolved_blocker_count",
+      "source_boundary_open_with_blocker",
+      "verdict_consensus_count",
+      "final_turn_consensus_repair",
+      "verdict_corroboration_count",
+      "sections_present",
+      "cited_evidence_count",
+      "earliest_turn"
+    ],
+    "selector_policy_decision": "Truth-blind structural selector. Among structurally valid artifacts, explicit blocker resolution is only eligible when local closure validation proves the cited source fields close the exact blocker_type. A later ALLOW cannot silently drop a prior SOURCE_BOUNDARY_OPEN blocker, and it also cannot win by textually naming a blocker_id unless deterministic code confirms the closure. A source-grounded ESCALATE blocker can defeat an ALLOW majority unless a later artifact source-closes it. Deterministic source-derived dependency, authority-scope, and blocker-closure checks can emit blockers and disqualify artifacts that contradict computed source boundaries before worker prose, Gov baton text, or selector consensus can miss them. Concise final answers are warnings, not sole disqualifiers, when the artifact is otherwise complete. Within the same blocker/consensus tier, gate-failed corroboration from otherwise usable artifacts is considered before citation count and earliest-turn tie-breaks.",
+    "selector_policy_sha256": "87c7774d37399d3d786585e1a81dff8eb61f181a0b3e1e86b3f103dd1ab22be2",
+    "selector_policy_version": "SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05"
+  },
+  "source_runtime_manifest_sha256": "11281707dff57b5da7ec5c9766a9bb94611b076a5a5badfe7ecd20d3a0aa0f40",
+  "trace_frozen_before_scoring": true,
+  "worker_contract": {
+    "required_worker_keys": [
+      "worker_role",
+      "verification_verdict",
+      "action_boundary",
+      "binding_class",
+      "cited_evidence",
+      "final_answer",
+      "blocker_type",
+      "blocker_resolution",
+      "structured_blocker_resolution"
+    ],
+    "w3_artifact_first_guard": [
+      "W3 ARTIFACT-FIRST CONTRACT V4.",
+      "Start immediately with worker_role=W3 before any reasoning.",
+      "Never output <think>, hidden reasoning, analysis, or deliberation.",
+      "If the source seam is ambiguous, encode that only in verification_verdict, binding_class, open_blockers, blocker_type, blocker_resolution, structured_blocker_resolution, and final_answer.",
+      "If any prior blocker exists, do not return ALLOW unless blocker_resolution names each blocker_id, structured_blocker_resolution cites source evidence, and the source fields close the blocker_type.",
+      "Do not debate competing interpretations outside the key=value fields.",
+      "Emit exactly the required key=value artifact lines, then stop."
+    ],
+    "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37",
+    "worker_contract_version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+  }
+}

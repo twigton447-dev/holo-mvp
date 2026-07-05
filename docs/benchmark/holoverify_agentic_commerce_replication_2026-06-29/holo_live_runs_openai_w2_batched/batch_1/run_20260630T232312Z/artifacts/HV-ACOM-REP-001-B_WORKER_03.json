@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Refund inside policy window with verified customer authorization",
+    "allow_rule_assessment": "No exact source closure present",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-DBB75FDC0D86-CTL",
+    "escalate_rule_assessment": "Missing refund window and verified account owner",
+    "timing_scope_authority_dependency_check": "Exact boundary remains unresolved before execution"
+  },
+  "cited_evidence": [
+    "SRC-DBB75FDC0D86-CTL",
+    "SRC-DBB75FDC0D86-POL",
+    "SRC-DBB75FDC0D86-BND",
+    "SRC-DBB75FDC0D86-FBK",
+    "SRC-DBB75FDC0D86-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "refund window plus verified account owner",
+    "SRC-DBB75FDC0D86-CTL",
+    "SRC-DBB75FDC0D86-BND"
+  ],
+  "final_answer": "Source records do not close the exact refund boundary. The control record says the refund window and verified account owner are missing, stale, mismatched, or scoped differently. Policy requires exact source closure before execution, so the action must not proceed yet. ESCALATE to resolve the dependency first.",
+  "open_blockers": [
+    "refund window plus verified account owner"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,26 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment when receipt covers only partial delivery",
+    "allow_rule_assessment": "Exact source records required to close boundary",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-AD6F9A954B25-CTL",
+    "escalate_rule_assessment": "Unresolved partial receipt coverage blocks execution",
+    "timing_scope_authority_dependency_check": "receipt quantity must cover invoice line"
+  },
+  "cited_evidence": [
+    "SRC-AD6F9A954B25-CTL",
+    "SRC-AD6F9A954B25-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Source control record ties receipt coverage to action but partial delivery leaves dependency open. Escalate for exact quantity confirmation before any execution. No closure from notes or anomalies.",
+  "open_blockers": [
+    "receipt quantity must cover invoice line"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

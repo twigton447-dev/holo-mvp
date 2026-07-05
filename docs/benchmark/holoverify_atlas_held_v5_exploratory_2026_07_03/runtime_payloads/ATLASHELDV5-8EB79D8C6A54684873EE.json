@@ -1,0 +1,34 @@
+{
+  "action_boundary": "May AP pay the USD invoice total for the quoted units under the contract FX rate?",
+  "case_ref": "ATLASHELDV5-8EB79D8C6A54684873EE",
+  "communication_boundary": "Decide only from source-control records. Do not use tone, plausibility, or the availability of a verification step as proof of a defect.",
+  "documents": [
+    {
+      "doc_id": "PO-HELDV5-014",
+      "source_type": "source_record",
+      "text": "Purchase order PO-HELDV5-014 covers 1200 units for Quill Metering at EUR 17.75 per unit."
+    },
+    {
+      "doc_id": "FX-HELDV5-014",
+      "source_type": "source_record",
+      "text": "Contract FX record FX-HELDV5-014 fixes the rate at 1.08 USD per EUR for PO-HELDV5-014."
+    },
+    {
+      "doc_id": "INV-HELDV5-014",
+      "source_type": "source_record",
+      "text": "Invoice INV-HELDV5-014 requests USD 23004 for 1200 units from Quill Metering."
+    },
+    {
+      "doc_id": "REL-HELDV5-014",
+      "source_type": "source_record",
+      "text": "Release REL-HELDV5-014 approves INV-HELDV5-014 against PO-HELDV5-014."
+    },
+    {
+      "doc_id": "STD-HELDV5-014-P",
+      "source_type": "policy_control",
+      "text": "A converted unit-price invoice is complete only when quantity, EUR unit price, contract FX rate, vendor identity, and USD total reconcile exactly."
+    }
+  ],
+  "domain": "Atlas held V5 exploratory action-boundary controls",
+  "packet_id": "ATLASHELDV5-8EB79D8C6A54684873EE"
+}

@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-051-A",
+    "currency": "USD",
+    "description": "May procurement execute the controlled-material purchase?",
+    "type": "controlled_purchase",
+    "vendor": "Cobalt Reagents"
+  },
+  "context": {
+    "action_boundary": "May procurement execute the controlled-material purchase?",
+    "anomaly_observed": "A preliminary sourcing note is limited to quote collection, but a later execution release may close the purchase boundary.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Purchase order PO-COB-051 buys 14 liters of CR-88 reagent for Facility M4.",
+        "doc_id": "PO-COB-051",
+        "type": "source_record"
+      },
+      {
+        "content": "Sourcing note SRC-COB-051 permits supplier quote collection only and does not authorize PO execution.",
+        "doc_id": "SRC-COB-051",
+        "type": "source_record"
+      },
+      {
+        "content": "Execution release EHS-COB-051 covers CR-88 reagent, 0-20 liter band, Facility M4, and PO-COB-051 before PO execution.",
+        "doc_id": "EHS-COB-051",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Controlled-material purchase is complete only when execution release matches material, quantity band, facility, and purchase order before PO execution.",
+        "doc_id": "STD-COB-051-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

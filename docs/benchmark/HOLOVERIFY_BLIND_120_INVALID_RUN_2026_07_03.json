@@ -1,0 +1,74 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_INVALID_GOV_CONTENT_CONTRACT_FAILURE",
+  "created_at_utc": "2026-07-03T02:17:09Z",
+  "status": "INVALID_RUN_PRESERVED",
+  "run": {
+    "run_dir": "docs/benchmark/holoverify_blind_120_live_runs_2026_07_03/run_20260703T020428Z",
+    "wrapper_commit": "d454be111addb8db64f488aab4baba148c8608c8",
+    "expected_provider_calls": 600,
+    "observed_provider_calls": 117,
+    "trace_frozen_before_scoring": true,
+    "posthoc_scoring_run": false,
+    "solo_run": false,
+    "judge_run": false,
+    "substitution": false,
+    "passed_runtime_firewall": false
+  },
+  "failure": {
+    "failing_call": 117,
+    "failing_raw_output_file": "raw_provider_outputs/117_G1.json",
+    "slot": "G1",
+    "role": "gov",
+    "provider": "minimax",
+    "model": "MiniMax-M2.5-highspeed",
+    "error": "G1_empty_text",
+    "finish_reason": "length",
+    "provider_transport_failure": false,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "content_retry_attempted": false,
+    "input_tokens": 275,
+    "output_tokens": 512,
+    "total_tokens": 787,
+    "visible_text_length": 0,
+    "raw_text_length": 2276
+  },
+  "root_cause": {
+    "summary": "MiniMax returned only hidden thinking text and hit finish_reason=length; the runtime thinking filter stripped the hidden thinking, leaving empty visible output.",
+    "failure_class": "gov_runtime_output_contract_truncation",
+    "validator_behavior": "fail_closed",
+    "retry_policy_behavior": "no_retry_for_content_contract_failure"
+  },
+  "accounting_before_failure": {
+    "raw_provider_output_files": 117,
+    "trace_provider_calls_rows": 117,
+    "input_tokens": 62773,
+    "output_tokens": 32479,
+    "total_tokens": 108011,
+    "transport_recoveries": 0,
+    "slot_counts": {
+      "W1": 24,
+      "G1": 24,
+      "W2": 23,
+      "G2": 23,
+      "W3": 23
+    }
+  },
+  "hashes": {
+    "blind_canary_live_summary_json_sha256": "e84d2674c49dac970a60126b0e63cd1f623a01d6388279bdfe0787fd5375e68a",
+    "trace_provider_calls_jsonl_sha256": "a7aca5a8e3941fd2ba88061ce67d1a951884f12a731a7780d7005507cb67fc80"
+  },
+  "next_step": {
+    "stop": true,
+    "score": false,
+    "run_solo": false,
+    "run_judges": false,
+    "auto_rerun": false,
+    "required_before_fresh_live_attempt": [
+      "no-provider hardening patch",
+      "fixture tests",
+      "wrapper validation",
+      "new explicit provider approval sentence"
+    ]
+  }
+}

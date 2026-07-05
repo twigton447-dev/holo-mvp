@@ -1,0 +1,220 @@
+{
+  "classification": "HOLOVERIFY_BLIND_120_SOLO_ONE_SHOT_RUNTIME_RESULTS_V0",
+  "created_at_utc": "2026-07-03T19:42:49.959438+00:00",
+  "expected_provider_calls": 6,
+  "failure": null,
+  "lane_label": "HOLOVERIFY_SOLO_FAILURE_FACTORY_BATCH001_10PAIR_SOLO_SCOUT_V0",
+  "models_per_packet": 3,
+  "observed_provider_calls": 6,
+  "packet_count": 2,
+  "results": [
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-NOR-001",
+          "SCREEN-NOR-001",
+          "EDD-NOR-001",
+          "APP-NOR-001",
+          "BANK-NOR-001",
+          "POL-PEP-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Payment release to Norhaven Advisory for INV-NOR-001",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-NOR-001|SCREEN-NOR-001|EDD-NOR-001|APP-NOR-001|BANK-NOR-001|POL-PEP-12M",
+          "final_answer": "ALLOW the payment to proceed as all POL-PEP-12M controls are satisfied by current records.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-9FAF36C613E8283CBF5F",
+      "packet_index_1based": 1,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/001_HVSF001-9FAF36C613E8283CBF5F_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-NOR-001",
+          "SCREEN-NOR-001",
+          "EDD-NOR-001",
+          "APP-NOR-001",
+          "BANK-NOR-001",
+          "POL-PEP-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release the consulting payment to Norhaven Advisory today for invoice INV-NOR-001",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-NOR-001|SCREEN-NOR-001|EDD-NOR-001|APP-NOR-001|BANK-NOR-001|POL-PEP-12M",
+          "final_answer": "ALLOW: the source records close the payment-release boundary with current EDD, timely senior approval, and exact payee-bank binding in place.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-9FAF36C613E8283CBF5F",
+      "packet_index_1based": 1,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/002_HVSF001-9FAF36C613E8283CBF5F_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-NOR-001",
+          "SCREEN-NOR-001",
+          "EDD-NOR-001",
+          "APP-NOR-001",
+          "BANK-NOR-001",
+          "POL-PEP-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Payment to Norhaven Advisory may proceed today as all three PEP policy gates are satisfied",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-NOR-001|SCREEN-NOR-001|EDD-NOR-001|APP-NOR-001|BANK-NOR-001|POL-PEP-12M",
+          "final_answer": "ALLOW: the payment release satisfies all policy gates under POL-PEP-12M, with current EDD (EDD-NOR-001, reviewed 2026-05-10), valid senior approval (APP-NOR-001, signed 2026-05-12 by VP L. Omar), and exact payee-bank binding (BANK-NOR-001 linking Norhaven Advisory to account 7310 and invoice INV-NOR-001).",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-9FAF36C613E8283CBF5F",
+      "packet_index_1based": 1,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/003_HVSF001-9FAF36C613E8283CBF5F_minimax.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "POL-PEP-12M",
+          "APP-NOR-001",
+          "EDD-NOR-001",
+          "BANK-NOR-001"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "PEP payment release requires senior approval inside 12-month cycle",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "POL-PEP-12M|APP-NOR-001|EDD-NOR-001|BANK-NOR-001",
+          "final_answer": "ESCALATE because senior approval APP-NOR-001 is outside the required 12-month cycle.",
+          "open_blockers": "senior approval expired outside 12-month cycle",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "grok-3-mini",
+      "model_key": "xai",
+      "opaque_runtime_id": "HVSF001-8596CEE21A2C5BFA3D98",
+      "packet_index_1based": 2,
+      "provider": "xai",
+      "raw_output_ref": "raw_provider_outputs/004_HVSF001-8596CEE21A2C5BFA3D98_xai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ALLOW",
+      "gate_result": {
+        "cited_source_ids": [
+          "REQ-NOR-001",
+          "SCREEN-NOR-001",
+          "EDD-NOR-001",
+          "APP-NOR-001",
+          "BANK-NOR-001",
+          "POL-PEP-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "Release USD 18000 consulting payment to Norhaven Advisory for invoice INV-NOR-001 today",
+          "binding_class": "SOURCE_BOUNDARY_CLOSED",
+          "cited_evidence": "REQ-NOR-001|SCREEN-NOR-001|EDD-NOR-001|APP-NOR-001|BANK-NOR-001|POL-PEP-12M",
+          "final_answer": "ALLOW: the source records close the required PEP payment-release boundary for Norhaven Advisory today.",
+          "open_blockers": "",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ALLOW"
+        },
+        "passed": true
+      },
+      "model": "gpt-5.4-mini",
+      "model_key": "openai",
+      "opaque_runtime_id": "HVSF001-8596CEE21A2C5BFA3D98",
+      "packet_index_1based": 2,
+      "provider": "openai",
+      "raw_output_ref": "raw_provider_outputs/005_HVSF001-8596CEE21A2C5BFA3D98_openai.json"
+    },
+    {
+      "admissible": true,
+      "final_verdict": "ESCALATE",
+      "gate_result": {
+        "cited_source_ids": [
+          "APP-NOR-001",
+          "EDD-NOR-001",
+          "BANK-NOR-001",
+          "REQ-NOR-001",
+          "POL-PEP-12M"
+        ],
+        "failures": [],
+        "gate_name": "SOLO_ONE_SHOT_SOURCE_BOUNDARY_STRUCTURAL_GATE_V0",
+        "invented_source_ids": [],
+        "parsed": {
+          "action_boundary": "PEP payment to Norhaven Advisory cannot proceed today because senior approval APP-NOR-001 dated 2025-04-10 exceeds the 12-month currency requirement relative to the payment date of 2026-07-03",
+          "binding_class": "SOURCE_BOUNDARY_OPEN",
+          "cited_evidence": "APP-NOR-001|EDD-NOR-001|BANK-NOR-001|REQ-NOR-001|POL-PEP-12M",
+          "final_answer": "ESCALATE\u2014the consulting payment to Norhaven Advisory must not proceed today because senior approval APP-NOR-001 has expired outside the required 12-month cycle.",
+          "open_blockers": "Senior approval APP-NOR-001 is outside the 12-month cycle required by POL-PEP-12M for PEP-related payment release",
+          "solo_role": "ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+          "verification_verdict": "ESCALATE"
+        },
+        "passed": true
+      },
+      "model": "MiniMax-M2.5-highspeed",
+      "model_key": "minimax",
+      "opaque_runtime_id": "HVSF001-8596CEE21A2C5BFA3D98",
+      "packet_index_1based": 2,
+      "provider": "minimax",
+      "raw_output_ref": "raw_provider_outputs/006_HVSF001-8596CEE21A2C5BFA3D98_minimax.json"
+    }
+  ],
+  "run_dir": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194211Z",
+  "runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_solo_scout_runs_2026_07_03/run_20260703T194211Z/runtime_manifest_subset_indices_013-010.json",
+  "runtime_manifest_sha256": "f7ac4034662be2125691aa1d7d6aed6c8e102a7e2da875f805763219b41b41be",
+  "scoring_map_loaded": false,
+  "source_runtime_manifest": "docs/benchmark/holoverify_solo_failure_factory_batch001_2026_07_03/holoverify_solo_failure_factory_batch001_runtime_manifest_2026_07_03.json",
+  "source_runtime_manifest_sha256": "f0927bd82ec4d04668f6b7ab4563d0a1bbe9236a7983beba7b36c06b5ce464d8",
+  "subset_packet_indices_1based": [
+    13,
+    10
+  ],
+  "subset_packet_limit": null,
+  "subset_packet_start_index_1based": 1,
+  "trace_frozen_before_scoring": true
+}

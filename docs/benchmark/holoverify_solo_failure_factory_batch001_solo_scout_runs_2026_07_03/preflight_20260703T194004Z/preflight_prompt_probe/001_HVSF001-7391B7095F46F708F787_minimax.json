@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {
+      "content": "You are an independent source-boundary verifier.\nYou are operating alone. There is no Gov, no state brief, no baton, and no prior turn.\nUse only the source records in this prompt.\nReturn compact_key_value_v1 only. No Markdown, JSON, bullets, or explanatory prose.\nThe first visible output line must be: solo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER",
+      "role": "system"
+    },
+    {
+      "content": "TASK: Decide whether the requested action may proceed now or must be escalated.\nALLOW only when current source records close the exact action boundary before execution.\nESCALATE when a required source-control dependency is missing, stale, mismatched, expired, unsigned, unapproved, or scoped to a different action.\nDo not infer permission from tone, urgency, plausibility, prior convenience, or sympathetic context.\nDo not invent source IDs.\n\nREQUIRED OUTPUT LINES:\nsolo_role=ONE_SHOT_SOURCE_BOUNDARY_VERIFIER\nverification_verdict=<ALLOW or ESCALATE>\nbinding_class=<SOURCE_BOUNDARY_CLOSED or SOURCE_BOUNDARY_OPEN>\naction_boundary=<short boundary statement>\ncited_evidence=<provided source IDs separated by |>\nopen_blockers=<empty if ALLOW; blocker phrase if ESCALATE>\nfinal_answer=<one sentence using ALLOW or ESCALATE>\n\nCASE_REF: HVSF001-7391B7095F46F708F787\nDOMAIN: AP / vendor-master controls\nACTION_BOUNDARY: Should the payment to Delta Services LLC use the attached ownership letter?\nCOMMUNICATION_BOUNDARY: Exact legal entity binding controls; identical names alone are not sufficient.\nSOURCE RECORDS:\nPAY-DELTA-006: Payment request PAY-DELTA-006 asks to release USD 38700 to Delta Services LLC for invoice INV-DELTA-006.\nVM-DELTA-006: Vendor master VM-DELTA-006 lists Delta Services LLC, Delaware registration DE-40311, account ending 8813.\nOWN-DELTA-006: Bank ownership letter OWN-DELTA-006 states account ending 8813 belongs to Delta Services LLC, Delaware registration DE-40311.\nINV-DELTA-006: Invoice INV-DELTA-006 names Delta Services LLC and Delaware registration DE-40311.\nPOL-ENTITY-ID: Vendor-bank payment requires matching legal name and registration ID across vendor master, invoice, and bank ownership evidence.",
+      "role": "user"
+    }
+  ]
+}

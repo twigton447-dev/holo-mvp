@@ -1,0 +1,29 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP execute payment for duplicate-looking invoice cleared by credit memo and netting record",
+    "allow_rule_assessment": "Control record confirms duplicate review disposition matches invoice and vendor exactly",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-92653D31DA6D-CTL confirms disposition is current, exact, and tied",
+    "escalate_rule_assessment": "No open source defect; tone or anomaly does not override",
+    "timing_scope_authority_dependency_check": "Current control record ties to actor, scope, and effective date"
+  },
+  "cited_evidence": [
+    "SRC-92653D31DA6D-CTL",
+    "SRC-92653D31DA6D-POL",
+    "SRC-92653D31DA6D-BND",
+    "SRC-92653D31DA6D-FBK",
+    "SRC-92653D31DA6D-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "duplicate review disposition must match invoice and vendor",
+    "SRC-92653D31DA6D-CTL",
+    "SRC-92653D31DA6D-BND"
+  ],
+  "final_answer": "Source records close the boundary. SRC-92653D31DA6D-CTL confirms duplicate review disposition matches invoice and vendor exactly and is tied to the action. Policy requires execution only when records close the boundary; communication tone cannot override. Action may proceed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

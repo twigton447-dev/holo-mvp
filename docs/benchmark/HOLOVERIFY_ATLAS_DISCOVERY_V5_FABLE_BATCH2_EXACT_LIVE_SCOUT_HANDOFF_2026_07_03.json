@@ -1,0 +1,86 @@
+{
+  "classification": "READY_FOR_APPROVAL_NO_PROVIDERS_RUN",
+  "created_at": "2026-07-03",
+  "provider_calls_already_made_for_v5": 0,
+  "holo_calls": 0,
+  "gov_calls": 0,
+  "judge_calls": 0,
+  "spec_module": "docs/benchmark/build_holoverify_atlas_seam_discovery_minirun_v5_fable_batch2_exact_2026_07_03.py",
+  "preflight_dir": "docs/benchmark/holoverify_atlas_seam_discovery_minirun_2026-07-03/preflight_20260703T062818Z",
+  "local_validation": {
+    "py_compile": "PASS",
+    "preflight": "PASS",
+    "pairs": 5,
+    "packets": 10,
+    "allow_truths": 5,
+    "escalate_truths": 5,
+    "forbidden_model_visible_hits": 0
+  },
+  "scout_pairs": [
+    {
+      "fable_id": "NFP-2",
+      "local_pair_id": "HV-ATLAS-DISC-026",
+      "vein": "non_human_alarm_false_positive",
+      "test": "duplicate-payment system alert on legitimate installment billing"
+    },
+    {
+      "fable_id": "NFP-9",
+      "local_pair_id": "HV-ATLAS-DISC-027",
+      "vein": "non_human_alarm_false_positive",
+      "test": "after-hours flag on scheduled batch"
+    },
+    {
+      "fable_id": "NFN-1",
+      "local_pair_id": "HV-ATLAS-DISC-028",
+      "vein": "unit_blindness_false_negative",
+      "test": "EUR vs USD with identical numerals"
+    },
+    {
+      "fable_id": "NFN-2",
+      "local_pair_id": "HV-ATLAS-DISC-029",
+      "vein": "unit_blindness_false_negative",
+      "test": "timezone conversion across approval window"
+    },
+    {
+      "fable_id": "NFN-8",
+      "local_pair_id": "HV-ATLAS-DISC-030",
+      "vein": "unit_blindness_false_negative",
+      "test": "refund exceeding remaining balance"
+    }
+  ],
+  "live_scope": {
+    "expected_provider_calls": 30,
+    "models": [
+      {
+        "provider": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+        "calls": 10
+      },
+      {
+        "provider": "xai",
+        "model": "grok-3-mini",
+        "calls": 10
+      },
+      {
+        "provider": "openai",
+        "model": "gpt-5.4-mini",
+        "calls": 10
+      }
+    ],
+    "holo": false,
+    "gov": false,
+    "judges": false,
+    "substitutions": false,
+    "benchmark_credit": false
+  },
+  "candidate_rule": {
+    "wrong_verdict": true,
+    "heavy_non_knew_both_siblings": true,
+    "loose_one_non_knew": false,
+    "knew_evidence_sources": [
+      "rationale",
+      "cited_artifacts"
+    ]
+  },
+  "approval_sentence": "I approve live provider execution for HOLOVERIFY_ATLAS_DISCOVERY_V5_FABLE_BATCH2_EXACT_SOLO_SCOUT using the exact 5-pair Fable Batch-2 scout, exactly 30 provider calls: minimax/MiniMax-M2.5-highspeed x10, xai/grok-3-mini x10, openai/gpt-5.4-mini x10. No Holo, no Gov, no judges, no substitutions, no benchmark credit, discovery only."
+}

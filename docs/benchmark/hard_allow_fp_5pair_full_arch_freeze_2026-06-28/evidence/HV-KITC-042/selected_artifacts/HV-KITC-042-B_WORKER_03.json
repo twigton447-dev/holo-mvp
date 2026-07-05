@@ -1,0 +1,50 @@
+{
+  "binding_class": "EXECUTION_RELEASE_PENDING",
+  "cited_evidence": [
+    "PO-NOV-042 binds 18 liters NS-55 solvent to Facility R2 purchase",
+    "SRC-NOV-042 explicitly limits scope to supplier quote collection only, not execution",
+    "EHS-NOV-042 states sourcing review complete but purchase execution release remains to be scheduled",
+    "STD-NOV-042-P requires EHS execution release matching chemical, quantity band, facility, and PO before issuance"
+  ],
+  "critical_features_preserved": [
+    "EXECUTION_RELEASE_PENDING binding class preserved per EHS-NOV-042 literal language",
+    "source IDs PO-NOV-042, SRC-NOV-042, EHS-NOV-042, STD-NOV-042-P not substituted or invented",
+    "material NS-55 and quantity 18 liters traced only to PO-NOV-042",
+    "execution-release scope separated from sourcing-note scope per gov directive"
+  ],
+  "execution_release_binding": {
+    "binding_class": "EXECUTION_RELEASE_PENDING",
+    "controlling_source_fact": "EHS-NOV-042 literal text: 'purchase execution release remains to be scheduled'; sourcing review complete does not substitute for execution release closure",
+    "execution_release_id": "EHS-NOV-042",
+    "facility": "Facility R2",
+    "limited_scope_note_id": "SRC-NOV-042",
+    "material": "NS-55 solvent",
+    "purchase_order_id": "PO-NOV-042",
+    "purchase_order_match": "PO-NOV-042 binds NS-55 solvent, 18 liters, Facility R2",
+    "quantity_band": "18 liters"
+  },
+  "final_answer": "Execution release binding is EXECUTION_RELEASE_PENDING per explicit source language in EHS-NOV-042. Policy STD-NOV-042-P requires the execution release to match chemical, quantity band, facility, and purchase order before PO issuance. SRC-NOV-042 is explicitly scoped to supplier quote collection and does not authorize execution. No source record supplies a closed execution release; EHS-NOV-042 confirms execution release remains to be scheduled. Policy boundary not satisfied.",
+  "gate_result": {
+    "artifact_binding": "EXECUTION_RELEASE_PENDING",
+    "artifact_verdict": "ESCALATE",
+    "failures": [],
+    "gate_name": "WORKER_SOURCE_BOUND_GATE",
+    "passed": true,
+    "source_gate_binding": "EXECUTION_RELEASE_PENDING",
+    "source_gate_verdict": "ESCALATE"
+  },
+  "open_blockers": [
+    "EHS-NOV-042 purchase execution release not yet scheduled",
+    "PO issuance cannot proceed until execution release is issued and matched against PO-NOV-042"
+  ],
+  "packet_id": "HV-KITC-042-B",
+  "run_lock": {
+    "lane": "FULL_HOLOVERIFY_ARCH",
+    "model": "MiniMax-M2.5-highspeed",
+    "no_substitutions": true,
+    "worker_role": "FINAL_COMPILER"
+  },
+  "verification_verdict": "ESCALATE",
+  "warning_or_prelim_artifact_handling": "SRC-NOV-042 warning tone correctly read as limited-scope per literal text; does not override EHS-NOV-042 execution-release status",
+  "worker_role": "FINAL_COMPILER"
+}

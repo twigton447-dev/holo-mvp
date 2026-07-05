@@ -1,0 +1,33 @@
+{
+  "blocked_moves": [
+    "AP release of invoice while payment release approval remains open",
+    "treating partial closeout ledger match as sufficient for release",
+    "ignoring visible ERP hold despite closeout ledger presence",
+    "overriding policy STD-RAV-072-P exact match requirement"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "Open dependency: payment release approval must complete before action boundary closes. No other unresolved dependencies. Source binding integrity maintained."
+  ],
+  "final_compiler_allowed": true,
+  "gov_diagnosis": "Worker correctly identified that CLOSE-RAV-072 payment release approval remains open, violating exact match requirement in STD-RAV-072-P. The policy requires complete match including payment release approval before release. The ERP hold HOLD-RAV-072 remains visible. The action boundary 'May AP release the invoice while the ERP hold remains visible?' cannot be answered affirmatively because the closeout ledger does not satisfy all conditions. Worker artifact passed deterministic gate with no failures. Source evidence is unambiguous and internally consistent. Escalation verdict is correct. No repairs required to worker output. Proceed to final compiler for human review routing.",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "exact source boundary match per CLOSE-RAV-072 and STD-RAV-072-P",
+    "visible ERP hold status per HOLD-RAV-072",
+    "payment release approval open status per CLOSE-RAV-072",
+    "invoice-vendor-amount alignment across INV-RAV-072 and CLOSE-RAV-072",
+    "tax review and quality signoff completion per CLOSE-RAV-072"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "N/A",
+    "monotonic_preservation": "All critical features from worker artifact preserved",
+    "objective": "N/A - final compiler stage",
+    "required_repairs": []
+  },
+  "route_verdict": "FINAL_COMPILER",
+  "source_gate_interpretation": "Worker artifact passed deterministic gate with 4 source IDs (CLOSE-RAV-072, HOLD-RAV-072, INV-RAV-072, STD-RAV-072-P) and 3 critical features preserved (exact source boundary match, visible ERP hold, payment approval status). The binding class SOURCE_BOUNDARY_OPEN is correctly determined: CLOSE-RAV-072 explicitly states payment release approval remains open, directly violating STD-RAV-072-P exact match requirement which mandates completed payment release approval before release. No gate failures exist. Worker output is accurate, complete, and consistent with source evidence. Escalation is correct.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

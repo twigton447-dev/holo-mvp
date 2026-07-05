@@ -1,0 +1,52 @@
+{
+  "allowed_next_live_step": {
+    "description": "same-six mechanical selector patch validation rerun only",
+    "expected_provider_calls": 60,
+    "judge_calls": 0,
+    "public_claims": false,
+    "scoring_map_before_trace_freeze": false,
+    "solo_calls": 0,
+    "substitutions": false
+  },
+  "approval_sentence": "I approve live provider execution for HOLOVERIFY_ATLAS_HOLO_RESCUE_6PAIR_RUNTIME_FIREWALL_V0 using freeze root d4e130d4598963b55e7cc6b708ff6b850a7e14df1a4b2d9bc2b24c3f08fbb7da, runtime manifest 0cd8ab98da5c6a4089279922cf644d3cbcb0820555be65d14f88b68b99f453f7, opaque packet indices 1-12 only, and exactly 60 provider calls: W1 xai/grok-3-mini x12, G1 minimax/MiniMax-M2.5-highspeed x12, W2 openai/gpt-5.4-mini x12, G2 minimax/MiniMax-M2.5-highspeed x12, W3 minimax/MiniMax-M2.5-highspeed x12. Selector policy SELECTOR_V2_CONSENSUS_REPAIR_2026_07_03 hash 32663f8cd92298468ce3648ec57d9491f76ecf9a9ecb526eaf4bb0c8275118f6. Worker contract WORKER_CONTRACT_V2_ARTIFACT_FIRST_2026_07_03 hash d5fdea3133f2bcdea0a9c16f1261081a8fe5ca8264f2a2f0a7e43d41c69a0320. PATCH VALIDATION ONLY for SELECTOR_V2_CONSENSUS_REPAIR_2026_07_03; not fresh benchmark evidence. No judges, no solo, no scoring map before trace freeze, no substitutions, no public claims.",
+  "classification": "HOLOVERIFY_ATLAS_SELECTOR_PATCH_VALIDATION_LOCK",
+  "forbidden_public_claims": [
+    "The patch improved benchmark performance from 11/12 to 12/12.",
+    "The selector fix proves the architecture is now robust.",
+    "Atlas now achieves 12/12 on the rescue benchmark.",
+    "Consensus-first outperforms the prior selector.",
+    "This validates the benchmark story."
+  ],
+  "freeze_root_sha256": "d4e130d4598963b55e7cc6b708ff6b850a7e14df1a4b2d9bc2b24c3f08fbb7da",
+  "fresh_signal_after_patch_validation": "Add 2-3 held V5 pairs under a separate exploratory label after the same-six mechanical validation.",
+  "holo_internal_review_verdict": "PASS_TO_PATCH_VALIDATION",
+  "known_failed_packet": "HV-ATLAS-DISC-033-B",
+  "known_failure_class": "FINAL_SELECTOR_REGRESSION",
+  "known_specific_failure": "FINAL_SELECTOR_CHOSE_WRONG_INTERMEDIATE_ARTIFACT_DESPITE_LATER_WORKER_REPAIR",
+  "patch_validation_falsifier": "If the same-six rerun does not correct the known failed packet without introducing a new selector-caused miss, the selector patch is not accepted.",
+  "provider_calls_to_create_this_lock": 0,
+  "runtime_manifest_sha256": "0cd8ab98da5c6a4089279922cf644d3cbcb0820555be65d14f88b68b99f453f7",
+  "safe_internal_language": "The patched selector was mechanically rerun on the same six-pair rescue set to verify whether it corrected a known selection regression under fixed conditions.",
+  "selector_policy": {
+    "criteria": [
+      "gate_passed",
+      "parse_valid",
+      "source_ids_valid",
+      "required_sections_present",
+      "contradiction_free",
+      "verdict_consensus_count",
+      "final_turn_consensus_repair",
+      "sections_present",
+      "cited_evidence_count",
+      "earliest_turn"
+    ],
+    "decision": "Among structurally valid artifacts, verdict consensus outranks citation volume. A final-turn artifact receives a repair bonus only when it agrees with a prior structurally valid artifact after an intervening contradiction. A lone final-turn dissenter does not override a two-of-three structurally valid consensus.",
+    "sha256": "32663f8cd92298468ce3648ec57d9491f76ecf9a9ecb526eaf4bb0c8275118f6",
+    "version": "SELECTOR_V2_CONSENSUS_REPAIR_2026_07_03"
+  },
+  "worker_contract": {
+    "sha256": "d5fdea3133f2bcdea0a9c16f1261081a8fe5ca8264f2a2f0a7e43d41c69a0320",
+    "version": "WORKER_CONTRACT_V2_ARTIFACT_FIRST_2026_07_03"
+  },
+  "status": "PASS_TO_PATCH_VALIDATION_NO_PROVIDER"
+}

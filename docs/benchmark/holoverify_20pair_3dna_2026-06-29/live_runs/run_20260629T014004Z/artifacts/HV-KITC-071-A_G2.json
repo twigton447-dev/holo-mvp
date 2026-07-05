@@ -1,0 +1,73 @@
+{
+  "artifact_hash": "593fbe807d840e9dd402bbece1123c43ce106af5e644d357c05ef6486e5207cb",
+  "blocked_moves": [
+    "introduction of any source_id not in source_ids_used_so_far",
+    "modification of cited_evidence array from worker_01",
+    "reopening of any of the four closed gates",
+    "relaxation of exact-match policy requirement",
+    "treating ALERT-QUA-071 as execution authority rather than contextual alert",
+    "substitution of any cited_evidence with non-equivalent records",
+    "reclassification of ALLOW verdict to ESCALATE when gates are closed",
+    "introduction of new blockers when deterministic gate passed with zero failures"
+  ],
+  "control_action": "FINAL_COMPILER",
+  "dependency_ledger": [
+    "HV-KITC-071-A_WORKER_01:SOURCE_BOUNDARY_MAPPER\u2192HV-KITC-071-A_WORKER_02:ADVERSARIAL_SCOPE_CHALLENGER dependency resolved. Gate pass confirmed by HOLOVERIFY_WORKER_DETERMINISTIC_GATE. Artifact hash 3c77478f validated.",
+    "HV-KITC-071-A_WORKER_02:ADVERSARIAL_SCOPE_CHALLENGER\u2192FINAL_COMPILER dependency resolved. Gate pass confirmed by HOLOVERIFY_WORKER_DETERMINISTIC_GATE. Artifact hash 0fe736a3 validated."
+  ],
+  "final_compiler_allowed": true,
+  "final_compiler_payload": {
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "cited_evidence": [
+      "CALL-QUA-071",
+      "VM-QUA-071",
+      "BANK-QUA-071",
+      "REL-QUA-071"
+    ],
+    "compile_target": "HV-KITC-071-A_WORKER_02",
+    "controlling_source_fact": "STD-QUA-071-P chain rule satisfied by collective records closing all four gates",
+    "final_answer": "Source chain closes all four gates under STD-QUA-071-P. CALL-QUA-071 supplies pre-change callback, VM-QUA-071 vendor-master approval, BANK-QUA-071 bank ownership, and REL-QUA-071 the matching payment-release authority for vendor Quanta Field Services amount USD 73400 account ending 8821 and release date 2026-06-28. Action boundary is closed; payment release may proceed.",
+    "open_blockers": [],
+    "verification_verdict": "ALLOW"
+  },
+  "gov_diagnosis": "Two consecutive workers with different DNA (xai, google) both produced PASS verdicts with identical SOURCE_BOUNDARY_CLOSED binding. Deterministic gate confirmed zero failures across both artifacts. Source chain satisfies exact-match policy: pre-change callback + vendor-master approval + bank ownership + matching release authority. No unresolved dependencies. ALERT-QUA-071 correctly classified as contextual alert rather than execution authority. All four gates closed. Route FINAL_COMPILER is appropriate when both worker gates pass and no escalation triggers are present.",
+  "gov_dna": "minimax",
+  "gov_mode": "CONTROL_ROUTER",
+  "gov_rationale": "Both worker artifacts passed HOLOVERIFY_WORKER_DETERMINISTIC_GATE with PASS status, zero failures, and SOURCE_BOUNDARY_CLOSED binding. The adversarial challenge by WORKER_02 (google gemini-2.5-flash-lite) confirmed the source boundary without introducing new blockers. No repairs required. No blocked moves violated. All dependencies resolved. Gov routes to FINAL_COMPILER to emit the authoritative release determination.",
+  "gov_signature": "HoloGov-V::minimax::HV-KITC-071-A_G2::ALLOW_FINAL_COMPILER",
+  "must_preserve": [
+    "CALL-QUA-071 pre-change callback as gate-1 evidence",
+    "VM-QUA-071 vendor-master approval as gate-2 evidence",
+    "BANK-QUA-071 bank ownership as gate-3 evidence",
+    "REL-QUA-071 payment-release authority as gate-4 evidence",
+    "exact source IDs and critical terms across all cited records",
+    "action boundary May AP release payment after the vendor bank update",
+    "STD-QUA-071-P exact-match policy requirement",
+    "release date 2026-06-28 as timing scope authority"
+  ],
+  "must_repair": [],
+  "next_worker_baton": {
+    "attack_focus": "All four gates closed under STD-QUA-071-P: CALL-QUA-071 pre-change callback, VM-QUA-071 vendor-master approval, BANK-QUA-071 bank ownership, REL-QUA-071 payment-release authority for vendor Quanta Field Services amount USD 73400 account ending 8821 release date 2026-06-28. Deterministic gate passed with zero failures. Binding class SOURCE_BOUNDARY_CLOSED confirmed by both worker artifacts.",
+    "monotonic_preservation": [
+      "CALL-QUA-071 pre-change callback as gate-1 evidence",
+      "VM-QUA-071 vendor-master approval as gate-2 evidence",
+      "BANK-QUA-071 bank ownership as gate-3 evidence",
+      "REL-QUA-071 payment-release authority as gate-4 evidence",
+      "exact source IDs and critical terms across all cited records",
+      "action boundary May AP release payment after the vendor bank update",
+      "STD-QUA-071-P exact-match policy requirement",
+      "release date 2026-06-28 as timing scope authority"
+    ],
+    "objective": "Continue under Gov source-bound repairs.",
+    "required_repairs": []
+  },
+  "packet_id": "HV-KITC-071-A",
+  "pair_id": "HV-KITC-071",
+  "route_verdict": "FINAL_COMPILER",
+  "run_id": "run_20260629T014004Z",
+  "source_gate_interpretation": "All four gates closed under STD-QUA-071-P: CALL-QUA-071 pre-change callback, VM-QUA-071 vendor-master approval, BANK-QUA-071 bank ownership, REL-QUA-071 payment-release authority for vendor Quanta Field Services amount USD 73400 account ending 8821 release date 2026-06-28. Deterministic gate passed with zero failures. Binding class SOURCE_BOUNDARY_CLOSED confirmed by both worker artifacts.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "timestamp": "2026-06-29T01:42:17Z",
+  "turn_id": "HV-KITC-071-A_G2",
+  "verification_verdict": "ALLOW"
+}

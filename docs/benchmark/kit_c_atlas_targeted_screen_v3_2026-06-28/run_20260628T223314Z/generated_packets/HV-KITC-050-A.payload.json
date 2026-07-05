@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-050-A",
+    "currency": "USD",
+    "description": "May legal send a customer holding notice without full breach notice approval?",
+    "type": "incident_notice",
+    "vendor": "Vesta Cloud"
+  },
+  "context": {
+    "action_boundary": "May legal send a customer holding notice without full breach notice approval?",
+    "anomaly_observed": "The incident has not been finally classified, but the action is a holding notice rather than a breach admission.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Send action SEND-VES-050 issues a customer holding notice for incident INC-7 to cohort enterprise-admins within 24 hours using non-admission wording.",
+        "doc_id": "SEND-VES-050",
+        "type": "source_record"
+      },
+      {
+        "content": "Notice authority AUTH-VES-050 covers incident INC-7, cohort enterprise-admins, holding notice with non-admission wording, and 24-hour send window.",
+        "doc_id": "AUTH-VES-050",
+        "type": "source_record"
+      },
+      {
+        "content": "Breach committee record says final breach admission approval remains pending and is not required for a non-admission holding notice.",
+        "doc_id": "BREACH-VES-050",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Customer holding notice is complete when notice authority matches incident, customer cohort, non-admission wording, and send window; full breach-notice approval is required only for final breach admission.",
+        "doc_id": "STD-VES-050-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "allow_rule_assessment": "Monitor-only no-block permits release only on exact match of legal name, country, tax ID, account, and disposition per STD-TES-074-P.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "PAY-TES-074 specifies account ending 7205; CLR-TES-074 specifies account ending 7025 only. No source confirms CLR-TES-074 extends to account 7205. FLAG-TES-074 remains visible with no tax ID or account disposition, and no authoritative source supersedes it for this transaction.",
+    "escalate_rule_assessment": "Account mismatch (7205 vs 7025) and residual flag visibility block execution without authoritative resolution.",
+    "timing_scope_authority_dependency_check": "Both account mismatch and flag supersession must be resolved by authoritative source confirmation before execution."
+  },
+  "cited_evidence": [
+    "PAY-TES-074",
+    "CLR-TES-074",
+    "FLAG-TES-074",
+    "STD-TES-074-P"
+  ],
+  "critical_features_preserved": [
+    "exact source IDs only (PAY-TES-074, CLR-TES-074, FLAG-TES-074, STD-TES-074-P)",
+    "policy exact-match requirement from STD-TES-074-P preserved",
+    "account number as critical blocker (7205 vs 7025) preserved",
+    "monotonic source binding integrity across all records",
+    "no relaxation of exact-match requirements permitted",
+    "no adjacent source treated as validating mismatched account"
+  ],
+  "final_answer": "ESCALATE. Payment PAY-TES-074 releases to account ending 7205, but clearance CLR-TES-074 specifies account ending 7025 only. Policy STD-TES-074-P requires exact match of legal name, country, tax ID, account, and disposition for monitor-only no-block release. No authoritative source confirms CLR-TES-074 extends to account 7205 or explicitly excludes this payment. Additionally, FLAG-TES-074 remains visible with no disposition recorded for this transaction, and no authoritative source supersedes it for account 7205. Both blockers remain unresolved; the source boundary is open. ALLOW is not permitted until authoritative confirmation resolves the account mismatch and flag supersession.",
+  "open_blockers": [
+    "Account number mismatch: PAY-TES-074 releases to account 7205 but CLR-TES-074 clearance covers only account 7025; no authoritative source confirms CLR-TES-074 extends to account 7205 or explicitly excludes this payment; per STD-TES-074-P exact match is required",
+    "Flag supersession gap: FLAG-TES-074 remains visible with no tax ID or account disposition; CLR-TES-074 disposition is monitor-only no-block but applies to account 7025; no authoritative source confirms FLAG-TES-074 is superseded for this specific transaction and account"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

@@ -1,0 +1,32 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "Exact current control record closes the action boundary for irreversible order release after fraud hold cleared",
+    "allow_rule_assessment": "Exact control record matches actor, scope, date, and system boundary",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-87F480242DA5-CTL",
+    "escalate_rule_assessment": "No open defect remains; warning tone cannot block",
+    "timing_scope_authority_dependency_check": "GATE satisfied by current source-control records"
+  },
+  "cited_evidence": [
+    "SRC-87F480242DA5-CTL",
+    "SRC-87F480242DA5-BND",
+    "SRC-87F480242DA5-POL",
+    "SRC-87F480242DA5-FBK",
+    "SRC-87F480242DA5-REQ"
+  ],
+  "critical_features_preserved": [
+    "exact source boundary",
+    "source-control authority",
+    "no tone-based blocking",
+    "current record precedence",
+    "dependency resolved",
+    "SRC-87F480242DA5-CTL",
+    "fraud hold clearance must predate release",
+    "SRC-87F480242DA5-BND"
+  ],
+  "final_answer": "ALLOW. The exact current control record closes the action boundary for irreversible order release after fraud hold cleared, and the policy says execution may proceed only on current source records. The boundary is closed by source-control evidence, not by tone, urgency, or adjacent records.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

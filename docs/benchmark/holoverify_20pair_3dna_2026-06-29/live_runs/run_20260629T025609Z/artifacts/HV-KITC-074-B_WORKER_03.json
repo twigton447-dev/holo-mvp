@@ -1,0 +1,31 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May AP release payment after a sanctions near-match remains visible?",
+    "allow_rule_assessment": "Monitor-only no-block disposition permits release only on exact match of name, country, tax ID, account, and disposition. PAY-TES-074 (account 7205) does not match CLR-TES-074 (account 7025). FLAG-TES-074 shows visible flag without matching disposition in CLR-TES-074.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "STD-TES-074-P requires exact match of name, country, tax ID, account, and disposition. CLR-TES-074 covers account 7025; PAY-TES-074 releases account 7205. Mismatch blocks release.",
+    "escalate_rule_assessment": "Account number discrepancy and visible flag without clearance disposition leave the source boundary open. CLR-TES-074 scope applicability to PAY-TES-074 remains unresolved.",
+    "timing_scope_authority_dependency_check": "Clearance must precede release; CLR-TES-074 does not cover PAY-TES-074 account 7205. FLAG-TES-074 disposition linkage to CLR-TES-074 is absent. Exact-match precondition per STD-TES-074-P is not satisfied."
+  },
+  "cited_evidence": [
+    "PAY-TES-074",
+    "FLAG-TES-074",
+    "CLR-TES-074",
+    "STD-TES-074-P"
+  ],
+  "critical_features_preserved": [
+    "Account mismatch finding (7205 vs 7025)",
+    "Visible flag blocker FLAG-TES-074",
+    "STD-TES-074-P exact-match rule",
+    "Blocked release authorization",
+    "CLR-TES-074 scope boundary question"
+  ],
+  "final_answer": "Payment release cannot proceed. PAY-TES-074 references account 7205, while CLR-TES-074 covers account 7025 only. This account mismatch violates STD-TES-074-P exact-match requirement for name, country, tax ID, account, and disposition. Additionally, FLAG-TES-074 remains visible without a matching disposition in CLR-TES-074. Source boundary remains open; clarification on CLR-TES-074 applicability and flag disposition is required before any release.",
+  "open_blockers": [
+    "Account number discrepancy (7205 vs 7025) prevents exact match",
+    "FLAG-TES-074 visible flag lacks matching disposition in CLR-TES-074",
+    "CLR-TES-074 applicability to PAY-TES-074 is unresolved"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "FINAL_COMPILER"
+}

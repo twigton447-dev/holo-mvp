@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May the commerce agent execute the requested customer, account, refund, order, or subscription action? Focus: fulfillment exception code expired.",
+    "allow_rule_assessment": "Current control record closes exact boundary; source records match.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-9D05851C32AD-CTL",
+    "escalate_rule_assessment": "No escalation needed; exact current source evidence is present.",
+    "timing_scope_authority_dependency_check": "carrier exception validity date current and exact"
+  },
+  "cited_evidence": [
+    "SRC-9D05851C32AD-CTL",
+    "SRC-9D05851C32AD-POL",
+    "SRC-9D05851C32AD-BND",
+    "SRC-9D05851C32AD-FBK",
+    "SRC-9D05851C32AD-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "carrier exception validity date",
+    "SRC-9D05851C32AD-CTL",
+    "SRC-9D05851C32AD-BND"
+  ],
+  "final_answer": "Proceed. The controlling control record states the carrier exception validity date is current, exact, and tied to the requested action, and the policy allows execution only when the exact source boundary is closed. Communication text and anomaly cues do not override the source-control record, so no blocker remains.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

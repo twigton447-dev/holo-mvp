@@ -1,0 +1,33 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May HR or payroll execute the requested workforce, pay, benefits, or employment-status action? Focus: bonus release for employee absent from eligibility list.",
+    "allow_rule_assessment": "Source records do not authorize bonus release",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-E7E500C00E7C-CTL",
+    "escalate_rule_assessment": "Eligibility list mismatch blocks execution",
+    "timing_scope_authority_dependency_check": "bonus pool, employee eligibility, approver limit unresolved"
+  },
+  "cited_evidence": [
+    "SRC-E7E500C00E7C-CTL",
+    "SRC-E7E500C00E7C-POL",
+    "SRC-E7E500C00E7C-BND",
+    "SRC-E7E500C00E7C-FBK",
+    "SRC-E7E500C00E7C-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule",
+    "bonus pool, employee eligibility, and approver limit match",
+    "SRC-E7E500C00E7C-CTL",
+    "SRC-E7E500C00E7C-BND"
+  ],
+  "final_answer": "Action may not proceed. Source control record SRC-E7E500C00E7C-CTL shows unresolved dependencies on bonus pool, eligibility, and approver limits. Exact boundary remains open. Policy requires closed source records before execution.",
+  "open_blockers": [
+    "eligibility absent",
+    "approver limit mismatch"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

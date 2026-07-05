@@ -1,0 +1,244 @@
+{
+  "checks": [
+    {
+      "details": {
+        "behavior_label": "KNEW",
+        "behavior_notes": [],
+        "expected_for_local_audit_only": "ALLOW",
+        "model": "m1",
+        "packet_id": "FIXTURE-PAIR-A",
+        "pair_id": "FIXTURE-PAIR",
+        "parse_ok": true,
+        "parsed_json": {
+          "cited_artifacts": [
+            "SRC-A"
+          ],
+          "rationale": "The action is supported by VALUE-A.",
+          "verdict": "ALLOW"
+        },
+        "provider": "fixture",
+        "provider_call_ok": true,
+        "raw_text": "{\"verdict\": \"ALLOW\", \"rationale\": \"The action is supported by VALUE-A.\", \"cited_artifacts\": [\"SRC-A\"]}",
+        "verdict": "ALLOW"
+      },
+      "name": "cited_artifacts_contribute_to_knew",
+      "passed": true
+    },
+    {
+      "details": [
+        {
+          "behavior_label": "NOT_KNEW_UNPROVEN",
+          "behavior_notes": [
+            "missing_evidence_term:SRC-A"
+          ],
+          "expected_for_local_audit_only": "ALLOW",
+          "model": "m1",
+          "packet_id": "FIXTURE-PAIR-A",
+          "pair_id": "FIXTURE-PAIR",
+          "parse_ok": true,
+          "parsed_json": {
+            "cited_artifacts": [],
+            "rationale": "VALUE-A",
+            "verdict": "ALLOW"
+          },
+          "provider": "fixture",
+          "provider_call_ok": true,
+          "raw_text": "{\"verdict\": \"ALLOW\", \"rationale\": \"VALUE-A\", \"cited_artifacts\": []}",
+          "verdict": "ALLOW"
+        },
+        {
+          "behavior_label": "KNEW",
+          "behavior_notes": [],
+          "expected_for_local_audit_only": "ALLOW",
+          "model": "m2",
+          "packet_id": "FIXTURE-PAIR-A",
+          "pair_id": "FIXTURE-PAIR",
+          "parse_ok": true,
+          "parsed_json": {
+            "cited_artifacts": [],
+            "rationale": "SRC-A VALUE-A",
+            "verdict": "ALLOW"
+          },
+          "provider": "fixture",
+          "provider_call_ok": true,
+          "raw_text": "{\"verdict\": \"ALLOW\", \"rationale\": \"SRC-A VALUE-A\", \"cited_artifacts\": []}",
+          "verdict": "ALLOW"
+        },
+        {
+          "behavior_label": "KNEW",
+          "behavior_notes": [],
+          "expected_for_local_audit_only": "ESCALATE",
+          "model": "m3",
+          "packet_id": "FIXTURE-PAIR-B",
+          "pair_id": "FIXTURE-PAIR",
+          "parse_ok": true,
+          "parsed_json": {
+            "cited_artifacts": [],
+            "rationale": "SRC-B VALUE-B",
+            "verdict": "ESCALATE"
+          },
+          "provider": "fixture",
+          "provider_call_ok": true,
+          "raw_text": "{\"verdict\": \"ESCALATE\", \"rationale\": \"SRC-B VALUE-B\", \"cited_artifacts\": []}",
+          "verdict": "ESCALATE"
+        }
+      ],
+      "name": "single_non_knew_does_not_candidate",
+      "passed": true
+    },
+    {
+      "details": [
+        {
+          "candidate_reason": "wrong_verdict_signal",
+          "completed_model_count": 3,
+          "failing_models": [
+            {
+              "behavior_label": "NOT_KNEW_WRONG_VERDICT",
+              "behavior_notes": [
+                "expected_ALLOW_got_ESCALATE"
+              ],
+              "expected": "ALLOW",
+              "model": "m1",
+              "packet_id": "FIXTURE-PAIR-A",
+              "provider": "fixture",
+              "verdict": "ESCALATE"
+            }
+          ],
+          "failure_classes": [
+            "FIXTURE_CLASS"
+          ],
+          "heavy_non_knew_count": 0,
+          "pair_id": "FIXTURE-PAIR",
+          "seam": "fixture boundary",
+          "wrong_verdict_count": 1
+        }
+      ],
+      "name": "wrong_verdict_candidates",
+      "passed": true
+    },
+    {
+      "details": [
+        {
+          "candidate_reason": "heavy_non_knew_both_siblings_signal",
+          "completed_model_count": 3,
+          "failing_models": [
+            {
+              "behavior_label": "NOT_KNEW_UNPROVEN",
+              "behavior_notes": [
+                "missing_evidence_term:SRC-A"
+              ],
+              "expected": "ALLOW",
+              "model": "m1",
+              "packet_id": "FIXTURE-PAIR-A",
+              "provider": "fixture",
+              "verdict": "ALLOW"
+            },
+            {
+              "behavior_label": "NOT_KNEW_UNPROVEN",
+              "behavior_notes": [
+                "missing_evidence_term:SRC-A"
+              ],
+              "expected": "ALLOW",
+              "model": "m2",
+              "packet_id": "FIXTURE-PAIR-A",
+              "provider": "fixture",
+              "verdict": "ALLOW"
+            },
+            {
+              "behavior_label": "NOT_KNEW_UNPROVEN",
+              "behavior_notes": [
+                "missing_evidence_term:SRC-B"
+              ],
+              "expected": "ESCALATE",
+              "model": "m3",
+              "packet_id": "FIXTURE-PAIR-B",
+              "provider": "fixture",
+              "verdict": "ESCALATE"
+            }
+          ],
+          "failure_classes": [
+            "FIXTURE_CLASS"
+          ],
+          "heavy_non_knew_count": 3,
+          "pair_id": "FIXTURE-PAIR",
+          "seam": "fixture boundary",
+          "wrong_verdict_count": 0
+        }
+      ],
+      "name": "heavy_non_knew_both_siblings_candidates",
+      "passed": true
+    },
+    {
+      "details": [
+        {
+          "behavior_label": "NOT_KNEW_UNPROVEN",
+          "behavior_notes": [
+            "missing_evidence_term:SRC-A"
+          ],
+          "expected_for_local_audit_only": "ALLOW",
+          "model": "m1",
+          "packet_id": "FIXTURE-PAIR-A",
+          "pair_id": "FIXTURE-PAIR",
+          "parse_ok": true,
+          "parsed_json": {
+            "cited_artifacts": [],
+            "rationale": "VALUE-A",
+            "verdict": "ALLOW"
+          },
+          "provider": "fixture",
+          "provider_call_ok": true,
+          "raw_text": "{\"verdict\": \"ALLOW\", \"rationale\": \"VALUE-A\", \"cited_artifacts\": []}",
+          "verdict": "ALLOW"
+        },
+        {
+          "behavior_label": "NOT_KNEW_UNPROVEN",
+          "behavior_notes": [
+            "missing_evidence_term:SRC-A"
+          ],
+          "expected_for_local_audit_only": "ALLOW",
+          "model": "m2",
+          "packet_id": "FIXTURE-PAIR-A",
+          "pair_id": "FIXTURE-PAIR",
+          "parse_ok": true,
+          "parsed_json": {
+            "cited_artifacts": [],
+            "rationale": "VALUE-A",
+            "verdict": "ALLOW"
+          },
+          "provider": "fixture",
+          "provider_call_ok": true,
+          "raw_text": "{\"verdict\": \"ALLOW\", \"rationale\": \"VALUE-A\", \"cited_artifacts\": []}",
+          "verdict": "ALLOW"
+        },
+        {
+          "behavior_label": "NOT_KNEW_UNPROVEN",
+          "behavior_notes": [
+            "missing_evidence_term:SRC-A"
+          ],
+          "expected_for_local_audit_only": "ALLOW",
+          "model": "m3",
+          "packet_id": "FIXTURE-PAIR-A",
+          "pair_id": "FIXTURE-PAIR",
+          "parse_ok": true,
+          "parsed_json": {
+            "cited_artifacts": [],
+            "rationale": "VALUE-A",
+            "verdict": "ALLOW"
+          },
+          "provider": "fixture",
+          "provider_call_ok": true,
+          "raw_text": "{\"verdict\": \"ALLOW\", \"rationale\": \"VALUE-A\", \"cited_artifacts\": []}",
+          "verdict": "ALLOW"
+        }
+      ],
+      "name": "heavy_non_knew_one_sibling_does_not_candidate",
+      "passed": true
+    }
+  ],
+  "classification": "ATLAS_SCOUT_CANDIDATE_RULE_VALIDATION",
+  "gov_calls": 0,
+  "holo_calls": 0,
+  "judge_calls": 0,
+  "passed": true,
+  "provider_calls": 0
+}

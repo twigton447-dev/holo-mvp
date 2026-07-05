@@ -1,0 +1,30 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations release a routine action when the dependency closure must match the requested object, scope, and release condition?",
+    "allow_rule_assessment": "Dependency closure DEP-EHS-003 exactly matches request REQ-EHS-003 across source object, account, scope, and release condition, with closure timestamp 09:05 before queued release 10:30. All matching standard MATCH-EHS-003 criteria satisfied. Source boundary closed.",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "DEP-EHS-003 dependency closure completed 2026-06-17 09:05 for OBJ-EHS-003, ACCT-EHS-003, scope 003, RC-EHS-003 before ACT-DEP-EHS-003 queued release at 10:30.",
+    "escalate_rule_assessment": "N/A - overblock detected",
+    "timing_scope_authority_dependency_check": "Closure 09:05 before release 10:30 same day. Scope 003, account ACCT-EHS-003, object OBJ-EHS-003, condition RC-EHS-003 all match. Authority chain through ENTITLE-EHS-003 and ROSTER-EHS-003 confirmed."
+  },
+  "cited_evidence": [
+    "DEP-EHS-003",
+    "REQ-EHS-003",
+    "ENTITLE-EHS-003",
+    "MAP-EHS-003",
+    "MATCH-EHS-003",
+    "QUEUE-EHS-003",
+    "ROSTER-EHS-003"
+  ],
+  "critical_features_preserved": [
+    "Exact source object match (OBJ-EHS-003)",
+    "Exact account match (ACCT-EHS-003)",
+    "Exact scope match (EHS production scope 003)",
+    "Exact release condition match (RC-EHS-003)",
+    "Before-release timestamp (09:05 before 10:30)"
+  ],
+  "final_answer": "The exact current source evidence closes the action boundary. Dependency closure DEP-EHS-003 matches request REQ-EHS-003 on all four dimensions (source object, account, scope, release condition) with closure timestamp 09:05 before the queued 10:30 release. Prior worker gate failures cited missing terms that are present in the source records. Overblock repaired. ALLOW granted. Source boundary closed.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

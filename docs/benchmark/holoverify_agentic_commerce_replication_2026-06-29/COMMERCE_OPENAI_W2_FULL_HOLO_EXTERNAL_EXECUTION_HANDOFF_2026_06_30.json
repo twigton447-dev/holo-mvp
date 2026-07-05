@@ -1,0 +1,129 @@
+{
+  "classification": "COMMERCE_OPENAI_W2_FULL_HOLO_EXTERNAL_EXECUTION_HANDOFF",
+  "codex_live_attempt_status": {
+    "benchmark_failure": false,
+    "blocked_before_live_execution": true,
+    "provider_calls_started": 0,
+    "reason": "Codex tenant policy blocks exporting frozen benchmark packet/prompt content to external providers."
+  },
+  "created_date": "2026-06-30",
+  "current_preflight": {
+    "classification": "COMMERCE_OPENAI_W2_LIVE_HOLO_PREFLIGHT",
+    "expected_holo_calls": 200,
+    "expected_judge_calls": 0,
+    "expected_solo_calls": 0,
+    "preflight_root_signature": "a2d1ac9d0cbd91b2f6c4b7b57f023daad031a1ed8580a75cdbe8016fe265c7d1",
+    "providers_called": 0,
+    "result": "COMMERCE_OPENAI_W2_READY_FOR_FULL_HOLO_RUN",
+    "status": "PASS",
+    "w2_model": "openai/gpt-5.4-mini"
+  },
+  "expected_outputs": [
+    "live_summary.md",
+    "live_results.json",
+    "TRACE_CALLS.jsonl",
+    "LOCK_MANIFEST.json",
+    "LOCK_VALIDATION.json",
+    "AP_OPENAI_W2_HOLO_NO_LEAKAGE_AUDIT.md",
+    "AP_OPENAI_W2_HOLO_NO_LEAKAGE_AUDIT.json",
+    "AP_OPENAI_W2_HOLO_READINESS_ASSERTIONS.md",
+    "AP_OPENAI_W2_HOLO_READINESS_ASSERTIONS.json",
+    "prompts/",
+    "artifacts/"
+  ],
+  "fail_closed_on": [
+    "unrecovered_transport_failure",
+    "gov_parse_content_or_truncation_failure",
+    "worker_parse_content_or_truncation_failure",
+    "verdict_failure",
+    "leakage",
+    "packet_drift",
+    "incomplete_trace",
+    "roster_mismatch",
+    "fallback_or_substitution_needed"
+  ],
+  "family": {
+    "family_id": "HV-ACOM-REP-2026-06-29",
+    "family_name": "Agentic Commerce Order-Execution Controls",
+    "packets": 40,
+    "pairs": 20
+  },
+  "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+  "handoff_id": "COMMERCE_OPENAI_W2_FULL_HOLO_EXTERNAL_EXECUTION_HANDOFF_2026_06_30",
+  "lineage": {
+    "ap_final_evidence_commit_at_handoff": "78164d478cc573c85ec0894c3bccf8c367623b5d",
+    "commerce_transport_hardening_in_ancestry": true,
+    "packet_freeze_commit": "de22377be8175d04078ba6c70f1fd35222e9f572",
+    "required_runtime_ancestor_commit": "78164d478cc573c85ec0894c3bccf8c367623b5d"
+  },
+  "pass_rules": {
+    "expected_holo_calls_complete": 200,
+    "final_verdicts_correct": true,
+    "gov_v2_parses_every_gov_turn": true,
+    "judge_calls": 0,
+    "no_leakage": true,
+    "packet_identity_matches_freeze": true,
+    "packets_complete": 40,
+    "pairs_complete": 20,
+    "solo_calls": 0,
+    "unrecovered_provider_failures": 0,
+    "worker_compact_parses_every_worker_turn": true
+  },
+  "prior_commerce_evidence": {
+    "invalid_full_family_run": {
+      "classification": "PROVIDER_TRANSPORT_DNS_FAILURE",
+      "provider_calls": 122,
+      "root_failure": "HV-ACOM-REP-013-A_G1 MiniMax Gov URLError Errno 8 DNS resolution",
+      "run_folder": "docs/benchmark/holoverify_agentic_commerce_replication_2026-06-29/holo_live_runs_openai_w2/run_20260630T032421Z"
+    },
+    "successful_all_six_canary": {
+      "gov_calls": 12,
+      "no_leakage": "PASS",
+      "packet_correct": 6,
+      "provider_calls": 30,
+      "readiness_passed": true,
+      "run_folder": "docs/benchmark/holoverify_agentic_commerce_replication_2026-06-29/holo_canary_openai_w2_all_six_collapse/run_20260630T031643Z",
+      "valid_pairs": 3,
+      "worker_calls": 18
+    }
+  },
+  "provider_roster": {
+    "G1": "minimax/MiniMax-M2.5-highspeed",
+    "G2": "minimax/MiniMax-M2.5-highspeed",
+    "W1": "xai/grok-3-mini",
+    "W2": "openai/gpt-5.4-mini",
+    "W3": "minimax/MiniMax-M2.5-highspeed",
+    "gov_may_select_models": false
+  },
+  "required_env_vars": [
+    "XAI_API_KEY",
+    "OPENAI_API_KEY",
+    "MINIMAX_API_KEY"
+  ],
+  "scope": {
+    "ap_run": false,
+    "expected_gov_calls": 80,
+    "expected_holo_calls": 200,
+    "expected_worker_calls": 120,
+    "it_run": false,
+    "judges": false,
+    "packet_edits_allowed": false,
+    "prompt_edits_allowed": false,
+    "solo": false
+  },
+  "shell_commands": {
+    "live": [
+      "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+      "git merge-base --is-ancestor 78164d478cc573c85ec0894c3bccf8c367623b5d \"$(git rev-parse HEAD)\"",
+      "set -a; source .env; set +a",
+      "python3 -B docs/benchmark/run_commerce_replication_holoverify_3dna_2026_06_29.py --run-holo-openai-w2"
+    ],
+    "preflight": [
+      "cd /Users/taylorwigton/CascadeProjects/holo-mvp-holochat-4dna-foundation-001",
+      "git merge-base --is-ancestor 78164d478cc573c85ec0894c3bccf8c367623b5d \"$(git rev-parse HEAD)\"",
+      "python3 -B -m pytest -q docs/benchmark/test_ap_openai_w2_invalid_run_handling_2026_06_29.py docs/benchmark/test_commerce_w3_worker_failure_hardening_2026_06_29.py",
+      "python3 -B docs/benchmark/run_commerce_replication_holoverify_3dna_2026_06_29.py --preflight-openai-w2"
+    ]
+  },
+  "status": "READY_FOR_AUTHORIZED_LOCAL_SHELL_EXECUTION"
+}

@@ -1,0 +1,43 @@
+{
+  "blocked_moves": [
+    "Treating AUTH-BOR-082 \"current IRB-approved consent C12\" as equivalent to consent-status-class CLOSED without addressing the explicit \"remains pending\" qualifier in the same document",
+    "Using FEAS-BOR-082 planning-only status to override AUTH-BOR-082 source language about pending consent",
+    "Claiming activation authority closes consent-status class when AUTH-BOR-082 says consent C12 remains pending"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "AUTH-BOR-082 is the controlling source for consent-status class and must be cited verbatim: \"consent C12 remains pending\"",
+    "STD-BOR-082-P requires consent-status class in activation authority before enrollment; AUTH-BOR-082 does not close this class",
+    "FEAS-BOR-082 is preliminary and does not resolve the pending consent-status class from AUTH-BOR-082"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "AUTH-BOR-082 as controlling source fact",
+    "ACT-BOR-082 activation record for site B-18, protocol P8.1, activation date 2026-06-28",
+    "FEAS-BOR-082 as preliminary planning artifact only (FP_EXCEPTION_PATH_FREEZE class)",
+    "STD-BOR-082-P policy requirement for consent-status class in activation authority"
+  ],
+  "must_repair": [
+    "Verdict: must be ESCALATE not ALLOW because consent-status class is unresolved (pending) in AUTH-BOR-082",
+    "Binding: must be CONSENT_STATUS_PENDING not CURRENT_IRB_CONSENT_CLOSED because AUTH-BOR-082 explicitly states \"consent C12 remains pending\"",
+    "Missing term: the word \"pending\" from AUTH-BOR-082 source must appear in output to match gate expectations"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Exploit the \"remains pending\" qualifier in AUTH-BOR-082; distinguish between \"current IRB-approved consent exists\" (consent document status) and \"consent-status class is closed\" (operational enrollment status). Worker must preserve AUTH-BOR-082 verbatim language about pending status rather than abstracting away the qualifier.",
+    "monotonic_preservation": [
+      "AUTH-BOR-082 activation authority controls boundary",
+      "ACT-BOR-082 activation record matches site B-18, protocol P8.1, activation date 2026-06-28",
+      "FEAS-BOR-082 is planning-only per policy atlas FP_EXCEPTION_PATH_FREEZE class"
+    ],
+    "objective": "Re-evaluate whether activation authority AUTH-BOR-082 satisfies consent-status-class requirement per STD-BOR-082-P, recognizing that \"current IRB-approved consent C12 remains pending\" means the consent-status class is PENDING not CLOSED.",
+    "required_repairs": [
+      "Replace binding CURRENT_IRB_CONSENT_CLOSED with CONSENT_STATUS_PENDING based on AUTH-BOR-082 \"consent C12 remains pending\" language",
+      "Replace verdict ALLOW with ESCALATE because consent-status class is not closed",
+      "Ensure \"pending\" appears in output as direct citation from AUTH-BOR-082"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate expects ESCALATE and CONSENT_STATUS_PENDING because AUTH-BOR-082 states \"current IRB-approved consent C12 remains pending\" - the worker incorrectly abstracted away the \"pending\" qualifier and overmapped to CLOSED status class. This is a substantive misinterpretation of controlling source language, not a procedural defect. The source_context internal_documents array explicitly confirms AUTH-BOR-082 states consent \"remains pending.\"",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

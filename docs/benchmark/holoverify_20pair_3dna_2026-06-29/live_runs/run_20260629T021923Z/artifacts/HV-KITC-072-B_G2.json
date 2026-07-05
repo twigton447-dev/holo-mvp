@@ -1,0 +1,63 @@
+{
+  "blocked_moves": [
+    "CONTINUE_WORKER with authorization override - policy requires exact match",
+    "Any ALLOW verdict - controlling source fact explicitly violates policy rule",
+    "Treating HOLD-RAV-072 visibility as sufficient without closeout ledger exact-match completion",
+    "Ignoring payment release approval open status as minor discrepancy",
+    "Claiming closeout ledger supersedes ERP hold when payment release approval is incomplete"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "HV-KITC-072-B_STATUS: SOURCE_BOUNDARY_OPEN_BLOCKED",
+    "blocking_condition: Payment release approval remains open in CLOSE-RAV-072",
+    "policy_requirement_violated: STD-RAV-072-P exact-match for payment release approval",
+    "required_resolution: Payment release approval must be completed in closeout ledger before invoice release may proceed",
+    "erp_hold_status: Visible but superseded by closeout ledger deficiency per policy"
+  ],
+  "diagnostic_notes": [
+    "Previous Gov turn (G1) returned verdict None which failed the gate - invalid output format",
+    "Worker artifacts W1 and W2 both correctly identified SOURCE_BOUNDARY_OPEN due to unmatched payment release approval",
+    "CLOSE-RAV-072 explicitly states payment release approval remains open",
+    "STD-RAV-072-P requires exact match including completed payment release approval before release",
+    "The controlling source fact is unambiguous: payment release approval is incomplete in the closeout ledger"
+  ],
+  "dna": "minimax",
+  "final_compiler_allowed": true,
+  "gov_command": "Diagnose previous worker output, preserve correct source bindings, repair gate failures, block invalid moves, and create the next worker baton.",
+  "gov_mode": "CONTROL_ROUTER",
+  "lane": "HOLOVERIFY_20PAIR_3DNA_FULL_ARCH",
+  "model": "minimax/MiniMax-M2.5-highspeed",
+  "must_preserve": [
+    "CLOSE-RAV-072 payment release approval open status",
+    "STD-RAV-072-P exact-match requirement",
+    "SOURCE_BOUNDARY_OPEN binding class",
+    "ESCALATE verification verdict",
+    "blocking_condition: payment release approval remains open",
+    "required_resolution: payment release approval must be completed in closeout ledger"
+  ],
+  "must_repair": [
+    "Previous Gov turn G1 returned invalid verdict None - gate failure repaired by issuing valid control action this turn"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Confirm no alternate source can authorize release when payment release approval remains open in the controlling closeout ledger. Confirm no policy exception applies when exact-match requirement is violated.",
+    "monotonic_preservation": [
+      "CLOSE-RAV-072 states payment release approval remains open",
+      "STD-RAV-072-P requires exact match including payment release approval",
+      "HOLD-RAV-072 remains visible",
+      "No authority exists to override exact-match requirement",
+      "ESCALATE verdict is correct"
+    ],
+    "objective": "Finalize escalation record with precise blocking condition and required resolution. No further worker turns needed. Compile final record for source-boundary open blocker.",
+    "required_repairs": []
+  },
+  "packet_id": "HV-KITC-072-B",
+  "pair_id": "HV-KITC-072",
+  "rationale": "Both worker artifacts correctly identified the blocking condition: CLOSE-RAV-072 shows payment release approval remains open, violating STD-RAV-072-P exact-match requirement. The previous Gov turn failed by returning invalid verdict None. Current worker output passes deterministic gate. No source boundary exists for ALLOW. ESCALATE with FINAL_COMPILER route is the correct control action. No additional worker turns required as the blocking condition is unambiguous in the source documents.",
+  "role": "gov",
+  "route_verdict": "FINAL_COMPILER",
+  "run_id": "run_20260629T021923Z",
+  "source_gate_interpretation": "SOURCE_BOUNDARY_OPEN_BLOCKED - Exact match requirement violated: payment release approval incomplete in CLOSE-RAV-072. Policy requires completed payment release approval before release. Visible ERP hold remains. No authority chain exists to override the exact-match requirement.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "turn_id": "HV-KITC-072-B_G2",
+  "verification_verdict": "ESCALATE"
+}

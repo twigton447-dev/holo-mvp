@@ -1,0 +1,47 @@
+{
+  "blocked_moves": [
+    "Inventory movement to sellable_inventory for OVX-9 lot L-882 is blocked pending hold-class reconciliation",
+    "No synthetic formal hold-release document may be invented",
+    "ALERT-OVX-HOLD-021 alone does not authorize movement"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "INV-OVX-2026-7021 (action.business_ref) must trace to INV-OVX-021 (inventory_release_request document)",
+    "INV-OVX-021 references thermal-transport must connect to ALERT-OVX-HOLD-021 thermal-transport hold class",
+    "DISP-OVX-021 row QD-74 packaging-inspection must be verified as controlling disposition for OVX-9 lot L-882",
+    "STD-OVX-021-P policy boundary requires exact hold-class matching across product, lot, hold class, release path"
+  ],
+  "final_compiler_allowed": false,
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ALERT-OVX-HOLD-021 thermal-transport hold class",
+    "DISP-OVX-021 packaging-inspection hold class",
+    "INV-OVX-021 references thermal-transport for OVX-9 lot L-882",
+    "Product OVX-9, lot L-882, release path sellable_inventory consistency",
+    "HOLD_CLASS_MISMATCH binding is source-verified and genuine"
+  ],
+  "must_repair": [
+    "Map business reference INV-OVX-2026-7021 to source document INV-OVX-021 explicitly in evidence chain",
+    "Close gate failure knew_term_missing:INV-OVX-2026-7021 by establishing trace from action.business_ref to inventory_release document"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Verify that INV-OVX-2026-7021 (business_ref) = INV-OVX-021 (source document) and confirm the hold-class mismatch blocks close-out using source-bound evidence only; do not treat alert artifacts as resolution and do not invent formal hold-release records",
+    "monotonic_preservation": [
+      "ALERT-OVX-HOLD-021 hold class = thermal-transport",
+      "DISP-OVX-021 hold class = packaging-inspection",
+      "INV-OVX-021 hold class = thermal-transport",
+      "Product OVX-9, lot L-882, release path sellable_inventory",
+      "HOLD_CLASS_MISMATCH binding is genuine and source-verified"
+    ],
+    "objective": "Trace INV-OVX-2026-7021 to INV-OVX-021 establishing the business-reference-to-document chain, then verify the HOLD_CLASS_MISMATCH binding using INV-OVX-021 as the canonical inventory-release source while preserving the thermal-transport vs packaging-inspection discrepancy as a source-verified blocker",
+    "required_repairs": [
+      "Explicitly map action.business_ref INV-OVX-2026-7021 to source document INV-OVX-021 in cited evidence",
+      "Confirm INV-OVX-021 hold class = thermal-transport for OVX-9 lot L-882",
+      "Verify DISP-OVX-021 row QD-74 hold class = packaging-inspection for same product-lot",
+      "Establish that source mismatch blocks close-out without inventing new documents"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "The hold-class mismatch between thermal-transport (INV-OVX-021, ALERT-OVX-HOLD-021) and packaging-inspection (DISP-OVX-021) is a verified source discrepancy. The gate failure is procedural: the worker did not explicitly trace the action business_ref INV-OVX-2026-7021 to the source document INV-OVX-021. The mismatch itself is real and blocks close-out; repair is required to satisfy gate traceability, not to resolve the factual discrepancy.",
+  "surface": "HOLOVERIFY_FULL_ARCH"
+}

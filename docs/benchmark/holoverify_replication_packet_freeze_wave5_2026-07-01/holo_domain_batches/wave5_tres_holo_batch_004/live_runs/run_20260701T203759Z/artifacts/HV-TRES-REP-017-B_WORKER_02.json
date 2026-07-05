@@ -1,0 +1,27 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "May treasury execute the funds movement or cash-management action now? Focus: settlement account override.",
+    "allow_rule_assessment": "No source record closes the exact boundary.",
+    "binding_class": "SOURCE_BOUNDARY_OPEN",
+    "controlling_source_fact": "SRC-E0C520730887-CTL",
+    "escalate_rule_assessment": "Missing current authority match blocks execution now.",
+    "timing_scope_authority_dependency_check": "current settlement instruction and counterparty authority match remains open."
+  },
+  "cited_evidence": [
+    "SRC-E0C520730887-CTL",
+    "SRC-E0C520730887-BND",
+    "SRC-E0C520730887-POL"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match rule"
+  ],
+  "final_answer": "Action may not proceed. The control record does not close the required dependency for settlement account override, and the policy requires current source records to close the exact boundary before treasury execution. The unresolved current settlement instruction and counterparty authority match remains a blocking gap.",
+  "open_blockers": [
+    "current settlement instruction and counterparty authority match"
+  ],
+  "verification_verdict": "ESCALATE",
+  "worker_role": "ADVERSARIAL_SCOPE_CHALLENGER"
+}

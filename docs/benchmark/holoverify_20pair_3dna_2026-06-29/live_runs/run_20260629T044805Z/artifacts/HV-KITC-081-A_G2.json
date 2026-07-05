@@ -1,0 +1,37 @@
+{
+  "block": "Avoid escalation based on warning tone, stale/adjacent records, missing phrasing, or hypothetical risk when current source evidence conclusively closes the action boundary.",
+  "blocked_moves": [
+    "Do not escalate from warning tone, stale/adjacent records, missing phrasing, or plausible risk when exact current source evidence closes the boundary."
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dep": "",
+  "dependency_ledger": [],
+  "final": false,
+  "final_compiler_allowed": false,
+  "focus": "overblock",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "ESCALATE"
+  ],
+  "must_repair": [
+    "Potential overblock: re-check whether exact current source evidence closes the action boundary; if closed, return ALLOW with SOURCE_BOUNDARY_CLOSED."
+  ],
+  "next_worker_baton": {
+    "attack_focus": "overblock",
+    "monotonic_preservation": [
+      "ESCALATE"
+    ],
+    "objective": "Repair failed deterministic gate before final selection.",
+    "required_repairs": [
+      "Potential overblock: re-check whether exact current source evidence closes the action boundary; if closed, return ALLOW with SOURCE_BOUNDARY_CLOSED."
+    ]
+  },
+  "objective": "repair",
+  "preserve": "ESCALATE",
+  "repair": "Re-evaluate action boundary: verify if exact current source evidence definitively closes the boundary; if closed, issue ALLOW with SOURCE_BOUNDARY_CLOSED rather than escalating.",
+  "route": "CONTINUE_WORKER",
+  "route_verdict": "CONTINUE_WORKER",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verdict": "ALLOW",
+  "verification_verdict": "ALLOW"
+}

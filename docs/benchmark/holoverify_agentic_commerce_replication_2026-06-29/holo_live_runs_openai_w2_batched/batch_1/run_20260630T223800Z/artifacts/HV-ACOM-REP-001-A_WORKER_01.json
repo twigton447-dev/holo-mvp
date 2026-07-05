@@ -1,0 +1,30 @@
+{
+  "_worker_output_format": "compact_key_value_v1",
+  "boundary_binding": {
+    "action_boundary": "refund inside policy window with verified customer authorization",
+    "allow_rule_assessment": "Control record closes exact boundary match",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "SRC-9D3A5FAE2021-CTL",
+    "escalate_rule_assessment": "ESCALATE is required when exact current source evidence leaves the packet action boundary open.",
+    "timing_scope_authority_dependency_check": "refund window plus verified account owner closed"
+  },
+  "cited_evidence": [
+    "SRC-9D3A5FAE2021-CTL",
+    "SRC-9D3A5FAE2021-POL",
+    "SRC-9D3A5FAE2021-BND",
+    "SRC-9D3A5FAE2021-FBK",
+    "SRC-9D3A5FAE2021-REQ"
+  ],
+  "critical_features_preserved": [
+    "source IDs",
+    "action boundary",
+    "policy exact-match",
+    "refund window plus verified account owner",
+    "SRC-9D3A5FAE2021-CTL",
+    "SRC-9D3A5FAE2021-BND"
+  ],
+  "final_answer": "SRC-9D3A5FAE2021-CTL confirms refund window and verified owner match the exact action. Policy requires only source closure for execution. Boundary is closed; action proceeds without defect.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "SOURCE_BOUNDARY_MAPPER"
+}

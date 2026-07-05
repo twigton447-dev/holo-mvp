@@ -1,0 +1,51 @@
+{
+  "blocked_moves": [
+    "Do not finalize ALLOW verdict until critical terms are bound to source doc_ids",
+    "Do not allow closure move until 'Tessa Medical GmbH' appears as a bound source citation",
+    "Do not treat FLAG-TES-074 as blocking\u2014entity details (Tessa Medica LLC, Belarus) do not match CLR-TES-074 (Tessa Medical GmbH, Germany)"
+  ],
+  "control_action": "CONTINUE_REPAIR",
+  "dependency_ledger": [
+    "Source boundary closes when CLR-TES-074 exactly binds PAY-TES-074 fields: Tessa Medical GmbH (name), Germany (country), DE-4481 (tax ID), 7205 (account), monitor-only no-block (disposition). FLAG-TES-074 does not create dependency\u2014entity mismatch prevents blocking."
+  ],
+  "final_compiler_allowed": false,
+  "gov_command": "CONTROL_ROUTER",
+  "gov_mode": "CONTROL_ROUTER",
+  "must_preserve": [
+    "CLR-TES-074 and PAY-TES-074 exact match on Tessa Medical GmbH, Germany, DE-4481, account 7205",
+    "CLR-TES-074 disposition monitor-only no-block before release",
+    "STD-TES-074-P permits release on exact match",
+    "FLAG-TES-074 applies to Tessa Medica LLC Belarus (spelling/country mismatch, does not block)",
+    "source_boundary closed by CLR-TES-074 and STD-TES-074-P together"
+  ],
+  "must_repair": [
+    "Explicitly bind critical term 'Tessa Medical GmbH' as a source fact citing PAY-TES-074 and CLR-TES-074 by doc_id",
+    "Explicitly bind critical term 'DE-4481' citing PAY-TES-074 and CLR-TES-074",
+    "Explicitly bind critical term 'Germany' citing PAY-TES-074 and CLR-TES-074",
+    "Explicitly bind critical term 'account ending 7205' citing PAY-TES-074 and CLR-TES-074",
+    "State that FLAG-TES-074 is non-blocking due to entity mismatch (Tessa Medica LLC Belarus vs Tessa Medical GmbH Germany)",
+    "Close source_boundary only after citing all required field matches explicitly"
+  ],
+  "next_worker_baton": {
+    "attack_focus": "Ensure literal term 'Tessa Medical GmbH' appears as a bound source fact citing PAY-TES-074 and CLR-TES-074. Verify all 5 required fields are explicitly matched: legal name, country, tax ID, account, disposition. Confirm FLAG-TES-074 entity mismatch.",
+    "monotonic_preservation": [
+      "CLR-TES-074 and PAY-TES-074 exact match analysis (already correct)",
+      "Monitor-only no-block disposition authorizes release",
+      "FLAG-TES-074 is non-blocking due to entity details mismatch",
+      "STD-TES-074-P policy permits release on exact match"
+    ],
+    "objective": "Repair source-boundary verification by explicitly binding all critical terms to source document IDs. Re-verify boundary closure with complete artifact bindings.",
+    "required_repairs": [
+      "Bind 'Tessa Medical GmbH' to doc_ids PAY-TES-074 and CLR-TES-074",
+      "Bind 'DE-4481' to doc_ids PAY-TES-074 and CLR-TES-074",
+      "Bind 'Germany' to doc_ids PAY-TES-074 and CLR-TES-074",
+      "Bind 'account ending 7205' to doc_ids PAY-TES-074 and CLR-TES-074",
+      "Confirm FLAG-TES-074 non-match: Tessa Medica LLC Belarus vs Tessa Medical GmbH Germany",
+      "Re-state source_boundary as closed only after all field matches are explicitly bound"
+    ]
+  },
+  "route_verdict": "CONTINUE_WORKER",
+  "source_gate_interpretation": "Gate failed: critical term 'Tessa Medical GmbH' not explicitly bound in worker output. Evidence (PAY-TES-074, CLR-TES-074) contains the term but worker cited it only in summary, not as a bound source fact. CLR-TES-074 exactly matches PAY-TES-074 on legal name, country, tax ID, account, and disposition\u2014analysis is correct but binding is incomplete.",
+  "surface": "HOLOVERIFY_3DNA_FULL_ARCH",
+  "verification_verdict": "ESCALATE"
+}

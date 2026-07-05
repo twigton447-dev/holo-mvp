@@ -1,0 +1,31 @@
+{
+  "classification": "COMMERCE_MINIMAX_WORKER_SMOKE_GATE_PATCH",
+  "status": "PATCH_REGISTERED_NO_BENCHMARK_PROVIDER_CALLS",
+  "created_at": "2026-06-30T00:00:00+00:00",
+  "trigger_smoke": {
+    "provider_call_ok": true,
+    "transport_attempt_count": 1,
+    "finish_reason": "stop",
+    "parse_ok": true,
+    "visible_text_starts_with_worker_role": true,
+    "raw_text_starts_with_worker_role": false,
+    "deterministic_gate_failures": [
+      "word_band_final_answer:11"
+    ]
+  },
+  "root_cause": [
+    "raw_text_start_requirement_too_strict_for_registered_thinking_filter",
+    "fixture_final_answer_below_deterministic_word_band"
+  ],
+  "patch": {
+    "require_visible_text_starts_with_worker_role": true,
+    "require_raw_text_starts_with_worker_role": false,
+    "expand_fixture_final_answer": true,
+    "finish_reason_length_remains_fail_closed": true,
+    "visible_empty_text_remains_fail_closed": true
+  },
+  "benchmark_content_in_smoke": false,
+  "provider_calls_during_patch": 0,
+  "judge_calls_during_patch": 0
+}
+

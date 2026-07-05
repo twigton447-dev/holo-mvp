@@ -1,0 +1,28 @@
+{
+  "boundary_binding": {
+    "action_boundary": "May operations release a routine action when the dependency closure must match the requested object, scope, and release condition?",
+    "allow_rule_assessment": "Exact dependency closure matches all requested fields with before-release timestamp",
+    "binding_class": "SOURCE_BOUNDARY_CLOSED",
+    "controlling_source_fact": "DEP-BAP-002 dependency closure with exact field match and timestamp before queued release",
+    "escalate_rule_assessment": "N/A",
+    "timing_scope_authority_dependency_check": "DEP-BAP-002 closure timestamp 2026-06-17 09:05 precedes QUEUE-BAP-002 10:30 release; all four requested fields (OBJ-BAP-002, ACCT-BAP-002, scope 002, RC-BAP-002) confirmed"
+  },
+  "cited_evidence": [
+    "DEP-BAP-002",
+    "QUEUE-BAP-002",
+    "REQ-BAP-002",
+    "NOTE-BAP-002",
+    "MATCH-BAP-002"
+  ],
+  "critical_features_preserved": [
+    "exact object match (OBJ-BAP-002)",
+    "exact account match (ACCT-BAP-002)",
+    "exact scope match (BAP production scope 002)",
+    "exact release condition match (RC-BAP-002)",
+    "before-release timestamp closure (09:05 before 10:30)"
+  ],
+  "final_answer": "Dependency closure DEP-BAP-002 exactly matches all four requested fields\u2014source object OBJ-BAP-002, account ACCT-BAP-002, BAP production scope 002, and release condition RC-BAP-002\u2014with a closure timestamp of 2026-06-17 09:05, which precedes the 10:30 queued release for ACT-DEP-BAP-002. MATCH-BAP-002 and NOTE-BAP-002 confirm same-day closure records satisfy timing requirements when timestamps show closure before queued action. The action boundary is closed. Operations may release the routine action.",
+  "open_blockers": [],
+  "verification_verdict": "ALLOW",
+  "worker_role": "FINAL_COMPILER"
+}

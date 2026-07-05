@@ -1,0 +1,27 @@
+{
+  "call_number": 27,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "d77137eb7fb0a8aabf6e2db88cce01b35cbf88ab84fbe1097e846fdf2b6c2491",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user says: \"packet_id=BLIND120-0C0BFBB1814CE3C1E731\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThey want a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. They want exactly those three lines. Should we include the packet_id? The instruction says \"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move.\" So we only output those three lines. Do we need to include \"packet_id\"? No. The example shows we must output those three fields. Probably we need to output exactly the three lines as given, no extra whitespace or punctuation.\n\nThus:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut the original includes \"preserve source-grounded reasoning\". That includes a hyphen. That's okay. Also the \"blocked_move=do not invent source IDs\". All lower case? It appears as given. We'll follow exactly.\n\nThus final answer: exactly three lines.\n\nBut we must check for any formatting requirements: \"Do not add headings, explanations, JSON, Markdown, or extra lines.\" So no headings, no extra lines, just those three lines.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "84470d607abeeb656d10a2fdc22031c5c6545134676b2e8b94f02596c288fe52",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 123,
+    "output_tokens": 326,
+    "raw_text": "<think>\nThe user says: \"packet_id=BLIND120-0C0BFBB1814CE3C1E731\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nThey want a plain text record with three key=value lines: route_verdict, repair_target, blocked_move. They want exactly those three lines. Should we include the packet_id? The instruction says \"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move.\" So we only output those three lines. Do we need to include \"packet_id\"? No. The example shows we must output those three fields. Probably we need to output exactly the three lines as given, no extra whitespace or punctuation.\n\nThus:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut the original includes \"preserve source-grounded reasoning\". That includes a hyphen. That's okay. Also the \"blocked_move=do not invent source IDs\". All lower case? It appears as given. We'll follow exactly.\n\nThus final answer: exactly three lines.\n\nBut we must check for any formatting requirements: \"Do not add headings, explanations, JSON, Markdown, or extra lines.\" So no headings, no extra lines, just those three lines.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0696572f85a6597726b235e77c9094e6",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 449,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

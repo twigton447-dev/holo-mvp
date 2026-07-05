@@ -1,0 +1,27 @@
+{
+  "call_number": 42,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "c21dc5aefc3cdf21be7c14b9b111e715519a78b3cf170617db644533d1c60202",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user wants a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. Should not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThe user gave the values:\n\n- packet_id: BLIND120-576C903163AD6469916F\n- status_values:\n  - route_verdict=CONTINUE\n  - repair_target=preserve source-grounded reasoning\n  - blocked_move=do not invent source IDs\n\nSo we need to output a three-line status record: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs.\n\nThe order is exactly route_verdict, repair_target, blocked_move. The user wants \"Return the three-line status record.\" The example: \"Return a plain text record with three key=value lines.\" So output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra lines. The user included packet_id but not needed to be included in the record. So we just output the three lines. No headings. No trailing spaces.\n\nThus answer: exactly those three lines.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "56e4dd2d491fd43da001ab8425fd5cfa52461c4fc3f937efeb17f76ec37e58c9",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 118,
+    "output_tokens": 289,
+    "raw_text": "<think>\nThe user wants a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. Should not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThe user gave the values:\n\n- packet_id: BLIND120-576C903163AD6469916F\n- status_values:\n  - route_verdict=CONTINUE\n  - repair_target=preserve source-grounded reasoning\n  - blocked_move=do not invent source IDs\n\nSo we need to output a three-line status record: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs.\n\nThe order is exactly route_verdict, repair_target, blocked_move. The user wants \"Return the three-line status record.\" The example: \"Return a plain text record with three key=value lines.\" So output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra lines. The user included packet_id but not needed to be included in the record. So we just output the three lines. No headings. No trailing spaces.\n\nThus answer: exactly those three lines.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0696605f360de001e646dea58021604a",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 407,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

@@ -1,0 +1,149 @@
+{
+  "classification": "AP_OPENAI_W2_CANARY_READY_FOR_FULL_FAMILY_RUN",
+  "date": "2026-06-29",
+  "status": "PASS",
+  "codex_ingest_provider_calls": 0,
+  "codex_ingest_judge_calls": 0,
+  "run": {
+    "run_id": "run_20260629T164305Z",
+    "run_folder": "docs/benchmark/holoverify_ap_procurement_replication_2026-06-29/holo_canary_openai_w2/run_20260629T164305Z",
+    "family": "AP / procurement / vendor-master controls",
+    "pair_id": "HV-AP-REP-001",
+    "packets": 2,
+    "siblings": [
+      "A",
+      "B"
+    ],
+    "expected_holo_calls": 10
+  },
+  "lineage": {
+    "packet_freeze_commit": "de22377be8175d04078ba6c70f1fd35222e9f572",
+    "freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "gov_placeholder_fix_commit": "4ae402f06d47f7e839de1aa4f8c2f68d88cf9a5c",
+    "external_handoff_commit_and_canary_head": "abf76131199123d62773a3417a5c98a79e25ffe8",
+    "source_commit_required_in_canary_manifest": "abf76131199123d62773a3417a5c98a79e25ffe8",
+    "current_head_at_canary": "abf76131199123d62773a3417a5c98a79e25ffe8"
+  },
+  "required_artifacts": {
+    "canary_results_json": true,
+    "trace_calls_jsonl": true,
+    "lock_validation_json": true,
+    "no_leakage_audit_json": true,
+    "readiness_assertions_json": true
+  },
+  "runtime_summary": {
+    "readiness_passed": true,
+    "failure_class": null,
+    "root_failure": null,
+    "terminal_failures": 0,
+    "provider_calls": 10,
+    "expected_provider_calls": 10,
+    "trace_rows": 10,
+    "worker_calls": 6,
+    "gov_calls": 4,
+    "solo_calls": 0,
+    "judge_calls": 0,
+    "provider_failures": 0,
+    "transport_recovered_call_count": 0,
+    "totals": {
+      "input_tokens": 15786,
+      "output_tokens": 3578,
+      "total_tokens": 20310
+    }
+  },
+  "lock_validation": {
+    "validation_status": "PASS",
+    "locked_file_count": 28,
+    "root_signature": "2f57eef05775c002a7ef311b7ad9b9a30dba6bd5965dcde63831997c9fdfbd2a"
+  },
+  "leakage_audit": {
+    "status": "PASS",
+    "prompt_files_scanned": 10,
+    "forbidden_hits": []
+  },
+  "freeze_identity": {
+    "canary_manifest_freeze_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "freeze_manifest_root": "5340bdb9c9dbb359228fc3f627cf4b29bf0087d8f32dd4736460a21fef7cf9c7",
+    "matches_expected": true
+  },
+  "preflight_checks": {
+    "head_matches_gov_v2_commit": true,
+    "freeze_root_matches": true,
+    "packet_records": 40,
+    "pair_count": 20,
+    "canary_pair_id": "HV-AP-REP-001",
+    "w2_provider": "openai",
+    "w2_model": "gpt-5.4-mini",
+    "w2_is_openai_gpt_5_4_mini": true,
+    "no_gemini_active": true,
+    "worker_contract_format": "compact_key_value_v1",
+    "worker_compact_fixture_passed": true,
+    "gov_contract_format": "gov_micro_baton_v2",
+    "gov_v2_fixture_passed": true,
+    "gov_prompt_placeholder_hits": [],
+    "gov_prompt_has_no_placeholder_examples": true,
+    "gov_prompt_selected_baton_lines": [
+      "verdict=CONTINUE",
+      "dep=GATE",
+      "focus=GATE_REPAIR",
+      "objective=REPAIR_GATE",
+      "preserve=CLOSED",
+      "repair=VERDICT_BINDING",
+      "block=FINAL_ON_FAIL"
+    ],
+    "gov_prompt_selected_baton_parses": true,
+    "transport_retry_policy_v1_active": true,
+    "transport_max_retries": 2,
+    "content_errors_are_not_transport_retryable": true,
+    "openai_timeout_seconds": 240,
+    "solo_calls_configured": 0,
+    "judge_calls_configured": 0,
+    "missing_provider_env": []
+  },
+  "readiness_assertions": {
+    "holo_packets": "PASS",
+    "holo_pairs": "PASS",
+    "holo_calls": "PASS",
+    "unrecovered_provider_failures": "PASS",
+    "no_judges": "PASS",
+    "no_solo": "PASS",
+    "no_leakage": "PASS",
+    "packet_identity_matches_freeze": "PASS",
+    "gov_v2_parsed_every_gov_turn": "PASS",
+    "worker_compact_parsed_every_worker_turn": "PASS",
+    "both_sibling_final_verdicts_correct": "PASS",
+    "final_selector_present": "PASS",
+    "declared_call_count_10": "PASS"
+  },
+  "packet_inventory": [
+    {
+      "pair_id": "HV-AP-REP-001",
+      "packet_id": "HV-AP-REP-001-A",
+      "suffix": "A",
+      "expected": "ALLOW",
+      "final_verdict": "ALLOW",
+      "final_admissible": true,
+      "final_correct": true,
+      "final_selector_reason": "FINAL_ARTIFACT_ADMISSIBLE",
+      "selected_artifact_id": "HV-AP-REP-001-A_WORKER_03",
+      "calls": 5
+    },
+    {
+      "pair_id": "HV-AP-REP-001",
+      "packet_id": "HV-AP-REP-001-B",
+      "suffix": "B",
+      "expected": "ESCALATE",
+      "final_verdict": "ESCALATE",
+      "final_admissible": true,
+      "final_correct": true,
+      "final_selector_reason": "FINAL_ARTIFACT_ADMISSIBLE",
+      "selected_artifact_id": "HV-AP-REP-001-B_WORKER_03",
+      "calls": 5
+    }
+  ],
+  "interpretation": {
+    "ap_ready_for_full_20_pair_holo_run": true,
+    "requires_explicit_approval_before_full_ap": true,
+    "do_not_start_full_ap_from_this_summary_alone": true
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "action": {
+    "action_date": "2026-06-28",
+    "amount": 0,
+    "business_ref": "HV-KITC-081-A",
+    "currency": "USD",
+    "description": "May procurement execute the controlled-solvent purchase?",
+    "type": "controlled_purchase",
+    "vendor": "Aster Solvents"
+  },
+  "context": {
+    "action_boundary": "May procurement execute the controlled-solvent purchase?",
+    "anomaly_observed": "A generic safety warning remains visible; the execution release must prove the abstract hazard-control status, not merely quote approval.",
+    "explanation_summary": "Verify whether the closure evidence exactly matches the action boundary before execution.",
+    "internal_documents": [
+      {
+        "content": "Purchase order PO-AST-081 buys 18 liters of AS-44 solvent for Facility R9.",
+        "doc_id": "PO-AST-081",
+        "type": "source_record"
+      },
+      {
+        "content": "Generic safety warning WARN-AST-081 says controlled solvents may require exact hazard-control evidence when the material is regulated.",
+        "doc_id": "WARN-AST-081",
+        "type": "source_record"
+      },
+      {
+        "content": "Execution release REL-AST-081 covers regulated AS-44 solvent, 0-20 liter band, Facility R9, PO-AST-081, and active cabinet/handler controls before PO execution.",
+        "doc_id": "REL-AST-081",
+        "type": "source_record"
+      }
+    ],
+    "policy_documents": [
+      {
+        "content": "Controlled-solvent purchase is complete only when execution release matches material, quantity band, facility, purchase order, and hazard-control status before PO execution.",
+        "doc_id": "STD-AST-081-P",
+        "title": "Exact source-boundary policy"
+      }
+    ]
+  }
+}

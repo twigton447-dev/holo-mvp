@@ -409,7 +409,7 @@ The whitepaper makes the broader point: this is the kind of testing required if 
 
 The benchmark evidence is still internally built. It is not a universal claim. It is not third-party validation. It should not be treated as unconstrained production reliability.
 
-But the current public claim must be narrower than the internal evidence package.
+But the current public claim is no longer the old 614-packet framing. The public denominator is the stricter blind-120 lane.
 
 First, the terms:
 
@@ -423,24 +423,24 @@ A **false positive** means Holo says ESCALATE when the action was actually allow
 
 A **false negative** means Holo says ALLOW when the action should have escalated. That is usually the dangerous miss.
 
-The current clean HoloVerify evidence package contains a counted governed-runtime result across the current packet bank. That result remains useful architecture and debugging evidence.
+The current strict public HoloVerify evidence package contains 120 blind action-boundary packets: 60 ALLOW truths and 60 ESCALATE truths. HoloVerify scored 120/120 on that lane, with zero observed false positives and zero observed false negatives.
 
-It is not yet a blind production error-rate claim.
+The older 614-packet result remains historical/internal. It is not combined with blind-120 for public FPR/FNR or Wilson claims.
 
-The reason is simple: the current governed-runtime harness included answer-aware deterministic repair gates. Those gates could use packet truth during runtime repair and final selection. That makes the lane useful for hardening the engine, but not clean enough for public statistical risk bounds.
+The V5/V6 repair runs remain useful architecture and debugging evidence, but they are internal hardening evidence. They do not create public statistical risk bounds.
 
 The current sanctioned claim is:
 
-> HoloVerify has a counted governed-runtime result across the current packet bank. The current runtime included answer-aware deterministic repair gates, so a blind-gate replication is required before reporting the result as a production error-rate bound.
+> On the current strict blind-120 public denominator, HoloVerify produced zero observed false positives and zero observed false negatives across 120 action-boundary packets. The 614-packet result is historical/internal and is not the current public denominator.
 
-The next benchmark step is therefore a blind-gate replication:
+The blind-gate inclusion rule remains:
 
 - runtime packet IDs must be opaque
 - Gov must not see answer truth
 - deterministic gates must not know ALLOW or ESCALATE truth
 - final selection must not use the answer key
 - wrong final answers must count as false positives or false negatives after the trace is frozen
-- statistical bounds return only after that blind lane reports
+- statistical bounds come only from clean blind lanes with trace-bound post-hoc scoring
 
 ### The same models alone
 
@@ -450,19 +450,19 @@ The internal baselines used the same mini-model families that were used inside H
 
 The solo models received frozen packets, but they did not receive Gov, shared state, deterministic gates, artifact memory, best-answer preservation, or a final selector.
 
-That comparison remains useful internal evidence. But because the governed-runtime lane used answer-aware deterministic repair gates, public ratio tables and statistical bounds are paused until the blind-gate lane reports.
+That comparison remains useful internal evidence. The Solo Failure Factory now gives a better way to show the problem: a square matrix of packets and domains, where mostly green solo dots are interrupted by red wrong-verdict dots, amber parse/admissibility failures, and gray quarantines.
 
 The safe lesson is narrower:
 
-> The architecture may improve how the same model families behave at the action boundary, but the production error-rate claim requires blind runtime gates and post-hoc scoring only.
+> Solo agents can be mostly right and still fail at high-stakes action boundaries. HoloVerify is being tested on whether it covers those failures without creating new ones.
 
 ### Internal replication notes
 
 The internal packet bank includes clinical activation, AP / vendor-master payment controls, agentic commerce, IT access, HR, privacy, finance, public-sector controls, treasury, legal, cloud infrastructure, security operations, and operational technology.
 
-Those traces remain preserved as engineering evidence. They are not being erased. The public claim is simply being narrowed until the blind-gate replication proves that prompts, Gov, gates, artifact registry, and final selection cannot see or infer answer truth.
+Those traces remain preserved as engineering evidence. They are not being erased. The public claim is simply separated from the internal hardening ledger.
 
-The next live proof is not a bigger headline. It is a cleaner lane.
+The next proof is not a bigger headline. It is a cleaner, broader lane.
 
 ### HoloBuild and stronger baselines
 

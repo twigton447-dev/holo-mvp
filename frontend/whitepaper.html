@@ -227,31 +227,31 @@
 </section>
 <section class="paper-section" id="09-what-the-benchmark-has-shown-so-far"><h2>09. What the benchmark has shown so far</h2>
 <p>The benchmark evidence is still internally built. It is not a universal claim. It is not third-party validation. It should not be treated as unconstrained production reliability.</p>
-<p>But the current public claim must be narrower than the internal evidence package.</p>
+<p>But the current public claim is no longer the old 614-packet framing. The public denominator is the stricter blind-120 lane.</p>
 <p>First, the terms:</p>
 <p>A <strong>packet</strong> is one frozen test case: a proposed action plus the documents and facts the AI is allowed to use.</p>
 <p>A <strong>sibling pair</strong> is two related packets. One should ALLOW and the other should ESCALATE. The difference is usually narrow, so the system has to read carefully.</p>
 <p>The <strong>clean denominator</strong> is the set of packets we are willing to count publicly. Canaries, drafts, broken runs, and diagnostic tests are kept separate.</p>
 <p>A <strong>false positive</strong> means Holo says ESCALATE when the action was actually allowed. That creates friction.</p>
 <p>A <strong>false negative</strong> means Holo says ALLOW when the action should have escalated. That is usually the dangerous miss.</p>
-<p>The current clean HoloVerify evidence package contains a counted governed-runtime result across the current packet bank. That result remains useful architecture and debugging evidence.</p>
-<p>It is not yet a blind production error-rate claim.</p>
-<p>The reason is simple: the current governed-runtime harness included answer-aware deterministic repair gates. Those gates could use packet truth during runtime repair and final selection. That makes the lane useful for hardening the engine, but not clean enough for public statistical risk bounds.</p>
+<p>The current strict public HoloVerify evidence package contains 120 blind action-boundary packets: 60 ALLOW truths and 60 ESCALATE truths. HoloVerify scored 120/120 on that lane, with zero observed false positives and zero observed false negatives.</p>
+<p>The older 614-packet result remains historical/internal. It is not combined with blind-120 for public FPR/FNR or Wilson claims.</p>
+<p>The V5/V6 repair runs remain useful architecture and debugging evidence, but they are internal hardening evidence. They do not create public statistical risk bounds.</p>
 <p>The current sanctioned claim is:</p>
-<blockquote><p>HoloVerify has a counted governed-runtime result across the current packet bank. The current runtime included answer-aware deterministic repair gates, so a blind-gate replication is required before reporting the result as a production error-rate bound.</p></blockquote>
-<p>The next benchmark step is therefore a blind-gate replication:</p>
-<ul><li>runtime packet IDs must be opaque</li><li>Gov must not see answer truth</li><li>deterministic gates must not know ALLOW or ESCALATE truth</li><li>final selection must not use the answer key</li><li>wrong final answers must count as false positives or false negatives after the trace is frozen</li><li>statistical bounds return only after that blind lane reports</li></ul>
+<blockquote><p>On the current strict blind-120 public denominator, HoloVerify produced zero observed false positives and zero observed false negatives across 120 action-boundary packets. The 614-packet result is historical/internal and is not the current public denominator.</p></blockquote>
+<p>The blind-gate inclusion rule remains:</p>
+<ul><li>runtime packet IDs must be opaque</li><li>Gov must not see answer truth</li><li>deterministic gates must not know ALLOW or ESCALATE truth</li><li>final selection must not use the answer key</li><li>wrong final answers must count as false positives or false negatives after the trace is frozen</li><li>statistical bounds come only from clean blind lanes with trace-bound post-hoc scoring</li></ul>
 <h3>The same models alone</h3>
 <p>The most important comparison is not Holo against a weaker hidden baseline.</p>
 <p>The internal baselines used the same mini-model families that were used inside HoloVerify. The difference was architecture.</p>
 <p>The solo models received frozen packets, but they did not receive Gov, shared state, deterministic gates, artifact memory, best-answer preservation, or a final selector.</p>
-<p>That comparison remains useful internal evidence. But because the governed-runtime lane used answer-aware deterministic repair gates, public ratio tables and statistical bounds are paused until the blind-gate lane reports.</p>
+<p>That comparison remains useful internal evidence. The Solo Failure Factory now gives a better way to show the problem: a square matrix of packets and domains, where mostly green solo dots are interrupted by red wrong-verdict dots, amber parse/admissibility failures, and gray quarantines.</p>
 <p>The safe lesson is narrower:</p>
-<blockquote><p>The architecture may improve how the same model families behave at the action boundary, but the production error-rate claim requires blind runtime gates and post-hoc scoring only.</p></blockquote>
+<blockquote><p>Solo agents can be mostly right and still fail at high-stakes action boundaries. HoloVerify is being tested on whether it covers those failures without creating new ones.</p></blockquote>
 <h3>Internal replication notes</h3>
 <p>The internal packet bank includes clinical activation, AP / vendor-master payment controls, agentic commerce, IT access, HR, privacy, finance, public-sector controls, treasury, legal, cloud infrastructure, security operations, and operational technology.</p>
-<p>Those traces remain preserved as engineering evidence. They are not being erased. The public claim is simply being narrowed until the blind-gate replication proves that prompts, Gov, gates, artifact registry, and final selection cannot see or infer answer truth.</p>
-<p>The next live proof is not a bigger headline. It is a cleaner lane.</p>
+<p>Those traces remain preserved as engineering evidence. They are not being erased. The public claim is simply separated from the internal hardening ledger.</p>
+<p>The next proof is not a bigger headline. It is a cleaner, broader lane.</p>
 <h3>HoloBuild and stronger baselines</h3>
 <p>The HoloBuild lane tests a different question than HoloVerify.</p>
 <p>HoloVerify asks whether an action should execute.</p>

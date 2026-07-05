@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HoloEngine · The Action Boundary Benchmark · Version 7.54 · July 2026</title>
+<title>HoloEngine · The Action Boundary Benchmark · Version 7.55 · July 2026</title>
 <meta name="description" content="Measuring AI reliability before irreversible enterprise action.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,10 +22,10 @@
     <div class="toplinks"><a href="/">Home</a><a href="/whitepaper">Whitepaper</a><a href="/benchmark">Benchmark</a><a href="/payloads/">Payloads</a></div>
   </nav>
   <header class="hero">
-    <div class="eyebrow">HoloVerify · Version 7.54 · July 2026</div>
+    <div class="eyebrow">HoloVerify · Version 7.55 · July 2026</div>
     <h1>The Action Boundary Benchmark</h1>
     <p class="subtitle">Measuring AI reliability before irreversible enterprise action</p>
-    <div class="meta-row"><div class="meta-card"><span>Claim status</span><strong>Under blind-gate review</strong></div><div class="meta-card"><span>Current lane</span><strong>Governed runtime</strong></div><div class="meta-card"><span>Next proof</span><strong>Blind replication</strong></div></div>
+    <div class="meta-row"><div class="meta-card"><span>Public score</span><strong>120/120</strong></div><div class="meta-card"><span>Truth split</span><strong>60 / 60</strong></div><div class="meta-card"><span>Claim boundary</span><strong>Blind-120 only</strong></div></div>
   </header>
   <main class="wrap">
     <section class="paper-section takeaway-panel" id="brief-takeaway">
@@ -33,11 +33,13 @@
       <p class="takeaway-line"><strong>Can a solo AI agent protect the action boundary before irreversible enterprise action?</strong> HoloVerify tests whether the same model families behave differently when run alone versus inside a governed architecture.</p>
       <p class="takeaway-note"><strong>Packets are domain-specific pressure tests.</strong> Each packet asks whether the current evidence really authorizes an action such as releasing payment, granting access, executing an order, activating a clinical workflow, filing a legal action, or changing infrastructure.</p>
       <p class="takeaway-note"><strong>The thesis:</strong> solo agents are brittle at the action boundary because plausible text is not the same as source-grounded permission. HoloVerify tries to make the same model families safer by changing the structure around them: worker rotation, Gov handoffs, deterministic checks, artifact preservation, and final selection.</p>
-      <p class="takeaway-note"><strong>The current claim boundary:</strong> HoloVerify has a counted governed-runtime result across the current packet bank. The current runtime included answer-aware deterministic repair gates, so a blind-gate replication is required before reporting the result as a production error-rate bound.</p>
-      <p class="takeaway-note"><strong>Why this matters:</strong> the architecture may still be valuable, but the public proof has to be stricter than the engineering harness. The next lane must prove that Gov, gates, prompts, and final selection cannot see or infer the answer during runtime.</p>
+      <p class="takeaway-note"><strong>The current public denominator:</strong> HoloVerify has a strict blind-120 public lane: 120/120 packets correct, balanced across 60 ALLOW and 60 ESCALATE packets. The older 614-packet number is historical/internal and is not combined with this denominator.</p>
+      <p class="takeaway-note"><strong>Why this matters:</strong> the public proof now separates clean blind benchmark evidence from internal engineering evidence. V5/V6 repair runs are useful hardening evidence, but they do not create public FPR/FNR claims.</p>
       <p class="takeaway-note"><strong>Models used in the governed-runtime work:</strong> the benchmark lanes used mini-model families including <code>xai/grok-3-mini</code>, <code>openai/gpt-5.4-mini</code>, and <code>minimax/MiniMax-M2.5-highspeed</code>. The next public comparison will state model rosters only after the blind lane passes its no-provider disconfirmation tests.</p>
-      <h3>Blind-Gate Proof Before Public Rates</h3>
-      <p class="takeaway-note">Before any public error-rate or confidence-bound language returns, the blind lane must pass tests for ID leakage, poisoned truth metadata, artifact mutation, selector truth dependence, canary skew, budget parity, and claim-scope linting.</p>
+      <h3>HoloVerify Result</h3>
+      <div class="table-scroll takeaway-table"><table><thead><tr><th>Metric</th><th>Errors</th><th>n</th><th>Exact 95% upper bound</th><th>Wilson 95% upper bound</th></tr></thead><tbody><tr><td>Overall packet error</td><td>0</td><td>120</td><td>2.466%</td><td>3.102%</td></tr><tr><td>False positive rate</td><td>0</td><td>60</td><td>4.870%</td><td>6.015%</td></tr><tr><td>False negative rate</td><td>0</td><td>60</td><td>4.870%</td><td>6.015%</td></tr></tbody></table></div>
+      <div class="mobile-risk-cards"><div class="risk-card"><span>Overall packet error</span><strong>0 / 120</strong><p>Exact 95% upper <b>2.466%</b> · Wilson 95% upper <b>3.102%</b></p></div><div class="risk-card"><span>False positive rate</span><strong>0 / 60</strong><p>Exact 95% upper <b>4.870%</b> · Wilson 95% upper <b>6.015%</b></p></div><div class="risk-card"><span>False negative rate</span><strong>0 / 60</strong><p>Exact 95% upper <b>4.870%</b> · Wilson 95% upper <b>6.015%</b></p></div></div>
+      <p class="takeaway-note">Zero observed errors does not mean zero risk. The 95% upper bound says how high the true error rate could still plausibly be after this many clean trials.</p>
     </section>
     <section class="paper-section" id="what-is-holoengine"><h2>What Is HoloEngine?</h2>
 <p>HoloEngine is an AI control system for high-stakes actions. It is designed for cases where an AI system may approve, release, grant, execute, escalate, or prepare something that affects the real world.</p>
@@ -61,22 +63,27 @@
 <hr/>
 </section>
 <section class="paper-section" id="current-benchmark-ledger"><h2>Current Claim Boundary</h2>
-<p>The current HoloVerify evidence package preserves a counted governed-runtime result across the packet bank. That result is useful architecture and debugging evidence.</p>
-<p>It is not yet a blind production error-rate claim.</p>
-<blockquote><p>HoloVerify has a counted governed-runtime result across the current packet bank. The current runtime included answer-aware deterministic repair gates, so a blind-gate replication is required before reporting the result as a production error-rate bound.</p></blockquote>
-<p>The next benchmark step is a blind-gate replication. Runtime packet IDs must be opaque, Gov must not see answer truth, deterministic gates must not know ALLOW or ESCALATE truth, final selection must not use the answer key, and wrong final answers must count as false positives or false negatives only after the trace is frozen.</p>
+<p>The current public HoloVerify evidence package is the blind-120 lane: 120 packets, 60 ALLOW truths, 60 ESCALATE truths, and 120 correct HoloVerify outcomes.</p>
+<p>The older 614-packet result is historical/internal. It is not combined with blind-120 for public FPR/FNR or Wilson claims.</p>
+<blockquote><p>Public benchmark claims use blind-120 only. Internal patch-validation, selected-lane repair, Solo Failure Factory, and packet-mining evidence remain separate.</p></blockquote>
+<p>This keeps the public denominator clean while preserving the engineering record of failures, patches, and reruns.</p>
 <hr/>
 </section>
-<section class="paper-section" id="blind-gate-disconfirmation"><h2>Blind-Gate Disconfirmation Plan</h2>
-<p>The blind lane must pass a no-provider disconfirmation battery before any live canary is treated as evidence.</p>
+<section class="paper-section" id="blind-gate-disconfirmation"><h2>Blind-Gate Controls</h2>
+<p>The blind lane was created to prevent the benchmark machinery from knowing the answer during runtime. These controls remain part of the inclusion standard for public denominator evidence.</p>
 <div class="table-scroll"><table><thead><tr><th>Test</th><th>What it tries to falsify</th></tr></thead><tbody><tr><td>T1</td><td>No runtime ID leaks answer truth or sibling role.</td></tr><tr><td>T2</td><td>Runtime prompts, gates, batons, and selector inputs are byte-identical when hidden truth metadata is poisoned.</td></tr><tr><td>T3</td><td>The harness does not mutate worker artifacts after provider return.</td></tr><tr><td>T4</td><td>The final selector chooses by declared blind criteria only.</td></tr><tr><td>T5</td><td>The canary sample is reproducible and not selected from the easy stratum.</td></tr><tr><td>T6</td><td>The blind lane is not privileged with extra turns, retries, or token budget versus the lane it replaces.</td></tr><tr><td>T7</td><td>No public rate claim is derived from a canary-sized denominator.</td></tr></tbody></table></div>
-<p>Passing this battery would not prove HoloVerify is reliable. It would only support one narrow sentence: the blind lane, as fixtured, shows no detected truth channel.</p>
+<p>These controls do not prove universal reliability. They keep the counted denominator from being contaminated by answer-key leakage.</p>
 <hr/>
 </section>
 <section class="paper-section" id="what-counts"><h2>What Counts</h2>
-<p>The public denominator is under blind-gate review.</p>
-<p>Internal governed-runtime traces remain preserved, but public rate language is paused until the blind lane proves that runtime prompts, gates, Gov batons, artifact registry, and final selection cannot see or infer packet truth.</p>
-<p>This matters because benchmark credibility depends as much on what is excluded as on what is counted.</p>
+<p>The current public denominator counts the blind-120 lane only.</p>
+<div class="table-scroll"><table><thead><tr><th>Evidence</th><th>Treatment</th></tr></thead><tbody><tr><td>Blind-120 HoloVerify lane</td><td>Current strict public denominator: 120 packets, 60 ALLOW, 60 ESCALATE, 120/120 correct.</td></tr><tr><td>Old 614-era material</td><td>Historical/internal. Not combined with blind-120 for public FPR/FNR.</td></tr><tr><td>Solo Failure Factory</td><td>Internal seam discovery and red-dot source evidence.</td></tr><tr><td>V5/V6 repair lanes</td><td>Internal hardening evidence. Useful, but not public benchmark denominator.</td></tr><tr><td>Packet/key defects</td><td>Quarantined and excluded from clean denominators.</td></tr></tbody></table></div>
+<hr/>
+</section>
+<section class="paper-section" id="solo-red-dot-visual"><h2>Solo Red Dots</h2>
+<p>The benchmark needs to show the failure pattern visually: solo agents are often right, but red errors appear across domains where a small miss can matter.</p>
+<div class="table-scroll"><table><thead><tr><th>Visual element</th><th>Meaning</th></tr></thead><tbody><tr><td>One square</td><td>One packet or sibling pair, grouped by domain.</td></tr><tr><td>Six mini dots</td><td>Three solo models across both siblings.</td></tr><tr><td>Green</td><td>Solo got the packet right in admissible form.</td></tr><tr><td>Red</td><td>Solo made a wrong verdict.</td></tr><tr><td>Amber</td><td>Parse or admissibility failure.</td></tr><tr><td>Gray</td><td>Packet/key quarantine.</td></tr><tr><td>Holo toggle</td><td>Shows whether HoloVerify covered the solo failure without creating a new error.</td></tr></tbody></table></div>
+<p>Current Solo Failure Factory totals: 210 inspected pairs, 104 pairs with at least one solo failure, 79 wrong-verdict solo-failure pairs, 33 FP-overblock pairs, 18 FN-false-allow pairs, and 18 all-three solo-collapse pairs.</p>
 <hr/>
 </section>
 <section class="paper-section" id="evidence-families"><h2>Evidence Families</h2>
@@ -123,9 +130,9 @@
 </section>
 <section class="paper-section" id="what-this-does-not-claim"><h2>What This Does Not Claim</h2>
 <p>This benchmark does not claim:</p>
-<ul><li>HoloVerify has zero real-world risk.</li><li>HoloVerify is universally superior to every model.</li><li>HoloVerify replaces qualified human review in clinical, legal, financial, or defense contexts.</li><li>The tested packets cover every possible enterprise failure mode.</li><li>One-shot solo baselines represent every possible solo prompting method.</li><li>The governed-runtime lane is already a blind production error-rate proof.</li></ul>
+<ul><li>HoloVerify has zero real-world risk.</li><li>HoloVerify is universally superior to every model.</li><li>HoloVerify replaces qualified human review in clinical, legal, financial, or defense contexts.</li><li>The tested packets cover every possible enterprise failure mode.</li><li>One-shot solo baselines represent every possible solo prompting method.</li><li>That V5/V6 internal repair evidence is public benchmark evidence.</li><li>That the old 614-packet result can be combined with blind-120 for public rates.</li></ul>
 <p>The only sanctioned public sentence right now is:</p>
-<blockquote><p>HoloVerify has a counted governed-runtime result across the current packet bank. The current runtime included answer-aware deterministic repair gates, so a blind-gate replication is required before reporting the result as a production error-rate bound.</p></blockquote>
+<blockquote><p>On the current strict blind-120 public denominator, HoloVerify produced zero observed false positives and zero observed false negatives across 120 action-boundary packets. The 614-packet result is historical/internal and is not the current public denominator.</p></blockquote>
 <hr/>
 </section>
 <section class="paper-section" id="next-packet-families"><h2>Next Packet Families</h2>
@@ -150,7 +157,7 @@
 </section>
   </main>
   <footer>
-    <div><strong>HoloEngine</strong><br>Version 7.53 · July 2026</div>
+    <div><strong>HoloEngine</strong><br>Version 7.55 · July 2026</div>
     <div><a href="/whitepaper">holoengine.ai/whitepaper</a><br><a href="/benchmark">holoengine.ai/benchmark</a></div>
   </footer>
   <script>

@@ -2,87 +2,93 @@
 
 | Metric | Errors | n | Exact 95% upper bound | Wilson 95% upper bound |
 | --- | ---: | ---: | ---: | ---: |
-| Overall packet error | 0 | 614 | 0.487% | 0.622% |
-| False positive rate | 0 | 307 | 0.971% | 1.236% |
-| False negative rate | 0 | 307 | 0.971% | 1.236% |
+| Overall packet error | 0 | 120 | 2.466% | 3.102% |
+| False positive rate | 0 | 60 | 4.870% | 6.015% |
+| False negative rate | 0 | 60 | 4.870% | 6.015% |
 
-**What this table measures:** the full HoloVerify governed architecture across
-614 clean frozen action-boundary packets. This is the Holo result, not a solo
-model result.
+**What this table measures:** the current strict public denominator: the blind
+120-packet HoloVerify lane. It is balanced across 60 ALLOW packets and 60
+ESCALATE packets. This is the current public Holo result, not a solo model
+result.
 
-**What it is compared against:** the same mini-model families run alone as
-one-shot solo baselines. Solo gets one call per packet. No Gov, no shared state,
-no deterministic rescue layer, and no final selector.
+**What it is compared against:** solo and internal repair evidence are kept in
+separate ledgers. The public denominator is not combined with Solo Failure
+Factory, V5/V6 patch validation, or the old 614-era draft denominator.
 
-### Counted Families in the 614
+### Current Public Count
 
-| Family | Domain | Packets | HoloVerify |
-| --- | --- | ---: | ---: |
-| Kit C / Clinical Activation | Clinical-regulated activation controls | 40 | 40/40 |
-| AP / Vendor-Master Payment Controls | AP, procurement, and vendor-bank controls | 40 | 40/40 |
-| Agentic Commerce Order Execution | Refunds, purchases, fulfillment, credits, and order-release controls | 40 | 40/40 |
-| IT Access Permission Change | Admin access, role escalation, offboarding, and break-glass controls | 40 | 40/40 |
-| Wave2-4 Expansion | HR, privacy, finance, government, benefits, banking, defense admin, insurance, and utilities | 174 | 174/174 |
-| Wave5 Completed 7-Domain Expansion | Medical, treasury, legal, infrastructure, security, public-sector, and operational technology controls | 280 | 280/280 |
-
-### Holo vs Solo, By Domain
-
-This is the clean matched solo comparison slice: the same 100 packets were run
-through HoloVerify and through the same three mini-model families as one-shot
-solo baselines.
-
-| Domain | Holo KNEW | Solo KNEW | Solo audit-failure rate | Solo failure mix |
-| --- | ---: | ---: | ---: | --- |
-| HR / payroll / workforce controls | 22/22 | 22/66 | 66.7% | 1 wrong verdict, 10 parse fails, 33 structural/evidence fails |
-| Data privacy / customer data release controls | 16/16 | 26/48 | 45.8% | 1 wrong verdict, 3 parse fails, 18 structural/evidence fails |
-| Banking / KYC / AML controls | 10/10 | 10/30 | 66.7% | 4 wrong verdicts, 6 parse fails, 10 structural/evidence fails |
-| Benefits / public casework controls | 8/8 | 8/24 | 66.7% | 1 wrong verdict, 2 parse fails, 13 structural/evidence fails |
-| Finance close / revenue / expense controls | 8/8 | 14/24 | 41.7% | 2 wrong verdicts, 2 parse fails, 6 structural/evidence fails |
-| Government procurement / grants controls | 6/6 | 6/18 | 66.7% | 1 wrong verdict, 4 parse fails, 7 structural/evidence fails |
-| Defense administration / logistics controls | 12/12 | 12/36 | 66.7% | 2 wrong verdicts, 3 parse fails, 19 structural/evidence fails |
-| Insurance claims / coverage controls | 14/14 | 14/42 | 66.7% | 0 wrong verdicts, 8 parse fails, 20 structural/evidence fails |
-| Energy / utilities / infrastructure controls | 4/4 | 4/12 | 66.7% | 1 wrong verdict, 2 parse fails, 5 structural/evidence fails |
-
-Solo audit-failure rate means the solo output was not KNEW/admissible: it had
-the wrong verdict, failed to parse, or lacked the required source-grounded
-structure. That is stricter than "sounded plausible."
-
-Important scope note: the Holo-vs-solo table above uses the matched 100-packet
-solo comparison slice. The domain Wilson table below uses the full current
-614-packet Holo denominator.
-
-### Holo Domain Risk Bounds
-
-The benchmark starts strong overall, then gets more detailed by domain. The
-grand-total Wilson number is not the same as the domain-level Wilson number.
-Each domain has its own denominator, so each domain has its own 95% upper bound.
-
-| Counted Holo domain | Packets | Errors | Exact 95% upper bound | Wilson 95% upper bound |
+| Lane | Packets | ALLOW | ESCALATE | HoloVerify |
 | --- | ---: | ---: | ---: | ---: |
-| Kit C / Clinical activation controls | 40 | 0 | 7.216% | 8.762% |
-| AP / Vendor-master payment controls | 40 | 0 | 7.216% | 8.762% |
-| Agentic commerce order execution | 40 | 0 | 7.216% | 8.762% |
-| IT access permission change | 40 | 0 | 7.216% | 8.762% |
-| HR workforce controls | 40 | 0 | 7.216% | 8.762% |
-| Data privacy release controls | 40 | 0 | 7.216% | 8.762% |
-| Finance close / control overrides | 40 | 0 | 7.216% | 8.762% |
-| Benefits enrollment controls | 8 | 0 | 31.234% | 32.441% |
-| Banking / KYC controls | 10 | 0 | 25.887% | 27.753% |
-| Defense administration controls | 12 | 0 | 22.092% | 24.249% |
-| Government / public sector controls | 6 | 0 | 39.304% | 39.033% |
-| Insurance claims controls | 14 | 0 | 19.264% | 21.531% |
-| Energy / utilities controls | 4 | 0 | 52.713% | 48.989% |
-| Medical treatment activation controls | 40 | 0 | 7.216% | 8.762% |
-| Treasury / wire controls | 40 | 0 | 7.216% | 8.762% |
-| Legal / regulatory filing controls | 40 | 0 | 7.216% | 8.762% |
-| Cloud infrastructure controls | 40 | 0 | 7.216% | 8.762% |
-| Security operations controls | 40 | 0 | 7.216% | 8.762% |
-| Public-sector records controls | 40 | 0 | 7.216% | 8.762% |
-| Operational technology / industrial safety controls | 40 | 0 | 7.216% | 8.762% |
+| Blind Holo lane | 120 | 60 | 60 | 120/120 |
+
+The older 614-packet number is historical/internal. It is not the current public
+denominator because that lane included evidence later excluded by the stricter
+blind-gate rule. It must not be combined with blind-120 for public FPR/FNR or
+Wilson claims.
+
+### Internal Solo-Seam Scoreboard
+
+The solo-seam work is the visual diagnostic target: find packets where the same
+model families are often right, but at least one solo call fails at the action
+boundary.
+
+| Metric | Count |
+| --- | ---: |
+| Solo scout pairs inspected | 210 |
+| Pairs with at least one solo failure | 104 |
+| Pairs with wrong-verdict solo failure | 79 |
+| FP_OVERBLOCK pairs | 33 |
+| FN_FALSE_ALLOW pairs | 18 |
+| All-three solo-collapse pairs | 18 |
+| Mixed pairs | 27 |
+| Parse/admissibility-only pairs | 25 |
+| Quarantined packet/key defects | 1 |
+
+This scoreboard is internal seam evidence. It is not public FPR/FNR evidence by
+itself. Its purpose is to show where solo agents break, then test whether
+HoloVerify covers those red-dot failures without creating new ones.
+
+### Internal Patch And Retest Status
+
+Holo failures are not hidden. They are preserved, autopsied, patched, and rerun
+under a stricter label.
+
+| Lane | Result | Treatment |
+| --- | ---: | --- |
+| V5 selected FN rescue | 12/14 packets, 5/7 pairs | Valid internal failed-live evidence |
+| V6 tiny patch validation | 4/4 packets, 2/2 pairs | Internal patch-validation evidence |
+| V6 same selected-lane rerun | 14/14 packets, 7/7 pairs | Internal selected-lane repair evidence |
+
+The V5 miss class was `V5_SCOPE_DEPENDENCY_NON_DETECTION`: workers failed to
+detect a visible source-field authority/scope blocker. V6 added deterministic
+source-field authority/scope checks. The same selected lane that failed under V5
+then passed under V6.
+
+This supports the engineering hardening story. It does not create a new public
+benchmark denominator.
+
+### Red-Dot Visualization Model
+
+The benchmark visual should show the solo brittleness problem directly.
+
+| Visual element | Meaning |
+| --- | --- |
+| One square | One packet or sibling pair, grouped by domain |
+| Six mini dots | Three solo models across both siblings |
+| Green dot | Solo model got the packet right in admissible form |
+| Red dot | Solo model made a wrong verdict |
+| Amber dot | Parse/admissibility failure |
+| Gray dot | Quarantined packet/key defect |
+| Holo toggle | Shows whether HoloVerify covered the solo failure without creating a new error |
+
+The point is not that solos are always bad. The point is that solo agents are
+often right, but red-dot failures can still appear at the action boundary.
+HoloVerify is being tested on whether it covers those failures without creating
+new ones.
 
 ### Models Used
 
-HoloVerify's current locked roster:
+The current governed-runtime work uses the same mini-model families repeatedly:
 
 | Role | Model | Job |
 | --- | --- | --- |
@@ -92,13 +98,10 @@ HoloVerify's current locked roster:
 | Gov 2 | `minimax/MiniMax-M2.5-highspeed` | Control routing |
 | Worker 3 | `minimax/MiniMax-M2.5-highspeed` | Final compiler |
 
-Same models, run alone on the matched 100-packet solo comparison slice:
-
-| Solo model | Calls | KNEW/admissible | Solo audit-failure rate | Wrong verdict | Parse fail | Structural/evidence fail |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `openai/gpt-5.4-mini` | 100 | 82/100 | 18% | 0 | 0 | 18 |
-| `minimax/MiniMax-M2.5-highspeed` | 100 | 26/100 | 74% | 0 | 40 | 34 |
-| `xai/grok-3-mini` | 100 | 8/100 | 92% | 13 | 0 | 79 |
+The benchmark does not claim that stronger models are unnecessary. It claims
+that structure matters: the same model families behave differently when they are
+run alone versus inside a governed architecture with state, gates, preservation,
+and final selection.
 
 ---
 
@@ -162,29 +165,29 @@ This page uses a few benchmark terms. Here is what they mean.
 
 ## Current Benchmark Ledger
 
-The current clean benchmark-grade HoloVerify counted sample is:
+The current strict public HoloVerify counted sample is:
 
 | Metric | Value |
 | --- | ---: |
-| Frozen action-boundary packets | 614 |
-| Sibling pairs | 307 |
-| ALLOW truths | 307 |
-| ESCALATE truths | 307 |
-| Correct HoloVerify packets | 614 |
+| Blind action-boundary packets | 120 |
+| Sibling pairs | 60 |
+| ALLOW truths | 60 |
+| ESCALATE truths | 60 |
+| Correct HoloVerify packets | 120 |
 | Observed false positives | 0 |
 | Observed false negatives | 0 |
 
 Observed result:
 
-> HoloVerify produced zero observed false positives and zero observed false negatives across 614 clean benchmark-grade action-boundary packets. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
+> HoloVerify produced zero observed false positives and zero observed false negatives across the current 120-packet blind public denominator. This is a measured sample outcome, not a claim of zero risk. The statistical upper bounds on plausible error rates are reported below.
 
 The honest statistical statement is:
 
 | Metric | Errors | n | Exact 95% upper bound | Wilson 95% upper bound |
 | --- | ---: | ---: | ---: | ---: |
-| Overall packet error | 0 | 614 | 0.487% | 0.622% |
-| False positive rate | 0 | 307 | 0.971% | 1.236% |
-| False negative rate | 0 | 307 | 0.971% | 1.236% |
+| Overall packet error | 0 | 120 | 2.466% | 3.102% |
+| False positive rate | 0 | 60 | 4.870% | 6.015% |
+| False negative rate | 0 | 60 | 4.870% | 6.015% |
 
 Exact and Wilson are two standard ways to put a confidence band around an error
 rate. They answer the same basic question:
@@ -198,14 +201,11 @@ bounded by the confidence interval.
 
 In simpler terms:
 
-> We saw zero errors in 614 counted packets. Statistics still requires humility:
+> We saw zero errors in the 120-packet blind public denominator. Statistics still requires humility:
 > the real error rate could be above zero, so we report the upper bound.
 
-Plain English: this moved the benchmark from roughly under 0.68% packet-level
-Wilson risk to roughly under 0.62% packet-level Wilson risk.
-
 The stricter false-positive and false-negative side-specific number is higher
-because each side has half the examples: 307 ALLOW and 307 ESCALATE.
+because each side has half the examples: 60 ALLOW and 60 ESCALATE.
 
 ---
 
@@ -221,12 +221,12 @@ The business question is:
 Side-specific false-positive and false-negative risk is the primary safety bar
 because ALLOW and ESCALATE fail in different ways.
 
-| Target side-specific upper bound | Required ALLOW examples | Required ESCALATE examples | Required total packets | Additional packets from current 614 |
+| Target Wilson side-specific upper bound | Required ALLOW examples | Required ESCALATE examples | Required total packets | Additional packets from current 120 |
 | --- | ---: | ---: | ---: | ---: |
-| < 1.0% | 299 | 299 | 598 | 0 |
-| < 0.5% | 598 | 598 | 1,196 | 582 |
-| < 0.25% | 1,197 | 1,197 | 2,394 | 1,780 |
-| < 0.1% | 2,995 | 2,995 | 5,990 | 5,376 |
+| < 1.0% | 381 | 381 | 762 | 642 |
+| < 0.5% | 765 | 765 | 1,530 | 1,410 |
+| < 0.25% | 1,533 | 1,533 | 3,066 | 2,946 |
+| < 0.1% | 3,838 | 3,838 | 7,676 | 7,556 |
 
 Recommended threshold policy:
 
@@ -251,7 +251,7 @@ error rate.
 
 That distinction matters.
 
-If HoloVerify gets 614 out of 614 packets right, the observed error rate is 0%.
+If HoloVerify gets 120 out of 120 packets right, the observed error rate is 0%.
 But the real world is larger than the sample. A perfect sample does not prove a
 perfect system.
 
@@ -298,8 +298,8 @@ the positive event.
 
 | Actual / Predicted | ESCALATE | ALLOW |
 | --- | ---: | ---: |
-| Actual ESCALATE | Correctly escalated = 307 | Missed escalation = 0 |
-| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 307 |
+| Actual ESCALATE | Correctly escalated = 60 | Missed escalation = 0 |
+| Actual ALLOW | Wrongly escalated = 0 | Correctly allowed = 60 |
 
 Observed rates:
 
@@ -321,23 +321,27 @@ The central comparison is not "Holo used stronger models."
 
 It did not.
 
-The matched solo baselines used the same mini-model families that were used
-inside the governed HoloVerify architecture.
+The solo baselines use the same mini-model families that appear inside the
+governed HoloVerify architecture.
 
-The difference was not model strength.
+The difference is not model strength. The difference is the control system
+around those models.
 
-The difference was the control system around those models.
+For the solo baseline, each model receives exactly one independent call per
+packet. No Gov, no baton, no deterministic repair layer, and no final selector.
 
-For the solo baseline, each model received exactly one independent call per
-packet. No Gov, no shared state, no deterministic rescue layer, and no final
-selector were available to the solo runs.
+Current Solo Failure Factory totals:
 
-- Gov reviewed worker outputs between turns.
-- Each worker received the current state instead of starting from scratch.
-- Local code checked worker outputs after every turn.
-- The system saved the best valid answer it had seen so far.
-- The final answer could not quietly drop important proof from an earlier valid answer.
-- Every call, token count, gate result, and final-selection reason was logged.
+| Metric | Count |
+| --- | ---: |
+| Solo scout pairs inspected | 210 |
+| Pairs with at least one solo failure | 104 |
+| Pairs with wrong-verdict solo failure | 79 |
+| FP_OVERBLOCK pairs | 33 |
+| FN_FALSE_ALLOW pairs | 18 |
+| All-three solo-collapse pairs | 18 |
+| Mixed pairs | 27 |
+| Parse/admissibility-only pairs | 25 |
 
 Solo outputs only count as **KNEW/admissible** when they produce the right
 verdict, valid structure, required source grounding, no invented source IDs,
@@ -350,46 +354,41 @@ It asks:
 > Did the one-shot model actually know why the action should ALLOW or ESCALATE,
 > in a form that could survive an audit?
 
-| Evidence slice | HoloVerify | Same models alone, one-shot | What it shows |
-| --- | ---: | ---: | --- |
-| Clinical Activation Boundary Controls | 40/40 packets | 6/120 KNEW/admissible | Broad solo collapse; Holo solved both siblings across 20 pairs |
-| Vendor-Master Payment Controls | 40/40 packets | 53/120 KNEW/admissible | Solo sometimes succeeded, but every pair still had strict one-shot failures |
-| Wave3/Wave4 focused slice | 54/54 packets | 54/162 KNEW/admissible | 27/27 strong solo-collapse pairs in the focused expansion |
-| Wave2B5 + Wave3/Wave4 matched expansion | 100/100 packets | 116/300 KNEW/admissible | Larger matched slice with same-model solo instability preserved |
-
 This does not prove that every solo model always fails.
 
 It shows something narrower and more useful:
 
-> The same model families that were brittle as isolated one-shot decision makers
-> became reliable when placed inside the governed HoloVerify architecture.
+> Solo agents can look mostly competent and still fail at exactly the wrong
+> action boundary. HoloVerify is being tested on whether it covers those red-dot
+> failures without creating new ones.
 
-That is the benchmark's main architecture finding.
+That is the benchmark's main architecture question.
 
 ---
 
 ## What Counts
 
-Only clean benchmark-grade evidence is counted in the 614-packet denominator.
+Only the blind-120 lane is counted in the current strict public denominator.
 
 Included:
 
-- Frozen packets.
+- 120 frozen blind packets.
+- 60 ALLOW and 60 ESCALATE truths.
 - Locked traces.
-- Hash-checked prompts and payloads.
-- Full HoloVerify governed architecture runs.
-- Balanced ALLOW/ESCALATE sibling pairs.
-- No prompt leakage.
-- No judges in the clean statistical denominator.
+- Runtime-manifest separation from the scoring map.
+- Trace-bound post-hoc scoring.
+- No judges in the public statistical denominator.
 
 Excluded:
 
 - Canaries.
 - Precursors.
+- Old 614-era denominator material.
+- Solo Failure Factory seam discovery.
+- V5/V6 patch-validation and selected-lane repair evidence.
 - HoloBuild quality rows.
-- Missing-evidence rows.
-- Public-copy drafts.
-- Anything without a clean root package.
+- Packet/key defects.
+- Anything without a clean blind root package.
 
 This matters because benchmark credibility depends as much on what is excluded
 as on what is counted.
@@ -398,22 +397,20 @@ as on what is counted.
 
 ## Evidence Families
 
-| Family | Domain | Packets | Pairs | HoloVerify |
-| --- | --- | ---: | ---: | ---: |
-| Clinical Activation Boundary Controls | Clinical-regulated activation controls | 40 | 20 | 40/40 |
-| Vendor-Master Payment Controls | AP / procurement / vendor-master controls | 40 | 20 | 40/40 |
-| Agentic Commerce Order Execution | Order execution controls | 40 | 20 | 40/40 |
-| IT Access Permission Change | Access / privilege controls | 40 | 20 | 40/40 |
-| Wave2-4 Expansion | HR, privacy, finance, government, benefits, banking, defense admin, insurance, utilities | 174 | 87 | 174/174 |
-| Wave5 Completed 7-Domain Expansion | Medical, treasury, legal, infrastructure, security, public-sector, and operational technology controls | 280 | 140 | 280/280 |
+The public family table should be regenerated from the blind-120 manifest before
+publication. The internal atlas already covers domains including AP, vendor
+master, agentic commerce, IAM, SaaS controls, clinical activation, banking,
+privacy, security, treasury, public-sector records, legal, infrastructure, and
+industrial controls.
 
-Other locked evidence exists, but is not counted in the clean denominator:
+Other locked evidence exists, but is not counted in the public denominator:
 
 | Evidence | Why separate |
 | --- | --- |
-| Agentic Commerce all-six collapse canary | Lock-rooted canary, not full-family denominator |
-| Hard ALLOW false-positive precursor | Frozen precursor, not clean denominator |
-| D11 HoloBuild mini-suite | HoloBuild quality evidence, not HoloVerify action-boundary denominator |
+| Solo Failure Factory | Seam discovery and red-dot source evidence, not public FPR/FNR denominator |
+| V5/V6 Tier 3 repair lanes | Internal hardening and selected-lane repair evidence |
+| Old 614-era material | Historical/internal unless re-admitted under the strict blind rule |
+| HoloBuild mini-suites | Product quality evidence, not HoloVerify public action-boundary denominator |
 
 ---
 
@@ -514,9 +511,10 @@ This benchmark does not claim:
 
 This benchmark does claim:
 
-> On the current clean locked denominator, HoloVerify has produced zero observed
-> false-positive or false-negative errors across 614 action-boundary packets,
-> with a measured statistical upper risk band.
+> On the current strict blind-120 public denominator, HoloVerify has produced
+> zero observed false-positive or false-negative errors across 120
+> action-boundary packets. The old 614-packet number is historical/internal and
+> is not the current public denominator.
 
 ---
 

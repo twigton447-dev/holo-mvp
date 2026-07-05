@@ -1,0 +1,27 @@
+{
+  "call_number": 12,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "a6331b37c69b8c981062befacf159fcc61a44f57c892e951a5812c84b7f59e18",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user asks: \"packet_id=HVSF016HA-0705182D345B199BF07B\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe need to output a plain text record with three key=value lines. Fields in order: route_verdict, repair_target, blocked_move. So we need to output exactly three lines:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nProbably also we might need to include packet_id? The user didn't ask for packet_id. The spec says fields: route_verdict, repair_target, blocked_move. So just those three. The user explicitly said: \"Return the three-line status record.\" So output exactly those three lines.\n\nThus answer is the three lines.\n\nPotential pitfalls: Should we include spaces? Format must be key=value exactly. Probably no extra spaces around =. The values contain spaces: \"preserve source-grounded reasoning\" and \"do not invent source IDs\". The user gave them as \"preserve source-grounded reasoning\" and \"do not invent source IDs\". So output exactly as given.\n\nThus final answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should ensure no extra newline after the third line? Probably okay. Use exactly three lines.\n\nNow output.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "c5a6e967e9651e006c65ee901a539d44db1ddaa0c6dd2772a65e092029b77964",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 120,
+    "output_tokens": 337,
+    "raw_text": "<think>\nThe user asks: \"packet_id=HVSF016HA-0705182D345B199BF07B\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\nReturn the three-line status record.\"\n\nWe need to output a plain text record with three key=value lines. Fields in order: route_verdict, repair_target, blocked_move. So we need to output exactly three lines:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nProbably also we might need to include packet_id? The user didn't ask for packet_id. The spec says fields: route_verdict, repair_target, blocked_move. So just those three. The user explicitly said: \"Return the three-line status record.\" So output exactly those three lines.\n\nThus answer is the three lines.\n\nPotential pitfalls: Should we include spaces? Format must be key=value exactly. Probably no extra spaces around =. The values contain spaces: \"preserve source-grounded reasoning\" and \"do not invent source IDs\". The user gave them as \"preserve source-grounded reasoning\" and \"do not invent source IDs\". So output exactly as given.\n\nThus final answer:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe should ensure no extra newline after the third line? Probably okay. Use exactly three lines.\n\nNow output.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0698e9e3dd2408c0aa29f9588831f1a6",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 457,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

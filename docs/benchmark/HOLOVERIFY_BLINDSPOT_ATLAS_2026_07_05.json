@@ -1,0 +1,483 @@
+{
+  "atlas_id": "HOLOVERIFY_BLINDSPOT_ATLAS_2026_07_05",
+  "date": "2026-07-05",
+  "callsign": "HOLOATLAS SUBAGENT",
+  "status": "PASS_NO_PROVIDER_ATLAS_V6_RERUN_UPDATED",
+  "constraints_observed": {
+    "providers_run": false,
+    "holo_live_run": false,
+    "solo_run": false,
+    "judges_run": false,
+    "frozen_runtime_evidence_edited": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false,
+    "repo_backed_evidence_only": true
+  },
+  "current_status": {
+    "strict_public_denominator": "blind-120 only",
+    "old_614": "stale/historical",
+    "blind_120_score": {
+      "packets": 120,
+      "allow_packets": 60,
+      "escalate_packets": 60,
+      "correct_packets": 120
+    },
+    "v5_tier3_fn_rescue": {
+      "classification": "AUTHORIZED_RUNTIME_VALID_SELECTED_GATE_FAILED",
+      "packet_score": "12/14",
+      "pair_score": "5/7",
+      "claim_boundary": "internal failed rescue evidence only"
+    },
+    "v6_tiny_patch_validation": {
+      "classification": "V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_PASSED",
+      "packet_score": "4/4",
+      "pair_score": "2/2",
+      "claim_boundary": "internal patch-validation only"
+    },
+    "v6_tier3_fn_holo_rescue_rerun": {
+      "status": "completed",
+      "classification": "V6_TIER3_FN_HOLO_RESCUE_RERUN_SELECTED_LANE_REPAIR_PASSED",
+      "run_folder": "docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z",
+      "runtime_only_manifest_present": true,
+      "runtime_only_manifest": "docs/benchmark/HOLOVERIFY_V6_TIER3_FN_HOLO_RESCUE_RERUN_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+      "provider_calls": "70/70",
+      "provider_call_count": 70,
+      "provider_failures": 0,
+      "route": "W1 -> G1 -> W2 -> G2 -> W3 x14",
+      "packet_score": "14/14",
+      "pair_score": "7/7",
+      "failed_packets": [],
+      "same_selected_lane_comparison": {
+        "v5": "12/14 packets, 5/7 pairs",
+        "v6": "14/14 packets, 7/7 pairs"
+      },
+      "claim_boundary": [
+        "internal selected-lane repair evidence only",
+        "not public benchmark evidence",
+        "not global FNR",
+        "not FP precision evidence",
+        "not general model superiority"
+      ]
+    }
+  },
+  "failure_class_taxonomy": [
+    {
+      "id": "SOLO_FP_OVERBLOCK",
+      "definition": "Solo model blocks a source-closed ALLOW packet because the action sounds sensitive or risky.",
+      "gov_learning_allowed": true,
+      "score_boundary": "Keep separate from FN rescue and public-denominator claims."
+    },
+    {
+      "id": "SOLO_FN_FALSE_ALLOW",
+      "definition": "Solo or Holo final answer allows a source-open ESCALATE packet.",
+      "gov_learning_allowed": true,
+      "score_boundary": "Selected rescue evidence is internal unless separately admitted."
+    },
+    {
+      "id": "SOLO_PARSE_ADMISSIBILITY_FAILURE",
+      "definition": "Output is unusable or non-admissible even if the verdict direction is close.",
+      "gov_learning_allowed": true,
+      "score_boundary": "Do not count as wrong-verdict failure."
+    },
+    {
+      "id": "PACKET_KEY_DEFECT",
+      "definition": "Expected verdict depends on source-invisible facts or unsupported key assumptions.",
+      "gov_learning_allowed": true,
+      "score_boundary": "Quarantine; exclude from clean denominators."
+    },
+    {
+      "id": "PROVIDER_TRANSPORT_FAILURE",
+      "definition": "Provider/network transport fails before valid content is produced.",
+      "gov_learning_allowed": true,
+      "score_boundary": "Preserve separately; exclude incomplete run from scoring."
+    },
+    {
+      "id": "WORKER_PARSE_CONTRACT_FAILURE",
+      "definition": "Worker output violates required parse keys or contract fields.",
+      "gov_learning_allowed": true,
+      "score_boundary": "Fail closed and keep parse/admissibility separate from semantic verdict."
+    },
+    {
+      "id": "GOV_RUNTIME_CONTRACT_FAILURE",
+      "definition": "Gov/governed decision path fails to bind the final decision to the governed route or fail closed on veto/failure.",
+      "gov_learning_allowed": true,
+      "score_boundary": "Treat as runtime contract risk, not packet semantic score."
+    },
+    {
+      "id": "SELECTOR_REGRESSION",
+      "definition": "Selector chooses from an ineligible artifact set, leaks hidden labels, or lets consensus outrank hard gates.",
+      "gov_learning_allowed": true,
+      "score_boundary": "Must be sealed by truth-blind selector tests before live use."
+    },
+    {
+      "id": "BLOCKER_DETECTED_THEN_DROPPED",
+      "definition": "A source-grounded blocker appears in a worker artifact but is not carried forward.",
+      "gov_learning_allowed": true,
+      "score_boundary": "V4 addressed this for emitted blockers."
+    },
+    {
+      "id": "FALSE_BLOCKER_CLOSURE_ACCEPTED",
+      "definition": "A worker names a blocker and cites a source, but the cited source fields do not close that blocker.",
+      "gov_learning_allowed": true,
+      "score_boundary": "V5 addresses this when blockers exist and have recognized closure fields."
+    },
+    {
+      "id": "BLOCKER_NOT_DETECTED_BY_ANY_WORKER",
+      "definition": "No worker emits the source-visible blocker, so blocker preservation and closure validation never activate.",
+      "gov_learning_allowed": true,
+      "score_boundary": "Requires deterministic source-field checks or stronger worker discovery; not fixed by V4/V5 alone."
+    },
+    {
+      "id": "V5_SCOPE_DEPENDENCY_NON_DETECTION",
+      "definition": "V5 closure validation is present but no worker/gate emits source-field authority or scope dependency blockers.",
+      "gov_learning_allowed": true,
+      "score_boundary": "Failed-live V5 Tier 3 evidence; not public benchmark evidence."
+    },
+    {
+      "id": "V6_SCOPE_DEPENDENCY_GATE_PATCHED",
+      "definition": "V6 deterministic source-field gate emits authority/scope blockers and blocks contradictory ALLOW artifacts for implemented seams.",
+      "gov_learning_allowed": true,
+      "score_boundary": "Internal proof covers tiny patch validation and the same selected Tier 3 FN rescue lane; no public denominator, global FNR, FP precision, or general model-superiority claim follows."
+    }
+  ],
+  "patch_map": [
+    {
+      "version": "V4",
+      "name": "blocker preservation",
+      "selector_policy_version": "SELECTOR_V4_BLOCKER_PRESERVATION_2026_07_04",
+      "failure_classes_addressed": [
+        "BLOCKER_DETECTED_THEN_DROPPED",
+        "SELECTOR_REGRESSION"
+      ],
+      "code_patch_lives": [
+        "holoverify_blind_runner_v0.py"
+      ],
+      "tests_live": [
+        "tests/test_holoverify_blind_selector_repair_regression.py"
+      ],
+      "evidence_validates": [
+        "docs/benchmark/HOLOVERIFY_BLOCKER_PRESERVATION_PATCH_REPORT_2026_07_04.md",
+        "docs/benchmark/HOLOVERIFY_V4_BLOCKER_PRESERVATION_SMALL_RESCUE_LIVE_ROLLUP_2026_07_04.json",
+        "docs/benchmark/HOLOVERIFY_V4_SMALL_RESCUE_FAILURE_AUTOPSY_2026_07_04.md"
+      ],
+      "remains_unproven": [
+        "semantic blocker closure validation",
+        "all-worker blocker non-detection",
+        "broad public benchmark improvement"
+      ]
+    },
+    {
+      "version": "V5",
+      "name": "blocker closure validation",
+      "selector_policy_version": "SELECTOR_V5_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+      "failure_classes_addressed": [
+        "FALSE_BLOCKER_CLOSURE_ACCEPTED"
+      ],
+      "code_patch_lives": [
+        "holoverify_blind_runner_v0.py"
+      ],
+      "tests_live": [
+        "tests/test_holoverify_v5_blocker_closure_validation.py",
+        "tests/test_holoverify_blind_selector_repair_regression.py"
+      ],
+      "evidence_validates": [
+        "docs/benchmark/HOLOVERIFY_V5_BLOCKER_CLOSURE_VALIDATION_DESIGN_2026_07_04.md",
+        "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_LIVE_ROLLUP_2026_07_04.md",
+        "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_PACKET_DEFECT_REVIEW_2026_07_04.md",
+        "docs/benchmark/HOLOVERIFY_LIVING_SEAM_ATLAS_AND_ARCHITECTURE_LEDGER_2026_07_05.md"
+      ],
+      "remains_unproven": [
+        "source-field dependency detection when no worker emits a blocker",
+        "Tier 3 selected FN rescue pass",
+        "global FNR/FPR improvement"
+      ]
+    },
+    {
+      "version": "V6",
+      "name": "scope dependency gate",
+      "selector_policy_version": "SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05",
+      "failure_classes_addressed": [
+        "V5_SCOPE_DEPENDENCY_NON_DETECTION",
+        "BLOCKER_NOT_DETECTED_BY_ANY_WORKER"
+      ],
+      "code_patch_lives": [
+        "holoverify_blind_runner_v0.py"
+      ],
+      "tests_live": [
+        "tests/test_holoverify_v6_scope_dependency_gate.py",
+        "tests/test_holoverify_blind_selector_repair_regression.py",
+        "tests/test_holoverify_v5_blocker_closure_validation.py",
+        "tests/test_holoverify_blind_120_live_wrapper.py"
+      ],
+      "evidence_validates": [
+        "docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_PATCH_REPORT_2026_07_05.md",
+        "docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_POSTLIVE_ARCHITECTURE_AUDIT_2026_07_05.json",
+        "docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z/v6_tier3_fn_holo_rescue_rerun_live_summary.json",
+        "docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z/v6_tier3_fn_holo_rescue_rerun_posthoc_score_trace_bound_v1.json",
+        "docs/benchmark/HOLOVERIFY_LIVING_SEAM_ATLAS_AND_ARCHITECTURE_LEDGER_2026_07_05.md"
+      ],
+      "remains_unproven": [
+        "broader V6 validation beyond selected source-field seams",
+        "public denominator credit",
+        "global FNR improvement",
+        "FP precision improvement",
+        "general model superiority"
+      ]
+    }
+  ],
+  "seam_map": [
+    {
+      "id": "authority_scope_mismatch",
+      "domains": [
+        "agentic commerce",
+        "clinical",
+        "IAM",
+        "SaaS",
+        "banking/payments"
+      ],
+      "failure_classes": [
+        "V5_SCOPE_DEPENDENCY_NON_DETECTION",
+        "BLOCKER_NOT_DETECTED_BY_ANY_WORKER"
+      ],
+      "status": "productive; partially patched by V6 for two known families"
+    },
+    {
+      "id": "blocker_closure_vs_blocker_detection",
+      "domains": [
+        "cross-domain"
+      ],
+      "failure_classes": [
+        "FALSE_BLOCKER_CLOSURE_ACCEPTED",
+        "BLOCKER_NOT_DETECTED_BY_ANY_WORKER"
+      ],
+      "status": "core Atlas distinction"
+    },
+    {
+      "id": "exact_boundary_overblock",
+      "domains": [
+        "FP rescue",
+        "hard ALLOW controls"
+      ],
+      "failure_classes": [
+        "SOLO_FP_OVERBLOCK"
+      ],
+      "status": "productive; keep separate from FN rescue"
+    },
+    {
+      "id": "payment_rail_vs_invoice_approval",
+      "domains": [
+        "AP / procurement",
+        "vendor-master",
+        "trade finance"
+      ],
+      "failure_classes": [
+        "SOLO_FN_FALSE_ALLOW",
+        "PACKET_KEY_DEFECT",
+        "FALSE_BLOCKER_CLOSURE_ACCEPTED"
+      ],
+      "status": "productive; requires explicit source-visible approval/callback fields"
+    },
+    {
+      "id": "saas_add_on_seat_api_limit_scope",
+      "domains": [
+        "SaaS subscription controls",
+        "agentic commerce"
+      ],
+      "failure_classes": [
+        "V5_SCOPE_DEPENDENCY_NON_DETECTION",
+        "V6_SCOPE_DEPENDENCY_GATE_PATCHED"
+      ],
+      "status": "productive; add-on activation family patched narrowly in V6"
+    },
+    {
+      "id": "iam_role_tenant_deployment_scope",
+      "domains": [
+        "IT / IAM / access"
+      ],
+      "failure_classes": [
+        "SOLO_FN_FALSE_ALLOW",
+        "SOLO_FP_OVERBLOCK"
+      ],
+      "status": "evidence present; deterministic rules still pending"
+    },
+    {
+      "id": "clinical_triage_vs_treatment_activation",
+      "domains": [
+        "clinical / treatment activation"
+      ],
+      "failure_classes": [
+        "V5_SCOPE_DEPENDENCY_NON_DETECTION",
+        "V6_SCOPE_DEPENDENCY_GATE_PATCHED"
+      ],
+      "status": "productive; protocol-start family patched narrowly in V6"
+    },
+    {
+      "id": "banking_review_vs_wire_execution",
+      "domains": [
+        "banking",
+        "payments",
+        "treasury"
+      ],
+      "failure_classes": [
+        "FALSE_BLOCKER_CLOSURE_ACCEPTED",
+        "SOLO_FN_FALSE_ALLOW"
+      ],
+      "status": "productive; V5 validates transaction type and amount limit when blocker exists"
+    },
+    {
+      "id": "privacy_export_scope",
+      "domains": [
+        "privacy / data export"
+      ],
+      "failure_classes": [
+        "SOLO_FP_OVERBLOCK",
+        "SOLO_FN_FALSE_ALLOW"
+      ],
+      "status": "evidence present; not yet a named deterministic V6 rule"
+    },
+    {
+      "id": "agentic_commerce_add_on_subscription_refund_controls",
+      "domains": [
+        "agentic commerce",
+        "refund controls"
+      ],
+      "failure_classes": [
+        "SOLO_FN_FALSE_ALLOW",
+        "SOLO_FP_OVERBLOCK",
+        "V6_SCOPE_DEPENDENCY_GATE_PATCHED"
+      ],
+      "status": "productive; split add-on, subscription, refund, and cap seams"
+    }
+  ],
+  "domain_map": [
+    {
+      "domain": "AP / procurement",
+      "evidence_status": "present",
+      "notes": "Vendor-master, AP payment destination, procurement release, payment rail versus invoice approval."
+    },
+    {
+      "domain": "agentic commerce",
+      "evidence_status": "present",
+      "notes": "Order execution, subscription controls, add-on activation, refund controls."
+    },
+    {
+      "domain": "IT / IAM / access",
+      "evidence_status": "present",
+      "notes": "IT access replication, IAM scope, service-account deployment, payment-template permissions."
+    },
+    {
+      "domain": "banking / payments / treasury",
+      "evidence_status": "present",
+      "notes": "Banking relationship, wire execution, trade-finance payment release, treasury controls."
+    },
+    {
+      "domain": "SaaS subscription controls",
+      "evidence_status": "present",
+      "notes": "Seat expansion, API-limit, subscription, admin delegation."
+    },
+    {
+      "domain": "clinical / treatment activation",
+      "evidence_status": "present",
+      "notes": "Kit C, medication activation, protocol start, treatment activation."
+    },
+    {
+      "domain": "privacy / data export",
+      "evidence_status": "present",
+      "notes": "DPRV, privacy data-share, export/consent region scope."
+    },
+    {
+      "domain": "security operations",
+      "evidence_status": "present",
+      "notes": "Security operations and containment/incident response candidate surfaces."
+    },
+    {
+      "domain": "public sector",
+      "evidence_status": "limited_candidate_only",
+      "notes": "Public-sector emergency procurement appears in parse/admissibility candidate material; not strict public denominator evidence."
+    },
+    {
+      "domain": "others_found",
+      "evidence_status": "present",
+      "notes": "HR/workforce, finance close, legal, insurance, logistics, utility/OT safety, tax/withholding, grant-funded AP."
+    }
+  ],
+  "gov_safe_learning_boundary": {
+    "gov_may_use": [
+      "general failure-class policy",
+      "source-field checks from model-visible runtime source text",
+      "required dependency closure",
+      "blocker ledgers",
+      "invalid closure ledgers",
+      "deterministic dependency ledgers",
+      "scope matching rules",
+      "packet/key quarantine rules",
+      "provider transport exclusion rules"
+    ],
+    "gov_must_not_use": [
+      "packet truth",
+      "sibling ID",
+      "answer keys",
+      "scoring map",
+      "prior failed packet expected verdict",
+      "benchmark-specific hidden labels",
+      "hidden family tags",
+      "old denominator membership as proof",
+      "packet identity as a decision shortcut"
+    ]
+  },
+  "passed_audit_areas_preserved": {
+    "no_packet_answer_keys": true,
+    "no_scoring_map_contents": true,
+    "no_sibling_truth_shortcuts": true,
+    "no_prompt_visible_hidden_labels": true,
+    "gov_safe_learning_boundary_explicit": true
+  },
+  "next_recommendations": [
+    {
+      "topic": "choose_new_packets",
+      "recommendation": "Choose packets by seam and source-visible rule, not by desired model outcome; keep ALLOW/ESCALATE siblings balanced."
+    },
+    {
+      "topic": "avoid_packet_key_defects",
+      "recommendation": "Require every expected verdict to be derivable from runtime-visible sources without sibling facts, hidden current-cycle facts, or external truth."
+    },
+    {
+      "topic": "patched_failure_class",
+      "recommendation": "Call a class patched only after no-provider negative and positive tests pass, wrapper identity is updated, trace-bound patch validation passes, and claim boundaries stay internal unless separately admitted."
+    },
+    {
+      "topic": "partially_patched_failure_class",
+      "recommendation": "Call a class partially patched when coverage is limited to a tiny lane, selected fixtures, or only some deterministic source-field families."
+    },
+    {
+      "topic": "promote_to_product_gov_policy",
+      "recommendation": "Promote source-field authority/scope matching, required dependency closure, blocker preservation, deterministic closure validation, packet/key quarantine, parse fail-closed behavior, and provider transport exclusion."
+    }
+  ],
+  "source_map": [
+    "docs/benchmark/HOLOVERIFY_LIVING_SEAM_ATLAS_AND_ARCHITECTURE_LEDGER_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_BLOCKER_PRESERVATION_PATCH_REPORT_2026_07_04.md",
+    "docs/benchmark/HOLOVERIFY_V4_SMALL_RESCUE_FAILURE_AUTOPSY_2026_07_04.md",
+    "docs/benchmark/HOLOVERIFY_V5_BLOCKER_CLOSURE_VALIDATION_DESIGN_2026_07_04.md",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_PACKET_DEFECT_REVIEW_2026_07_04.md",
+    "docs/benchmark/HOLOVERIFY_V5_TIER2_FN_RESCUE_LIVE_ROLLUP_2026_07_04.md",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_HOLO_RESCUE_LIVE_ROLLUP_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_HOLO_RESCUE_ACCOUNTING_CORRECTION_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_TIER3_FN_HOLO_RESCUE_FAILURE_AUTOPSY_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_PATCH_REPORT_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_POSTLIVE_ARCHITECTURE_AUDIT_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V6_TIER3_FN_HOLO_RESCUE_RERUN_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+    "docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z/v6_tier3_fn_holo_rescue_rerun_live_summary.json",
+    "docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z/v6_tier3_fn_holo_rescue_rerun_posthoc_score_trace_bound_v1.json",
+    "docs/benchmark/HOLOVERIFY_CONTEXT_PRESERVATION_AUDIT_2026_07_05.md",
+    "docs/benchmark/holoverify_domain_consolidation_ledger_2026_07_01/HOLOVERIFY_DOMAIN_CONSOLIDATION_LEDGER_2026_07_01.md",
+    "holoverify_blind_runner_v0.py",
+    "tests/test_holoverify_blind_selector_repair_regression.py",
+    "tests/test_holoverify_v5_blocker_closure_validation.py",
+    "tests/test_holoverify_v6_scope_dependency_gate.py",
+    "tests/test_holoverify_blind_120_live_wrapper.py",
+    "tests/test_blind_lane_t6_budget_parity.py",
+    "tests/test_holoverify_governed_decision_smoke.py"
+  ]
+}

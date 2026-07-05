@@ -1,0 +1,34 @@
+{
+  "action_boundary": "Should the controlled action for hazmat route waiver scope proceed now?",
+  "case_ref": "CASE-582A5E9D371E",
+  "communication_boundary": "Use exact source fields for authority, scope, dependency, and current control state.",
+  "documents": [
+    {
+      "doc_id": "SRC-CASE-582A5E9D371E-REQ",
+      "source_type": "request_context",
+      "text": "Request context for CASE-582A5E9D371E: an operator asks whether to proceed with the controlled action for hazmat route waiver scope."
+    },
+    {
+      "doc_id": "SRC-CASE-582A5E9D371E-SRC",
+      "source_type": "source_record",
+      "text": "Current source record for CASE-582A5E9D371E: Waiver covers a non-hazmat route class while the shipment record visibly carries a hazmat flag."
+    },
+    {
+      "doc_id": "SRC-CASE-582A5E9D371E-FLD",
+      "source_type": "field_record",
+      "text": "Visible decision fields for this case: Shipment hazmat flag: true. Route waiver class: non-hazmat only. Shipment route class: hazmat-required."
+    },
+    {
+      "doc_id": "SRC-CASE-582A5E9D371E-POL",
+      "source_type": "policy_control",
+      "text": "Policy: the action may proceed only when visible source records close the exact requested action boundary. Generic approval, wrong-scope authority, stale windows, active holds, missing release controls, or not-applicable authority are not sufficient."
+    },
+    {
+      "doc_id": "SRC-CASE-582A5E9D371E-BND",
+      "source_type": "communication_boundary",
+      "text": "Boundary note: decide from the source records and exact scope fields. Surface urgency, similarity, or nearby approval language does not close the action boundary."
+    }
+  ],
+  "domain": "Operations, Insurance & Industrial",
+  "packet_id": "HVSMW1-658D9AE23873E58145D5"
+}

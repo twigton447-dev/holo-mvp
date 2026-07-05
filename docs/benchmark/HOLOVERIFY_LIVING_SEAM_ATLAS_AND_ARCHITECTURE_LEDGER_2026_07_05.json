@@ -49,7 +49,7 @@
       "internal_directional_rescue_work": {
         "purpose": "Validate V5/V6 behavior on selected solo-failure rescue seams.",
         "denominator_treatment": "Internal-only; not public FPR/FNR or benchmark denominator.",
-        "provider_approval_status": "V5 Tier 3 live run completed and failed the selected gate; any V6 rerun or broader validation needs separate explicit approval."
+        "provider_approval_status": "V6 Tier 3 selected-lane rerun completed and passed internal repair gate; future live work needs separate explicit approval."
       },
       "seam_mining_work": {
         "purpose": "Find and audit new FN_FALSE_ALLOW / FP_OVERBLOCK candidates.",
@@ -270,9 +270,36 @@
       "not_global_fnr": true,
       "not_fp_precision_evidence": true
     },
+    "v6_tier3_fn_holo_rescue_rerun": {
+      "classification": "V6_TIER3_FN_HOLO_RESCUE_RERUN_SELECTED_LANE_REPAIR_PASSED",
+      "commit": "5c6e70063 benchmark: preserve v6 tier3 fn rerun evidence",
+      "run_folder": "docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z",
+      "provider_calls": "70/70",
+      "provider_failures": 0,
+      "route": "W1 -> G1 -> W2 -> G2 -> W3 x14",
+      "packet_score": "14/14",
+      "pair_score": "7/7",
+      "failed_packets": [],
+      "v5_prior_result_for_same_selected_lane": {
+        "packet_score": "12/14",
+        "pair_score": "5/7"
+      },
+      "v6_repair_result_for_same_selected_lane": {
+        "packet_score": "14/14",
+        "pair_score": "7/7"
+      },
+      "claim_boundary": {
+        "internal_selected_lane_repair_evidence_only": true,
+        "not_public_benchmark_evidence": true,
+        "not_global_fnr": true,
+        "not_fp_precision_evidence": true,
+        "not_general_model_superiority": true
+      }
+    },
     "v6_meaning": {
       "patches": "deterministic source-field authority/scope dependency detection",
       "addresses_tier3_v5_miss_class": "V5_SCOPE_DEPENDENCY_NON_DETECTION",
+      "same_selected_tier3_lane_passes_under_v6": true,
       "broad_benchmark_claim": false
     },
     "current_scorecard": {
@@ -280,10 +307,8 @@
       "old_614": "stale/historical",
       "tier3_v5_fn_rescue": "failed-live evidence: 12/14 packets and 5/7 pairs",
       "v6_tiny_validation": "passed on 4 packets / 2 pairs",
-      "next_decision": [
-        "rerun Tier 3 FN rescue under V6",
-        "build a broader V6 validation set first"
-      ]
+      "v6_tier3_selected_lane_rerun": "passed on the same selected lane: 14/14 packets and 7/7 pairs",
+      "interpretation": "Supports the engineering hardening story, not a public reliability denominator."
     }
   },
   "quarantine_register": {
@@ -352,6 +377,11 @@
         "lane": "v6_tiny_patch_validation",
         "status": "INTERNAL_PATCH_VALIDATION_ONLY",
         "treatment": "Do not promote to public denominator without a separate clean-denominator rule."
+      },
+      {
+        "lane": "v6_tier3_fn_selected_lane_rerun",
+        "status": "V6_TIER3_FN_HOLO_RESCUE_RERUN_SELECTED_LANE_REPAIR_PASSED",
+        "treatment": "Internal selected-lane repair evidence only; not public benchmark evidence."
       }
     ]
   },
@@ -370,7 +400,8 @@
       "Tier 2 internal gate restoration after the replacement pair.",
       "Tier 3 V5 FN Holo rescue completed as an authorized runtime-valid selected-gate failure: 12/14 packets and 5/7 pairs.",
       "V6 tiny scope-dependency patch-validation passed on 4/4 packets and 2/2 pairs.",
-      "V6 addresses the Tier 3 V5 miss class V5_SCOPE_DEPENDENCY_NON_DETECTION only within the tiny patch-validation lane so far.",
+      "V6 addresses the Tier 3 V5 miss class V5_SCOPE_DEPENDENCY_NON_DETECTION within the tiny patch-validation lane and the same selected Tier 3 rerun lane.",
+      "V6 Tier 3 FN rerun passed on the same selected lane that failed under V5: 14/14 packets and 7/7 pairs.",
       "Tier 3 targeted-mining solo scout found 2 useful FN pairs, T3FN-MINE-006 and T3FN-MINE-010, for internal directional mining only.",
       "Tier 3 targeted-mining solo Scout 2 found 1 useful FN pair, T3FN2-MINE-003, for internal directional mining only.",
       "Tier 3 targeted-mining solo Scout 3 promoted 2 FN candidates, T3FN3-MINE-003 and T3FN3-MINE-009, for internal directional mining only.",
@@ -403,14 +434,17 @@
       "Scout 3 proves global FNR.",
       "The V6 tiny patch-validation pass is public benchmark evidence.",
       "The V6 tiny patch-validation pass proves global FNR or FP precision.",
-      "V6 has been validated broadly beyond the 4-packet / 2-pair tiny patch-validation lane."
+      "The V6 Tier 3 selected-lane rerun is public benchmark evidence.",
+      "The V6 Tier 3 selected-lane rerun proves global FNR or FP precision.",
+      "The V6 Tier 3 selected-lane rerun proves general model superiority.",
+      "V6 has been validated broadly beyond the tiny patch-validation and selected-lane rerun evidence."
     ]
   },
   "plain_english_status_for_taylor": {
     "what_is_proven": [
       "The strict public scorecard is still the blind-120 lane: 120/120 packets, balanced 60 ALLOW and 60 ESCALATE.",
-      "The V5 Tier 3 FN rescue run was real, authorized, and runtime-valid, but it failed the selected gate at 12/14 packets and 5/7 pairs.",
-      "The V6 tiny patch-validation fixed the two known Tier 3 V5 miss fixtures in a 4-packet / 2-pair internal lane."
+      "V5 found the selected-lane failure: the Tier 3 FN rescue run was real, authorized, and runtime-valid, but it failed at 12/14 packets and 5/7 pairs.",
+      "V6 patched the failure class and the same selected Tier 3 lane now passes at 14/14 packets and 7/7 pairs."
     ],
     "what_is_not_proven": [
       "V6 has not yet proved a broad benchmark improvement.",
@@ -419,11 +453,12 @@
     ],
     "what_changed_with_v6": [
       "The deterministic layer now checks the source-field authority/scope dependency that V5 missed on the two Tier 3 B-side failures.",
-      "The matching ALLOW siblings still passed in the tiny validation, so the patch did not overblock those two paired examples."
+      "The tiny validation passed first, then the full same-set Tier 3 rerun passed under V6.",
+      "This supports the engineering hardening story, not a public reliability denominator."
     ],
     "next_two_possible_moves": [
-      "Rerun the same 7-pair / 14-packet Tier 3 FN rescue lane under V6 to test whether the failed V5 selected gate is repaired.",
-      "Build a broader V6 validation set first, so the next live run tests the patch beyond the two known miss pairs."
+      "Build a broader V6 validation set first, so the next live run tests the patch beyond the two known miss pairs.",
+      "Keep Phase 1 strict public denominator work separate and continue only with clean blind/balanced packets."
     ]
   },
   "source_map": [
@@ -452,6 +487,9 @@
     "docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_PREFLIGHT_2026_07_05.json",
     "docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_POSTLIVE_ARCHITECTURE_AUDIT_2026_07_05.json",
     "docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014301Z",
-    "docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014145Z"
+    "docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014145Z",
+    "docs/benchmark/HOLOVERIFY_V6_TIER3_FN_HOLO_RESCUE_RERUN_PREFLIGHT_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V6_TIER3_FN_HOLO_RESCUE_RERUN_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+    "docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z"
   ]
 }

@@ -56,7 +56,7 @@ Phase 1 workstreams:
 | Workstream | Purpose | Denominator treatment | Provider approval status |
 |---|---|---|---|
 | Strict public denominator work | Build clean balanced ALLOW/ESCALATE packets toward 762 total | Public denominator only after freeze, clean runtime controls, and trace-bound scoring | Requires separate explicit approval per run |
-| Internal directional rescue work | Validate V5/V6 behavior on selected solo-failure rescue seams | Internal-only; not public FPR/FNR or benchmark denominator | V5 Tier 3 live run completed and failed the selected gate; any V6 rerun or broader validation needs separate explicit approval |
+| Internal directional rescue work | Validate V5/V6 behavior on selected solo-failure rescue seams | Internal-only; not public FPR/FNR or benchmark denominator | V6 Tier 3 selected-lane rerun completed and passed internal repair gate; future live work needs separate explicit approval |
 | Seam mining work | Find and audit new FN_FALSE_ALLOW / FP_OVERBLOCK candidates | Candidate discovery only; no denominator credit by itself | No provider approval from mining artifacts alone |
 
 ## 3. Solo Failure Factory
@@ -235,15 +235,34 @@ V6 meaning:
 
 - V6 patches deterministic source-field authority/scope dependency detection.
 - It addresses the Tier 3 V5 miss class: `V5_SCOPE_DEPENDENCY_NON_DETECTION`.
+- The same selected Tier 3 lane that failed under V5 now passes under V6.
 - It does not yet make a broad benchmark claim.
+
+V6 Tier 3 FN Holo rescue rerun:
+
+| Metric | Value |
+|---|---|
+| Classification | `V6_TIER3_FN_HOLO_RESCUE_RERUN_SELECTED_LANE_REPAIR_PASSED` |
+| Commit | `5c6e70063 benchmark: preserve v6 tier3 fn rerun evidence` |
+| Run folder | `docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z` |
+| Provider calls | 70/70 |
+| Provider failures | 0 |
+| Route | `W1 -> G1 -> W2 -> G2 -> W3` x14 |
+| Packet score | 14/14 |
+| Pair score | 7/7 |
+| Failed packets | `[]` |
+| V5 prior result for same selected lane | 12/14 packets, 5/7 pairs |
+| V6 repair result for same selected lane | 14/14 packets, 7/7 pairs |
+| Scope | Internal selected-lane repair evidence only |
 
 Current scorecard:
 
 - Strict public denominator remains blind-120 only.
 - Old `614` remains stale/historical.
 - Tier 3 V5 FN rescue remains failed-live evidence: 12/14 packets and 5/7 pairs.
-- V6 tiny validation passed, but only on 4 packets / 2 pairs.
-- Next decision is either rerun Tier 3 FN rescue under V6 or build a broader V6 validation set first.
+- V6 tiny validation passed on 4 packets / 2 pairs.
+- V6 Tier 3 FN rerun passed on the same selected lane: 14/14 packets and 7/7 pairs.
+- This supports the engineering hardening story, not a public reliability denominator.
 
 ## 5. Quarantine Register
 
@@ -273,6 +292,7 @@ Stale or invalid lanes:
 - Solo Failure Factory Holo failure lanes and patch-validation lanes: internal architecture/debug evidence only unless separately promoted under a clean denominator rule.
 - Tier 3 V5 FN Holo rescue live run: authorized and runtime-valid but selected-gate failed; internal failed rescue evidence only.
 - V6 tiny patch-validation: internal patch-validation only; not public benchmark evidence.
+- V6 Tier 3 FN rerun: internal selected-lane repair evidence only; not public benchmark evidence.
 
 ## 6. Claim Boundary
 
@@ -292,7 +312,8 @@ Internal-only claims:
 - Tier 2 internal gate restoration after replacement pair.
 - Tier 3 V5 FN Holo rescue completed as an authorized runtime-valid selected-gate failure: 12/14 packets and 5/7 pairs.
 - V6 tiny scope-dependency patch-validation passed on 4/4 packets and 2/2 pairs.
-- V6 addresses the Tier 3 V5 miss class `V5_SCOPE_DEPENDENCY_NON_DETECTION` only within the tiny patch-validation lane so far.
+- V6 addresses the Tier 3 V5 miss class `V5_SCOPE_DEPENDENCY_NON_DETECTION` within the tiny patch-validation lane and the same selected Tier 3 rerun lane.
+- V6 Tier 3 FN rerun passed on the same selected lane that failed under V5: 14/14 packets and 7/7 pairs.
 - Tier 3 targeted-mining solo scout found 2 useful FN pairs, `T3FN-MINE-006` and `T3FN-MINE-010`, for internal directional mining only.
 - Tier 3 targeted-mining solo Scout 2 found 1 useful FN pair, `T3FN2-MINE-003`, for internal directional mining only.
 - Tier 3 targeted-mining solo Scout 3 promoted 2 FN candidates, `T3FN3-MINE-003` and `T3FN3-MINE-009`, for internal directional mining only.
@@ -326,15 +347,18 @@ Forbidden claims:
 - "Scout 3 proves global FNR."
 - "The V6 tiny patch-validation pass is public benchmark evidence."
 - "The V6 tiny patch-validation pass proves global FNR or FP precision."
-- "V6 has been validated broadly beyond the 4-packet / 2-pair tiny patch-validation lane."
+- "The V6 Tier 3 selected-lane rerun is public benchmark evidence."
+- "The V6 Tier 3 selected-lane rerun proves global FNR or FP precision."
+- "The V6 Tier 3 selected-lane rerun proves general model superiority."
+- "V6 has been validated broadly beyond the tiny patch-validation and selected-lane rerun evidence."
 
 ## 7. Plain-English Status For Taylor
 
 What is proven:
 
 - The strict public scorecard is still the blind-120 lane: 120/120 packets, balanced 60 ALLOW and 60 ESCALATE.
-- The V5 Tier 3 FN rescue run was real, authorized, and runtime-valid, but it failed the selected gate at 12/14 packets and 5/7 pairs.
-- The V6 tiny patch-validation fixed the two known Tier 3 V5 miss fixtures in a 4-packet / 2-pair internal lane.
+- V5 found the selected-lane failure: the Tier 3 FN rescue run was real, authorized, and runtime-valid, but it failed at 12/14 packets and 5/7 pairs.
+- V6 patched the failure class and the same selected Tier 3 lane now passes at 14/14 packets and 7/7 pairs.
 
 What is not proven:
 
@@ -345,12 +369,13 @@ What is not proven:
 What changed with V6:
 
 - The deterministic layer now checks the source-field authority/scope dependency that V5 missed on the two Tier 3 B-side failures.
-- The matching ALLOW siblings still passed in the tiny validation, so the patch did not overblock those two paired examples.
+- The tiny validation passed first, then the full same-set Tier 3 rerun passed under V6.
+- This supports the engineering hardening story, not a public reliability denominator.
 
 Next two possible moves:
 
-- Rerun the same 7-pair / 14-packet Tier 3 FN rescue lane under V6 to test whether the failed V5 selected gate is repaired.
 - Build a broader V6 validation set first, so the next live run tests the patch beyond the two known miss pairs.
+- Keep Phase 1 strict public denominator work separate and continue only with clean blind/balanced packets.
 
 ## Source Map
 
@@ -380,3 +405,6 @@ Next two possible moves:
 - V6 tiny post-live architecture audit: `docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_POSTLIVE_ARCHITECTURE_AUDIT_2026_07_05.json`
 - V6 tiny valid scored run: `docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014301Z`
 - V6 tiny failed DNS/network attempt: `docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014145Z`
+- V6 Tier 3 rerun preflight: `docs/benchmark/HOLOVERIFY_V6_TIER3_FN_HOLO_RESCUE_RERUN_PREFLIGHT_2026_07_05.json`
+- V6 Tier 3 rerun runtime-only manifest: `docs/benchmark/HOLOVERIFY_V6_TIER3_FN_HOLO_RESCUE_RERUN_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json`
+- V6 Tier 3 rerun scored run: `docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z`

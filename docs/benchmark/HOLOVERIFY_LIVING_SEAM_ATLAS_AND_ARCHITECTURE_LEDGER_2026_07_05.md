@@ -56,7 +56,7 @@ Phase 1 workstreams:
 | Workstream | Purpose | Denominator treatment | Provider approval status |
 |---|---|---|---|
 | Strict public denominator work | Build clean balanced ALLOW/ESCALATE packets toward 762 total | Public denominator only after freeze, clean runtime controls, and trace-bound scoring | Requires separate explicit approval per run |
-| Internal directional rescue work | Validate V5 behavior on selected solo-failure rescue seams | Internal-only; not public FPR/FNR or benchmark denominator | Tier 3 FN package build is accounting-safe after Scout 3 promotion review; live providers require separate explicit approval |
+| Internal directional rescue work | Validate V5/V6 behavior on selected solo-failure rescue seams | Internal-only; not public FPR/FNR or benchmark denominator | V5 Tier 3 live run completed and failed the selected gate; any V6 rerun or broader validation needs separate explicit approval |
 | Seam mining work | Find and audit new FN_FALSE_ALLOW / FP_OVERBLOCK candidates | Candidate discovery only; no denominator credit by itself | No provider approval from mining artifacts alone |
 
 ## 3. Solo Failure Factory
@@ -122,8 +122,8 @@ Merged clean internal gate:
 - Replacement supplement: 2/2 packets, 1/1 pair.
 - Merged clean internal gate: 15/15 score-valid packet diagnostic and 7/7 clean internal pair gate.
 - Tier 2 gate result: unlocked only as an internal directional FN_FALSE_ALLOW rescue expansion gate.
-- Tier 3 FN build status: `UNLOCKED_ACCOUNTING_SAFE_TO_BUILD_RUNTIME_PACKAGE`.
-- Tier 3 live provider approval status: not granted by this ledger update.
+- Tier 3 FN V5 status: authorized live run completed and failed the selected gate.
+- Tier 3 V5 scope: internal directional FN rescue only; not public benchmark evidence and not a global FNR claim.
 
 Tier 3 FN eligibility audit:
 
@@ -133,7 +133,7 @@ Tier 3 FN eligibility audit:
 | Tier 3 target clean FN pairs | 7 |
 | Deficit | 0 |
 
-Tier 3 FN Holo rescue is unlocked for runtime-package build because the eligible clean FN pool now meets or exceeds the 7-pair target. A live run still requires separate explicit provider approval.
+Tier 3 FN Holo rescue was unlocked for runtime-package build because the eligible clean FN pool met the 7-pair target. The later V5 live run completed under authorization and failed the selected gate; future V6 rerun or expansion still requires separate explicit provider approval.
 
 Expected full HoloGov call count for a 7-pair Tier 3 FN package:
 
@@ -203,6 +203,48 @@ Promoted Scout 3 FN candidates:
 
 Scout 3 promotion updates the internal clean FN pool from 6 pairs to 8 pairs. Tier 3 target remains 7 clean FN pairs, leaving a deficit of 0. This unlocks Tier 3 FN Holo rescue for runtime-package build only; it remains internal directional FN rescue, not public benchmark evidence and not a global FNR claim.
 
+Tier 3 V5 FN Holo rescue live run:
+
+| Metric | Value |
+|---|---|
+| Classification | `AUTHORIZED_RUNTIME_VALID_SELECTED_GATE_FAILED` |
+| Run folder | `docs/benchmark/holoverify_tier3_fn_holo_rescue_2026_07_05/live_runs/run_20260704T195236Z` |
+| Provider calls | 70/70 |
+| Provider failures | 0 |
+| Runtime controls | Trace frozen before scoring; scoring map loaded post-freeze |
+| Packet score | 12/14 |
+| Pair score | 5/7 |
+| Failed packets | `HVSF-FACTORY16-008-B`, `HVSF-FACTORY16-019-B` |
+
+Tier 3 V5 FN Holo rescue is failed-live internal evidence. It is not a Holo win, not public benchmark evidence, not a global FNR claim, and not FP precision evidence.
+
+V6 tiny scope-dependency patch-validation:
+
+| Metric | Value |
+|---|---|
+| Classification | `V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_PASSED` |
+| Commit | `dcf44cd2b benchmark: preserve v6 scope dependency patch validation` |
+| Valid scored run | `docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014301Z` |
+| Failed DNS/network attempt | `docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014145Z` preserved separately and excluded from scoring |
+| Valid-run provider calls | 20/20 |
+| Valid-run provider failures | 0 |
+| Post-hoc score | 4/4 packets, 2/2 pairs |
+| Scope | Internal patch-validation only |
+
+V6 meaning:
+
+- V6 patches deterministic source-field authority/scope dependency detection.
+- It addresses the Tier 3 V5 miss class: `V5_SCOPE_DEPENDENCY_NON_DETECTION`.
+- It does not yet make a broad benchmark claim.
+
+Current scorecard:
+
+- Strict public denominator remains blind-120 only.
+- Old `614` remains stale/historical.
+- Tier 3 V5 FN rescue remains failed-live evidence: 12/14 packets and 5/7 pairs.
+- V6 tiny validation passed, but only on 4 packets / 2 pairs.
+- Next decision is either rerun Tier 3 FN rescue under V6 or build a broader V6 validation set first.
+
 ## 5. Quarantine Register
 
 Packet/key defects:
@@ -229,6 +271,8 @@ Stale or invalid lanes:
 - First full blind-120 execution attempt `run_20260703T020428Z`: invalid failed-closed run preserved by execution lock; not denominator evidence.
 - Tier 2 raw run before quarantine/replacement: preserved raw score, not clean Tier 2 proof by itself.
 - Solo Failure Factory Holo failure lanes and patch-validation lanes: internal architecture/debug evidence only unless separately promoted under a clean denominator rule.
+- Tier 3 V5 FN Holo rescue live run: authorized and runtime-valid but selected-gate failed; internal failed rescue evidence only.
+- V6 tiny patch-validation: internal patch-validation only; not public benchmark evidence.
 
 ## 6. Claim Boundary
 
@@ -246,11 +290,13 @@ Internal-only claims:
 - V5 Tier 1 patch-validation pass.
 - V5 Tier 2 raw 13/14, quarantine, replacement supplement, and merged clean internal gate.
 - Tier 2 internal gate restoration after replacement pair.
-- Tier 3 FN status is accounting-safe to build as a 7-pair / 14-packet runtime package after Scout 3 promotion review.
+- Tier 3 V5 FN Holo rescue completed as an authorized runtime-valid selected-gate failure: 12/14 packets and 5/7 pairs.
+- V6 tiny scope-dependency patch-validation passed on 4/4 packets and 2/2 pairs.
+- V6 addresses the Tier 3 V5 miss class `V5_SCOPE_DEPENDENCY_NON_DETECTION` only within the tiny patch-validation lane so far.
 - Tier 3 targeted-mining solo scout found 2 useful FN pairs, `T3FN-MINE-006` and `T3FN-MINE-010`, for internal directional mining only.
 - Tier 3 targeted-mining solo Scout 2 found 1 useful FN pair, `T3FN2-MINE-003`, for internal directional mining only.
 - Tier 3 targeted-mining solo Scout 3 promoted 2 FN candidates, `T3FN3-MINE-003` and `T3FN3-MINE-009`, for internal directional mining only.
-- A 7-pair / 14-packet full HoloGov Tier 3 FN package expects 70 provider calls: W1 x14, G1 x14, W2 x14, G2 x14, W3 x14.
+- Any future 7-pair / 14-packet full HoloGov Tier 3 FN rerun expects 70 provider calls: W1 x14, G1 x14, W2 x14, G2 x14, W3 x14.
 
 Forbidden claims:
 
@@ -265,8 +311,7 @@ Forbidden claims:
 - "HoloVerify beats all models."
 - "Parse/admissibility-only failures are wrong-verdict failures."
 - "Quarantined packet/key defects can stay in clean denominators."
-- "Tier 3 FN provider approval is allowed now."
-- "Tier 3 FN Holo rescue may run live without separate explicit approval."
+- "Future Tier 3 FN or V6 rescue runs may run live without separate explicit approval."
 - "Tier 3 FN rescue is public benchmark evidence."
 - "Tier 3 FN rescue proves global FNR."
 - "An 8-pair Tier 3 FN run can use the 70-call plan."
@@ -279,6 +324,33 @@ Forbidden claims:
 - "Six clean promoted FN pairs satisfy the seven-pair Tier 3 target."
 - "Scout 3 is public benchmark evidence."
 - "Scout 3 proves global FNR."
+- "The V6 tiny patch-validation pass is public benchmark evidence."
+- "The V6 tiny patch-validation pass proves global FNR or FP precision."
+- "V6 has been validated broadly beyond the 4-packet / 2-pair tiny patch-validation lane."
+
+## 7. Plain-English Status For Taylor
+
+What is proven:
+
+- The strict public scorecard is still the blind-120 lane: 120/120 packets, balanced 60 ALLOW and 60 ESCALATE.
+- The V5 Tier 3 FN rescue run was real, authorized, and runtime-valid, but it failed the selected gate at 12/14 packets and 5/7 pairs.
+- The V6 tiny patch-validation fixed the two known Tier 3 V5 miss fixtures in a 4-packet / 2-pair internal lane.
+
+What is not proven:
+
+- V6 has not yet proved a broad benchmark improvement.
+- V6 has not created a new public denominator.
+- V6 has not proved global FNR reduction, FP precision, or general HoloVerify superiority.
+
+What changed with V6:
+
+- The deterministic layer now checks the source-field authority/scope dependency that V5 missed on the two Tier 3 B-side failures.
+- The matching ALLOW siblings still passed in the tiny validation, so the patch did not overblock those two paired examples.
+
+Next two possible moves:
+
+- Rerun the same 7-pair / 14-packet Tier 3 FN rescue lane under V6 to test whether the failed V5 selected gate is repaired.
+- Build a broader V6 validation set first, so the next live run tests the patch beyond the two known miss pairs.
 
 ## Source Map
 
@@ -301,3 +373,10 @@ Forbidden claims:
 - Tier 3 FN rescue eligibility audit memo: `docs/benchmark/HOLOVERIFY_TIER3_FN_RESCUE_ELIGIBILITY_AUDIT_2026_07_05.md`
 - Tier 3 targeted-mining Scout 3 solo rollup: `docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.json`
 - Tier 3 targeted-mining Scout 3 solo rollup memo: `docs/benchmark/HOLOVERIFY_TIER3_FN_TARGETED_MINING_SCOUT3_SOLO_ROLLUP_2026_07_05.md`
+- Tier 3 V5 FN accounting correction: `docs/benchmark/HOLOVERIFY_TIER3_FN_HOLO_RESCUE_ACCOUNTING_CORRECTION_2026_07_05.json`
+- Tier 3 V5 FN live rollup: `docs/benchmark/HOLOVERIFY_TIER3_FN_HOLO_RESCUE_LIVE_ROLLUP_2026_07_05.json`
+- V6 patch report: `docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_PATCH_REPORT_2026_07_05.json`
+- V6 tiny preflight: `docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_PREFLIGHT_2026_07_05.json`
+- V6 tiny post-live architecture audit: `docs/benchmark/HOLOVERIFY_V6_SCOPE_DEPENDENCY_GATE_TINY_PATCH_VALIDATION_POSTLIVE_ARCHITECTURE_AUDIT_2026_07_05.json`
+- V6 tiny valid scored run: `docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014301Z`
+- V6 tiny failed DNS/network attempt: `docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014145Z`

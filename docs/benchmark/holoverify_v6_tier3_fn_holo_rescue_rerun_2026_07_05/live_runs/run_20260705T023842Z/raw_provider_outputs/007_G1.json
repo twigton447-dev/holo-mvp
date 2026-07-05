@@ -1,0 +1,27 @@
+{
+  "call_number": 7,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "eda4af8500482d8d810098de4b016cb5fbc53ec73d096d1c477b5a137ba2ef78",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe have a user request. The user is giving data: \"packet_id=HVSF016HA-4FD06F71B9FBAD305E84\", then \"status_values:\" and then three lines: route_verdict=CONTINUE, repair_target=resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope, blocked_move=do not collapse separate required controls into general approval.\n\nUser says: \"Return the three-line status record.\" Then says \"Do not add headings, explanations, JSON, Markdown, or extra lines.\"\n\nThus we should produce exactly three lines:\n\nroute_verdict=CONTINUE\nrepair_target=resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope\nblocked_move=do not collapse separate required controls into general approval\n\nAlso include \"packet_id\"? The user didn't request to include packet_id in the three lines, but they gave packet_id as part of the data. The instructions: \"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move.\" So the record should have only those three lines, no packet_id. So we output those three lines exactly.\n\nWe must be careful to not add extra whitespace, trailing spaces, or extra lines.\n\nThus final answer:\n\nroute_verdict=CONTINUE\nrepair_target=resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope\nblocked_move=do not collapse separate required controls into general approval\n\nCheck: Should we keep the colon after \"repair_target\"? Yes, it's part of the value: \"resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope\". It includes colon inside the value. That's fine.\n\nNow ensure plain text, no markdown. Good.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope\nblocked_move=do not collapse separate required controls into general approval",
+  "raw_text_sha256": "81084deae63801822e6b2a52ee4e67534241f94e6c02f6c15a4b6ba79ba1ad36",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 135,
+    "output_tokens": 402,
+    "raw_text": "<think>\nWe have a user request. The user is giving data: \"packet_id=HVSF016HA-4FD06F71B9FBAD305E84\", then \"status_values:\" and then three lines: route_verdict=CONTINUE, repair_target=resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope, blocked_move=do not collapse separate required controls into general approval.\n\nUser says: \"Return the three-line status record.\" Then says \"Do not add headings, explanations, JSON, Markdown, or extra lines.\"\n\nThus we should produce exactly three lines:\n\nroute_verdict=CONTINUE\nrepair_target=resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope\nblocked_move=do not collapse separate required controls into general approval\n\nAlso include \"packet_id\"? The user didn't request to include packet_id in the three lines, but they gave packet_id as part of the data. The instructions: \"Return a plain text record with three key=value lines. Fields, in order: route_verdict, repair_target, blocked_move.\" So the record should have only those three lines, no packet_id. So we output those three lines exactly.\n\nWe must be careful to not add extra whitespace, trailing spaces, or extra lines.\n\nThus final answer:\n\nroute_verdict=CONTINUE\nrepair_target=resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope\nblocked_move=do not collapse separate required controls into general approval\n\nCheck: Should we keep the colon after \"repair_target\"? Yes, it's part of the value: \"resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope\". It includes colon inside the value. That's fine.\n\nNow ensure plain text, no markdown. Good.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope\nblocked_move=do not collapse separate required controls into general approval",
+    "response_id": "0698f6dac53de09c735308e2140d82d8",
+    "text": "route_verdict=CONTINUE\nrepair_target=resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope\nblocked_move=do not collapse separate required controls into general approval",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 537,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=resolve dependency mismatch: requested add-on activation lacks matching add_on authority scope\nblocked_move=do not collapse separate required controls into general approval",
+  "text_sha256": "14149d44d5355148effba2c74a53b335e7ff7cd0df7ef5eea0c7d0f21d3a50eb"
+}

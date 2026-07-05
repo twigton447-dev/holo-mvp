@@ -1,0 +1,27 @@
+{
+  "call_number": 22,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "1f9907992205ac6f9210bcfa3a024d85741f2ec5f3184618d2c9e4ef58c38980",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to parse the user request: \"packet_id=HVSF002-19978E81A913359B0614 status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\" The user wants a plain text record with three key=value lines. Fields in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus we produce:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra whitespace or lines. Possibly we need to preserve exactly those values. The packet_id maybe we should ignore, as it's not part of the requested record. The user says \"Return the three-line status record.\" So just the three lines.\n\nThus final answer: exactly these three lines.\n\nCheck: They gave \"status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs\". So we need to replicate exactly that.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "e03e461ee3ce9b983fb67f735e0f9dcce22fe451172229e9e5a6df0753c7658c",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 119,
+    "output_tokens": 271,
+    "raw_text": "<think>\nWe need to parse the user request: \"packet_id=HVSF002-19978E81A913359B0614 status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs Return the three-line status record.\" The user wants a plain text record with three key=value lines. Fields in order: route_verdict, repair_target, blocked_move. Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\n\nThus we produce:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nWe must ensure no extra whitespace or lines. Possibly we need to preserve exactly those values. The packet_id maybe we should ignore, as it's not part of the requested record. The user says \"Return the three-line status record.\" So just the three lines.\n\nThus final answer: exactly these three lines.\n\nCheck: They gave \"status_values: route_verdict=CONTINUE repair_target=preserve source-grounded reasoning blocked_move=do not invent source IDs\". So we need to replicate exactly that.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0698f73ddc38674de859d96ab7e33542",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 390,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

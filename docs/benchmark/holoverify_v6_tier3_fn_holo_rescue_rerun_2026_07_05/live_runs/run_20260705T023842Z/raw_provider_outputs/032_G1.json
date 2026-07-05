@@ -1,0 +1,27 @@
+{
+  "call_number": 32,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "ff3e52219d849c759d04c8c38e0cc99ea8898e474d7d5fa3968fdc48e7f88984",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to parse the user request. They provide a packet_id and status_values. They request: \"Return the three-line status record.\" They gave the fields: route_verdict, repair_target, blocked_move. They want a plain text record with three key=value lines. So we should output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut check if they want exactly that, no extra lines. The fields: \"route_verdict, repair_target, blocked_move\" in that order. Should be exactly those lines, no headings, no explanations, no JSON, no Markdown, no extra lines. Also note the user wrote \"route_verdict=CONTINUE\" etc. So we should produce exactly three lines.\n\nThe user also provided \"packet_id=T3FNSCOUT-0D9094EBD0223307FD74\". Should we include that? The request says \"Return the three-line status record.\" The status record includes only those three fields, not the packet_id. So likely they want just those three lines. The user gave status_values: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs. So we just return those three lines.\n\nWe must ensure we use correct formatting: key=value with no extra spaces unless it's part of the value. Should be exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nPotential nuance: preserve source-grounded reasoning is the value; there are spaces, it's okay. The blocked_move also has spaces. Should we keep the period at the end? They have \"do not invent source IDs\". No period. We'll match exactly.\n\nThus output.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "raw_text_sha256": "c1b89a53a84e76cf157497cc6f43eb6eda772a888e294c4ade2aa8ee2c882506",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 122,
+    "output_tokens": 401,
+    "raw_text": "<think>\nWe need to parse the user request. They provide a packet_id and status_values. They request: \"Return the three-line status record.\" They gave the fields: route_verdict, repair_target, blocked_move. They want a plain text record with three key=value lines. So we should output:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nBut check if they want exactly that, no extra lines. The fields: \"route_verdict, repair_target, blocked_move\" in that order. Should be exactly those lines, no headings, no explanations, no JSON, no Markdown, no extra lines. Also note the user wrote \"route_verdict=CONTINUE\" etc. So we should produce exactly three lines.\n\nThe user also provided \"packet_id=T3FNSCOUT-0D9094EBD0223307FD74\". Should we include that? The request says \"Return the three-line status record.\" The status record includes only those three fields, not the packet_id. So likely they want just those three lines. The user gave status_values: route_verdict=CONTINUE, repair_target=preserve source-grounded reasoning, blocked_move=do not invent source IDs. So we just return those three lines.\n\nWe must ensure we use correct formatting: key=value with no extra spaces unless it's part of the value. Should be exactly:\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs\n\nPotential nuance: preserve source-grounded reasoning is the value; there are spaces, it's okay. The blocked_move also has spaces. Should we keep the period at the end? They have \"do not invent source IDs\". No period. We'll match exactly.\n\nThus output.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "response_id": "0698f77a861566f7164d8c9d49c16b33",
+    "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 523,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=preserve source-grounded reasoning\nblocked_move=do not invent source IDs",
+  "text_sha256": "a0926ea3c70f5b381b0388458254f6180340d9cfefc74f7084a08cbf35603389"
+}

@@ -1,0 +1,156 @@
+{
+  "title": "Borrowed Discipline",
+  "date": "2026-07-05",
+  "callsign": "Standards Archaeologist",
+  "scope": {
+    "kind": "benchmark_methodology_only",
+    "providers_run": false,
+    "holo_live_run": false,
+    "solo_live_run": false,
+    "gov_run": false,
+    "judges_run": false,
+    "public_site_edits": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "rules": [
+    {
+      "rule_id": "BD-001",
+      "name": "Name the lane before the score",
+      "source_benchmark": [
+        "SWE-bench Verified",
+        "LiveCodeBench",
+        "METR",
+        "MLPerf"
+      ],
+      "source_practice": "Verified or hard subsets are defined by explicit admission, filtering, timing, or division rules before results are claimed.",
+      "adapted_holoverify_rule": "Every HoloVerify packet must have a predeclared lane, selection rule, exclusion rule, and claim class before it can affect public wording.",
+      "allowed_wording": [
+        "The current public denominator is blind-120 only.",
+        "This lane is hard-case/stress-selected under a disclosed 1-in-6 solo-failure admission rule.",
+        "Internal repair evidence is useful hardening evidence but not public FPR/FNR denominator evidence."
+      ],
+      "forbidden_wording": [
+        "The stress-selected lane estimates natural population FPR/FNR.",
+        "The 300 packets extend blind-120 even though they were selected from known solo failures.",
+        "The old 614 result can be combined with blind-120."
+      ],
+      "required_evidence": [
+        "Admission manifest with packet ids, lane labels, truth balance, domain tags, source pool, and inclusion/exclusion criteria",
+        "Freeze hash or root hash for the packet set",
+        "Runtime manifest showing truth-free packet ids and inputs",
+        "Scoring map hash preserved separately from runtime",
+        "Quarantine and exclusion log"
+      ]
+    },
+    {
+      "rule_id": "BD-002",
+      "name": "Show the spread, not only the average",
+      "source_benchmark": [
+        "SWE-bench",
+        "LiveCodeBench",
+        "HELM",
+        "METR",
+        "Artificial Analysis AA-Omniscience"
+      ],
+      "source_practice": "Benchmarks expose resolved-instance matrices, scenario or time-window breakdowns, multi-metric grids, task-level success curves, repeated attempts, or separate accuracy and hallucination components.",
+      "adapted_holoverify_rule": "Report packet-level, sibling-level, and model-family-level inconsistency by lane; never let a single average hide wrong verdicts, parse failures, source failures, or quarantines.",
+      "allowed_wording": [
+        "Each stress pair reports six solo opportunities and the HoloVerify result.",
+        "Wrong verdicts, parse/admissibility failures, source/evidence failures, and quarantines are distinct cells.",
+        "The lane average is shown together with the packet matrix and denominator."
+      ],
+      "forbidden_wording": [
+        "Solo was X percent right, without showing which packets failed.",
+        "Parse failures are ignored because they are not wrong verdicts.",
+        "Only the aggregate score is needed."
+      ],
+      "required_evidence": [
+        "Packet-by-model result matrix",
+        "Separate status codes for wrong verdict, parse/admissibility failure, source/evidence failure, quarantine, not run, and pass",
+        "Sibling-pair grouping and ALLOW/ESCALATE truth balance",
+        "Lane-scoped denominator table",
+        "Trace links or trace identifiers for each counted result"
+      ]
+    },
+    {
+      "rule_id": "BD-003",
+      "name": "Freeze construction rules and audit artifacts",
+      "source_benchmark": [
+        "MLPerf",
+        "LiveCodeBench",
+        "SWE-bench",
+        "HELM"
+      ],
+      "source_practice": "Rules, release versions, reference implementations, scoring commands, prompt/completion artifacts, fixed seeds, replication requirements, and audits constrain result manipulation.",
+      "adapted_holoverify_rule": "A HoloVerify result receives public-denominator credit only if construction rules, runtime controls, scoring rules, and audit artifacts were frozen before score interpretation.",
+      "allowed_wording": [
+        "Runtime inputs were truth-free and final scoring was trace-bound post-hoc.",
+        "Final wrong answers count as FP or FN after trace freeze.",
+        "Packet replacement or post-hoc lane movement invalidates public-denominator credit."
+      ],
+      "forbidden_wording": [
+        "We repaired the prompt after seeing outcomes and kept the same denominator.",
+        "Known misses were excluded as unrepresentative after the run.",
+        "The scoring map was available to runtime gates."
+      ],
+      "required_evidence": [
+        "Prompt and deterministic-gate version identifiers",
+        "Worker/Gov route or architecture version identifier",
+        "Predeclared scoring rules and FP/FN definitions",
+        "Trace-bound post-hoc scoring artifact",
+        "Audit log proving no answer-key access at runtime",
+        "Diff or version note for any prompt, gate, or scoring change"
+      ]
+    }
+  ],
+  "expansion_admission": {
+    "current_public_denominator": "blind-120",
+    "target_packet_count": 300,
+    "clean_public_lane_requirements": [
+      "Admit 180 new blind packets before score interpretation",
+      "Balance the added packets as 90 ALLOW and 90 ESCALATE",
+      "Preserve sibling structure and domain tags",
+      "Publish all packet ids, freeze hashes, runtime manifests, scoring-map hashes, trace locations, quarantine rules, and FP/FN accounting",
+      "Do not publish blind-300 as the public denominator until the clean lane is complete"
+    ],
+    "stress_lane_requirements": [
+      "Disclose the 1-in-6 solo-failure admission rule before construction or publication",
+      "Label the lane hard-case/stress-selected",
+      "Report stress coverage and failure-seam evidence only",
+      "Do not call the lane a natural population FPR/FNR denominator",
+      "Do not combine the lane with blind-120 risk bounds"
+    ],
+    "forbidden_sources_for_padding": [
+      "old 614 material",
+      "V5/V6 selected repair runs",
+      "Solo Failure Factory inventory",
+      "canaries",
+      "preflights",
+      "packet/key quarantine material"
+    ]
+  },
+  "cherry_picking_or_score_inflation": [
+    "Calling a 1-in-6 solo-failure-selected lane a natural FPR/FNR denominator",
+    "Disclosing stress selection only after observing favorable HoloVerify outcomes",
+    "Replacing, excluding, or moving misses after trace freeze",
+    "Combining blind-120 with old 614, V5/V6 repair evidence, canaries, or stress inventory",
+    "Hiding parse, admissibility, source, or evidence failures as harmless non-attempts",
+    "Reporting only an aggregate score when packet-level or model-level inconsistency exists",
+    "Changing prompts, deterministic gates, worker routes, scoring rules, or quarantine rules after outcomes are known without opening a new lane",
+    "Letting runtime inputs, Gov, deterministic gates, or final selection see ALLOW/ESCALATE truth",
+    "Publishing a public denominator without a manifest, root hash, trace map, scoring map, and quarantine log"
+  ],
+  "source_links": [
+    "https://www.swebench.com/SWE-bench/",
+    "https://openai.com/index/introducing-swe-bench-verified/",
+    "https://livecodebench.github.io/",
+    "https://github.com/LiveCodeBench/LiveCodeBench",
+    "https://github.com/stanford-crfm/helm",
+    "https://arxiv.org/abs/2211.09110",
+    "https://raw.githubusercontent.com/mlcommons/inference_policies/master/inference_rules.adoc",
+    "https://metr.org/time-horizons/",
+    "https://artificialanalysis.ai/methodology/intelligence-benchmarking"
+  ]
+}

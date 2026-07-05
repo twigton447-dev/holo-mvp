@@ -1,0 +1,115 @@
+# HoloVerify Narrative Engineering Memo
+
+Date: 2026-07-05
+
+Callsign: Narrative Engineer
+
+Scope: plain-English copy package for HoloOps review. No providers, Holo live, solo live, Gov, judges, public site edits, staging, commits, or pushes were performed.
+
+## Headline Options
+
+1. The Last Click Needs More Than A Solo Model
+2. When One Red Dot Is Enough
+3. AI Can Analyze. Final Action Needs A Higher Bar.
+
+## Above The Fold
+
+AI is useful before the last click. It is not yet steady enough to own the last click. In our hard cases, solo models usually look competent. Then a red dot appears: a wrong block, a wrong allow, or an unusable answer. One red dot can be enough when the next step pays money, grants access, releases care, or changes a record. Holo is built for that narrow moment. It does not make the model magic. It forces the final call through checks that must cover the red dots, and it keeps the misses visible.
+
+## Main Benchmark Narrative
+
+### Problem
+
+Autonomous execution is attractive because the model can read, compare, and move fast. That is useful for analysis.
+
+But analysis is not the same as final action.
+
+Final action is the moment where the system approves, releases, grants, changes, or blocks something in the real world. A solo AI can be right most of the time and still be too brittle for that moment. The bad cases are not always dramatic. Sometimes the answer is almost right. Sometimes it blocks a valid action. Sometimes it allows one that still has a missing record. Sometimes it gives an answer that cannot be scored cleanly.
+
+For high-stakes final action, scattered failure is still failure.
+
+### Evidence
+
+The visual should start with the red/green matrix.
+
+Each square is one matched pair of frozen test cases. One side is an ALLOW case, where the records support the action. The other side is an ESCALATE case, where they do not. Inside the square are six solo opportunities: three solo models on the ALLOW side, and the same three solo models on the ESCALATE side.
+
+Most dots may be green. That matters. Solos are not useless.
+
+But the stress lane is built from the red and amber dots. The rule is simple: a hard-case pair enters that lane only if at least one of the six solo opportunities fails. That is the 1-in-6 rule.
+
+This lane is stress-selected seam evidence. It shows where solo execution breaks under pressure. It is not the public error-rate denominator for false approvals or false blocks. The public benchmark result remains separate: blind-120, balanced 60 ALLOW and 60 ESCALATE, where Holo scored 120/120 under the current clean public lane.
+
+### Solution
+
+Then show the same matrix with the Holo overlay.
+
+Holo's job is narrow. It should cover red dots without hiding misses. If Holo covers a solo failure, mark it with a visible green ring or overlay. If Holo also fails, leave it red. If a case is defective or not admitted, mark it gray and keep it out of the score.
+
+That matters because Holo did not start perfect. The hardening map should show partial red honestly. A V5 selected lane exposed a miss class. That miss was preserved, not erased. V6 added mechanism-level checks for that class. The same selected lane was rerun under bounded internal labels and then passed 14/14 packets, 7/7 pairs.
+
+That is the story: not magic, not proof of safe AI, and not a universal model claim. It is a control layer being forced to face the red dots, patch the mechanism, and keep the accounting clean.
+
+### Next Milestone
+
+The next public milestone should be 300 tests built under disclosed rules: 150 ALLOW and 150 ESCALATE. The stress lane should remain separately labeled. No case should enter that stress lane unless it has already tripped at least one solo opportunity under the 1-in-6 rule.
+
+## Matrix Section Copy
+
+Show the matrix before explaining the machinery.
+
+Green means the solo model made the right final call in a usable form. Red means the solo model made the wrong final call. Amber means the answer could not be used or scored cleanly. Gray means the case is excluded.
+
+The important thing is the pattern. The field is mostly green, but it is speckled. Those red and amber specks are the problem. A solo model can look strong in aggregate and still fail at the exact point where the system is about to pay, grant, release, or change something.
+
+Stress-lane admission rule: a pair enters only when at least one of six solo opportunities fails. That is stress selection, not a population sample.
+
+## Holo Overlay Section Copy
+
+Now turn on Holo.
+
+Do not move the solo dots. Keep them visible. Add Holo as an overlay.
+
+A green ring means Holo covered a solo failure in the labeled lane. A red ring means Holo failed too or the failure is not yet closed. Gray stays gray. The overlay should make the accounting harder to cheat, not easier.
+
+The viewer should be able to see three things at once: where solo failed, where Holo covered it, and where Holo still needs work.
+
+## Tuning And Hardening Section Copy
+
+The hardening map should include partial red.
+
+Holo did not begin as a finished proof. Some selected internal lanes failed. Those failures were preserved. They were named. They were patched at the mechanism level. Then the same bounded lane was rerun under a separate internal label.
+
+For example, the V5 selected false-negative rescue lane exposed a scope/dependency miss. V6 added source-field authority and scope checks. The selected rerun then passed 14/14 packets and 7/7 pairs.
+
+That result is internal hardening evidence. It is not a public benchmark denominator. It says the failure class was found, repaired, and retested under bounded conditions.
+
+## 300-Test Milestone Copy
+
+Next milestone: 300 clean tests under disclosed rules.
+
+Build 150 ALLOW tests and 150 ESCALATE tests. Keep the public lane balanced. Keep the stress lane separate. Do not admit a stress case unless it already failed at least one of six solo opportunities.
+
+The goal is not to make the chart prettier. The goal is to make the rules harder to misunderstand.
+
+## Claim-Safety Warnings
+
+- Do not say Holo proves safe AI.
+- Do not say solo models are useless.
+- Do not use the stress matrix as the public false-approval or false-block rate.
+- Do not say 4-10% is a universal real-world rate unless it is tied to a specific file-backed lane.
+- Do not combine the old 614 result with blind-120.
+- Keep blind-120 public results separate from stress-selected evidence.
+- Keep V5/V6 rescue and repair lanes labeled as internal hardening unless separately admitted.
+- Do not hide Holo misses behind a green aggregate.
+- Do not count gray quarantined or defective cases.
+- Do not claim broad model superiority.
+
+## Source Map
+
+- `docs/benchmark/HOLOVERIFY_BENCHMARK_STORY_AND_STRESS_MATRIX_RECOMMENDATION_2026_07_05.md`
+- `docs/benchmark/HOLOVERIFY_DOT_MATRIX_VISUAL_SPEC_2026_07_05.md`
+- `docs/benchmark/HOLOVERIFY_DOT_MATRIX_LLM_SPEC_2026_07_05.json`
+- `docs/benchmark/HOLOVERIFY_BLIND_120_CLEAN_SCOREBOARD_ROLLUP_2026_07_03.md`
+- `docs/benchmark/HOLOVERIFY_LIVING_SEAM_ATLAS_AND_ARCHITECTURE_LEDGER_2026_07_05.md`
+- `docs/benchmark_summary.md`

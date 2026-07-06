@@ -1,0 +1,88 @@
+{
+  "classification": "HOLOVERIFY_STRESS_MATRIX_WAVE1_FP_OVERBLOCK_HOLO_RESCUE_PREFLIGHT_REPORT_V0",
+  "date": "2026-07-05",
+  "status": "PASS",
+  "label": "HOLOVERIFY_STRESS_MATRIX_WAVE1_FP_OVERBLOCK_HOLO_RESCUE_V0",
+  "claim_boundary": {
+    "internal_wave1_fp_overblock_holo_rescue_only": true,
+    "public_benchmark_evidence": false,
+    "global_fpr_or_fnr_claim": false,
+    "fp_precision_evidence": false,
+    "natural_production_rate_evidence": false
+  },
+  "source_inputs": {
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_WAVE1_RESCUE_CURATION_2026_07_05.md": "f754b1097edcce80b14efbd39e59e605bf87dd9ad29d2f6f21527044d4aa883c",
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_WAVE1_RESCUE_CURATION_2026_07_05.json": "a343b09c872e6a8d27621d08f2ddb21a22c290e19243c8f40391bbdc7b35c837",
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE1_SOLO_ROLLUP_2026_07_05.json": "ec1d6fb9c06057267d06a503151302fcd023f363092ebc334eea329a25cde8f7",
+    "docs/benchmark/holoverify_stress_matrix_expansion_wave1_solo_scout_runs_2026_07_05/run_20260705T215904Z/stress_matrix_wave1_solo_posthoc_score.json": "8290f722aa228c5acef7ea3589320245761de14a0f23a94235680f573937febc"
+  },
+  "selected_pairs": [
+    "HVSM-W1-005",
+    "HVSM-W1-011",
+    "HVSM-W1-019",
+    "HVSM-W1-009",
+    "HVSM-W1-013"
+  ],
+  "runtime_binding": {
+    "runtime_only_manifest": "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_WAVE1_FP_OVERBLOCK_HOLO_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+    "runtime_manifest_sha256": "ab8eba80b1423db68acc04b9497298d4e7c22384318fc6570c26ecbca9e9d586",
+    "posthoc_scoring_map": "docs/benchmark/holoverify_stress_matrix_wave1_fp_overblock_holo_rescue_2026_07_05/holoverify_stress_matrix_wave1_fp_overblock_holo_rescue_scoring_map_2026_07_05.json",
+    "posthoc_scoring_map_sha256": "5d263b161a5be73530781f291a4971bcfa1301c830ffa42a5da5f456c17409bb",
+    "selector": "SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05",
+    "selector_sha256": "87c7774d37399d3d786585e1a81dff8eb61f181a0b3e1e86b3f103dd1ab22be2",
+    "worker_contract": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+    "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37",
+    "expected_provider_calls": 50,
+    "expected_route": ["W1", "G1", "W2", "G2", "W3"],
+    "expected_provider_calls_by_role": {
+      "W1": 10,
+      "G1": 10,
+      "W2": 10,
+      "G2": 10,
+      "W3": 10
+    }
+  },
+  "canonical_preflight": {
+    "folder": "docs/benchmark/holoverify_stress_matrix_wave1_fp_overblock_holo_rescue_2026_07_05/live_runs/preflight_20260705T232041Z",
+    "preflight_json": "docs/benchmark/holoverify_stress_matrix_wave1_fp_overblock_holo_rescue_2026_07_05/live_runs/preflight_20260705T232041Z/wave1_fp_overblock_holo_rescue_preflight.json",
+    "preflight_json_sha256": "82c5b420dd70ebb95d581721ef82fd8e0e91fde8154440595c4717857e047398",
+    "prompt_probe_trace": "docs/benchmark/holoverify_stress_matrix_wave1_fp_overblock_holo_rescue_2026_07_05/live_runs/preflight_20260705T232041Z/preflight_prompt_probe/TRACE_CALLS.jsonl",
+    "prompt_probe_trace_sha256": "8a5f772a99aa139d75c346844aad1261751af79f87e451e62ef3d88dd6946666",
+    "prompt_probe_results": "docs/benchmark/holoverify_stress_matrix_wave1_fp_overblock_holo_rescue_2026_07_05/live_runs/preflight_20260705T232041Z/preflight_prompt_probe/blind_canary_runtime_results.json",
+    "prompt_probe_results_sha256": "36d871db3f45d71050504aa2b3cf3143343c7a27fc61b5abf0b85deddb3e6210"
+  },
+  "checks": {
+    "runtime_manifest_json_parse": true,
+    "runtime_manifest_packet_count": 10,
+    "runtime_manifest_packet_keys_only": [
+      "opaque_runtime_id",
+      "runtime_payload_ref",
+      "runtime_payload_sha256"
+    ],
+    "runtime_manifest_truth_free": true,
+    "runtime_manifest_scoring_free": true,
+    "both_siblings_required_for_pair_credit": true,
+    "prompt_probe_call_count": 50,
+    "prompt_probe_packet_count": 10,
+    "prompt_probe_sequence_per_packet": ["W1", "G1", "W2", "G2", "W3"],
+    "prompt_probe_role_counts": {
+      "W1": 10,
+      "G1": 10,
+      "W2": 10,
+      "G2": 10,
+      "W3": 10
+    },
+    "selector_trace_visible": true,
+    "worker_contract_trace_visible": true,
+    "live_wrapper_scoring_map_path_before_trace_freeze": false,
+    "mixed_registration_json_before_trace_freeze": false,
+    "posthoc_scoring_trace_bound_only": true,
+    "solo_calls_disabled": true,
+    "judge_calls_disabled": true,
+    "substitutions_enabled": false,
+    "provider_trace_created_during_package_build": false,
+    "raw_provider_outputs_created_during_package_build": false,
+    "py_compile_pass": true
+  },
+  "future_approval_sentence": "I approve live provider execution for HOLOVERIFY_STRESS_MATRIX_WAVE1_FP_OVERBLOCK_HOLO_RESCUE_V0 using only runtime-only manifest docs/benchmark/HOLOVERIFY_STRESS_MATRIX_WAVE1_FP_OVERBLOCK_HOLO_RESCUE_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json with SHA-256 ab8eba80b1423db68acc04b9497298d4e7c22384318fc6570c26ecbca9e9d586, selector SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05 hash 87c7774d37399d3d786585e1a81dff8eb61f181a0b3e1e86b3f103dd1ab22be2, worker contract WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04 hash 5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37, and exactly 50 provider calls: W1 xai/grok-3-mini x10, G1 minimax/MiniMax-M2.5-highspeed x10, W2 openai/gpt-5.4-mini x10, G2 minimax/MiniMax-M2.5-highspeed x10, W3 minimax/MiniMax-M2.5-highspeed x10. INTERNAL WAVE 1 FP OVERBLOCK HOLO RESCUE ONLY; not public benchmark evidence, not a global FPR/FNR claim, not FP precision evidence, and not natural production rate evidence. No solo, no judges, no scoring map before trace freeze, no mixed registration JSON before trace freeze, no substitutions, no public claims."
+}

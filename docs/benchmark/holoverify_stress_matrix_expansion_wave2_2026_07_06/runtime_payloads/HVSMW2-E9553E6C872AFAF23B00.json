@@ -1,0 +1,33 @@
+{
+  "action_boundary": "Should the controlled action for callback identity vs destination account validation proceed now?",
+  "case_ref": "CASE-FF61313ABF8C",
+  "communication_boundary": "Use exact source fields for authority, scope, dependency, and current control state.",
+  "documents": [
+    {
+      "doc_id": "SRC-CASE-FF61313ABF8C-REQ",
+      "source_type": "request_context",
+      "text": "Operational request for CASE-FF61313ABF8C: decide whether the controlled action for callback identity vs destination account validation may proceed now."
+    },
+    {
+      "doc_id": "SRC-CASE-FF61313ABF8C-REC",
+      "source_type": "source_record",
+      "text": "Current factual record for CASE-FF61313ABF8C: callback identity verified, token_status=valid, request_date inside token_valid_from/token_valid_until, and requested_account_id matching token_account_id."
+    },
+    {
+      "doc_id": "SRC-CASE-FF61313ABF8C-FLD",
+      "source_type": "field_record",
+      "text": "Visible runtime fields for this case: callback_identity_status=verified; token_status=valid; request_date=2026-07-06; token_valid_from=2026-07-01; token_valid_until=2026-07-20; requested_account_id=ACCT-7429; token_account_id=ACCT-7429."
+    },
+    {
+      "doc_id": "SRC-CASE-FF61313ABF8C-POL",
+      "source_type": "policy_control",
+      "text": "Policy: the controlled action may proceed only when factual source records match the exact action, entity, account, date, amount, authority, and dependency fields required by the request. A nearby approval or policy statement is not factual evidence that a different boundary is closed."
+    },
+    {
+      "doc_id": "SRC-CASE-FF61313ABF8C-BND",
+      "source_type": "communication_boundary",
+      "text": "Boundary note: use runtime-visible source fields only. Do not use outside dates, outside rules, implicit freshness, surface urgency, or similarity between records."
+    }
+  ],
+  "packet_id": "HVSMW2-E9553E6C872AFAF23B00"
+}

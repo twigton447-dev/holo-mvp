@@ -1,0 +1,33 @@
+{
+  "action_boundary": "Should the controlled action for consult authorization vs infusion activation proceed now?",
+  "case_ref": "CASE-C5AF122F8142",
+  "communication_boundary": "Use exact source fields for authority, scope, dependency, and current control state.",
+  "documents": [
+    {
+      "doc_id": "SRC-CASE-C5AF122F8142-REQ",
+      "source_type": "request_context",
+      "text": "Operational request for CASE-C5AF122F8142: decide whether the controlled action for consult authorization vs infusion activation may proceed now."
+    },
+    {
+      "doc_id": "SRC-CASE-C5AF122F8142-REC",
+      "source_type": "source_record",
+      "text": "Current factual record for CASE-C5AF122F8142: payer authorization covers infusion drug, date window, site, and quantity."
+    },
+    {
+      "doc_id": "SRC-CASE-C5AF122F8142-FLD",
+      "source_type": "field_record",
+      "text": "Visible runtime fields for this case: requested_action_scope=printed_in_source_record; authority_scope=printed_in_source_record; entity_or_account_scope=printed_in_source_record; time_amount_or_environment_scope=printed_in_source_record; release_or_hold_dependency=printed_in_source_record."
+    },
+    {
+      "doc_id": "SRC-CASE-C5AF122F8142-POL",
+      "source_type": "policy_control",
+      "text": "Policy: the controlled action may proceed only when factual source records match the exact action, entity, account, date, amount, authority, and dependency fields required by the request. A nearby approval or policy statement is not factual evidence that a different boundary is closed."
+    },
+    {
+      "doc_id": "SRC-CASE-C5AF122F8142-BND",
+      "source_type": "communication_boundary",
+      "text": "Boundary note: use runtime-visible source fields only. Do not use outside dates, outside rules, implicit freshness, surface urgency, or similarity between records."
+    }
+  ],
+  "packet_id": "HVSMW2-4CCA3D7C9D3059F74740"
+}

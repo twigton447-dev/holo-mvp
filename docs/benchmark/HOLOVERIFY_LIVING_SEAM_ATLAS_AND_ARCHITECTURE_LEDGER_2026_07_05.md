@@ -350,7 +350,61 @@ Current V7 public claim boundary:
 - There is no V7 FP precision claim.
 - There is no V7 production safety certification.
 
-## 6. Quarantine Register
+## 6. Wave 2 Stress Matrix Status
+
+Wave 2 design:
+
+| Metric | Value |
+|---|---:|
+| Design commit | `0dcc219f5880b2af13db38ae473a9f401e04e7d9` |
+| Pairs | 30 |
+| Packets | 60 |
+| Clinical & Regulated Activation pairs | 9 |
+| Banking, KYC & Risk pairs | 7 |
+| Operations, Insurance & Industrial pairs | 6 |
+| Legal, Privacy & Regulatory pairs | 5 |
+| Public Sector, Benefits & Grants pairs | 3 |
+| ALLOW packets | 30 |
+| ESCALATE packets | 30 |
+
+The ALLOW/ESCALATE split lives in the scoring map only. Runtime artifacts must remain truth-free.
+
+Wave 2 freeze:
+
+| Metric | Value |
+|---|---|
+| Freeze commit | `69b578e511fb94928b06e4c27e9ce081611b19e5` |
+| Runtime manifest SHA-256 | `428bdd3e1e24e2538bfc6e37989ff741e3efa2749da7dc3b86c863ead90fb39c` |
+| Scoring map SHA-256 | `edea242aed13d949b977779f19fbbeb91ec89d08103be8e5be8d2df1b781289a` |
+| Freeze root | `3717076340e74cbec8842d7479b21ae66172d3ac311c2cc1dec126de29c195b3` |
+| Pre-live architecture | PASS |
+| Status | frozen but unrun |
+
+Wave 2 live attempt:
+
+| Metric | Value |
+|---|---|
+| Blocked-attempt commit | `8909b93436ecb399dc32e0e26007891982d07fc3` |
+| Status | `LIVE_EXECUTION_BLOCKED_BY_POLICY_BEFORE_PROVIDER_CALLS` |
+| Actual provider calls | 0 |
+| Live run folder | none |
+| `TRACE_PROVIDER_CALLS.jsonl` | absent |
+| Raw provider outputs | absent |
+| Scoring | not run |
+| Wave 2 solo result | none |
+
+The Wave 2 live attempt is an operational policy block before provider contact. It is not a failed solo result, not a failed model result, and not a stress-matrix result.
+
+Current Wave 2 public claim boundary:
+
+- Wave 2 is frozen but unrun.
+- There is no Wave 2 public benchmark evidence.
+- There is no Wave 2 stress-matrix result yet.
+- Strict public denominator remains blind-120 only.
+- There is no Wave 2 global FPR/FNR claim.
+- There is no Wave 2 production-rate claim.
+
+## 7. Quarantine Register
 
 Packet/key defects:
 
@@ -383,8 +437,10 @@ Stale or invalid lanes:
 - Wave 1 Top 5 FP-overblock Holo rescue: failed internal hardening evidence only; not a Holo win or public benchmark evidence.
 - V7 tiny preflight: preflight-ready package only; no live validation result exists.
 - V7 blocked live attempt: policy block before provider contact; no provider calls, no raw outputs, no scoring, and no live validation result.
+- Wave 2 freeze: frozen but unrun; not public benchmark evidence and not a stress-matrix result.
+- Wave 2 blocked live attempt: policy block before provider contact; no provider calls, no raw outputs, no scoring, and no Wave 2 solo result.
 
-## 7. Claim Boundary
+## 8. Claim Boundary
 
 Public-safe claims:
 
@@ -413,6 +469,8 @@ Internal-only claims:
 - V7 hardening is committed internal hardening for false-blocker suppression, with selector `SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05`.
 - V7 tiny preflight is package-ready with expected 30 calls, but no live validation result exists.
 - The V7 live attempt was blocked by policy before provider calls; actual calls were 0.
+- Wave 2 stress-matrix expansion is designed and frozen: 30 pairs / 60 packets, with 30 ALLOW and 30 ESCALATE in the scoring map only.
+- Wave 2 live execution was blocked by policy before provider calls; actual provider calls were 0 and no Wave 2 solo result exists.
 
 Forbidden claims:
 
@@ -455,8 +513,14 @@ Forbidden claims:
 - "V7 tiny preflight is a live validation result."
 - "The V7 blocked live attempt is a failed Holo run or failed model run."
 - "V7 proves global FPR/FNR, FP precision, production safety, or general model superiority."
+- "Wave 2 is public benchmark evidence."
+- "Wave 2 has a stress-matrix result."
+- "Wave 2 has a solo result."
+- "Wave 2 proves global FPR/FNR or production-rate prevalence."
+- "Wave 2 can be added to the public denominator."
+- "The Wave 2 blocked live attempt is a failed solo run or failed model run."
 
-## 8. Plain-English Status For Taylor
+## 9. Plain-English Status For Taylor
 
 What is proven:
 
@@ -465,6 +529,7 @@ What is proven:
 - V6 patched the failure class and the same selected Tier 3 lane now passes at 14/14 packets and 7/7 pairs.
 - Wave 1 exposed an FP-overblock seam where Holo V6 still failed on 3 ALLOW siblings in the Top 5 rescue lane.
 - V7 hardening was implemented and passed no-provider validation, but the live V7 attempt was blocked before any provider calls.
+- Wave 2 is designed and frozen as a 30-pair / 60-packet internal stress-matrix expansion, but it has not run.
 
 What is not proven:
 
@@ -473,6 +538,7 @@ What is not proven:
 - V6 has not proved global FNR reduction, FP precision, or general HoloVerify superiority.
 - V7 has not produced a live validation result.
 - V7 has not created public benchmark evidence, a Holo win, global FPR/FNR evidence, FP precision evidence, or production safety certification.
+- Wave 2 has not produced a solo scout result or any public benchmark evidence.
 
 What changed with V6:
 
@@ -481,12 +547,14 @@ What changed with V6:
 - This supports the engineering hardening story, not a public reliability denominator.
 - V7 is the next hardening step for false blockers created and preserved on ALLOW packets.
 - The current environment blocked the live V7 run before provider contact, so the V7 state is preflight-ready plus no-provider-tested, not live-validated.
+- Wave 2 is now frozen for future internal stress-matrix scouting, but the current environment blocked the live attempt before provider contact.
 
 Next two possible moves:
 
 - Build a broader V6 validation set first, so the next live run tests the patch beyond the two known miss pairs.
 - Keep Phase 1 strict public denominator work separate and continue only with clean blind/balanced packets.
 - If V7 live validation is still desired, move it to an approved environment or process that is allowed to export the runtime packet contents to providers.
+- If Wave 2 solo scouting is still desired, move it to an approved environment or process that is allowed to export the runtime packet contents to providers.
 
 ## Source Map
 
@@ -529,3 +597,9 @@ Next two possible moves:
 - V7 tiny preflight: `docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_PREFLIGHT_2026_07_05.json`
 - V7 tiny runtime-only manifest: `docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json`
 - V7 blocked live-attempt operational note: `docs/benchmark/HOLOVERIFY_V7_TINY_PATCH_VALIDATION_LIVE_ATTEMPT_BLOCKED_OPERATIONAL_NOTE_2026_07_06.json`
+- Wave 2 design: `docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_DESIGN_2026_07_06.json`
+- Wave 2 packet freeze: `docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_PACKET_FREEZE_2026_07_06.json`
+- Wave 2 runtime-only manifest: `docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_RUNTIME_MANIFEST_NO_TRUTH_2026_07_06.json`
+- Wave 2 preflight: `docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_PREFLIGHT_2026_07_06.json`
+- Wave 2 hash manifest: `docs/benchmark/holoverify_stress_matrix_expansion_wave2_2026_07_06/holoverify_stress_matrix_expansion_wave2_hash_manifest_2026_07_06.json`
+- Wave 2 blocked live-attempt operational note: `docs/benchmark/HOLOVERIFY_STRESS_MATRIX_WAVE2_SOLO_SCOUT_LIVE_ATTEMPT_BLOCKED_OPERATIONAL_NOTE_2026_07_06.json`

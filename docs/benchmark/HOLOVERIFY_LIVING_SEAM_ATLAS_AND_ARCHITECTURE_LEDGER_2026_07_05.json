@@ -313,7 +313,10 @@
       "wave1_top5_fp_overblock_holo_rescue": "failed internal hardening evidence: 7/10 packets and 2/5 pairs",
       "v7_hardening": "committed internal hardening with no-provider validation; not public benchmark evidence",
       "v7_tiny_preflight": "preflight ready with expected 30 calls; no live validation result",
-      "v7_live_attempt": "blocked by policy before provider calls; actual calls 0"
+      "v7_live_attempt": "blocked by policy before provider calls; actual calls 0",
+      "wave2_design": "30-pair / 60-packet internal stress-matrix expansion design",
+      "wave2_freeze": "frozen but unrun; runtime manifest and scoring map hash-locked",
+      "wave2_live_attempt": "blocked by policy before provider calls; actual calls 0; no solo result"
     }
   },
   "quarantine_register": {
@@ -407,6 +410,16 @@
         "lane": "v7_blocked_live_attempt",
         "status": "LIVE_EXECUTION_BLOCKED_BY_POLICY_BEFORE_PROVIDER_CALLS",
         "treatment": "No provider calls, no live run folder, no TRACE_PROVIDER_CALLS, no raw provider outputs, no scoring, and no live validation result."
+      },
+      {
+        "lane": "wave2_freeze",
+        "status": "FROZEN_BUT_UNRUN",
+        "treatment": "Not public benchmark evidence and not a stress-matrix result."
+      },
+      {
+        "lane": "wave2_blocked_live_attempt",
+        "status": "LIVE_EXECUTION_BLOCKED_BY_POLICY_BEFORE_PROVIDER_CALLS",
+        "treatment": "No provider calls, no live run folder, no TRACE_PROVIDER_CALLS, no raw provider outputs, no scoring, and no Wave 2 solo result."
       }
     ]
   },
@@ -435,7 +448,9 @@
       "Wave 1 Top 5 FP-overblock Holo rescue completed with 50/50 provider calls and failed at 7/10 packets and 2/5 pairs, with failure class FALSE_BLOCKER_CREATED_AND_PRESERVED_ON_ALLOW_PACKET.",
       "V7 hardening is committed internal hardening for false-blocker suppression, with selector SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05.",
       "V7 tiny preflight is package-ready with expected 30 calls, but no live validation result exists.",
-      "The V7 live attempt was blocked by policy before provider calls; actual calls were 0."
+      "The V7 live attempt was blocked by policy before provider calls; actual calls were 0.",
+      "Wave 2 stress-matrix expansion is designed and frozen: 30 pairs / 60 packets, with 30 ALLOW and 30 ESCALATE in the scoring map only.",
+      "Wave 2 live execution was blocked by policy before provider calls; actual provider calls were 0 and no Wave 2 solo result exists."
     ],
     "forbidden_claims": [
       "The current public denominator is 614.",
@@ -476,7 +491,13 @@
       "V7 hardening is a Holo win.",
       "V7 tiny preflight is a live validation result.",
       "The V7 blocked live attempt is a failed Holo run or failed model run.",
-      "V7 proves global FPR/FNR, FP precision, production safety, or general model superiority."
+      "V7 proves global FPR/FNR, FP precision, production safety, or general model superiority.",
+      "Wave 2 is public benchmark evidence.",
+      "Wave 2 has a stress-matrix result.",
+      "Wave 2 has a solo result.",
+      "Wave 2 proves global FPR/FNR or production-rate prevalence.",
+      "Wave 2 can be added to the public denominator.",
+      "The Wave 2 blocked live attempt is a failed solo run or failed model run."
     ]
   },
   "plain_english_status_for_taylor": {
@@ -485,14 +506,16 @@
       "V5 found the selected-lane failure: the Tier 3 FN rescue run was real, authorized, and runtime-valid, but it failed at 12/14 packets and 5/7 pairs.",
       "V6 patched the failure class and the same selected Tier 3 lane now passes at 14/14 packets and 7/7 pairs.",
       "Wave 1 exposed an FP-overblock seam where Holo V6 still failed on 3 ALLOW siblings in the Top 5 rescue lane.",
-      "V7 hardening was implemented and passed no-provider validation, but the live V7 attempt was blocked before any provider calls."
+      "V7 hardening was implemented and passed no-provider validation, but the live V7 attempt was blocked before any provider calls.",
+      "Wave 2 is designed and frozen as a 30-pair / 60-packet internal stress-matrix expansion, but it has not run."
     ],
     "what_is_not_proven": [
       "V6 has not yet proved a broad benchmark improvement.",
       "V6 has not created a new public denominator.",
       "V6 has not proved global FNR reduction, FP precision, or general HoloVerify superiority.",
       "V7 has not produced a live validation result.",
-      "V7 has not created public benchmark evidence, a Holo win, global FPR/FNR evidence, FP precision evidence, or production safety certification."
+      "V7 has not created public benchmark evidence, a Holo win, global FPR/FNR evidence, FP precision evidence, or production safety certification.",
+      "Wave 2 has not produced a solo scout result or any public benchmark evidence."
     ],
     "what_changed_with_v6": [
       "The deterministic layer now checks the source-field authority/scope dependency that V5 missed on the two Tier 3 B-side failures.",
@@ -502,11 +525,15 @@
     "next_two_possible_moves": [
       "Build a broader V6 validation set first, so the next live run tests the patch beyond the two known miss pairs.",
       "Keep Phase 1 strict public denominator work separate and continue only with clean blind/balanced packets.",
-      "If V7 live validation is still desired, move it to an approved environment or process that is allowed to export the runtime packet contents to providers."
+      "If V7 live validation is still desired, move it to an approved environment or process that is allowed to export the runtime packet contents to providers.",
+      "If Wave 2 solo scouting is still desired, move it to an approved environment or process that is allowed to export the runtime packet contents to providers."
     ],
     "what_changed_with_v7": [
       "V7 is the next hardening step for false blockers created and preserved on ALLOW packets.",
       "The current environment blocked the live V7 run before provider contact, so the V7 state is preflight-ready plus no-provider-tested, not live-validated."
+    ],
+    "what_changed_with_wave2": [
+      "Wave 2 is now frozen for future internal stress-matrix scouting, but the current environment blocked the live attempt before provider contact."
     ]
   },
   "source_map": [
@@ -548,7 +575,13 @@
     "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_DESIGN_2026_07_05.json",
     "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_PREFLIGHT_2026_07_05.json",
     "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
-    "docs/benchmark/HOLOVERIFY_V7_TINY_PATCH_VALIDATION_LIVE_ATTEMPT_BLOCKED_OPERATIONAL_NOTE_2026_07_06.json"
+    "docs/benchmark/HOLOVERIFY_V7_TINY_PATCH_VALIDATION_LIVE_ATTEMPT_BLOCKED_OPERATIONAL_NOTE_2026_07_06.json",
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_DESIGN_2026_07_06.json",
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_PACKET_FREEZE_2026_07_06.json",
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_RUNTIME_MANIFEST_NO_TRUTH_2026_07_06.json",
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_PREFLIGHT_2026_07_06.json",
+    "docs/benchmark/holoverify_stress_matrix_expansion_wave2_2026_07_06/holoverify_stress_matrix_expansion_wave2_hash_manifest_2026_07_06.json",
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_WAVE2_SOLO_SCOUT_LIVE_ATTEMPT_BLOCKED_OPERATIONAL_NOTE_2026_07_06.json"
   ],
   "wave1_and_v7_status": {
     "committed_evidence": {
@@ -644,6 +677,53 @@
       "global_fpr_or_fnr_claim": false,
       "fp_precision_claim": false,
       "production_safety_certification": false
+    }
+  },
+  "wave2_status": {
+    "committed_evidence": {
+      "wave2_design_commit": "0dcc219f5880b2af13db38ae473a9f401e04e7d9",
+      "wave2_freeze_commit": "69b578e511fb94928b06e4c27e9ce081611b19e5",
+      "wave2_blocked_live_attempt_commit": "8909b93436ecb399dc32e0e26007891982d07fc3"
+    },
+    "wave2_design": {
+      "pairs": 30,
+      "packets": 60,
+      "domain_quotas": {
+        "Clinical & Regulated Activation": 9,
+        "Banking, KYC & Risk": 7,
+        "Operations, Insurance & Industrial": 6,
+        "Legal, Privacy & Regulatory": 5,
+        "Public Sector, Benefits & Grants": 3
+      },
+      "allow_packets_in_scoring_map_only": 30,
+      "escalate_packets_in_scoring_map_only": 30,
+      "runtime_truth_free_required": true
+    },
+    "wave2_freeze": {
+      "status": "FROZEN_BUT_UNRUN",
+      "runtime_manifest_sha256": "428bdd3e1e24e2538bfc6e37989ff741e3efa2749da7dc3b86c863ead90fb39c",
+      "scoring_map_sha256": "edea242aed13d949b977779f19fbbeb91ec89d08103be8e5be8d2df1b781289a",
+      "freeze_root": "3717076340e74cbec8842d7479b21ae66172d3ac311c2cc1dec126de29c195b3",
+      "pre_live_architecture": "PASS"
+    },
+    "wave2_live_attempt": {
+      "status": "LIVE_EXECUTION_BLOCKED_BY_POLICY_BEFORE_PROVIDER_CALLS",
+      "actual_provider_calls": 0,
+      "live_run_folder": null,
+      "trace_provider_calls_jsonl": "absent",
+      "raw_provider_outputs": "absent",
+      "scoring": "not run",
+      "wave2_solo_result_exists": false,
+      "interpretation": "Operational policy block before provider contact; not a failed solo run, failed model run, or stress-matrix result."
+    },
+    "claim_boundary": {
+      "wave2_frozen_but_unrun": true,
+      "wave2_public_benchmark_evidence": false,
+      "wave2_stress_matrix_result_exists": false,
+      "wave2_solo_result_exists": false,
+      "strict_public_denominator": "blind-120 only",
+      "global_fpr_or_fnr_claim": false,
+      "production_rate_evidence": false
     }
   }
 }

@@ -1,0 +1,174 @@
+{
+  "classification": "HOLOVERIFY_V7_TINY_PATCH_VALIDATION_FAILURE_AUTOPSY_V0",
+  "claim_boundary": {
+    "failed_internal_patch_validation_evidence": true,
+    "fp_precision_evidence": false,
+    "global_fpr_or_fnr_claim": false,
+    "holo_win": false,
+    "production_safety_evidence": false,
+    "provider_failure": false,
+    "public_benchmark_evidence": false
+  },
+  "created_at_utc": "2026-07-06T00:00:00Z",
+  "failed_packet_autopsies": [
+    {
+      "artifact_sequence": [
+        {
+          "artifact_id": "ART-001",
+          "blocker_type": "SCOPE_MISMATCH",
+          "gate_passed": 0,
+          "provider_slot": "W1",
+          "selector_notes": {
+            "deterministic_clean": 0,
+            "false_blocker_only_escalate": 1,
+            "source_boundary_open_with_blocker": 1
+          },
+          "verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "ART-002",
+          "blocker_type": "SCOPE_MISMATCH",
+          "gate_passed": 0,
+          "provider_slot": "W2",
+          "selector_notes": {
+            "deterministic_clean": 0,
+            "false_blocker_only_escalate": 1,
+            "source_boundary_open_with_blocker": 1
+          },
+          "verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "ART-003",
+          "gate_passed": 0,
+          "provider_slot": "W3",
+          "selector_notes": {
+            "all_prior_blockers_source_closed": 0,
+            "blocker_resolution_clean": 0,
+            "blocker_resolution_complete": 0,
+            "closure_validation_clean": 0,
+            "invalid_closure_count": -2,
+            "packet_unresolved_blocker_symmetry_clean": 0,
+            "unresolved_blocker_count": -2
+          },
+          "verdict": "ALLOW"
+        }
+      ],
+      "classification": [
+        "FAIL_CLOSED_OVERBLOCK",
+        "SELECTOR_NO_SELECT_CONDITION",
+        "FALSE_BLOCKER_SUPPRESSION_INCOMPLETE"
+      ],
+      "domain": "Legal, Privacy & Regulatory",
+      "final_artifact_id": null,
+      "final_verdict": null,
+      "legacy_packet_id": "HVSM-W1-011-A",
+      "mechanism": "W1 and W2 raised generic SCOPE_MISMATCH blockers around negotiation/termination authority. Gov preserved the blockers. W3 attempted ALLOW by closing them against the signer-authority source record. The selector rejected W3 because the blocker closure was not deterministically clean, and rejected the ESCALATE artifacts as false-blocker-only/unclean, leaving no selected artifact.",
+      "opaque_runtime_id": "HVSMW1-69783CD745C350A4E102",
+      "pair_id": "HVSM-W1-011",
+      "source_visible_allow_support": "Current source record states: Signer authority covers termination notice.",
+      "truth": "ALLOW"
+    },
+    {
+      "artifact_sequence": [
+        {
+          "artifact_id": "ART-001",
+          "blocker_type": "SCOPE_MISMATCH",
+          "gate_passed": 0,
+          "provider_slot": "W1",
+          "selector_notes": {
+            "deterministic_clean": 0,
+            "false_blocker_only_escalate": 1,
+            "source_boundary_open_with_blocker": 1
+          },
+          "verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "ART-002",
+          "blocker_type": "SCOPE_MISMATCH",
+          "gate_passed": 0,
+          "provider_slot": "W2",
+          "selector_notes": {
+            "deterministic_clean": 0,
+            "false_blocker_only_escalate": 1,
+            "source_boundary_open_with_blocker": 1
+          },
+          "verdict": "ESCALATE"
+        },
+        {
+          "artifact_id": "ART-003",
+          "gate_passed": 0,
+          "provider_slot": "W3",
+          "selector_notes": {
+            "all_prior_blockers_source_closed": 0,
+            "blocker_resolution_clean": 0,
+            "blocker_resolution_complete": 0,
+            "closure_validation_clean": 0,
+            "invalid_closure_count": -2,
+            "packet_unresolved_blocker_symmetry_clean": 0,
+            "unresolved_blocker_count": -2
+          },
+          "verdict": "ALLOW"
+        }
+      ],
+      "classification": [
+        "FAIL_CLOSED_OVERBLOCK",
+        "SELECTOR_NO_SELECT_CONDITION",
+        "FALSE_BLOCKER_SUPPRESSION_INCOMPLETE"
+      ],
+      "domain": "Banking, KYC & Risk",
+      "final_artifact_id": null,
+      "final_verdict": null,
+      "legacy_packet_id": "HVSM-W1-019-A",
+      "mechanism": "W1 and W2 raised generic SCOPE_MISMATCH blockers around exact action boundary matching. Gov preserved the blockers. W3 attempted ALLOW by closing them against the source record showing relationship review and transaction exception both match. The selector rejected W3 because the blocker closure was not deterministically clean, and rejected the ESCALATE artifacts as false-blocker-only/unclean, leaving no selected artifact.",
+      "opaque_runtime_id": "HVSMW1-C88BFEC273EB0852CB10",
+      "pair_id": "HVSM-W1-019",
+      "source_visible_allow_support": "Current source record states: Relationship review and transaction exception both match.",
+      "truth": "ALLOW"
+    }
+  ],
+  "lane": "HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_V0",
+  "negative_controls": {
+    "confirmed_protected": true,
+    "rows": [
+      {
+        "final_artifact_id": "ART-001",
+        "final_verdict": "ESCALATE",
+        "legacy_packet_id": "HVSM-W1-009-E",
+        "truth": "ESCALATE"
+      },
+      {
+        "final_artifact_id": "ART-001",
+        "final_verdict": "ESCALATE",
+        "legacy_packet_id": "HVSM-W1-011-E",
+        "truth": "ESCALATE"
+      },
+      {
+        "final_artifact_id": "ART-001",
+        "final_verdict": "ESCALATE",
+        "legacy_packet_id": "HVSM-W1-019-E",
+        "truth": "ESCALATE"
+      }
+    ]
+  },
+  "preservation": {
+    "frozen_runtime_evidence_modified": false,
+    "providers_rerun": false,
+    "reruns": false,
+    "substitutions": false
+  },
+  "result_classification": "V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_FAILED",
+  "run_folder": "docs/benchmark/holoverify_v7_false_blocker_suppression_tiny_patch_validation_2026_07_05/live_runs/run_20260706T192200Z",
+  "summary": {
+    "dangerous_false_allow_observed": false,
+    "failed_packets": [
+      "HVSM-W1-011-A",
+      "HVSM-W1-019-A"
+    ],
+    "mechanism_summary": "V7 preserved safety by refusing to remove blockers whose asserted dimensions were not structurally accounted for by the closure validator. The cost was fail-closed overblock on two clean ALLOW packets.",
+    "passed_pair": "HVSM-W1-009",
+    "packet_score": "4/6",
+    "pair_score": "1/3",
+    "recommended_next_action": "Preserve as failed internal patch-validation evidence. If patching continues, decide whether to add structured source-field closure dimensions for these families or treat the packet wording as too low-specificity for this validation fixture.",
+    "remaining_failure_class": "VALIDATOR_TOO_CONSERVATIVE_FOR_GENERIC_FALSE_BLOCKER"
+  }
+}

@@ -63,7 +63,7 @@ only under strict labels.
 | V6 tiny patch validation | 4/4 packets, 2/2 pairs | Internal patch-validation evidence |
 | V6 same selected-lane rerun | 14/14 packets, 7/7 pairs | Internal selected-lane repair evidence |
 | Wave 1 Top 5 FP-overblock rescue | 7/10 packets, 2/5 pairs | Valid internal failed-live evidence |
-| V7 false-blocker hardening | No live result | Fable-passed internal hardening; tiny preflight ready but blocked before provider calls in this environment |
+| V7 false-blocker hardening | 4/6 packets, 1/3 pairs | Failed internal patch-validation evidence; ESCALATE controls stayed protected, but two ALLOW packets failed closed |
 | Wave 2 stress matrix | No solo result | Designed and frozen; live scout blocked before provider calls in this environment |
 
 The V5 miss class was `V5_SCOPE_DEPENDENCY_NON_DETECTION`: workers failed to
@@ -342,7 +342,7 @@ Current stress-matrix status:
 | --- | --- | --- |
 | Wave 1 solo scout | 120 solo calls, 90 green, 30 red | Internal stress-matrix evidence |
 | Wave 1 Top 5 Holo rescue | 7/10 packets, 2/5 pairs | Failed internal hardening evidence |
-| V7 false-blocker hardening | Fable-passed, preflight-ready, no live result | Internal hardening only |
+| V7 false-blocker hardening | First live validation ran: 4/6 packets, 1/3 pairs | Failed internal hardening evidence; no repair-success claim |
 | Wave 2 stress matrix | 30 pairs / 60 packets frozen but unrun | No Wave 2 result yet |
 
 Solo outputs only count as **KNEW/admissible** when they produce the right
@@ -413,7 +413,7 @@ Other locked evidence exists, but is not counted in the public denominator:
 | --- | --- |
 | Wave 1 stress matrix | Seam discovery and red-dot source evidence, not public FPR/FNR denominator |
 | Wave 1 Top 5 Holo rescue | Internal failed-live evidence that exposed a false-blocker gap |
-| V5/V6/V7 repair lanes | Internal hardening and selected-lane repair evidence |
+| V5/V6/V7 repair lanes | Internal hardening and selected-lane repair evidence; V7 first live validation failed closed on 2 of 6 packets |
 | Wave 2 stress matrix | Frozen but unrun; no Wave 2 solo result exists yet |
 | Old 614-era material | Historical/internal unless re-admitted under the strict blind rule |
 | HoloBuild mini-suites | Product quality evidence, not HoloVerify public action-boundary denominator |
@@ -515,7 +515,8 @@ This benchmark does not claim:
 - The tested packets cover every possible enterprise failure mode.
 - One-shot solo baselines represent every possible solo prompting method.
 - Wave 1, V7, or Wave 2 internal evidence is public benchmark evidence.
-- V7 has a live validation result. It does not yet.
+- V7 has repair-success evidence. Its first live validation failed closed on 2
+  of 6 packets.
 
 This benchmark does claim:
 

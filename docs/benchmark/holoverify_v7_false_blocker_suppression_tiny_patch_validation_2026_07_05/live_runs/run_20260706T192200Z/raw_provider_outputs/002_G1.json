@@ -1,0 +1,27 @@
+{
+  "call_number": 2,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "273c97eac72872061c4a5e20d62159e528bc3c07d4f99d3f67820114a0ff01b7",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to understand the request. The user says: \"packet_id=HVSMW1-316A3AE43F672C195074 status_values: route_verdict=CONTINUE repair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A blocked_move=do not preserve suppressed false blocker Return the three-line status record.\"\n\nWe need to produce a plain text record with three key=value lines: route_verdict, repair_target, blocked_move.\n\nThey gave the values: route_verdict=CONTINUE; repair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A (presumably part of repair_target). Actually \"repair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\". The \"blocked_move=do not preserve suppressed false blocker\". So the three lines are:\n\nroute_verdict=CONTINUE\nrepair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\nblocked_move=do not preserve suppressed false blocker\n\nWe need to output exactly those three lines. No extra headings or explanations, no JSON, no markdown, just the three lines.\n\nThus answer: \"route_verdict=CONTINUE\\nrepair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\\nblocked_move=do not preserve suppressed false blocker\". That's all.\n\nCheck: the user gave \"repair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\". So we need to preserve that exactly, including the semicolon and space. Also note \"blocked_move=do not preserve suppressed false blocker\". Good.\n\nThus answer.\n\nPotential tricky: need to ensure no extra whitespace lines. Just exactly three lines.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\nblocked_move=do not preserve suppressed false blocker",
+  "raw_text_sha256": "0d80043faf60e93bef6c58531418eade6d36abebbd2781ce77b46c773085223b",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 137,
+    "output_tokens": 442,
+    "raw_text": "<think>\nWe need to understand the request. The user says: \"packet_id=HVSMW1-316A3AE43F672C195074 status_values: route_verdict=CONTINUE repair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A blocked_move=do not preserve suppressed false blocker Return the three-line status record.\"\n\nWe need to produce a plain text record with three key=value lines: route_verdict, repair_target, blocked_move.\n\nThey gave the values: route_verdict=CONTINUE; repair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A (presumably part of repair_target). Actually \"repair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\". The \"blocked_move=do not preserve suppressed false blocker\". So the three lines are:\n\nroute_verdict=CONTINUE\nrepair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\nblocked_move=do not preserve suppressed false blocker\n\nWe need to output exactly those three lines. No extra headings or explanations, no JSON, no markdown, just the three lines.\n\nThus answer: \"route_verdict=CONTINUE\\nrepair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\\nblocked_move=do not preserve suppressed false blocker\". That's all.\n\nCheck: the user gave \"repair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\". So we need to preserve that exactly, including the semicolon and space. Also note \"blocked_move=do not preserve suppressed false blocker\". Good.\n\nThus answer.\n\nPotential tricky: need to ensure no extra whitespace lines. Just exactly three lines.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\nblocked_move=do not preserve suppressed false blocker",
+    "response_id": "069b3361007a05db6efca3067e347fee",
+    "text": "route_verdict=CONTINUE\nrepair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\nblocked_move=do not preserve suppressed false blocker",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 579,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=use affirmative closure ledger; suppressed false blockers: ART-001-BLK-1C9FF00A\nblocked_move=do not preserve suppressed false blocker",
+  "text_sha256": "e1a0ab06af57028787a6e92c805425557f1424aaaa569fdb767a890af60ecaac"
+}

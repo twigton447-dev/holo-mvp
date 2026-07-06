@@ -1,0 +1,27 @@
+{
+  "call_number": 7,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "1abb462a0216e75119f2b230e631db91dd7b875c7cd562bf5efdf38287704efd",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe have a request from the user: \"packet_id=HVSMW1-03C30A6F1E979B8E83F2 status_values: route_verdict=CONTINUE repair_target=stress-test and preserve blocker ids: ART-001-BLK-45E2B386 blocked_move=do not override blocker with consensus unless sources close it Return the three-line status record.\"\n\nThey want plain text record with three key=value lines. Fields: route_verdict, repair_target, blocked_move. Must include packet_id? The prompt says \"Return the three-line status record.\" It doesn't say to include packet_id. So they just want the three lines.\n\nWe should output exactly three lines, each \"key=value\". Possibly including the values exactly as provided.\n\nWe need to follow formatting: plain text, no extra headings or JSON, just three lines.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-45E2B386\nblocked_move=do not override blocker with consensus unless sources close it\n\nMake sure no extra whitespace at ends.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-45E2B386\nblocked_move=do not override blocker with consensus unless sources close it",
+  "raw_text_sha256": "5ea32807e80d1e8ad7517b6b51766593cc0a63c84e6e7f30e2e6fe88717416bd",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 143,
+    "output_tokens": 282,
+    "raw_text": "<think>\nWe have a request from the user: \"packet_id=HVSMW1-03C30A6F1E979B8E83F2 status_values: route_verdict=CONTINUE repair_target=stress-test and preserve blocker ids: ART-001-BLK-45E2B386 blocked_move=do not override blocker with consensus unless sources close it Return the three-line status record.\"\n\nThey want plain text record with three key=value lines. Fields: route_verdict, repair_target, blocked_move. Must include packet_id? The prompt says \"Return the three-line status record.\" It doesn't say to include packet_id. So they just want the three lines.\n\nWe should output exactly three lines, each \"key=value\". Possibly including the values exactly as provided.\n\nWe need to follow formatting: plain text, no extra headings or JSON, just three lines.\n\nThus output:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-45E2B386\nblocked_move=do not override blocker with consensus unless sources close it\n\nMake sure no extra whitespace at ends.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-45E2B386\nblocked_move=do not override blocker with consensus unless sources close it",
+    "response_id": "069b337ffb028e630ea2990eac2830ac",
+    "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-45E2B386\nblocked_move=do not override blocker with consensus unless sources close it",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 425,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-45E2B386\nblocked_move=do not override blocker with consensus unless sources close it",
+  "text_sha256": "ee08fca2cfeb4a12026399670d5ee2ed3546f0c5205fb8e6d96745e4b20c9eea"
+}

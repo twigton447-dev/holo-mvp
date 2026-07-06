@@ -1,0 +1,27 @@
+{
+  "call_number": 12,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "03d6d7ebdb2763c514e2fda682c7b97a19a1fc9bbd481ded9c1409948e37444d",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user asks: \"Return the three-line status record.\"\n\nWe have a packet_id, and status_values: route_verdict=CONTINUE, repair_target=stress-test and preserve blocker ids: ART-001-BLK-7826C5EC, blocked_move=do not override blocker with consensus unless sources close it.\n\nWe need to output plain text record with three key=value lines. The fields, in order: route_verdict, repair_target, blocked_move. The lines must start with route_verdict= etc. No extra lines, no headings, explanations, JSON, etc.\n\nThus output should be:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-7826C5EC\nblocked_move=do not override blocker with consensus unless sources close it\n\nCheck formatting: No extra spaces before values unless they belong in value. In example they used colon after \"repair_target:\" with a space after colon: \"repair_target=stress-test and preserve blocker ids: ART-001-BLK-7826C5EC\". Use that.\n\nThus answer: exactly those three lines. Also need to include packet_id? The instruction says fields: route_verdict, repair_target, blocked_move. No mention of packet_id, so we omit it.\n\nThus final output.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-7826C5EC\nblocked_move=do not override blocker with consensus unless sources close it",
+  "raw_text_sha256": "92f905aeff92c25da709360aefc2958b9e049aa1c0a32c75c7c0711112286ec9",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 138,
+    "output_tokens": 316,
+    "raw_text": "<think>\nThe user asks: \"Return the three-line status record.\"\n\nWe have a packet_id, and status_values: route_verdict=CONTINUE, repair_target=stress-test and preserve blocker ids: ART-001-BLK-7826C5EC, blocked_move=do not override blocker with consensus unless sources close it.\n\nWe need to output plain text record with three key=value lines. The fields, in order: route_verdict, repair_target, blocked_move. The lines must start with route_verdict= etc. No extra lines, no headings, explanations, JSON, etc.\n\nThus output should be:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-7826C5EC\nblocked_move=do not override blocker with consensus unless sources close it\n\nCheck formatting: No extra spaces before values unless they belong in value. In example they used colon after \"repair_target:\" with a space after colon: \"repair_target=stress-test and preserve blocker ids: ART-001-BLK-7826C5EC\". Use that.\n\nThus answer: exactly those three lines. Also need to include packet_id? The instruction says fields: route_verdict, repair_target, blocked_move. No mention of packet_id, so we omit it.\n\nThus final output.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-7826C5EC\nblocked_move=do not override blocker with consensus unless sources close it",
+    "response_id": "069b339df6fdc2500fa265039b6227c0",
+    "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-7826C5EC\nblocked_move=do not override blocker with consensus unless sources close it",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 454,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-7826C5EC\nblocked_move=do not override blocker with consensus unless sources close it",
+  "text_sha256": "e9ec6b504103f0696c381b8eb0f7f5bb8ca3428fde7fee46d634ef83c6890a16"
+}

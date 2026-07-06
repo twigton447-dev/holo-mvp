@@ -1,7 +1,7 @@
 {
   "classification": "HOLOVERIFY_LIVING_SEAM_ATLAS_AND_ARCHITECTURE_LEDGER",
   "created_at": "2026-07-05",
-  "callsign": "STATS SUBAGENT",
+  "callsign": "HoloStats",
   "scope": "Living evidence ledger and Phase 1 sample-size roadmap.",
   "audit_actions": {
     "providers_run": false,
@@ -308,7 +308,12 @@
       "tier3_v5_fn_rescue": "failed-live evidence: 12/14 packets and 5/7 pairs",
       "v6_tiny_validation": "passed on 4 packets / 2 pairs",
       "v6_tier3_selected_lane_rerun": "passed on the same selected lane: 14/14 packets and 7/7 pairs",
-      "interpretation": "Supports the engineering hardening story, not a public reliability denominator."
+      "interpretation": "Supports the engineering hardening story, not a public reliability denominator.",
+      "wave1_solo_scout": "internal stress-matrix seam discovery: 90 green, 30 red across 20 pairs / 120 solo calls",
+      "wave1_top5_fp_overblock_holo_rescue": "failed internal hardening evidence: 7/10 packets and 2/5 pairs",
+      "v7_hardening": "committed internal hardening with no-provider validation; not public benchmark evidence",
+      "v7_tiny_preflight": "preflight ready with expected 30 calls; no live validation result",
+      "v7_live_attempt": "blocked by policy before provider calls; actual calls 0"
     }
   },
   "quarantine_register": {
@@ -382,6 +387,26 @@
         "lane": "v6_tier3_fn_selected_lane_rerun",
         "status": "V6_TIER3_FN_HOLO_RESCUE_RERUN_SELECTED_LANE_REPAIR_PASSED",
         "treatment": "Internal selected-lane repair evidence only; not public benchmark evidence."
+      },
+      {
+        "lane": "wave1_solo_scout",
+        "status": "INTERNAL_STRESS_MATRIX_SEAM_DISCOVERY_ONLY",
+        "treatment": "Do not use as public benchmark evidence, global FPR/FNR, or natural production-rate evidence."
+      },
+      {
+        "lane": "wave1_top5_fp_overblock_holo_rescue",
+        "status": "FAILED_INTERNAL_HARDENING_EVIDENCE_ONLY",
+        "treatment": "Do not describe as a Holo win, public benchmark evidence, global FPR/FNR, or FP precision evidence."
+      },
+      {
+        "lane": "v7_tiny_preflight",
+        "status": "PREFLIGHT_READY_NO_LIVE_RESULT",
+        "treatment": "Preflight package only; not a live validation result."
+      },
+      {
+        "lane": "v7_blocked_live_attempt",
+        "status": "LIVE_EXECUTION_BLOCKED_BY_POLICY_BEFORE_PROVIDER_CALLS",
+        "treatment": "No provider calls, no live run folder, no TRACE_PROVIDER_CALLS, no raw provider outputs, no scoring, and no live validation result."
       }
     ]
   },
@@ -405,7 +430,12 @@
       "Tier 3 targeted-mining solo scout found 2 useful FN pairs, T3FN-MINE-006 and T3FN-MINE-010, for internal directional mining only.",
       "Tier 3 targeted-mining solo Scout 2 found 1 useful FN pair, T3FN2-MINE-003, for internal directional mining only.",
       "Tier 3 targeted-mining solo Scout 3 promoted 2 FN candidates, T3FN3-MINE-003 and T3FN3-MINE-009, for internal directional mining only.",
-      "Any future 7-pair / 14-packet full HoloGov Tier 3 FN rerun expects 70 provider calls: W1 x14, G1 x14, W2 x14, G2 x14, W3 x14."
+      "Any future 7-pair / 14-packet full HoloGov Tier 3 FN rerun expects 70 provider calls: W1 x14, G1 x14, W2 x14, G2 x14, W3 x14.",
+      "Wave 1 solo scout found 90 green and 30 red solo attempts across 20 stress-selected pairs / 120 solo calls, for internal seam discovery only.",
+      "Wave 1 Top 5 FP-overblock Holo rescue completed with 50/50 provider calls and failed at 7/10 packets and 2/5 pairs, with failure class FALSE_BLOCKER_CREATED_AND_PRESERVED_ON_ALLOW_PACKET.",
+      "V7 hardening is committed internal hardening for false-blocker suppression, with selector SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05.",
+      "V7 tiny preflight is package-ready with expected 30 calls, but no live validation result exists.",
+      "The V7 live attempt was blocked by policy before provider calls; actual calls were 0."
     ],
     "forbidden_claims": [
       "The current public denominator is 614.",
@@ -437,19 +467,32 @@
       "The V6 Tier 3 selected-lane rerun is public benchmark evidence.",
       "The V6 Tier 3 selected-lane rerun proves global FNR or FP precision.",
       "The V6 Tier 3 selected-lane rerun proves general model superiority.",
-      "V6 has been validated broadly beyond the tiny patch-validation and selected-lane rerun evidence."
+      "V6 has been validated broadly beyond the tiny patch-validation and selected-lane rerun evidence.",
+      "Wave 1 solo scout is public benchmark evidence.",
+      "Wave 1 solo scout proves global FPR/FNR or natural production-rate prevalence.",
+      "Wave 1 Top 5 FP-overblock rescue is a Holo win.",
+      "Wave 1 Top 5 FP-overblock rescue proves FP precision.",
+      "V7 hardening is public benchmark evidence.",
+      "V7 hardening is a Holo win.",
+      "V7 tiny preflight is a live validation result.",
+      "The V7 blocked live attempt is a failed Holo run or failed model run.",
+      "V7 proves global FPR/FNR, FP precision, production safety, or general model superiority."
     ]
   },
   "plain_english_status_for_taylor": {
     "what_is_proven": [
       "The strict public scorecard is still the blind-120 lane: 120/120 packets, balanced 60 ALLOW and 60 ESCALATE.",
       "V5 found the selected-lane failure: the Tier 3 FN rescue run was real, authorized, and runtime-valid, but it failed at 12/14 packets and 5/7 pairs.",
-      "V6 patched the failure class and the same selected Tier 3 lane now passes at 14/14 packets and 7/7 pairs."
+      "V6 patched the failure class and the same selected Tier 3 lane now passes at 14/14 packets and 7/7 pairs.",
+      "Wave 1 exposed an FP-overblock seam where Holo V6 still failed on 3 ALLOW siblings in the Top 5 rescue lane.",
+      "V7 hardening was implemented and passed no-provider validation, but the live V7 attempt was blocked before any provider calls."
     ],
     "what_is_not_proven": [
       "V6 has not yet proved a broad benchmark improvement.",
       "V6 has not created a new public denominator.",
-      "V6 has not proved global FNR reduction, FP precision, or general HoloVerify superiority."
+      "V6 has not proved global FNR reduction, FP precision, or general HoloVerify superiority.",
+      "V7 has not produced a live validation result.",
+      "V7 has not created public benchmark evidence, a Holo win, global FPR/FNR evidence, FP precision evidence, or production safety certification."
     ],
     "what_changed_with_v6": [
       "The deterministic layer now checks the source-field authority/scope dependency that V5 missed on the two Tier 3 B-side failures.",
@@ -458,7 +501,12 @@
     ],
     "next_two_possible_moves": [
       "Build a broader V6 validation set first, so the next live run tests the patch beyond the two known miss pairs.",
-      "Keep Phase 1 strict public denominator work separate and continue only with clean blind/balanced packets."
+      "Keep Phase 1 strict public denominator work separate and continue only with clean blind/balanced packets.",
+      "If V7 live validation is still desired, move it to an approved environment or process that is allowed to export the runtime packet contents to providers."
+    ],
+    "what_changed_with_v7": [
+      "V7 is the next hardening step for false blockers created and preserved on ALLOW packets.",
+      "The current environment blocked the live V7 run before provider contact, so the V7 state is preflight-ready plus no-provider-tested, not live-validated."
     ]
   },
   "source_map": [
@@ -490,6 +538,112 @@
     "docs/benchmark/holoverify_v6_scope_dependency_gate_tiny_patch_validation_2026_07_05/live_runs/run_20260705T014145Z",
     "docs/benchmark/HOLOVERIFY_V6_TIER3_FN_HOLO_RESCUE_RERUN_PREFLIGHT_2026_07_05.json",
     "docs/benchmark/HOLOVERIFY_V6_TIER3_FN_HOLO_RESCUE_RERUN_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
-    "docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z"
-  ]
+    "docs/benchmark/holoverify_v6_tier3_fn_holo_rescue_rerun_2026_07_05/live_runs/run_20260705T023842Z",
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE1_SOLO_ROLLUP_2026_07_05.json",
+    "docs/benchmark/holoverify_stress_matrix_expansion_wave1_solo_scout_runs_2026_07_05/run_20260705T215904Z",
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_WAVE1_FP_OVERBLOCK_HOLO_RESCUE_PROVENANCE_AUDIT_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_WAVE1_FP_OVERBLOCK_HOLO_RESCUE_FAILURE_AUTOPSY_2026_07_05.json",
+    "docs/benchmark/holoverify_stress_matrix_wave1_fp_overblock_holo_rescue_2026_07_05/live_runs/run_20260705T232606Z",
+    "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_PATCH_REPORT_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_DESIGN_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_PREFLIGHT_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V7_TINY_PATCH_VALIDATION_LIVE_ATTEMPT_BLOCKED_OPERATIONAL_NOTE_2026_07_06.json"
+  ],
+  "wave1_and_v7_status": {
+    "committed_evidence": {
+      "v7_hardening_commit": "573d21fa248691b9248f380240a61acba0228290",
+      "v7_tiny_preflight_commit": "1d3ab6ec3af18b6ea1d7c21386e67a5e5b127c89",
+      "v7_blocked_live_attempt_note_commit": "f975e2e00541a124f5c288a875c0b01122d54768",
+      "wave1_solo_scout_evidence_commit": "ef4d72c62",
+      "wave1_fp_overblock_failed_rescue_commit": "ae5227c47"
+    },
+    "wave1_solo_scout": {
+      "status": "INTERNAL_STRESS_MATRIX_SEAM_DISCOVERY_ONLY",
+      "pairs": 20,
+      "packets": 40,
+      "solo_calls": 120,
+      "green_dots": 90,
+      "red_dots": 30,
+      "false_positives": 23,
+      "false_negatives": 0,
+      "parse_admissibility_failures": 7,
+      "pairs_with_at_least_one_red": "16/20",
+      "wrong_verdict_pairs": 13,
+      "parse_only_holdouts": 3,
+      "claim_boundary": {
+        "internal_seam_evidence_only": true,
+        "public_benchmark_evidence": false,
+        "global_fpr_or_fnr_claim": false,
+        "natural_production_rate_evidence": false
+      }
+    },
+    "wave1_top5_fp_overblock_holo_rescue": {
+      "status": "FAILED_INTERNAL_HARDENING_EVIDENCE_ONLY",
+      "provider_calls": "50/50",
+      "provider_failures": 0,
+      "packet_score": "7/10",
+      "pair_score": "2/5",
+      "failed_packets": [
+        "HVSM-W1-009-A",
+        "HVSM-W1-011-A",
+        "HVSM-W1-019-A"
+      ],
+      "failure_class": "FALSE_BLOCKER_CREATED_AND_PRESERVED_ON_ALLOW_PACKET",
+      "claim_boundary": {
+        "internal_hardening_evidence_only": true,
+        "holo_win": false,
+        "public_benchmark_evidence": false,
+        "global_fpr_or_fnr_claim": false,
+        "fp_precision_evidence": false,
+        "natural_production_rate_evidence": false
+      }
+    },
+    "v7_hardening": {
+      "status": "INTERNAL_HARDENING_ONLY",
+      "selector": "SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05",
+      "selector_hash": "f653240e87b1062dfca2b651cae846459ccb524820803d6386cc0dddc808b71d",
+      "fable_final_verdict": "PASS",
+      "holoarchitecture_post_commit": "PASS",
+      "holostats": "PASS",
+      "no_provider_validation": {
+        "focused_commit_validation": "101 passed",
+        "architecture_rerun": "84 passed"
+      },
+      "claim_boundary": {
+        "internal_hardening_only": true,
+        "public_benchmark_evidence": false,
+        "holo_win": false,
+        "global_fpr_or_fnr_claim": false,
+        "fp_precision_evidence": false,
+        "production_safety_certification": false
+      }
+    },
+    "v7_tiny_preflight": {
+      "status": "PREFLIGHT_READY",
+      "runtime_manifest_hash": "f1f55f0c5b69f8bffa9c9a770f1b21a845e51e7bab5b810156f799175e213db8",
+      "package_committed": true,
+      "pre_live_holoarchitecture": "PASS",
+      "expected_provider_calls": 30,
+      "live_validation_result_exists": false
+    },
+    "v7_live_attempt": {
+      "status": "LIVE_EXECUTION_BLOCKED_BY_POLICY_BEFORE_PROVIDER_CALLS",
+      "actual_calls": 0,
+      "live_run_folder": null,
+      "trace_provider_calls_jsonl": "absent",
+      "raw_provider_outputs": "absent",
+      "scoring": "not run",
+      "live_validation_result_exists": false,
+      "interpretation": "Operational policy block before provider contact; not a failed Holo run, failed model run, or rescue result."
+    },
+    "public_claim_boundary": {
+      "strict_public_denominator": "blind-120 only",
+      "v7_public_benchmark_evidence": false,
+      "v7_holo_win": false,
+      "global_fpr_or_fnr_claim": false,
+      "fp_precision_claim": false,
+      "production_safety_certification": false
+    }
+  }
 }

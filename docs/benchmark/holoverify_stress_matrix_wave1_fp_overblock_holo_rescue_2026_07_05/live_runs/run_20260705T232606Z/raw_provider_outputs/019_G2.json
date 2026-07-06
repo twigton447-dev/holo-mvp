@@ -1,0 +1,27 @@
+{
+  "call_number": 19,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "ad0c847ada59bf01b4fdcf51cce09803f82f5ced7c6b4484c6b7782aba6bbf88",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user says: \"packet_id=HVSMW1-23E475812EFFC431B231\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-2447B44A\nblocked_move=do not silently drop source-grounded blockers\nReturn the three-line status record.\"\n\nWe need to produce a plain text record with three key=value lines. Fields: route_verdict, repair_target, blocked_move. In order. No headings, explanations, JSON, markdown, extra lines. So just:\n\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-2447B44A\nblocked_move=do not silently drop source-grounded blockers\n\nMake sure no extra whitespace, no trailing line breaks? It probably expects a final newline after third line, but no extra blank lines. So produce exactly that three lines. Ensure format: key=value, no spaces before or after equals sign? The spec says \"key=value\". In example they used route_verdict=CONTINUE. So follow that. We'll output exactly three lines.\n\nPotential nuance: The \"repair_target\" field includes colon and spaces. That's fine. The blocked_move field includes spaces. That's fine.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-2447B44A\nblocked_move=do not silently drop source-grounded blockers",
+  "raw_text_sha256": "051c82dd906467032ab2364014219105fd5820b02bf42fae647d189e04aa4bf9",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 136,
+    "output_tokens": 316,
+    "raw_text": "<think>\nThe user says: \"packet_id=HVSMW1-23E475812EFFC431B231\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-2447B44A\nblocked_move=do not silently drop source-grounded blockers\nReturn the three-line status record.\"\n\nWe need to produce a plain text record with three key=value lines. Fields: route_verdict, repair_target, blocked_move. In order. No headings, explanations, JSON, markdown, extra lines. So just:\n\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-2447B44A\nblocked_move=do not silently drop source-grounded blockers\n\nMake sure no extra whitespace, no trailing line breaks? It probably expects a final newline after third line, but no extra blank lines. So produce exactly that three lines. Ensure format: key=value, no spaces before or after equals sign? The spec says \"key=value\". In example they used route_verdict=CONTINUE. So follow that. We'll output exactly three lines.\n\nPotential nuance: The \"repair_target\" field includes colon and spaces. That's fine. The blocked_move field includes spaces. That's fine.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-2447B44A\nblocked_move=do not silently drop source-grounded blockers",
+    "response_id": "069a1b688552650d2ded1635b85a8638",
+    "text": "route_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-2447B44A\nblocked_move=do not silently drop source-grounded blockers",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 452,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G2",
+  "text": "route_verdict=CONTINUE\nrepair_target=resolve prior blocker ids before ALLOW: ART-001-BLK-2447B44A\nblocked_move=do not silently drop source-grounded blockers",
+  "text_sha256": "25c64c80c4068e54f2602732e2bc522d6303a5dc102ca8bc7d8e553d0234c81a"
+}

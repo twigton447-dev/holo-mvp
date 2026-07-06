@@ -1,0 +1,27 @@
+{
+  "call_number": 27,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "106e49081d8cf43e05b1c6643159a9d4d43b6ed5c00e8f1ed7d2d739329c2885",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to parse user request: they have a packet_id and status values with route_verdict, repair_target, blocked_move. They want a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. They say \"Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nSo output should be:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-51FB9124\nblocked_move=do not override blocker with consensus unless sources close it\n\nWe must ensure there is no extra spaces besides the format. Probably they want exactly those lines.\n\nThus answer: the three lines.\n\nCheck formatting: route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-51FB9124\nblocked_move=do not override blocker with consensus unless sources close it\n\nPotential nuance: Should we preserve the colon and spacing exactly as given? In the given example, they have \"repair_target=stress-test and preserve blocker ids: ART-001-BLK-51FB9124\". That includes a space after colon. We'll keep that.\n\nThus output exactly.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-51FB9124\nblocked_move=do not override blocker with consensus unless sources close it",
+  "raw_text_sha256": "df1c7a0cf45b2f444bfdc5fb1881fe3e91f02d8536114e31135fbfe976e8003f",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 138,
+    "output_tokens": 301,
+    "raw_text": "<think>\nWe need to parse user request: they have a packet_id and status values with route_verdict, repair_target, blocked_move. They want a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. They say \"Do not add headings, explanations, JSON, Markdown, or extra lines. Begin with route_verdict=.\"\n\nSo output should be:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-51FB9124\nblocked_move=do not override blocker with consensus unless sources close it\n\nWe must ensure there is no extra spaces besides the format. Probably they want exactly those lines.\n\nThus answer: the three lines.\n\nCheck formatting: route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-51FB9124\nblocked_move=do not override blocker with consensus unless sources close it\n\nPotential nuance: Should we preserve the colon and spacing exactly as given? In the given example, they have \"repair_target=stress-test and preserve blocker ids: ART-001-BLK-51FB9124\". That includes a space after colon. We'll keep that.\n\nThus output exactly.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-51FB9124\nblocked_move=do not override blocker with consensus unless sources close it",
+    "response_id": "069a1b9b0308274b923b2b58a199d92f",
+    "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-51FB9124\nblocked_move=do not override blocker with consensus unless sources close it",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 439,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-51FB9124\nblocked_move=do not override blocker with consensus unless sources close it",
+  "text_sha256": "612ef54c13279bfa382ffc6368854d9881647bdc9accbe43686f7cf511d8eb3f"
+}

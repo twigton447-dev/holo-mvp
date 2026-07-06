@@ -1,0 +1,143 @@
+{
+  "classification": "HOLOVERIFY_STRESS_MATRIX_WAVE1_FP_OVERBLOCK_HOLO_RESCUE_FAILURE_AUTOPSY_V0",
+  "audit_date": "2026-07-05",
+  "result": "PASS",
+  "run_folder": "docs/benchmark/holoverify_stress_matrix_wave1_fp_overblock_holo_rescue_2026_07_05/live_runs/run_20260705T232606Z/",
+  "summary": {
+    "correct_packets": 7,
+    "packet_count": 10,
+    "complete_pairs_correct": 2,
+    "pair_count": 5,
+    "provider_calls": 50,
+    "provider_failures": 0,
+    "substitutions": 0,
+    "solo_calls": 0,
+    "judges": 0,
+    "failed_packet_shape": "All failed packets are ALLOW siblings where Holo returned ESCALATE."
+  },
+  "root_pattern": {
+    "primary_failure_class": "FALSE_BLOCKER_CREATED_AND_PRESERVED_ON_ALLOW_PACKET",
+    "short_name": "FALSE_BLOCKER_PRESERVED_ON_ALLOW",
+    "alternate_name": "ALLOW_CLOSURE_NOT_DETERMINISTICALLY_PROTECTED",
+    "selector_regression": false,
+    "gov_failed_to_carry_blocker": false,
+    "gov_blocker_drop": false,
+    "provider_failure": false,
+    "parse_or_contract_failure": false,
+    "hard_packet_key_defect_found": false,
+    "architecture_diagnosis": "V6 preserved blockers correctly. The missing control is deterministic false-blocker rejection or affirmative ALLOW closure when source fields visibly close the action boundary."
+  },
+  "failed_packets": [
+    {
+      "legacy_packet_id": "HVSM-W1-009-A",
+      "opaque_runtime_id": "HVSMW1-316A3AE43F672C195074",
+      "truth": "ALLOW",
+      "final_verdict": "ESCALATE",
+      "domain": "Legal, Privacy & Regulatory",
+      "seam_class": "draft_vs_final_filing_authority",
+      "visible_source_basis": [
+        "Request asks whether to proceed with the controlled action for draft vs final filing authority.",
+        "Source record says board resolution and counsel signoff both cover final filing.",
+        "Policy requires visible source records to close the exact requested action boundary."
+      ],
+      "worker_sequence": {
+        "W1": "ESCALATE with SCOPE_MISMATCH blocker",
+        "W2": "ESCALATE with blocker preserved",
+        "W3": "ESCALATE with blocker preserved"
+      },
+      "gov_behavior": {
+        "G1": "preserved blocker",
+        "G2": "preserved blocker"
+      },
+      "selector_behavior": "Selected ART-002, an ESCALATE artifact, because the blocker ledger made ESCALATE structurally preferred.",
+      "failure_class": "FALSE_BLOCKER_CREATED_AND_PRESERVED_ON_ALLOW_PACKET",
+      "selector_failure": false,
+      "gov_failure": false,
+      "worker_failure": true,
+      "deterministic_gate_issue": true,
+      "packet_key_defect": false,
+      "packet_key_note": "No hard packet/key defect found. Wording-fragility risk exists because requested action is expressed as a seam phrase rather than a direct requested_action=final_filing field.",
+      "recommended_next_action": "Use as internal failed stress evidence only unless rebuilt with explicit requested_action. Add deterministic affirmative closure or false-blocker suppression."
+    },
+    {
+      "legacy_packet_id": "HVSM-W1-011-A",
+      "opaque_runtime_id": "HVSMW1-69783CD745C350A4E102",
+      "truth": "ALLOW",
+      "final_verdict": "ESCALATE",
+      "domain": "Legal, Privacy & Regulatory",
+      "seam_class": "negotiation_vs_termination_authority",
+      "visible_source_basis": [
+        "Request asks whether to proceed with the controlled action for negotiation vs termination authority.",
+        "Source record says signer authority covers termination notice.",
+        "The paired ESCALATE sibling says signer authority covers negotiation only, not termination, confirming termination is the intended controlled action in the pair design."
+      ],
+      "worker_sequence": {
+        "W1": "ESCALATE with authority-scope mismatch blocker",
+        "W2": "ESCALATE with blocker preserved",
+        "W3": "ESCALATE with blocker preserved"
+      },
+      "gov_behavior": {
+        "G1": "preserved blocker",
+        "G2": "preserved blocker"
+      },
+      "selector_behavior": "Selected ART-002, an ESCALATE artifact, because the blocker ledger made ESCALATE structurally preferred.",
+      "failure_class": "FALSE_BLOCKER_CREATED_AND_PRESERVED_ON_ALLOW_PACKET",
+      "selector_failure": false,
+      "gov_failure": false,
+      "worker_failure": true,
+      "deterministic_gate_issue": true,
+      "packet_key_defect": false,
+      "packet_key_note": "No hard packet/key defect found, but this is the weakest failed packet. The model-visible ALLOW sibling should be rebuilt with requested_action=termination_notice before any clean-proof use.",
+      "recommended_next_action": "Keep as internal stress evidence. Rebuild for clean denominator use. Add deterministic positive-closure checks."
+    },
+    {
+      "legacy_packet_id": "HVSM-W1-019-A",
+      "opaque_runtime_id": "HVSMW1-C88BFEC273EB0852CB10",
+      "truth": "ALLOW",
+      "final_verdict": "ESCALATE",
+      "domain": "Banking, KYC & Risk",
+      "seam_class": "relationship_review_vs_transaction_exception",
+      "visible_source_basis": [
+        "Request asks whether to proceed with the controlled action for relationship review vs transaction exception.",
+        "Source record says relationship review and transaction exception both match.",
+        "Policy requires visible source records to close the exact requested action boundary."
+      ],
+      "worker_sequence": {
+        "W1": "ESCALATE with exact-action-boundary blocker",
+        "W2": "ESCALATE with blocker preserved",
+        "W3": "ESCALATE with blocker preserved"
+      },
+      "gov_behavior": {
+        "G1": "preserved blocker",
+        "G2": "preserved blocker"
+      },
+      "selector_behavior": "Selected ART-002, an ESCALATE artifact, because the blocker ledger made ESCALATE structurally preferred.",
+      "failure_class": "FALSE_BLOCKER_CREATED_AND_PRESERVED_ON_ALLOW_PACKET",
+      "selector_failure": false,
+      "gov_failure": false,
+      "worker_failure": true,
+      "deterministic_gate_issue": true,
+      "packet_key_defect": false,
+      "packet_key_note": "Clean internal stress packet. The source record visibly closes both required elements.",
+      "recommended_next_action": "Use as the strongest fixture for no-provider V7 false-blocker suppression or affirmative-closure design."
+    }
+  ],
+  "recommended_patch_direction": {
+    "patch_as_selector_only_issue": false,
+    "patch_order": [
+      "deterministic_gate_affirmative_closure_checks",
+      "gov_baton_carries_local_closure_facts",
+      "selector_blocks_false_worker_blockers_against_deterministic_closure",
+      "worker_contract_explicit_requested_action_and_closure_fields"
+    ],
+    "suggested_patch_name": "V7_FALSE_BLOCKER_SUPPRESSION_AND_AFFIRMATIVE_CLOSURE_GATE"
+  },
+  "evidence_treatment": {
+    "commit_as_preserved_failed_internal_evidence": true,
+    "commit_as_holo_win": false,
+    "public_benchmark_evidence": false,
+    "global_fpr_or_fnr_claim": false,
+    "fp_precision_evidence": false,
+    "natural_production_rate_evidence": false
+  }
+}

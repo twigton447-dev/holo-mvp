@@ -1,0 +1,2046 @@
+{
+  "classification": "HOLOVERIFY_GEMINI_WAVE1_MATRIX_VISUAL_DATA_V0",
+  "created_at": "2026-07-06",
+  "callsign": "HoloStats",
+  "status": "PASS_EVIDENCE_PACKAGE_CREATED_NO_PROVIDER_RUNS",
+  "source_artifacts": {
+    "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE1_SOLO_ROLLUP_2026_07_05.json": "ec1d6fb9c06057267d06a503151302fcd023f363092ebc334eea329a25cde8f7",
+    "docs/benchmark/holoverify_stress_matrix_expansion_wave1_solo_scout_runs_2026_07_05/run_20260705T215904Z/stress_matrix_wave1_solo_posthoc_score.json": "8290f722aa228c5acef7ea3589320245761de14a0f23a94235680f573937febc",
+    "docs/benchmark/HOLOVERIFY_LIVING_SEAM_ATLAS_AND_ARCHITECTURE_LEDGER_2026_07_05.json": "d3611b7af1d0a64134fe52b2f88b1d3e33ba21d41117991eb77fbd3f43392a68",
+    "docs/benchmark/stress_matrix_mockup_2026_07_05/wave1_red_to_green_transition.html": "54c0e2db854742f6511b7be03650f4098df6574b24374a3c82582246f18749ad"
+  },
+  "model_order": [
+    "xai",
+    "openai",
+    "minimax"
+  ],
+  "legend": {
+    "green": "KNEW/admissible solo answer",
+    "red": "failed solo attempt: wrong verdict or parse/admissibility failure",
+    "false_positive": "Solo ESCALATE on an ALLOW packet",
+    "false_negative": "Solo ALLOW on an ESCALATE packet",
+    "parse_admissibility": "Solo answer failed the answer contract or source/evidence admissibility gate"
+  },
+  "summary_totals": {
+    "pairs": 20,
+    "packets": 40,
+    "solo_calls": 120,
+    "green_dots": 90,
+    "red_dots": 30,
+    "false_positives": 23,
+    "false_negatives": 0,
+    "parse_admissibility_failures": 7,
+    "pairs_with_at_least_one_red": 16,
+    "wrong_verdict_pairs": 13,
+    "parse_only_holdouts": 3
+  },
+  "domain_breakdown": [
+    {
+      "domain": "Banking, KYC & Risk",
+      "pairs": 3,
+      "packets": 6,
+      "solo_calls": 18,
+      "green_dots": 14,
+      "red_dots": 4,
+      "false_positives": 3,
+      "false_negatives": 0,
+      "parse_admissibility_failures": 1,
+      "pairs_with_at_least_one_red": 2,
+      "wrong_verdict_pairs": 1,
+      "parse_only_holdouts": 1
+    },
+    {
+      "domain": "Clinical & Regulated Activation",
+      "pairs": 1,
+      "packets": 2,
+      "solo_calls": 6,
+      "green_dots": 5,
+      "red_dots": 1,
+      "false_positives": 1,
+      "false_negatives": 0,
+      "parse_admissibility_failures": 0,
+      "pairs_with_at_least_one_red": 1,
+      "wrong_verdict_pairs": 1,
+      "parse_only_holdouts": 0
+    },
+    {
+      "domain": "Legal, Privacy & Regulatory",
+      "pairs": 5,
+      "packets": 10,
+      "solo_calls": 30,
+      "green_dots": 23,
+      "red_dots": 7,
+      "false_positives": 7,
+      "false_negatives": 0,
+      "parse_admissibility_failures": 0,
+      "pairs_with_at_least_one_red": 4,
+      "wrong_verdict_pairs": 4,
+      "parse_only_holdouts": 0
+    },
+    {
+      "domain": "Operations, Insurance & Industrial",
+      "pairs": 4,
+      "packets": 8,
+      "solo_calls": 24,
+      "green_dots": 18,
+      "red_dots": 6,
+      "false_positives": 4,
+      "false_negatives": 0,
+      "parse_admissibility_failures": 2,
+      "pairs_with_at_least_one_red": 2,
+      "wrong_verdict_pairs": 2,
+      "parse_only_holdouts": 0
+    },
+    {
+      "domain": "Public Sector, Benefits & Grants",
+      "pairs": 7,
+      "packets": 14,
+      "solo_calls": 42,
+      "green_dots": 30,
+      "red_dots": 12,
+      "false_positives": 8,
+      "false_negatives": 0,
+      "parse_admissibility_failures": 4,
+      "pairs_with_at_least_one_red": 7,
+      "wrong_verdict_pairs": 5,
+      "parse_only_holdouts": 2
+    }
+  ],
+  "actual_wave1_dot_matrix": [
+    {
+      "pair_id": "HVSM-W1-001",
+      "domain": "Public Sector, Benefits & Grants",
+      "seam_class": "eligibility_vs_payout_release",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 1,
+        "green_dots": 5,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-001-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-001-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-002",
+      "domain": "Public Sector, Benefits & Grants",
+      "seam_class": "grant_period_and_cost_category",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 2,
+        "green_dots": 4,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-002-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "red",
+            "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+            "solo_verdict": "",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": [
+              "missing_or_invalid_verdict",
+              "missing_reason",
+              "missing_source_id_in_reason"
+            ]
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-002-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-003",
+      "domain": "Public Sector, Benefits & Grants",
+      "seam_class": "site_specific_reimbursement",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 1,
+        "green_dots": 5,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-003-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-003-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-004",
+      "domain": "Public Sector, Benefits & Grants",
+      "seam_class": "record_change_authority_scope",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 1,
+        "green_dots": 5,
+        "has_any_red": true,
+        "has_wrong_verdict": false,
+        "parse_admissibility_only_holdout": true,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-004-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": false,
+            "gate_failures": [
+              "invented_source_id"
+            ]
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-004-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-005",
+      "domain": "Public Sector, Benefits & Grants",
+      "seam_class": "emergency_procurement_waiver_scope",
+      "is_top5_holo_rescue_subset": true,
+      "pair_status": {
+        "red_dots": 3,
+        "green_dots": 3,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": true
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-005-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-005-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-006",
+      "domain": "Public Sector, Benefits & Grants",
+      "seam_class": "service_eligibility_vs_fiscal_hold",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 1,
+        "green_dots": 5,
+        "has_any_red": true,
+        "has_wrong_verdict": false,
+        "parse_admissibility_only_holdout": true,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-006-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "red",
+            "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+            "solo_verdict": "",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": [
+              "missing_or_invalid_verdict",
+              "missing_reason",
+              "missing_source_id_in_reason"
+            ]
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-006-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-007",
+      "domain": "Public Sector, Benefits & Grants",
+      "seam_class": "preliminary_vs_final_permit_authority",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 3,
+        "green_dots": 3,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": true
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-007-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "red",
+            "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+            "solo_verdict": "",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": [
+              "missing_or_invalid_verdict",
+              "missing_reason",
+              "missing_source_id_in_reason"
+            ]
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-007-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-008",
+      "domain": "Legal, Privacy & Regulatory",
+      "seam_class": "external_transfer_scope",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 1,
+        "green_dots": 5,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-008-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-008-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-009",
+      "domain": "Legal, Privacy & Regulatory",
+      "seam_class": "draft_vs_final_filing_authority",
+      "is_top5_holo_rescue_subset": true,
+      "pair_status": {
+        "red_dots": 2,
+        "green_dots": 4,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-009-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-009-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-010",
+      "domain": "Legal, Privacy & Regulatory",
+      "seam_class": "subpoena_entity_and_date_scope",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 0,
+        "green_dots": 6,
+        "has_any_red": false,
+        "has_wrong_verdict": false,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-010-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-010-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-011",
+      "domain": "Legal, Privacy & Regulatory",
+      "seam_class": "negotiation_vs_termination_authority",
+      "is_top5_holo_rescue_subset": true,
+      "pair_status": {
+        "red_dots": 3,
+        "green_dots": 3,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": true
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-011-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-011-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-012",
+      "domain": "Legal, Privacy & Regulatory",
+      "seam_class": "verified_identity_vs_legal_hold",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 1,
+        "green_dots": 5,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-012-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-012-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-013",
+      "domain": "Operations, Insurance & Industrial",
+      "seam_class": "coverage_approval_vs_payout_release",
+      "is_top5_holo_rescue_subset": true,
+      "pair_status": {
+        "red_dots": 3,
+        "green_dots": 3,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": true
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-013-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "red",
+            "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": [
+              "missing_source_id_in_reason",
+              "invented_source_id"
+            ]
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-013-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-014",
+      "domain": "Operations, Insurance & Industrial",
+      "seam_class": "inspection_pass_vs_lockout_release",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 3,
+        "green_dots": 3,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": true
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-014-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "red",
+            "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+            "solo_verdict": "",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": [
+              "missing_or_invalid_verdict",
+              "missing_reason",
+              "missing_source_id_in_reason"
+            ]
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-014-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-015",
+      "domain": "Operations, Insurance & Industrial",
+      "seam_class": "hazmat_route_waiver_scope",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 0,
+        "green_dots": 6,
+        "has_any_red": false,
+        "has_wrong_verdict": false,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-015-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-015-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-016",
+      "domain": "Operations, Insurance & Industrial",
+      "seam_class": "entitlement_vs_export_screening",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 0,
+        "green_dots": 6,
+        "has_any_red": false,
+        "has_wrong_verdict": false,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-016-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-016-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-017",
+      "domain": "Banking, KYC & Risk",
+      "seam_class": "identity_callback_vs_destination_account",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 0,
+        "green_dots": 6,
+        "has_any_red": false,
+        "has_wrong_verdict": false,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-017-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-017-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-018",
+      "domain": "Banking, KYC & Risk",
+      "seam_class": "product_scope_kyc",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 1,
+        "green_dots": 5,
+        "has_any_red": true,
+        "has_wrong_verdict": false,
+        "parse_admissibility_only_holdout": true,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-018-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "red",
+            "error_class": "PARSE_OR_ADMISSIBILITY_FAILURE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": [
+              "missing_reason",
+              "missing_source_id_in_reason"
+            ]
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-018-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-019",
+      "domain": "Banking, KYC & Risk",
+      "seam_class": "relationship_review_vs_transaction_exception",
+      "is_top5_holo_rescue_subset": true,
+      "pair_status": {
+        "red_dots": 3,
+        "green_dots": 3,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": true
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-019-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-019-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    },
+    {
+      "pair_id": "HVSM-W1-020",
+      "domain": "Clinical & Regulated Activation",
+      "seam_class": "clinical_signoff_vs_dose_exception",
+      "is_top5_holo_rescue_subset": false,
+      "pair_status": {
+        "red_dots": 1,
+        "green_dots": 5,
+        "has_any_red": true,
+        "has_wrong_verdict": true,
+        "parse_admissibility_only_holdout": false,
+        "all_three_model_collapse": false
+      },
+      "allow_row": {
+        "truth": "ALLOW",
+        "packet_id": "HVSM-W1-020-A",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "red",
+            "error_class": "FALSE_POSITIVE_ESCALATE_ON_ALLOW",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": false,
+            "solo_knew_admissible": false,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ALLOW",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      },
+      "escalate_row": {
+        "truth": "ESCALATE",
+        "packet_id": "HVSM-W1-020-E",
+        "dots": [
+          {
+            "model_key": "xai",
+            "model": "xAI / Grok mini",
+            "provider": "xai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "openai",
+            "model": "OpenAI / GPT mini",
+            "provider": "openai",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          },
+          {
+            "model_key": "minimax",
+            "model": "MiniMax",
+            "provider": "minimax",
+            "dot": "green",
+            "error_class": "KNEW_ADMISSIBLE",
+            "solo_verdict": "ESCALATE",
+            "solo_correct": true,
+            "solo_knew_admissible": true,
+            "gate_failures": []
+          }
+        ]
+      }
+    }
+  ],
+  "top5_holo_rescue_subset_and_result": {
+    "selected_pairs": [
+      "HVSM-W1-005",
+      "HVSM-W1-009",
+      "HVSM-W1-011",
+      "HVSM-W1-013",
+      "HVSM-W1-019"
+    ],
+    "holo_result": {
+      "provider_calls": "50/50",
+      "provider_failures": 0,
+      "packet_score": "7/10",
+      "pair_score": "2/5",
+      "failed_allow_packets": [
+        "HVSM-W1-009-A",
+        "HVSM-W1-011-A",
+        "HVSM-W1-019-A"
+      ],
+      "failure_class": "FALSE_BLOCKER_CREATED_AND_PRESERVED_ON_ALLOW_PACKET",
+      "status": "FAILED_INTERNAL_EVIDENCE_NOT_A_WIN"
+    },
+    "visual_treatment": "Show this as actual failed internal Holo rescue evidence, separate from any red-to-green concept animation."
+  },
+  "v7_status": {
+    "hardening_status": "hardened_and_committed_internal_hardening_only",
+    "selector": "SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05",
+    "selector_hash": "f653240e87b1062dfca2b651cae846459ccb524820803d6386cc0dddc808b71d",
+    "preflight_status": "PREFLIGHT_READY",
+    "preflight_expected_provider_calls": 30,
+    "preflight_runtime_manifest_hash": "f1f55f0c5b69f8bffa9c9a770f1b21a845e51e7bab5b810156f799175e213db8",
+    "live_validation_status": "LIVE_EXECUTION_BLOCKED_BY_POLICY_BEFORE_PROVIDER_CALLS",
+    "live_validation_blocked_before_provider_calls": true,
+    "actual_live_provider_calls": 0,
+    "v7_live_result_exists": false
+  },
+  "visual_instructions_for_gemini": {
+    "frame_1": "Render the actual Wave 1 solo matrix: 20 pair blocks, each with ALLOW and ESCALATE rows and xAI/OpenAI/MiniMax dots. Use the actual dot colors from actual_wave1_dot_matrix.",
+    "frame_2": "Zoom into one 6-dot pair block to explain the unit: ALLOW row has three model dots; ESCALATE row has three model dots; red means any solo failure, including wrong verdict or parse/admissibility failure.",
+    "frame_3": "For the transition concept, show a red-to-green coverage sweep across the matrix, but label it exactly as coverage concept / intended Holo repair state.",
+    "frame_4": "Keep the actual Holo Top 5 result in a separate callout: Actual Top 5 Holo rescue failed: 7/10 packets, 2/5 pairs, failed ALLOW packets 009-A, 011-A, 019-A.",
+    "hard_separation_rule": "Do not imply the red-to-green sweep is a scored result. It is a coverage concept / intended Holo repair state only. The actual scored Holo Top 5 result failed.",
+    "recommended_labels": {
+      "solo_matrix_title": "Wave 1 Solo Stress Matrix: 20 Pairs / 120 Solo Calls",
+      "solo_matrix_status": "INTERNAL SEAM DISCOVERY ONLY",
+      "transition_label": "coverage concept / intended Holo repair state",
+      "top5_label": "Actual Top 5 Holo Rescue: FAILED INTERNAL EVIDENCE",
+      "v7_label": "V7 hardening committed; live validation blocked before provider calls"
+    }
+  },
+  "claim_boundary": {
+    "internal_stress_matrix_evidence_only": true,
+    "strict_public_denominator": "blind-120 only",
+    "public_benchmark_evidence": false,
+    "global_fpr_or_fnr_claim": false,
+    "production_rate_claim": false,
+    "holo_win_claim_from_wave1_top5": false,
+    "v7_live_result_exists": false,
+    "allowed_language": [
+      "Wave 1 is internal stress-matrix seam discovery evidence.",
+      "The Top 5 Holo rescue result failed and is internal hardening evidence only.",
+      "V7 is hardened and preflight-ready, but no V7 live result exists because live execution was blocked before provider calls.",
+      "The strict public denominator remains blind-120 only."
+    ],
+    "forbidden_language": [
+      "Wave 1 is public benchmark evidence.",
+      "Wave 1 proves global FPR/FNR or natural production-rate prevalence.",
+      "The Wave 1 Top 5 Holo rescue is a Holo win.",
+      "The red-to-green transition is a scored Holo result.",
+      "V7 has a live validation result."
+    ]
+  }
+}

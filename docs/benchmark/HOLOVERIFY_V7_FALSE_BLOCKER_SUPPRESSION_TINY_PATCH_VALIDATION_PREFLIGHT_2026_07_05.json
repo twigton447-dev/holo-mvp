@@ -1,0 +1,213 @@
+{
+  "checks": {
+    "expected_provider_calls_is_30": true,
+    "judge_calls_disabled": true,
+    "no_substitutions": true,
+    "packet_count_is_6": true,
+    "posthoc_scoring_required_after_trace_freeze": true,
+    "preflight_passed": true,
+    "prompt_probe_leakage_hits_empty": true,
+    "prompt_probe_observed_30_calls": true,
+    "prompt_probe_role_counts_6_each": true,
+    "prompt_probe_sequence_per_packet": true,
+    "provider_calls_not_yet_made": true,
+    "runtime_input_leakage_hits_empty": true,
+    "runtime_manifest_hash_matches_wrapper": true,
+    "runtime_manifest_truth_free": true,
+    "runtime_packet_rows_only_contain_opaque_id_ref_and_hash": true,
+    "solo_calls_disabled": true,
+    "wrapper_has_no_scoring_map_path_before_trace_freeze": true
+  },
+  "claim_boundary": {
+    "fp_precision_evidence": false,
+    "global_fpr_or_fnr_claim": false,
+    "holo_win": false,
+    "production_safety_certification": false,
+    "public_benchmark_evidence": false,
+    "tiny_patch_validation_only": true
+  },
+  "classification": "HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_PREFLIGHT_SUMMARY_V0",
+  "commit_under_test": "573d21fa248691b9248f380240a61acba0228290",
+  "created_at_utc": "2026-07-06T04:54:39.257039+00:00",
+  "expected_future_provider_calls": 30,
+  "expected_provider_calls_by_slot": {
+    "G1": {
+      "calls": 6,
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax"
+    },
+    "G2": {
+      "calls": 6,
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax"
+    },
+    "W1": {
+      "calls": 6,
+      "model": "grok-3-mini",
+      "provider": "xai"
+    },
+    "W2": {
+      "calls": 6,
+      "model": "gpt-5.4-mini",
+      "provider": "openai"
+    },
+    "W3": {
+      "calls": 6,
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax"
+    }
+  },
+  "expected_sequence_per_packet": [
+    "W1",
+    "G1",
+    "W2",
+    "G2",
+    "W3"
+  ],
+  "future_approval_sentence": "I approve live provider execution for HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_V0 using only runtime-only manifest docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json with SHA-256 f1f55f0c5b69f8bffa9c9a770f1b21a845e51e7bab5b810156f799175e213db8, selector SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05 hash f653240e87b1062dfca2b651cae846459ccb524820803d6386cc0dddc808b71d, worker contract WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04 hash 5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37, and exactly 30 provider calls: W1 xai/grok-3-mini x6, G1 minimax/MiniMax-M2.5-highspeed x6, W2 openai/gpt-5.4-mini x6, G2 minimax/MiniMax-M2.5-highspeed x6, W3 minimax/MiniMax-M2.5-highspeed x6. TINY PATCH VALIDATION ONLY for V7 false-blocker suppression and affirmative closure behavior across three Wave 1 failed ALLOW fixtures plus their matching ESCALATE negative controls; not public benchmark evidence, not a Holo win, not a global FPR/FNR claim, not FP precision evidence, and not production safety certification. No solo, no judges, no scoring map before trace freeze, no mixed registration JSON before trace freeze, no substitutions, no public claims.",
+  "lane_label": "HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_V0",
+  "live_command": "python3 docs/benchmark/run_holoverify_v7_false_blocker_suppression_tiny_patch_validation_live_2026_07_05.py --run-live --approval-statement \"$APPROVAL\"",
+  "package_folder": "docs/benchmark/holoverify_v7_false_blocker_suppression_tiny_patch_validation_2026_07_05",
+  "packet_count": 6,
+  "pair_count": 3,
+  "preflight_folder": "docs/benchmark/holoverify_v7_false_blocker_suppression_tiny_patch_validation_2026_07_05/live_runs/preflight_20260706T045343Z",
+  "prompt_probe": {
+    "call_count": 30,
+    "packet_sequences": {
+      "HVSMW1-03C30A6F1E979B8E83F2": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ],
+      "HVSMW1-23E475812EFFC431B231": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ],
+      "HVSMW1-316A3AE43F672C195074": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ],
+      "HVSMW1-69783CD745C350A4E102": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ],
+      "HVSMW1-A429A3E0E82B25839382": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ],
+      "HVSMW1-C88BFEC273EB0852CB10": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ]
+    },
+    "probe_dir": "docs/benchmark/holoverify_v7_false_blocker_suppression_tiny_patch_validation_2026_07_05/live_runs/preflight_20260706T045343Z/preflight_prompt_probe",
+    "provider_calls_made": 0,
+    "role_counts": {
+      "G1": 6,
+      "G2": 6,
+      "W1": 6,
+      "W2": 6,
+      "W3": 6
+    },
+    "runtime_results": "docs/benchmark/holoverify_v7_false_blocker_suppression_tiny_patch_validation_2026_07_05/live_runs/preflight_20260706T045343Z/preflight_prompt_probe/blind_canary_runtime_results.json",
+    "runtime_results_sha256": "eb6010378ab0654d6e21c828660415104619a4ecae07d2398124ac858850a50c",
+    "trace_calls": "docs/benchmark/holoverify_v7_false_blocker_suppression_tiny_patch_validation_2026_07_05/live_runs/preflight_20260706T045343Z/preflight_prompt_probe/TRACE_CALLS.jsonl",
+    "trace_calls_sha256": "8f53c6d925694ff88ed989ca5d940fdd6131f38d7100851f220df507776fa38c"
+  },
+  "runtime_manifest": {
+    "path": "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+    "sha256": "f1f55f0c5b69f8bffa9c9a770f1b21a845e51e7bab5b810156f799175e213db8",
+    "truth_free": true
+  },
+  "scoring_map": {
+    "path": "docs/benchmark/holoverify_v7_false_blocker_suppression_tiny_patch_validation_2026_07_05/holoverify_v7_false_blocker_suppression_tiny_patch_validation_scoring_map_2026_07_05.json",
+    "posthoc_only": true,
+    "sha256": "d373168a818b5337855970a84217f7caf98e8c1f666dfa409ba4c78edc7a69bb"
+  },
+  "selected_packets": [
+    "HVSM-W1-009-A",
+    "HVSM-W1-009-E",
+    "HVSM-W1-011-A",
+    "HVSM-W1-011-E",
+    "HVSM-W1-019-A",
+    "HVSM-W1-019-E"
+  ],
+  "selected_pairs": [
+    "HVSM-W1-009",
+    "HVSM-W1-011",
+    "HVSM-W1-019"
+  ],
+  "selector_policy": {
+    "selector_criteria": [
+      "gate_passed",
+      "parse_valid",
+      "source_ids_valid",
+      "required_sections_present",
+      "contradiction_free",
+      "deterministic_clean",
+      "blocker_resolution_clean",
+      "blocker_resolution_complete",
+      "closure_validation_clean",
+      "all_prior_blockers_source_closed",
+      "packet_unresolved_blocker_symmetry_clean",
+      "affirmative_closure_count",
+      "suppressed_false_blocker_count",
+      "packet_repair_required_count",
+      "false_blocker_only_escalate",
+      "invalid_closure_count",
+      "unresolved_blocker_count",
+      "source_boundary_open_with_blocker",
+      "verdict_consensus_count",
+      "final_turn_consensus_repair",
+      "verdict_corroboration_count",
+      "sections_present",
+      "cited_evidence_count",
+      "earliest_turn"
+    ],
+    "selector_policy_decision": "Truth-blind structural selector. Among structurally valid artifacts, explicit blocker resolution is only eligible when local closure validation proves the cited source fields close the exact blocker_type. A later ALLOW cannot silently drop a prior SOURCE_BOUNDARY_OPEN blocker, and it also cannot win by textually naming a blocker_id unless deterministic code confirms the closure. Unknown blocker types or blocker dimensions without a deterministic closure validator remain unresolved. A source-grounded ESCALATE blocker can defeat an ALLOW majority unless a later artifact source-closes it. Deterministic source-derived dependency, authority-scope, blocker-closure, and affirmative ALLOW-support checks can emit blockers and disqualify artifacts that contradict computed source boundaries before worker prose, Gov baton text, or selector consensus can miss them. A worker-created ESCALATE blocker that is contradicted by runtime-visible affirmative closure is moved to a suppressed false-blocker ledger and cannot by itself make an ESCALATE artifact selectable. An ALLOW artifact from any turn is not selectable while any active, non-suppressed blocker raised anywhere in the packet remains unresolved. Concise final answers are warnings, not sole disqualifiers, when the artifact is otherwise complete. Within the same blocker/consensus tier, gate-failed corroboration from otherwise usable artifacts is considered before citation count and earliest-turn tie-breaks.",
+    "selector_policy_sha256": "f653240e87b1062dfca2b651cae846459ccb524820803d6386cc0dddc808b71d",
+    "selector_policy_version": "SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05"
+  },
+  "status": "PASS",
+  "worker_contract": {
+    "required_worker_keys": [
+      "worker_role",
+      "verification_verdict",
+      "action_boundary",
+      "binding_class",
+      "cited_evidence",
+      "final_answer",
+      "blocker_type",
+      "blocker_resolution",
+      "structured_blocker_resolution"
+    ],
+    "w3_artifact_first_guard": [
+      "W3 ARTIFACT-FIRST CONTRACT V4.",
+      "Start immediately with worker_role=W3 before any reasoning.",
+      "Never output <think>, hidden reasoning, analysis, or deliberation.",
+      "If the source seam is ambiguous, encode that only in verification_verdict, binding_class, open_blockers, blocker_type, blocker_resolution, structured_blocker_resolution, and final_answer.",
+      "If any prior blocker exists, do not return ALLOW unless blocker_resolution names each blocker_id, structured_blocker_resolution cites source evidence, and the source fields close the blocker_type.",
+      "Do not debate competing interpretations outside the key=value fields.",
+      "Emit exactly the required key=value artifact lines, then stop."
+    ],
+    "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37",
+    "worker_contract_version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+  }
+}

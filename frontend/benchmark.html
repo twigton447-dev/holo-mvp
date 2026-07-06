@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HoloEngine · The Action Boundary Benchmark · Version 7.55 · July 2026</title>
+<title>HoloEngine · The Action Boundary Benchmark · Version 7.61 · July 2026</title>
 <meta name="description" content="Measuring AI reliability before irreversible enterprise action.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +22,7 @@
     <div class="toplinks"><a href="/">Home</a><a href="/whitepaper">Whitepaper</a><a href="/benchmark">Benchmark</a><a href="/payloads/">Payloads</a></div>
   </nav>
   <header class="hero">
-    <div class="eyebrow">HoloVerify · Version 7.55 · July 2026</div>
+    <div class="eyebrow">HoloVerify · Version 7.61 · July 2026</div>
     <h1>The Action Boundary Benchmark</h1>
     <p class="subtitle">Measuring AI reliability before irreversible enterprise action</p>
     <div class="meta-row"><div class="meta-card"><span>Public score</span><strong>120/120</strong></div><div class="meta-card"><span>Truth split</span><strong>60 / 60</strong></div><div class="meta-card"><span>Claim boundary</span><strong>Blind-120 only</strong></div></div>
@@ -34,7 +34,7 @@
       <p class="takeaway-note"><strong>Packets are domain-specific pressure tests.</strong> Each packet asks whether the current evidence really authorizes an action such as releasing payment, granting access, executing an order, activating a clinical workflow, filing a legal action, or changing infrastructure.</p>
       <p class="takeaway-note"><strong>The thesis:</strong> solo agents are brittle at the action boundary because plausible text is not the same as source-grounded permission. HoloVerify tries to make the same model families safer by changing the structure around them: worker rotation, Gov handoffs, deterministic checks, artifact preservation, and final selection.</p>
       <p class="takeaway-note"><strong>The current public denominator:</strong> HoloVerify has a strict blind-120 public lane: 120/120 packets correct, balanced across 60 ALLOW and 60 ESCALATE packets. The older 614-packet number is historical/internal and is not combined with this denominator.</p>
-      <p class="takeaway-note"><strong>Why this matters:</strong> the public proof now separates clean blind benchmark evidence from internal engineering evidence. V5/V6 repair runs are useful hardening evidence, but they do not create public FPR/FNR claims.</p>
+      <p class="takeaway-note"><strong>Why this matters:</strong> the public proof now separates clean blind benchmark evidence from internal engineering evidence. Wave 1 stress-matrix evidence, V7 hardening, and Wave 2 freeze work are useful engineering evidence, but they do not create public FPR/FNR claims.</p>
       <p class="takeaway-note"><strong>Models used in the governed-runtime work:</strong> the benchmark lanes used mini-model families including <code>xai/grok-3-mini</code>, <code>openai/gpt-5.4-mini</code>, and <code>minimax/MiniMax-M2.5-highspeed</code>. The next public comparison will state model rosters only after the blind lane passes its no-provider disconfirmation tests.</p>
       <h3>HoloVerify Result</h3>
       <div class="table-scroll takeaway-table"><table><thead><tr><th>Metric</th><th>Errors</th><th>n</th><th>Exact 95% upper bound</th><th>Wilson 95% upper bound</th></tr></thead><tbody><tr><td>Overall packet error</td><td>0</td><td>120</td><td>2.466%</td><td>3.102%</td></tr><tr><td>False positive rate</td><td>0</td><td>60</td><td>4.870%</td><td>6.015%</td></tr><tr><td>False negative rate</td><td>0</td><td>60</td><td>4.870%</td><td>6.015%</td></tr></tbody></table></div>
@@ -77,13 +77,20 @@
 </section>
 <section class="paper-section" id="what-counts"><h2>What Counts</h2>
 <p>The current public denominator counts the blind-120 lane only.</p>
-<div class="table-scroll"><table><thead><tr><th>Evidence</th><th>Treatment</th></tr></thead><tbody><tr><td>Blind-120 HoloVerify lane</td><td>Current strict public denominator: 120 packets, 60 ALLOW, 60 ESCALATE, 120/120 correct.</td></tr><tr><td>Old 614-era material</td><td>Historical/internal. Not combined with blind-120 for public FPR/FNR.</td></tr><tr><td>Solo Failure Factory</td><td>Internal seam discovery and red-dot source evidence.</td></tr><tr><td>V5/V6 repair lanes</td><td>Internal hardening evidence. Useful, but not public benchmark denominator.</td></tr><tr><td>Packet/key defects</td><td>Quarantined and excluded from clean denominators.</td></tr></tbody></table></div>
+<div class="table-scroll"><table><thead><tr><th>Evidence</th><th>Treatment</th></tr></thead><tbody><tr><td>Blind-120 HoloVerify lane</td><td>Current strict public denominator: 120 packets, 60 ALLOW, 60 ESCALATE, 120/120 correct.</td></tr><tr><td>Old 614-era material</td><td>Historical/internal. Not combined with blind-120 for public FPR/FNR.</td></tr><tr><td>Wave 1 stress matrix</td><td>Internal seam evidence: actual solo red/green dots and a failed Holo rescue attempt. Not public FPR/FNR.</td></tr><tr><td>V7 hardening</td><td>Internal architecture hardening. Fable passed the patch, but live validation is blocked in this environment and no V7 live result exists.</td></tr><tr><td>Wave 2 stress matrix</td><td>Designed and frozen, but unrun. It has no solo result yet.</td></tr><tr><td>Packet/key defects</td><td>Quarantined and excluded from clean denominators.</td></tr></tbody></table></div>
 <hr/>
 </section>
 <section class="paper-section" id="solo-red-dot-visual"><h2>Solo Red Dots</h2>
-<p>The benchmark needs to show the failure pattern visually: solo agents are often right, but red errors appear across domains where a small miss can matter.</p>
-<div class="table-scroll"><table><thead><tr><th>Visual element</th><th>Meaning</th></tr></thead><tbody><tr><td>One square</td><td>One packet or sibling pair, grouped by domain.</td></tr><tr><td>Six mini dots</td><td>Three solo models across both siblings.</td></tr><tr><td>Green</td><td>Solo got the packet right in admissible form.</td></tr><tr><td>Red</td><td>Solo made a wrong verdict.</td></tr><tr><td>Amber</td><td>Parse or admissibility failure.</td></tr><tr><td>Gray</td><td>Packet/key quarantine.</td></tr><tr><td>Holo toggle</td><td>Shows whether HoloVerify covered the solo failure without creating a new error.</td></tr></tbody></table></div>
-<p>Current Solo Failure Factory totals: 210 inspected pairs, 104 pairs with at least one solo failure, 79 wrong-verdict solo-failure pairs, 33 FP-overblock pairs, 18 FN-false-allow pairs, and 18 all-three solo-collapse pairs.</p>
+<p>The visual problem is simple: solo agents are often right, but red failures still appear at the action boundary. For high-stakes work, "mostly green" is not enough if the red dots are approvals, releases, account changes, filings, or clinical activations.</p>
+<div class="table-scroll"><table><thead><tr><th>Visual element</th><th>Meaning</th></tr></thead><tbody><tr><td>One square</td><td>One sibling pair, grouped by domain.</td></tr><tr><td>Six mini dots</td><td>Three solo models across the ALLOW sibling and the ESCALATE sibling.</td></tr><tr><td>Green</td><td>The solo model gave a correct usable answer.</td></tr><tr><td>Red</td><td>The solo attempt failed. This includes wrong verdicts and parse/admissibility failures.</td></tr><tr><td>Gray</td><td>Packet/key quarantine.</td></tr><tr><td>Holo status</td><td>Shown separately. A red-to-green animation is a future repair concept unless a live Holo run has passed.</td></tr></tbody></table></div>
+<p>Current Wave 1 stress-matrix result: 20 sibling pairs, 40 packets, and 120 solo calls. The solo layer produced 90 green dots and 30 red dots. Sixteen of 20 pairs had at least one red dot. Thirteen pairs had wrong-verdict failures. Three pairs were parse/admissibility-only holdouts.</p>
+<p>Wave 1 is internal stress-matrix evidence. It is not the public denominator and it is not a natural production-rate estimate.</p>
+<hr/>
+</section>
+<section class="paper-section" id="stress-matrix-status"><h2>Current Stress-Matrix Status</h2>
+<p>The stress matrix is an engineering lane. It finds hard action-boundary seams, then tests whether HoloVerify can cover those seams without creating new errors.</p>
+<div class="table-scroll"><table><thead><tr><th>Lane</th><th>Status</th><th>What it means</th></tr></thead><tbody><tr><td>Wave 1 solo scout</td><td>120 solo calls complete</td><td>90 green, 30 red. Useful internal evidence that solo models can fail at narrow action boundaries.</td></tr><tr><td>Wave 1 Top 5 Holo rescue</td><td>Failed internal run</td><td>Holo scored 7/10 packets and 2/5 pairs. It over-escalated three clean ALLOW packets, exposing the false-blocker preservation gap.</td></tr><tr><td>V7 false-blocker hardening</td><td>Committed and preflight-ready</td><td>Fable passed the patch after adversarial kill testing. Live validation was blocked by provider-export policy before any provider calls, so no V7 live result exists.</td></tr><tr><td>Wave 2 stress matrix</td><td>Frozen but unrun</td><td>30 more sibling pairs are designed and frozen. Live solo scout execution was blocked before provider calls, so no Wave 2 solo result exists.</td></tr></tbody></table></div>
+<blockquote><p>The stress-matrix story is not "Holo already turned every red dot green." The honest story is: we found red dots, a first rescue failed, V7 hardened the failure class, and live validation still has to run in a provider-enabled environment.</p></blockquote>
 <hr/>
 </section>
 <section class="paper-section" id="evidence-families"><h2>Evidence Families</h2>
@@ -130,22 +137,20 @@
 </section>
 <section class="paper-section" id="what-this-does-not-claim"><h2>What This Does Not Claim</h2>
 <p>This benchmark does not claim:</p>
-<ul><li>HoloVerify has zero real-world risk.</li><li>HoloVerify is universally superior to every model.</li><li>HoloVerify replaces qualified human review in clinical, legal, financial, or defense contexts.</li><li>The tested packets cover every possible enterprise failure mode.</li><li>One-shot solo baselines represent every possible solo prompting method.</li><li>That V5/V6 internal repair evidence is public benchmark evidence.</li><li>That the old 614-packet result can be combined with blind-120 for public rates.</li></ul>
+<ul><li>HoloVerify has zero real-world risk.</li><li>HoloVerify is universally superior to every model.</li><li>HoloVerify replaces qualified human review in clinical, legal, financial, or defense contexts.</li><li>The tested packets cover every possible enterprise failure mode.</li><li>One-shot solo baselines represent every possible solo prompting method.</li><li>That Wave 1, V7, or Wave 2 internal evidence is public benchmark evidence.</li><li>That V7 has a live validation result. It does not yet.</li><li>That the old 614-packet result can be combined with blind-120 for public rates.</li></ul>
 <p>The only sanctioned public sentence right now is:</p>
 <blockquote><p>On the current strict blind-120 public denominator, HoloVerify produced zero observed false positives and zero observed false negatives across 120 action-boundary packets. The 614-packet result is historical/internal and is not the current public denominator.</p></blockquote>
 <hr/>
 </section>
-<section class="paper-section" id="next-packet-families"><h2>Next Packet Families</h2>
-<p>The next packet expansion should prioritize more irreversible action boundaries, not generic reasoning tasks.</p>
-<p>Recommended next families:</p>
-<div class="table-scroll"><table><thead><tr><th>Domain</th><th>Action boundary being tested</th></tr></thead><tbody><tr><td>Defense logistics / command authorization</td><td>Whether source authority permits movement, procurement, or operational release</td></tr><tr><td>Banking / AML / account freeze controls</td><td>Whether account restriction or release is justified by current evidence</td></tr><tr><td>Insurance claims / payout authorization</td><td>Whether payout, denial, or escalation is permitted</td></tr><tr><td>Pharma quality / batch release</td><td>Whether manufacturing or quality evidence permits product release</td></tr><tr><td>Privacy / data disclosure / consent controls</td><td>Whether records may be disclosed to a requester</td></tr><tr><td>Education / student record release</td><td>Whether student records can be released under current authority</td></tr><tr><td>Export control / customs / restricted shipment release</td><td>Whether shipment can proceed under current screening evidence</td></tr><tr><td>Real estate / mortgage / escrow release</td><td>Whether funds, documents, or approvals may be released</td></tr><tr><td>Manufacturing quality hold / supplier substitution</td><td>Whether an exception can override a quality hold</td></tr><tr><td>Tax / regulatory payment controls</td><td>Whether a filing, remittance, or exception is currently authorized</td></tr><tr><td>Customer account security / MFA reset</td><td>Whether identity proof closes the account-change boundary</td></tr><tr><td>Energy trading / credit-limit controls</td><td>Whether a trade, override, or exposure increase is permitted</td></tr><tr><td>Legal discovery / privilege / litigation hold release</td><td>Whether documents can be released or must be escalated</td></tr><tr><td>Healthcare claims / prior authorization</td><td>Whether coverage or authorization evidence closes the payment/action boundary</td></tr></tbody></table></div>
-<p>Each family should preserve the existing structure:</p>
-<ul><li>20 sibling pairs.</li><li>40 packets.</li><li>10 hard-ALLOW target pairs.</li><li>10 hard-ESCALATE target pairs.</li><li>ALLOW and ESCALATE sibling for every pair.</li><li>Same frozen packet discipline.</li><li>Same no-leakage and packet-identity checks.</li><li>Same matched solo baseline after Holo freeze.</li></ul>
+<section class="paper-section" id="next-packet-families"><h2>Next Milestone</h2>
+<p>The next public milestone is not to blend the stress matrix into the blind-120 result. The next public milestone is a larger clean blind denominator.</p>
+<div class="table-scroll"><table><thead><tr><th>Track</th><th>Current state</th><th>Next action</th></tr></thead><tbody><tr><td>Public denominator</td><td>Blind-120, 60 ALLOW / 60 ESCALATE, 120/120 correct</td><td>Build the next balanced blind bank toward 150/150 and then 381/381.</td></tr><tr><td>Internal stress matrix</td><td>Wave 1 has actual solo results; Wave 2 is frozen but unrun</td><td>Run Wave 2 from a provider-enabled environment, then update the matrix to 50 pairs / 300 solo dots.</td></tr><tr><td>Architecture hardening</td><td>V7 is committed and preflight-ready</td><td>Run the V7 tiny validation from a provider-enabled environment before claiming repair success.</td></tr></tbody></table></div>
+<p>Every expansion should preserve the existing discipline: frozen packets, runtime-only manifests, post-hoc scoring, no answer-key leakage, packet/key quarantine, and clear separation between public denominator evidence and internal hardening evidence.</p>
 <hr/>
 </section>
 <section class="paper-section" id="audit-sources"><h2>Audit Sources</h2>
 <p>Primary current sources:</p>
-<ul><li><code>docs/benchmark/HOLOVERIFY_STATISTICAL_APPENDIX_2026_07_01.md</code></li><li><code>docs/benchmark/HOLOVERIFY_WAVE2_WAVE3_WAVE4_COMBINED_EVIDENCE_MEMO_2026_07_01.md</code></li><li><code>docs/benchmark/HOLOVERIFY_WAVE3_WAVE4_FINAL_EVIDENCE_MEMO_2026_07_01.md</code></li><li><code>docs/benchmark/HOLOVERIFY_REPLICATION_PACKET_FREEZE_WAVE5_7DOMAIN_2026_07_01.md</code></li></ul>
+<ul><li><code>docs/benchmark/HOLOVERIFY_LIVING_SEAM_ATLAS_AND_ARCHITECTURE_LEDGER_2026_07_05.md</code></li><li><code>docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE1_SOLO_ROLLUP_2026_07_05.md</code></li><li><code>docs/benchmark/HOLOVERIFY_V7_TINY_PATCH_VALIDATION_LIVE_ATTEMPT_BLOCKED_OPERATIONAL_NOTE_2026_07_06.md</code></li><li><code>docs/benchmark/HOLOVERIFY_STRESS_MATRIX_WAVE2_SOLO_SCOUT_LIVE_ATTEMPT_BLOCKED_OPERATIONAL_NOTE_2026_07_06.md</code></li><li><code>docs/benchmark/HOLOVERIFY_PROVIDER_ENABLED_EXECUTION_HANDOFF_2026_07_06.md</code></li></ul>
 <p>The benchmark should feel like an audit ledger: clear about what was counted, clear about what was excluded, and clear about how much uncertainty remains.</p>
 <hr/>
 </section>
@@ -157,7 +162,7 @@
 </section>
   </main>
   <footer>
-    <div><strong>HoloEngine</strong><br>Version 7.55 · July 2026</div>
+    <div><strong>HoloEngine</strong><br>Version 7.61 · July 2026</div>
     <div><a href="/whitepaper">holoengine.ai/whitepaper</a><br><a href="/benchmark">holoengine.ai/benchmark</a></div>
   </footer>
   <script>

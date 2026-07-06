@@ -26,23 +26,27 @@ denominator because that lane included evidence later excluded by the stricter
 blind-gate rule. It must not be combined with blind-120 for public FPR/FNR or
 Wilson claims.
 
-### Internal Solo-Seam Scoreboard
+### Internal Stress-Matrix Scoreboard
 
-The solo-seam work is the visual diagnostic target: find packets where the same
-model families are often right, but at least one solo call fails at the action
-boundary.
+The stress-matrix work is the visual diagnostic target: find packets where the
+same model families are often right, but at least one solo call fails at the
+action boundary.
+
+Current Wave 1 stress-matrix result:
 
 | Metric | Count |
 | --- | ---: |
-| Solo scout pairs inspected | 210 |
-| Pairs with at least one solo failure | 104 |
-| Pairs with wrong-verdict solo failure | 79 |
-| FP_OVERBLOCK pairs | 33 |
-| FN_FALSE_ALLOW pairs | 18 |
-| All-three solo-collapse pairs | 18 |
-| Mixed pairs | 27 |
-| Parse/admissibility-only pairs | 25 |
-| Quarantined packet/key defects | 1 |
+| Sibling pairs | 20 |
+| Packets | 40 |
+| Solo calls | 120 |
+| Green dots | 90 |
+| Red dots | 30 |
+| False-positive overblocks | 23 |
+| False negatives | 0 |
+| Parse/admissibility failures | 7 |
+| Pairs with at least one red dot | 16 |
+| Wrong-verdict pairs | 13 |
+| Parse-only holdouts | 3 |
 
 This scoreboard is internal seam evidence. It is not public FPR/FNR evidence by
 itself. Its purpose is to show where solo agents break, then test whether
@@ -51,13 +55,16 @@ HoloVerify covers those red-dot failures without creating new ones.
 ### Internal Patch And Retest Status
 
 Holo failures are not hidden. They are preserved, autopsied, patched, and rerun
-under a stricter label.
+only under strict labels.
 
 | Lane | Result | Treatment |
 | --- | ---: | --- |
 | V5 selected FN rescue | 12/14 packets, 5/7 pairs | Valid internal failed-live evidence |
 | V6 tiny patch validation | 4/4 packets, 2/2 pairs | Internal patch-validation evidence |
 | V6 same selected-lane rerun | 14/14 packets, 7/7 pairs | Internal selected-lane repair evidence |
+| Wave 1 Top 5 FP-overblock rescue | 7/10 packets, 2/5 pairs | Valid internal failed-live evidence |
+| V7 false-blocker hardening | No live result | Fable-passed internal hardening; tiny preflight ready but blocked before provider calls in this environment |
+| Wave 2 stress matrix | No solo result | Designed and frozen; live scout blocked before provider calls in this environment |
 
 The V5 miss class was `V5_SCOPE_DEPENDENCY_NON_DETECTION`: workers failed to
 detect a visible source-field authority/scope blocker. V6 added deterministic
@@ -76,10 +83,9 @@ The benchmark visual should show the solo brittleness problem directly.
 | One square | One packet or sibling pair, grouped by domain |
 | Six mini dots | Three solo models across both siblings |
 | Green dot | Solo model got the packet right in admissible form |
-| Red dot | Solo model made a wrong verdict |
-| Amber dot | Parse/admissibility failure |
+| Red dot | Solo attempt failed: wrong verdict or parse/admissibility failure |
 | Gray dot | Quarantined packet/key defect |
-| Holo toggle | Shows whether HoloVerify covered the solo failure without creating a new error |
+| Holo status | Shown separately. A red-to-green animation is a future repair concept unless a live Holo run has passed |
 
 The point is not that solos are always bad. The point is that solo agents are
 often right, but red-dot failures can still appear at the action boundary.
@@ -330,18 +336,14 @@ around those models.
 For the solo baseline, each model receives exactly one independent call per
 packet. No Gov, no baton, no deterministic repair layer, and no final selector.
 
-Current Solo Failure Factory totals:
+Current stress-matrix status:
 
-| Metric | Count |
-| --- | ---: |
-| Solo scout pairs inspected | 210 |
-| Pairs with at least one solo failure | 104 |
-| Pairs with wrong-verdict solo failure | 79 |
-| FP_OVERBLOCK pairs | 33 |
-| FN_FALSE_ALLOW pairs | 18 |
-| All-three solo-collapse pairs | 18 |
-| Mixed pairs | 27 |
-| Parse/admissibility-only pairs | 25 |
+| Lane | Status | Treatment |
+| --- | --- | --- |
+| Wave 1 solo scout | 120 solo calls, 90 green, 30 red | Internal stress-matrix evidence |
+| Wave 1 Top 5 Holo rescue | 7/10 packets, 2/5 pairs | Failed internal hardening evidence |
+| V7 false-blocker hardening | Fable-passed, preflight-ready, no live result | Internal hardening only |
+| Wave 2 stress matrix | 30 pairs / 60 packets frozen but unrun | No Wave 2 result yet |
 
 Solo outputs only count as **KNEW/admissible** when they produce the right
 verdict, valid structure, required source grounding, no invented source IDs,
@@ -384,8 +386,10 @@ Excluded:
 - Canaries.
 - Precursors.
 - Old 614-era denominator material.
-- Solo Failure Factory seam discovery.
-- V5/V6 patch-validation and selected-lane repair evidence.
+- Solo Failure Factory and stress-matrix seam discovery.
+- V5/V6/V7 patch-validation and selected-lane repair evidence.
+- Wave 1 Top 5 rescue evidence.
+- Wave 2 frozen-but-unrun material.
 - HoloBuild quality rows.
 - Packet/key defects.
 - Anything without a clean blind root package.
@@ -407,8 +411,10 @@ Other locked evidence exists, but is not counted in the public denominator:
 
 | Evidence | Why separate |
 | --- | --- |
-| Solo Failure Factory | Seam discovery and red-dot source evidence, not public FPR/FNR denominator |
-| V5/V6 Tier 3 repair lanes | Internal hardening and selected-lane repair evidence |
+| Wave 1 stress matrix | Seam discovery and red-dot source evidence, not public FPR/FNR denominator |
+| Wave 1 Top 5 Holo rescue | Internal failed-live evidence that exposed a false-blocker gap |
+| V5/V6/V7 repair lanes | Internal hardening and selected-lane repair evidence |
+| Wave 2 stress matrix | Frozen but unrun; no Wave 2 solo result exists yet |
 | Old 614-era material | Historical/internal unless re-admitted under the strict blind rule |
 | HoloBuild mini-suites | Product quality evidence, not HoloVerify public action-boundary denominator |
 
@@ -508,6 +514,8 @@ This benchmark does not claim:
   defense contexts.
 - The tested packets cover every possible enterprise failure mode.
 - One-shot solo baselines represent every possible solo prompting method.
+- Wave 1, V7, or Wave 2 internal evidence is public benchmark evidence.
+- V7 has a live validation result. It does not yet.
 
 This benchmark does claim:
 

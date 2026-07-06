@@ -1,0 +1,150 @@
+{
+  "classification": "HOLOVERIFY_PROVIDER_ENABLED_EXECUTION_HANDOFF_V0",
+  "claim_boundary": {
+    "global_fpr_or_fnr_claim": false,
+    "holo_win": false,
+    "natural_production_rate_evidence": false,
+    "production_safety_certification": false,
+    "public_benchmark_evidence": false
+  },
+  "created_at_utc": "2026-07-06T00:00:00Z",
+  "general_execution_rules": [
+    "Run one lane at a time.",
+    "Do not run both lanes in the same terminal session without preserving the first result.",
+    "Do not rerun failed content attempts into a clean result.",
+    "Preserve invalid, blocked, transport-failure, or partial traces separately.",
+    "Score only after trace freeze.",
+    "Do not edit runtime manifests or runtime payloads.",
+    "Do not load scoring maps before trace freeze.",
+    "Do not use substitutions.",
+    "Do not make public claims from these runs.",
+    "Send back run folder path, live summary, TRACE_PROVIDER_CALLS hash, raw output count, and post-hoc score JSON/MD."
+  ],
+  "handoff_purpose": "Give Taylor one safe handoff document for executing blocked-but-ready live lanes from an approved provider-enabled environment.",
+  "lanes": [
+    {
+      "approval_sentence": "I approve live provider execution for HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_V0 using only runtime-only manifest docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json with SHA-256 f1f55f0c5b69f8bffa9c9a770f1b21a845e51e7bab5b810156f799175e213db8, selector SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05 hash f653240e87b1062dfca2b651cae846459ccb524820803d6386cc0dddc808b71d, worker contract WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04 hash 5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37, and exactly 30 provider calls: W1 xai/grok-3-mini x6, G1 minimax/MiniMax-M2.5-highspeed x6, W2 openai/gpt-5.4-mini x6, G2 minimax/MiniMax-M2.5-highspeed x6, W3 minimax/MiniMax-M2.5-highspeed x6. TINY PATCH VALIDATION ONLY for V7 false-blocker suppression and affirmative closure behavior across three Wave 1 failed ALLOW fixtures plus their matching ESCALATE negative controls; not public benchmark evidence, not a Holo win, not a global FPR/FNR claim, not FP precision evidence, and not production safety certification. No solo, no judges, no scoring map before trace freeze, no mixed registration JSON before trace freeze, no substitutions, no public claims.",
+      "claim_boundary": {
+        "fp_precision_evidence": false,
+        "global_fpr_or_fnr_claim": false,
+        "holo_win": false,
+        "production_safety_certification": false,
+        "public_benchmark_evidence": false,
+        "tiny_patch_validation_only": true
+      },
+      "expected_output_run_folder_pattern": "docs/benchmark/holoverify_v7_false_blocker_suppression_tiny_patch_validation_2026_07_05/live_runs/run_<UTCSTAMP>/",
+      "expected_provider_calls": {
+        "G1 minimax/MiniMax-M2.5-highspeed": 6,
+        "G2 minimax/MiniMax-M2.5-highspeed": 6,
+        "W1 xai/grok-3-mini": 6,
+        "W2 openai/gpt-5.4-mini": 6,
+        "W3 minimax/MiniMax-M2.5-highspeed": 6,
+        "total": 30
+      },
+      "lane_name": "HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_V0",
+      "live_command": "python3 docs/benchmark/run_holoverify_v7_false_blocker_suppression_tiny_patch_validation_live_2026_07_05.py --run-live --approval-statement \"$APPROVAL\"",
+      "live_wrapper": {
+        "committed": true,
+        "path": "docs/benchmark/run_holoverify_v7_false_blocker_suppression_tiny_patch_validation_live_2026_07_05.py"
+      },
+      "post_run_artifacts_to_send_back": [
+        "run folder path",
+        "blind_canary_live_summary.json",
+        "v7_false_blocker_suppression_tiny_patch_validation_live_summary.json",
+        "TRACE_CALLS.jsonl",
+        "TRACE_PROVIDER_CALLS.jsonl",
+        "raw_provider_outputs/",
+        "blind_canary_runtime_results.json",
+        "v7_false_blocker_suppression_tiny_patch_validation_posthoc_score_trace_bound_v0.json",
+        "any generated post-hoc Markdown report, if present"
+      ],
+      "posthoc_scorer": {
+        "command": "python3 docs/benchmark/score_holoverify_v7_false_blocker_suppression_tiny_patch_validation_posthoc_2026_07_05.py --run-dir <RUN_DIR>",
+        "committed": true,
+        "path": "docs/benchmark/score_holoverify_v7_false_blocker_suppression_tiny_patch_validation_posthoc_2026_07_05.py"
+      },
+      "runtime_manifest": {
+        "path": "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_RUNTIME_MANIFEST_NO_TRUTH_2026_07_05.json",
+        "sha256": "f1f55f0c5b69f8bffa9c9a770f1b21a845e51e7bab5b810156f799175e213db8"
+      },
+      "selector": {
+        "sha256": "f653240e87b1062dfca2b651cae846459ccb524820803d6386cc0dddc808b71d",
+        "version": "SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05"
+      },
+      "status": {
+        "live_attempt_blocked_before_calls_in_codex_environment": true,
+        "live_result_exists": false,
+        "preflight_committed": true
+      },
+      "worker_contract": {
+        "sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37",
+        "version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+      }
+    },
+    {
+      "approval_sentence": "I approve live provider execution for HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_SOLO_SCOUT_V0 using only runtime-only manifest docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_RUNTIME_MANIFEST_NO_TRUTH_2026_07_06.json with SHA-256 428bdd3e1e24e2538bfc6e37989ff741e3efa2749da7dc3b86c863ead90fb39c, and exactly 180 solo provider calls: xai/grok-3-mini x60, openai/gpt-5.4-mini x60, minimax/MiniMax-M2.5-highspeed x60. SOLO SCOUT ONLY for stress-matrix expansion Wave 2 across 30 sibling pairs / 60 packets; not Holo rescue, not public benchmark evidence, not a global FPR/FNR claim, and not natural production rate evidence. No Holo, no Gov, no judges, no scoring map before trace freeze, no mixed registration JSON before trace freeze, no substitutions, no public claims.",
+      "claim_boundary": {
+        "global_fpr_or_fnr_claim": false,
+        "holo_rescue": false,
+        "natural_production_rate_evidence": false,
+        "public_benchmark_evidence": false,
+        "solo_scout_only": true
+      },
+      "expected_output_run_folder_pattern_if_local_support_runner_is_used": "docs/benchmark/holoverify_stress_matrix_expansion_wave2_solo_scout_runs_2026_07_06/run_<UTCSTAMP>/",
+      "expected_provider_calls": {
+        "minimax/MiniMax-M2.5-highspeed": 60,
+        "openai/gpt-5.4-mini": 60,
+        "total": 180,
+        "xai/grok-3-mini": 60
+      },
+      "lane_name": "HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_SOLO_SCOUT_V0",
+      "live_runner": {
+        "committed": false,
+        "local_support_artifact_path": "docs/benchmark/run_holoverify_stress_matrix_expansion_wave2_solo_scout_2026_07_06.py",
+        "note": "Prepared but left uncommitted after the Codex policy block. The committed freeze/runtime manifest can be used to recreate or separately commit the runner before provider-enabled execution."
+      },
+      "local_support_live_command_if_available": "python3 -B docs/benchmark/run_holoverify_stress_matrix_expansion_wave2_solo_scout_2026_07_06.py --run-live --approval-statement \"$APPROVAL\"",
+      "post_run_artifacts_to_send_back": [
+        "run folder path",
+        "solo_one_shot_live_summary.json",
+        "solo_one_shot_live_summary.md",
+        "solo_one_shot_runtime_results.json",
+        "TRACE_PROVIDER_CALLS.jsonl",
+        "raw_provider_outputs/",
+        "prompts/",
+        "stress_matrix_wave2_solo_posthoc_score.json",
+        "stress_matrix_wave2_solo_posthoc_score.md",
+        "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_SOLO_ROLLUP_2026_07_06.json, if generated",
+        "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_SOLO_ROLLUP_2026_07_06.md, if generated"
+      ],
+      "posthoc_scorer": {
+        "committed": false,
+        "local_support_artifact_path": "docs/benchmark/score_holoverify_stress_matrix_expansion_wave2_solo_scout_2026_07_06.py",
+        "local_support_command_if_available": "python3 -B docs/benchmark/score_holoverify_stress_matrix_expansion_wave2_solo_scout_2026_07_06.py --run-dir <RUN_DIR>",
+        "note": "Prepared but left uncommitted after the Codex policy block."
+      },
+      "runtime_manifest": {
+        "path": "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_EXPANSION_WAVE2_RUNTIME_MANIFEST_NO_TRUTH_2026_07_06.json",
+        "sha256": "428bdd3e1e24e2538bfc6e37989ff741e3efa2749da7dc3b86c863ead90fb39c"
+      },
+      "status": {
+        "design_and_freeze_committed": true,
+        "live_attempt_blocked_before_calls_in_codex_environment": true,
+        "wave2_solo_result_exists": false
+      }
+    }
+  ],
+  "post_run_return_checklist": [
+    "exact lane name",
+    "run folder path",
+    "observed provider call count",
+    "provider failures, if any",
+    "SHA-256 of TRACE_PROVIDER_CALLS.jsonl",
+    "raw provider output count",
+    "live summary path and SHA-256",
+    "post-hoc score JSON/MD paths and SHA-256 values",
+    "blocked, invalid, partial, transport-failure, or control-failure status if any",
+    "confirmation that no scoring map was loaded before trace freeze"
+  ],
+  "status": "NO_PROVIDER_HANDOFF_CREATED"
+}

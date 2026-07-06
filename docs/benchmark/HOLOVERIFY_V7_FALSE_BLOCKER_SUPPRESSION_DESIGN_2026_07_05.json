@@ -1,0 +1,186 @@
+{
+  "classification": "HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_DESIGN_V0",
+  "design_date": "2026-07-05",
+  "source_evidence": {
+    "commit": "ae5227c47",
+    "autopsy_md": "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_WAVE1_FP_OVERBLOCK_HOLO_RESCUE_FAILURE_AUTOPSY_2026_07_05.md",
+    "autopsy_json": "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_WAVE1_FP_OVERBLOCK_HOLO_RESCUE_FAILURE_AUTOPSY_2026_07_05.json",
+    "run_folder": "docs/benchmark/holoverify_stress_matrix_wave1_fp_overblock_holo_rescue_2026_07_05/live_runs/run_20260705T232606Z/"
+  },
+  "target_failure_class": "FALSE_BLOCKER_CREATED_AND_PRESERVED_ON_ALLOW_PACKET",
+  "goal": "Design deterministic false-blocker suppression and affirmative ALLOW-support validation before any code or live rerun.",
+  "scope": {
+    "no_provider": true,
+    "no_holo_live": true,
+    "no_solo": true,
+    "no_gov_live": true,
+    "no_judges": true,
+    "no_code_edits_yet": true,
+    "no_staging_commit_or_push": true
+  },
+  "failed_fixtures": [
+    {
+      "legacy_packet_id": "HVSM-W1-009-A",
+      "truth": "ALLOW",
+      "holo_final": "ESCALATE",
+      "failure_mechanism": "Workers created a false SCOPE_MISMATCH blocker around draft vs final filing scope; Gov preserved it; selector chose ESCALATE because the blocker remained open.",
+      "source_visible_fields_that_should_suppress": [
+        {
+          "source_id": "SRC-CASE-6F963061A9E8-SRC",
+          "field": "final_filing_authority",
+          "visible_value": "Board resolution and counsel signoff both cover final filing."
+        },
+        {
+          "source_id": "SRC-CASE-6F963061A9E8-POL",
+          "field": "policy",
+          "visible_value": "Action may proceed when visible source records close the exact requested action boundary."
+        }
+      ],
+      "packet_note": "Wording-fragility risk exists because requested action is expressed as a seam phrase rather than requested_action=final_filing. Use for internal hardening; rebuild before clean public-proof use."
+    },
+    {
+      "legacy_packet_id": "HVSM-W1-011-A",
+      "truth": "ALLOW",
+      "holo_final": "ESCALATE",
+      "failure_mechanism": "Workers created a false authority-scope mismatch around negotiation vs termination authority; Gov preserved it; selector chose ESCALATE because the blocker remained open.",
+      "source_visible_fields_that_should_suppress": [
+        {
+          "source_id": "SRC-CASE-940CF7BA77B3-SRC",
+          "field": "termination_notice_authority",
+          "visible_value": "Signer authority covers termination notice."
+        },
+        {
+          "source_id": "SRC-CASE-940CF7BA77B3-POL",
+          "field": "policy",
+          "visible_value": "Action may proceed when visible source records close the exact requested action boundary."
+        }
+      ],
+      "packet_note": "Weakest fixture. If requested_action=termination_notice cannot be extracted from model-visible text, V7 should mark PACKET_REPAIR_REQUIRED rather than force ALLOW."
+    },
+    {
+      "legacy_packet_id": "HVSM-W1-019-A",
+      "truth": "ALLOW",
+      "holo_final": "ESCALATE",
+      "failure_mechanism": "Workers created a false exact-action-boundary blocker even though relationship review and transaction exception both matched; Gov preserved it; selector chose ESCALATE because the blocker remained open.",
+      "source_visible_fields_that_should_suppress": [
+        {
+          "source_id": "SRC-CASE-0714395B150F-SRC",
+          "field": "relationship_review",
+          "visible_value": "match"
+        },
+        {
+          "source_id": "SRC-CASE-0714395B150F-SRC",
+          "field": "transaction_exception",
+          "visible_value": "match"
+        },
+        {
+          "source_id": "SRC-CASE-0714395B150F-POL",
+          "field": "policy",
+          "visible_value": "Action may proceed when visible source records close the exact requested action boundary."
+        }
+      ],
+      "packet_note": "Cleanest V7 fixture."
+    }
+  ],
+  "proposed_patch": {
+    "name": "V7_FALSE_BLOCKER_SUPPRESSION_AND_AFFIRMATIVE_CLOSURE_GATE",
+    "deterministic_gate": {
+      "stage_name": "deterministic_affirmative_allow_support_gate",
+      "runs_before": [
+        "Gov baton routing",
+        "selector artifact choice"
+      ],
+      "inputs_allowed": [
+        "runtime packet source text",
+        "worker artifact blocker fields",
+        "local deterministic parser output"
+      ],
+      "inputs_forbidden": [
+        "truth labels",
+        "scoring maps",
+        "sibling identity",
+        "pair ID",
+        "prior solo result",
+        "prior Holo result",
+        "post-hoc metadata"
+      ],
+      "emits": [
+        "affirmative_closure_ledger",
+        "suppressed_false_blocker_ledger",
+        "packet_repair_required_ledger"
+      ],
+      "closure_status_values": [
+        "SOURCE_CLOSED",
+        "SOURCE_OPEN",
+        "PACKET_REPAIR_REQUIRED"
+      ],
+      "suppression_rule": "Suppress a worker blocker only when a deterministic source-visible closure entry contradicts the exact missing or mismatched field asserted by the blocker."
+    },
+    "gov_baton_behavior": {
+      "carry_ledgers": [
+        "active_blocker_ledger",
+        "affirmative_closure_ledger",
+        "suppressed_false_blocker_ledger",
+        "packet_repair_required_ledger"
+      ],
+      "false_blocker_route": {
+        "blocked_move": "do not preserve suppressed false blocker",
+        "repair_target": "use affirmative closure ledger; return ALLOW unless a new source-valid blocker exists"
+      },
+      "real_blocker_rule": "Gov must still preserve blockers when the source fields do not close the boundary."
+    },
+    "selector_behavior": {
+      "rule_1": "If an artifact has only suppressed false blockers and a deterministic SOURCE_CLOSED entry, treat active blocker count as zero.",
+      "rule_2": "If an ALLOW artifact is source-closed and has no active blockers, it is eligible.",
+      "rule_3": "If an ESCALATE artifact depends only on suppressed false blockers, it is ineligible unless it cites a separate source-valid blocker.",
+      "rule_4": "If any valid active blocker remains, ESCALATE can still win.",
+      "rule_5": "If the packet is PACKET_REPAIR_REQUIRED, do not score it as a clean Holo win or Holo loss."
+    }
+  },
+  "required_no_provider_tests": [
+    "test_v7_emits_affirmative_closure_for_relationship_review_and_transaction_exception_w1_019",
+    "test_v7_suppresses_false_exact_boundary_blocker_w1_019",
+    "test_v7_emits_affirmative_closure_for_final_filing_board_and_counsel_w1_009",
+    "test_v7_suppresses_false_draft_vs_final_scope_blocker_w1_009",
+    "test_v7_maps_explicit_termination_notice_authority_when_requested_action_is_visible",
+    "test_v7_marks_ambiguous_negotiation_vs_termination_packet_as_packet_repair_required",
+    "test_v7_gov_carries_affirmative_closure_ledger",
+    "test_v7_gov_carries_suppressed_false_blocker_ledger",
+    "test_v7_selector_rejects_escalate_artifact_based_only_on_suppressed_false_blockers",
+    "test_v7_selector_still_allows_escalate_when_source_valid_blocker_remains",
+    "test_v7_does_not_read_truth_scoring_map_or_sibling_metadata",
+    "test_v7_does_not_mutate_frozen_wave1_evidence",
+    "test_v7_does_not_clear_paired_escalate_siblings_with_real_missing_fields"
+  ],
+  "minimum_acceptance_set": [
+    "HVSM-W1-019-A becomes deterministically source-closed.",
+    "A false worker blocker on HVSM-W1-019-A is suppressed.",
+    "HVSM-W1-019-E remains ESCALATE because transaction exception is missing.",
+    "HVSM-W1-009-A suppresses the false blocker only if requested action maps to final filing from visible text.",
+    "HVSM-W1-011-A either suppresses the false blocker from visible termination-notice closure or is marked PACKET_REPAIR_REQUIRED if requested-action extraction is not explicit enough."
+  ],
+  "falsifiers": [
+    "V7 suppresses a blocker without deterministic source-field contradiction.",
+    "V7 reads truth labels, scoring maps, sibling side, pair ID, prior solo result, prior Holo result, or post-hoc metadata in runtime logic.",
+    "V7 clears a real ESCALATE sibling where a required field is visibly missing.",
+    "V7 keeps an ESCALATE final solely because of a blocker that the closure ledger suppressed.",
+    "V7 turns an ambiguous packet into a clean ALLOW proof instead of marking PACKET_REPAIR_REQUIRED.",
+    "V7 mutates frozen Wave 1 evidence.",
+    "V7 requires provider calls to pass no-provider acceptance tests."
+  ],
+  "strongest_negative_control": {
+    "packet": "HVSM-W1-019-E",
+    "reason": "Source says relationship review exists, but transaction exception is missing. If V7 suppresses that blocker, the patch is unsafe."
+  },
+  "claim_boundary": {
+    "internal_hardening_only": true,
+    "public_benchmark_evidence": false,
+    "holo_win": false,
+    "global_fpr_or_fnr_evidence": false,
+    "fp_precision_evidence": false,
+    "natural_production_rate_evidence": false,
+    "model_superiority_evidence": false,
+    "allowed_claim": "V7 is a proposed no-provider deterministic patch design for the false-blocker preservation failure discovered in a failed internal Wave 1 FP-overblock rescue lane."
+  },
+  "status": "DESIGN_ONLY_READY_FOR_HOLOOPS_REVIEW"
+}

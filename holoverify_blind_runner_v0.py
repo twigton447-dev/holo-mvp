@@ -14,19 +14,27 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 
-SELECTOR_POLICY_VERSION = "SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05"
+SELECTOR_POLICY_VERSION = "SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05"
 SELECTOR_POLICY_DECISION = (
     "Truth-blind structural selector. Among structurally valid artifacts, "
     "explicit blocker resolution is only eligible when local closure validation "
     "proves the cited source fields close the exact blocker_type. A later ALLOW "
     "cannot silently drop a prior SOURCE_BOUNDARY_OPEN blocker, and it also "
     "cannot win by textually naming a blocker_id unless deterministic code "
-    "confirms the closure. A source-grounded ESCALATE blocker can defeat an "
-    "ALLOW majority unless a later artifact source-closes it. Deterministic "
-    "source-derived dependency, authority-scope, and blocker-closure checks can "
+    "confirms the closure. Unknown blocker types or blocker dimensions without "
+    "a deterministic closure validator remain unresolved. A source-grounded "
+    "ESCALATE blocker can defeat an ALLOW majority unless a later artifact "
+    "source-closes it. Deterministic "
+    "source-derived dependency, authority-scope, blocker-closure, and affirmative "
+    "ALLOW-support checks can "
     "emit blockers and disqualify artifacts that contradict computed source "
     "boundaries before worker prose, Gov baton text, or selector consensus can "
-    "miss them. Concise final answers are warnings, not sole disqualifiers, when "
+    "miss them. A worker-created ESCALATE blocker that is contradicted by "
+    "runtime-visible affirmative closure is moved to a suppressed false-blocker "
+    "ledger and cannot by itself make an ESCALATE artifact selectable. An ALLOW "
+    "artifact from any turn is not selectable while any active, non-suppressed "
+    "blocker raised anywhere in the packet remains unresolved. Concise "
+    "final answers are warnings, not sole disqualifiers, when "
     "the artifact is otherwise complete. Within the same blocker/consensus tier, "
     "gate-failed corroboration from otherwise usable artifacts is considered "
     "before citation count and earliest-turn tie-breaks."
@@ -42,6 +50,11 @@ SELECTOR_CRITERIA = (
     "blocker_resolution_complete",
     "closure_validation_clean",
     "all_prior_blockers_source_closed",
+    "packet_unresolved_blocker_symmetry_clean",
+    "affirmative_closure_count",
+    "suppressed_false_blocker_count",
+    "packet_repair_required_count",
+    "false_blocker_only_escalate",
     "invalid_closure_count",
     "unresolved_blocker_count",
     "source_boundary_open_with_blocker",
@@ -296,12 +309,15 @@ def _blockers_from_parsed(row: dict, parsed: dict, payload: dict) -> list[dict]:
             if len(blocker_types) == 1
             else _infer_blocker_type(blocker, payload)
         )
+        required_closure_fields = _closure_requirements_for_blocker(blocker_type, blocker, payload)
+        if not required_closure_fields:
+            required_closure_fields = _blocker_context_closure_fields(payload, parsed, cited)
         result.append(
             {
                 "blocker_id": _blocker_id(str(row.get("artifact_id")), blocker),
                 "blocker_text": blocker,
                 "blocker_type": blocker_type,
-                "required_closure_fields": _closure_requirements_for_blocker(blocker_type, blocker, payload),
+                "required_closure_fields": required_closure_fields,
                 "source_artifact_id": row.get("artifact_id"),
                 "source_role": row.get("role"),
                 "source_turn_index": row.get("turn_index"),
@@ -309,6 +325,42 @@ def _blockers_from_parsed(row: dict, parsed: dict, payload: dict) -> list[dict]:
             }
         )
     return result
+
+
+def _blocker_context_closure_fields(payload: dict, parsed: dict, cited: list[str]) -> dict:
+    action_boundary = _normalized_phrase(parsed.get("action_boundary"))
+    cited_set = {str(item) for item in cited if item}
+    for closure in _deterministic_affirmative_allow_support_checks(payload):
+        if closure.get("closure_status") != "SOURCE_CLOSED":
+            continue
+        if not (cited_set & {str(item) for item in closure.get("source_ids") or []}):
+            continue
+        closure_type = str(closure.get("closure_type") or "")
+        if closure_type == "FINAL_FILING_AUTHORITY" and (
+            "final filing" in action_boundary or "draft vs final" in action_boundary
+        ):
+            return {
+                "closure_type": closure_type,
+                "requested_action": closure.get("requested_action"),
+                "required_fields": closure.get("required_fields") or [],
+            }
+        if closure_type == "TERMINATION_NOTICE_AUTHORITY" and "termination notice" in action_boundary:
+            return {
+                "closure_type": closure_type,
+                "requested_action": closure.get("requested_action"),
+                "required_fields": closure.get("required_fields") or [],
+            }
+        if closure_type == "RELATIONSHIP_REVIEW_TRANSACTION_EXCEPTION" and (
+            "relationship review" in action_boundary
+            or "transaction exception" in action_boundary
+            or "both match" in action_boundary
+        ):
+            return {
+                "closure_type": closure_type,
+                "requested_action": closure.get("requested_action"),
+                "required_fields": closure.get("required_fields") or [],
+            }
+    return {}
 
 
 def _resolution_source_ids(parsed: dict, allowed_ids: set[str]) -> list[str]:
@@ -342,6 +394,30 @@ def _source_has_amount_limit(fields: dict, requested_amount: object) -> bool:
     return False
 
 
+VALIDATED_BLOCKER_CLOSURE_TYPES = {
+    "TRANSACTION_TYPE_APPROVAL_MISMATCH",
+    "ACTION_TYPE_APPROVAL_MISMATCH",
+    "SCOPE_MISMATCH",
+    "AMOUNT_LIMIT_MISSING",
+    "ADD_ON_SCOPE_MISMATCH",
+    "CALLBACK_FIELD_MISSING",
+    "SOURCE_POLICY_UNDERSPECIFIED",
+}
+
+
+def _resolution_verified_dimensions_for_type(blocker_type: str) -> set[str]:
+    normalized = _normalize_value(blocker_type).upper()
+    return {
+        "TRANSACTION_TYPE_APPROVAL_MISMATCH": {"transaction_type"},
+        "ACTION_TYPE_APPROVAL_MISMATCH": {"action_type"},
+        "SCOPE_MISMATCH": {"scope"},
+        "AMOUNT_LIMIT_MISSING": {"amount_limit"},
+        "ADD_ON_SCOPE_MISMATCH": {"add_on", "scope"},
+        "CALLBACK_FIELD_MISSING": {"callback"},
+        "SOURCE_POLICY_UNDERSPECIFIED": {"source_policy"},
+    }.get(normalized, set())
+
+
 def _validate_blocker_closure(payload: dict, blocker: dict, resolution_source_ids: list[str]) -> dict:
     blocker_id = str(blocker.get("blocker_id") or "")
     blocker_type = _normalize_value(blocker.get("blocker_type")).upper()
@@ -356,6 +432,33 @@ def _validate_blocker_closure(payload: dict, blocker: dict, resolution_source_id
             "failure_codes": ["blocker_resolution_missing_source_id"],
             "failures": ["no cited runtime source id appears in blocker_resolution or structured_blocker_resolution"],
             "cited_source_ids": resolution_source_ids,
+        }
+    if blocker_type not in VALIDATED_BLOCKER_CLOSURE_TYPES:
+        return {
+            "blocker_id": blocker_id,
+            "blocker_type": blocker.get("blocker_type"),
+            "status": "INVALID_CLOSURE",
+            "failure_codes": ["unsupported_blocker_type"],
+            "failures": [f"no deterministic closure validator for blocker_type {blocker.get('blocker_type')}"],
+            "cited_source_ids": resolution_source_ids,
+            "required_closure_fields": requirements,
+        }
+    asserted_dimensions = _blocker_asserted_dimensions(blocker)
+    verified_dimensions = _resolution_verified_dimensions_for_type(blocker_type)
+    unsupported_dimensions = sorted(asserted_dimensions - verified_dimensions)
+    if unsupported_dimensions:
+        return {
+            "blocker_id": blocker_id,
+            "blocker_type": blocker.get("blocker_type"),
+            "status": "INVALID_CLOSURE",
+            "failure_codes": ["unsupported_resolution_dimension"],
+            "failures": [
+                "blocker asserts dimensions without deterministic closure validation: "
+                + ",".join(unsupported_dimensions)
+            ],
+            "cited_source_ids": resolution_source_ids,
+            "required_closure_fields": requirements,
+            "unsupported_dimensions": unsupported_dimensions,
         }
     if blocker_type == "TRANSACTION_TYPE_APPROVAL_MISMATCH":
         required = _normalize_value(requirements.get("transaction_type"))
@@ -679,6 +782,644 @@ def _deterministic_blockers_from_dependency_failures(row: dict, gate: dict) -> l
     return blockers
 
 
+def _docs_containing(payload: dict, *needles: str) -> list[dict]:
+    matches: list[dict] = []
+    required = [needle.lower() for needle in needles if needle]
+    for doc in _source_documents(payload):
+        text = _doc_text(doc).lower()
+        if all(needle in text for needle in required):
+            matches.append(doc)
+    return matches
+
+
+def _docs_containing_any(payload: dict, required: Iterable[str], any_terms: Iterable[str]) -> list[dict]:
+    matches: list[dict] = []
+    required_terms = [term.lower() for term in required if term]
+    optional_terms = [term.lower() for term in any_terms if term]
+    for doc in _source_documents(payload):
+        text = _doc_text(doc).lower()
+        if all(term in text for term in required_terms) and any(term in text for term in optional_terms):
+            matches.append(doc)
+    return matches
+
+
+NEGATING_SOURCE_TERMS = (
+    " no ",
+    " not ",
+    " missing",
+    " absent",
+    " without ",
+    " lacks ",
+    " lack ",
+    " does not ",
+    " do not ",
+    " only ",
+    " stale",
+    " expired",
+)
+
+
+def _has_negating_source_signal(text: object) -> bool:
+    normalized = f" {_normalized_phrase(text)} "
+    return any(term in normalized for term in NEGATING_SOURCE_TERMS)
+
+
+def _docs_with_negating_signal(payload: dict, *required: str) -> list[dict]:
+    matches: list[dict] = []
+    required_terms = [term.lower() for term in required if term]
+    for doc in _source_documents(payload):
+        text = _doc_text(doc).lower()
+        if all(term in text for term in required_terms) and _has_negating_source_signal(text):
+            matches.append(doc)
+    return matches
+
+
+def _factual_closure_docs(docs: Iterable[dict]) -> list[dict]:
+    return [
+        doc
+        for doc in docs
+        if str(doc.get("source_type") or "") in {"source_record", "field_record"}
+    ]
+
+
+def _closure_entry(
+    payload: dict,
+    closure_type: str,
+    requested_action: str,
+    status: str,
+    required_fields: list[str],
+    matched_source_fields: dict,
+    source_ids: list[str],
+    reason: str,
+) -> dict:
+    closure_id = hashlib.sha256(
+        "|".join(
+            [
+                str(payload.get("packet_id") or ""),
+                closure_type,
+                requested_action,
+                status,
+                ",".join(source_ids),
+            ]
+        ).encode("utf-8")
+    ).hexdigest()[:12].upper()
+    required_verdict = (
+        "ALLOW"
+        if status == "SOURCE_CLOSED"
+        else "ESCALATE"
+        if status == "SOURCE_OPEN"
+        else "PACKET_REPAIR_REQUIRED"
+    )
+    return {
+        "closure_id": f"AFC-{closure_id}",
+        "closure_type": closure_type,
+        "requested_action": requested_action,
+        "required_fields": required_fields,
+        "matched_source_fields": matched_source_fields,
+        "source_ids": source_ids,
+        "closure_status": status,
+        "required_verdict": required_verdict,
+        "reason": reason,
+        "confidence": "deterministic_source_text",
+    }
+
+
+def _deterministic_affirmative_allow_support_checks(payload: dict) -> list[dict]:
+    """Source-visible affirmative ALLOW/open checks for known boundary forms.
+
+    The parser only inspects runtime packet source text. It does not read truth,
+    sibling labels, scoring maps, prior solo/Holo outputs, or design documents.
+    """
+    boundary_text = " ".join(
+        [
+            str(payload.get("action_boundary") or ""),
+            *[_doc_text(doc) for doc in _source_documents(payload)],
+        ]
+    ).lower()
+    checks: list[dict] = []
+
+    if "draft vs final filing authority" in boundary_text:
+        closed_docs_all = _factual_closure_docs(
+            _docs_containing(
+                payload,
+                "board resolution",
+                "counsel signoff",
+                "cover final filing",
+            )
+        )
+        negating_docs = _docs_with_negating_signal(payload, "final")
+        closed_docs = [doc for doc in closed_docs_all if not _has_negating_source_signal(_doc_text(doc))]
+        open_docs = _docs_containing_any(
+            payload,
+            ["final"],
+            [
+                "final counsel signoff is missing",
+                "counsel signoff is missing",
+                "no counsel signoff",
+                "does not cover final filing",
+                "not cover final filing",
+                "draft preparation",
+            ],
+        )
+        if closed_docs_all and negating_docs:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "FINAL_FILING_AUTHORITY",
+                    "final_filing",
+                    "PACKET_REPAIR_REQUIRED",
+                    ["board_resolution", "counsel_signoff", "final_filing_scope"],
+                    {},
+                    sorted({_doc_id(doc) for doc in [*closed_docs_all, *negating_docs]}),
+                    "final filing source text contains both closure and negating/open signals",
+                )
+            )
+        elif open_docs or negating_docs:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "FINAL_FILING_AUTHORITY",
+                    "final_filing",
+                    "SOURCE_OPEN",
+                    ["board_resolution", "counsel_signoff", "final_filing_scope"],
+                    {"counsel_signoff": "missing"},
+                    sorted({_doc_id(doc) for doc in [*open_docs, *negating_docs]}),
+                    "final counsel signoff is visibly missing",
+                )
+            )
+        elif closed_docs:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "FINAL_FILING_AUTHORITY",
+                    "final_filing",
+                    "SOURCE_CLOSED",
+                    ["board_resolution", "counsel_signoff", "final_filing_scope"],
+                    {
+                        "board_resolution": "covers final filing",
+                        "counsel_signoff": "covers final filing",
+                    },
+                    [_doc_id(doc) for doc in closed_docs],
+                    "board resolution and counsel signoff both cover final filing",
+                )
+            )
+        else:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "FINAL_FILING_AUTHORITY",
+                    "final_filing",
+                    "PACKET_REPAIR_REQUIRED",
+                    ["board_resolution", "counsel_signoff", "final_filing_scope"],
+                    {},
+                    [],
+                    "final filing boundary is named but required closure fields are not explicit",
+                )
+            )
+
+    if "negotiation vs termination authority" in boundary_text:
+        closed_docs_all = _factual_closure_docs(
+            [
+                *_docs_containing(payload, "signer authority", "covers termination notice"),
+                *_docs_containing(payload, "delegation", "covers termination notice"),
+            ]
+        )
+        negating_docs = _docs_with_negating_signal(payload, "termination notice")
+        closed_docs = [doc for doc in closed_docs_all if not _has_negating_source_signal(_doc_text(doc))]
+        open_docs = _docs_containing_any(
+            payload,
+            ["termination"],
+            [
+                "negotiation only",
+                "not termination",
+                "no signer authority",
+                "does not cover termination",
+                "not cover termination",
+                "missing",
+            ],
+        )
+        if closed_docs_all and negating_docs:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "TERMINATION_NOTICE_AUTHORITY",
+                    "termination_notice",
+                    "PACKET_REPAIR_REQUIRED",
+                    ["signer_authority", "termination_notice_scope"],
+                    {},
+                    sorted({_doc_id(doc) for doc in [*closed_docs_all, *negating_docs]}),
+                    "termination notice source text contains both closure and negating/open signals",
+                )
+            )
+        elif open_docs or negating_docs:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "TERMINATION_NOTICE_AUTHORITY",
+                    "termination_notice",
+                    "SOURCE_OPEN",
+                    ["signer_authority", "termination_notice_scope"],
+                    {"signer_authority": "not covering termination notice"},
+                    sorted({_doc_id(doc) for doc in [*open_docs, *negating_docs]}),
+                    "signer authority does not visibly cover termination notice",
+                )
+            )
+        elif closed_docs:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "TERMINATION_NOTICE_AUTHORITY",
+                    "termination_notice",
+                    "SOURCE_CLOSED",
+                    ["signer_authority", "termination_notice_scope"],
+                    {"signer_authority": "covers termination notice"},
+                    [_doc_id(doc) for doc in closed_docs],
+                    "signer authority covers termination notice",
+                )
+            )
+        else:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "TERMINATION_NOTICE_AUTHORITY",
+                    "termination_notice",
+                    "PACKET_REPAIR_REQUIRED",
+                    ["signer_authority", "termination_notice_scope"],
+                    {},
+                    [],
+                    "termination boundary is named but source fields do not explicitly state termination notice authority",
+                )
+            )
+
+    if "relationship review vs transaction exception" in boundary_text:
+        closed_docs_all = _factual_closure_docs(
+            _docs_containing(
+                payload,
+                "relationship review",
+                "transaction exception",
+                "both match",
+            )
+        )
+        negating_docs = _docs_with_negating_signal(payload, "relationship review", "transaction exception")
+        closed_docs = [doc for doc in closed_docs_all if not _has_negating_source_signal(_doc_text(doc))]
+        open_docs = _docs_containing_any(
+            payload,
+            ["relationship review", "transaction exception"],
+            [
+                "missing",
+                "does not match",
+                "not match",
+                "no transaction exception",
+                "stale",
+                "expired",
+            ],
+        )
+        if closed_docs_all and negating_docs:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "RELATIONSHIP_REVIEW_TRANSACTION_EXCEPTION",
+                    "transaction_exception_execution",
+                    "PACKET_REPAIR_REQUIRED",
+                    ["relationship_review", "transaction_exception"],
+                    {},
+                    sorted({_doc_id(doc) for doc in [*closed_docs_all, *negating_docs]}),
+                    "relationship/transaction source text contains both closure and negating/open signals",
+                )
+            )
+        elif open_docs or negating_docs:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "RELATIONSHIP_REVIEW_TRANSACTION_EXCEPTION",
+                    "transaction_exception_execution",
+                    "SOURCE_OPEN",
+                    ["relationship_review", "transaction_exception"],
+                    {
+                        "relationship_review": "open_or_stale",
+                        "transaction_exception": "missing_or_not_matching",
+                    },
+                    sorted({_doc_id(doc) for doc in [*open_docs, *negating_docs]}),
+                    "relationship review or transaction exception is visibly open",
+                )
+            )
+        elif closed_docs:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "RELATIONSHIP_REVIEW_TRANSACTION_EXCEPTION",
+                    "transaction_exception_execution",
+                    "SOURCE_CLOSED",
+                    ["relationship_review", "transaction_exception"],
+                    {
+                        "relationship_review": "match",
+                        "transaction_exception": "match",
+                    },
+                    [_doc_id(doc) for doc in closed_docs],
+                    "relationship review and transaction exception both match",
+                )
+            )
+        else:
+            checks.append(
+                _closure_entry(
+                    payload,
+                    "RELATIONSHIP_REVIEW_TRANSACTION_EXCEPTION",
+                    "transaction_exception_execution",
+                    "PACKET_REPAIR_REQUIRED",
+                    ["relationship_review", "transaction_exception"],
+                    {},
+                    [],
+                    "relationship/transaction boundary is named but required fields are not explicit",
+                )
+            )
+
+    return checks
+
+
+def _deterministic_blockers_from_affirmative_failures(row: dict, gate: dict) -> list[dict]:
+    blockers: list[dict] = []
+    for check in gate.get("affirmative_closure_failures") or []:
+        if check.get("closure_status") != "SOURCE_OPEN" or check.get("required_verdict") != "ESCALATE":
+            continue
+        blocker_text = str(check.get("reason") or check.get("closure_type") or "source-visible closure missing")
+        blockers.append(
+            {
+                "blocker_id": _blocker_id(str(row.get("artifact_id")), f"{check.get('closure_id')}:{blocker_text}"),
+                "blocker_text": blocker_text,
+                "blocker_type": "AFFIRMATIVE_SOURCE_OPEN",
+                "deterministic_check_id": check.get("closure_id"),
+                "required_closure_fields": {
+                    "closure_type": check.get("closure_type"),
+                    "required_fields": check.get("required_fields") or [],
+                    "requested_action": check.get("requested_action"),
+                },
+                "source_artifact_id": row.get("artifact_id"),
+                "source_role": row.get("role"),
+                "source_turn_index": row.get("turn_index"),
+                "cited_evidence": check.get("source_ids") or [],
+                "source": "deterministic_affirmative_allow_support_gate",
+            }
+        )
+    return blockers
+
+
+def _normalized_phrase(value: object) -> str:
+    return " ".join(
+        str(value or "")
+        .strip()
+        .lower()
+        .replace("_", " ")
+        .replace("-", " ")
+        .split()
+    )
+
+
+def _closure_alignment_terms(closure: dict) -> list[str]:
+    terms: list[str] = []
+    closure_type = _normalized_phrase(closure.get("closure_type"))
+    if closure_type == "final filing authority":
+        terms.extend(["final filing", "counsel signoff", "board resolution"])
+    elif closure_type == "termination notice authority":
+        terms.extend(["termination notice", "signer authority"])
+    elif closure_type == "relationship review transaction exception":
+        terms.extend(["relationship review", "transaction exception"])
+    return sorted(set(terms), key=len, reverse=True)
+
+
+def _dimension_tokens_from_text(value: object) -> set[str]:
+    text = _normalized_phrase(value)
+    dimensions: set[str] = set()
+    phrase_dimensions = {
+        "final filing": "final_filing",
+        "counsel signoff": "counsel_signoff",
+        "board resolution": "board_resolution",
+        "termination notice": "termination_notice",
+        "signer authority": "signer_authority",
+        "relationship review": "relationship_review",
+        "transaction exception": "transaction_exception",
+        "payment rail": "payment_rail",
+        "bank account": "bank_account",
+        "callback": "callback",
+        "amount limit": "amount_limit",
+        "second approval": "second_approval",
+        "dual approval": "second_approval",
+        "role": "role",
+        "entity": "entity_scope",
+        "scope": "scope",
+        "affiliate": "entity_scope",
+        "vendor of record": "entity_scope",
+        "pilot program": "scope",
+        "this contract": "scope",
+        "kyc": "kyc_approval",
+        "diligence": "kyc_approval",
+        "sanctions": "sanctions_screening",
+        "sanctions screening": "sanctions_screening",
+        "beneficiary": "beneficiary",
+        "wet signature": "signature",
+    }
+    for phrase, dimension in phrase_dimensions.items():
+        if phrase in text:
+            dimensions.add(dimension)
+    if any(term in text for term in ("stale", "expired", "outdated", "current cycle", "review cycle", "14 months ago", "annual refresh", "refresh not done")):
+        dimensions.add("freshness")
+    if any(term in text for term in ("wrong entity", "subsidiary", "parent entity", "affiliate", "vendor of record")):
+        dimensions.add("entity_scope")
+    return dimensions
+
+
+def _dimension_phrase_map() -> dict[str, str]:
+    return {
+        "final filing": "final_filing",
+        "counsel signoff": "counsel_signoff",
+        "board resolution": "board_resolution",
+        "termination notice": "termination_notice",
+        "signer authority": "signer_authority",
+        "relationship review": "relationship_review",
+        "transaction exception": "transaction_exception",
+        "payment rail": "payment_rail",
+        "bank account": "bank_account",
+        "callback": "callback",
+        "amount limit": "amount_limit",
+        "second approval": "second_approval",
+        "dual approval": "second_approval",
+        "pilot program": "scope",
+        "this contract": "scope",
+        "wrong entity": "entity_scope",
+        "parent entity": "entity_scope",
+        "vendor of record": "entity_scope",
+        "affiliate": "entity_scope",
+        "kyc": "kyc_approval",
+        "diligence": "kyc_approval",
+        "sanctions": "sanctions_screening",
+        "sanctions screening": "sanctions_screening",
+        "beneficiary": "beneficiary",
+        "wet signature": "signature",
+        "14 months ago": "freshness",
+        "annual refresh": "freshness",
+        "refresh not done": "freshness",
+        "current cycle": "freshness",
+        "review cycle": "freshness",
+        "stale": "freshness",
+        "expired": "freshness",
+        "outdated": "freshness",
+        "role": "role",
+        "scope": "scope",
+        "entity": "entity_scope",
+    }
+
+
+ALLOWED_BLOCKER_RESIDUAL_TOKENS = {
+    "a",
+    "action",
+    "an",
+    "and",
+    "are",
+    "authority",
+    "boundary",
+    "by",
+    "closed",
+    "closure",
+    "complete",
+    "completed",
+    "cover",
+    "covered",
+    "covers",
+    "does",
+    "done",
+    "do",
+    "exact",
+    "fail",
+    "fails",
+    "for",
+    "is",
+    "missing",
+    "mismatch",
+    "not",
+    "of",
+    "on",
+    "only",
+    "open",
+    "record",
+    "records",
+    "requested",
+    "required",
+    "requires",
+    "source",
+    "sources",
+    "the",
+    "to",
+    "unresolved",
+    "was",
+    "were",
+}
+
+
+def _blocker_text_residual_tokens(value: object) -> list[str]:
+    text = _normalized_phrase(value)
+    for phrase in sorted(_dimension_phrase_map(), key=len, reverse=True):
+        text = re.sub(rf"\b{re.escape(phrase)}\b", " ", text)
+    tokens = re.findall(r"[a-z0-9]+", text)
+    return [
+        token
+        for token in tokens
+        if token not in ALLOWED_BLOCKER_RESIDUAL_TOKENS and not token.isdigit()
+    ]
+
+
+def _closure_verified_dimensions(closure: dict) -> set[str]:
+    dimensions: set[str] = set()
+    for value in (
+        closure.get("closure_type"),
+        closure.get("requested_action"),
+        *(closure.get("required_fields") or []),
+    ):
+        dimensions.update(_dimension_tokens_from_text(value))
+    for key, value in dict(closure.get("matched_source_fields") or {}).items():
+        dimensions.update(_dimension_tokens_from_text(key))
+        dimensions.update(_dimension_tokens_from_text(value))
+    closure_type = _normalized_phrase(closure.get("closure_type"))
+    if closure_type == "final filing authority":
+        dimensions.update({"final_filing", "counsel_signoff", "board_resolution"})
+    elif closure_type == "termination notice authority":
+        dimensions.update({"termination_notice", "signer_authority"})
+    elif closure_type == "relationship review transaction exception":
+        dimensions.update({"relationship_review", "transaction_exception"})
+    return dimensions
+
+
+def _blocker_asserted_dimensions(blocker: dict) -> set[str]:
+    dimensions = _dimension_tokens_from_text(blocker.get("blocker_text"))
+    requirements = dict(blocker.get("required_closure_fields") or {})
+    for key, value in requirements.items():
+        if key == "blocker_text":
+            dimensions.update(_dimension_tokens_from_text(value))
+            continue
+        dimensions.update(_dimension_tokens_from_text(key))
+        dimensions.update(_dimension_tokens_from_text(value))
+    blocker_type = _normalize_value(blocker.get("blocker_type")).upper()
+    if blocker_type == "TRANSACTION_TYPE_APPROVAL_MISMATCH":
+        dimensions.add("transaction_type")
+    elif blocker_type == "ACTION_TYPE_APPROVAL_MISMATCH":
+        dimensions.add("action_type")
+    elif blocker_type == "AMOUNT_LIMIT_MISSING":
+        dimensions.add("amount_limit")
+    elif blocker_type == "CALLBACK_FIELD_MISSING":
+        dimensions.add("callback")
+    elif blocker_type == "ADD_ON_SCOPE_MISMATCH":
+        dimensions.update({"add_on", "scope"})
+    return dimensions
+
+
+def _blocker_has_unaccounted_content(blocker: dict) -> bool:
+    return bool(_blocker_text_residual_tokens(blocker.get("blocker_text")))
+
+
+def _blocker_matches_affirmative_closure(
+    blocker: dict,
+    closure: dict,
+) -> bool:
+    if closure.get("closure_status") != "SOURCE_CLOSED":
+        return False
+    if _blocker_has_unaccounted_content(blocker):
+        return False
+    blocker_dimensions = _blocker_asserted_dimensions(blocker)
+    closure_dimensions = _closure_verified_dimensions(closure)
+    if blocker_dimensions:
+        return blocker_dimensions.issubset(closure_dimensions)
+    return False
+
+
+def _suppress_false_blockers(blockers: list[dict], gate: dict) -> tuple[list[dict], list[dict]]:
+    active: list[dict] = []
+    suppressed: list[dict] = []
+    closures = gate.get("affirmative_closure_ledger") or []
+    for blocker in blockers:
+        closure = next(
+            (
+                item
+                for item in closures
+                if _blocker_matches_affirmative_closure(blocker, item)
+            ),
+            None,
+        )
+        if closure:
+            suppressed.append(
+                {
+                    "blocker_id": blocker.get("blocker_id"),
+                    "source_artifact_id": blocker.get("source_artifact_id"),
+                    "blocker_type": blocker.get("blocker_type"),
+                    "blocker_text": blocker.get("blocker_text"),
+                    "suppression_reason": "source-visible affirmative closure contradicts worker blocker",
+                    "contradicting_closure_id": closure.get("closure_id"),
+                    "closure_type": closure.get("closure_type"),
+                    "source_ids": closure.get("source_ids") or [],
+                }
+            )
+        else:
+            active.append(blocker)
+    return active, suppressed
+
+
 def _deterministic_dependency_checks(payload: dict) -> list[dict]:
     """Source-derived checks for computable action-boundary seams.
 
@@ -914,6 +1655,12 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
             json.dumps(active_blockers, sort_keys=True),
             "DETERMINISTIC DEPENDENCY LEDGER:",
             json.dumps(baton.get("dependency_ledger", []), sort_keys=True),
+            "AFFIRMATIVE CLOSURE LEDGER:",
+            json.dumps(baton.get("affirmative_closure_ledger", state.get("affirmative_closure_ledger", [])), sort_keys=True),
+            "SUPPRESSED FALSE BLOCKER LEDGER:",
+            json.dumps(baton.get("suppressed_false_blocker_ledger", state.get("suppressed_false_blocker_ledger", [])), sort_keys=True),
+            "PACKET REPAIR REQUIRED LEDGER:",
+            json.dumps(baton.get("packet_repair_required_ledger", state.get("packet_repair_required_ledger", [])), sort_keys=True),
             "STATE BRIEF:",
             json.dumps(state, sort_keys=True),
             "FULL LATEST GOV BATON:",
@@ -936,10 +1683,16 @@ def _selected_gov_baton_from_gate(gate: dict) -> dict:
     closure_failures = gate.get("closure_validation_failures") or []
     prior_unresolved = gate.get("unresolved_prior_blockers") or []
     blockers_found = gate.get("blockers_found") or []
+    suppressed_false_blockers = gate.get("suppressed_false_blocker_ledger") or []
+    packet_repair_required = gate.get("packet_repair_required_ledger") or []
     if closure_failures:
         ids = ",".join(str(item.get("blocker_id")) for item in closure_failures[:3])
         repair_target = f"repair invalid blocker closure before ALLOW: {ids}"
         blocked_move = "do not accept textual blocker closure without matching source fields"
+    elif packet_repair_required:
+        ids = ",".join(str(item.get("closure_id")) for item in packet_repair_required[:3])
+        repair_target = f"packet repair required before clean proof: {ids}"
+        blocked_move = "do not turn underspecified source fields into ALLOW"
     elif prior_unresolved:
         ids = ",".join(str(blocker.get("blocker_id")) for blocker in prior_unresolved[:3])
         repair_target = f"resolve prior blocker ids before ALLOW: {ids}"
@@ -952,6 +1705,10 @@ def _selected_gov_baton_from_gate(gate: dict) -> dict:
         ids = ",".join(str(blocker.get("blocker_id")) for blocker in blockers_found[:3])
         repair_target = f"stress-test and preserve blocker ids: {ids}"
         blocked_move = "do not override blocker with consensus unless sources close it"
+    elif suppressed_false_blockers:
+        ids = ",".join(str(item.get("blocker_id")) for item in suppressed_false_blockers[:3])
+        repair_target = f"use affirmative closure ledger; suppressed false blockers: {ids}"
+        blocked_move = "do not preserve suppressed false blocker"
     elif gate.get("passed"):
         repair_target = "preserve source-grounded reasoning"
         blocked_move = "do not invent source IDs"
@@ -966,6 +1723,9 @@ def _selected_gov_baton_from_gate(gate: dict) -> dict:
         "blocker_ledger": prior_unresolved or blockers_found,
         "invalid_closure_ledger": closure_failures,
         "closure_validation_failures": closure_failures,
+        "affirmative_closure_ledger": gate.get("affirmative_closure_ledger", []),
+        "suppressed_false_blocker_ledger": suppressed_false_blockers,
+        "packet_repair_required_ledger": packet_repair_required,
     }
 
 
@@ -1007,6 +1767,9 @@ def _parse_gov_baton(raw: str, fallback_gate: dict) -> dict:
         "blocker_ledger": selected.get("blocker_ledger", []),
         "invalid_closure_ledger": selected.get("invalid_closure_ledger", []),
         "closure_validation_failures": selected.get("closure_validation_failures", []),
+        "affirmative_closure_ledger": selected.get("affirmative_closure_ledger", []),
+        "suppressed_false_blocker_ledger": selected.get("suppressed_false_blocker_ledger", []),
+        "packet_repair_required_ledger": selected.get("packet_repair_required_ledger", []),
     }
 
 
@@ -1053,8 +1816,25 @@ def _gate_worker_output(payload: dict, parsed: dict, active_blockers: list[dict]
     ]
     for check in dependency_failures:
         failures.append(f"deterministic_dependency_mismatch:{check['check_id']}")
+    affirmative_checks = _deterministic_affirmative_allow_support_checks(payload)
+    affirmative_failures = [
+        check
+        for check in affirmative_checks
+        if parsed.get("verification_verdict") in {"ALLOW", "ESCALATE"}
+        and check.get("required_verdict") in {"ALLOW", "ESCALATE"}
+        and parsed.get("verification_verdict") != check.get("required_verdict")
+    ]
+    for check in affirmative_failures:
+        failures.append(f"deterministic_affirmative_closure_mismatch:{check['closure_id']}")
+    packet_repair_required = [
+        check
+        for check in affirmative_checks
+        if check.get("closure_status") == "PACKET_REPAIR_REQUIRED"
+    ]
+    for check in packet_repair_required:
+        failures.append(f"packet_repair_required:{check['closure_id']}")
     return {
-        "gate_name": "HOLOVERIFY_BLIND_STRUCTURAL_GATE_V1_DEPENDENCY_AWARE",
+        "gate_name": "HOLOVERIFY_BLIND_STRUCTURAL_GATE_V1_V7_FALSE_BLOCKER_SUPPRESSION",
         "passed": not failures,
         "failures": failures,
         "warnings": warnings,
@@ -1063,6 +1843,12 @@ def _gate_worker_output(payload: dict, parsed: dict, active_blockers: list[dict]
         "deterministic_dependency_checks": dependency_checks,
         "deterministic_dependency_failures": dependency_failures,
         "deterministic_dependency_blockers": [],
+        "affirmative_closure_ledger": affirmative_checks,
+        "affirmative_closure_failures": affirmative_failures,
+        "affirmative_closure_blockers": [],
+        "packet_repair_required_ledger": packet_repair_required,
+        "suppressed_false_blocker_ledger": [],
+        "worker_blockers_before_suppression": [],
         "prior_blockers_in": active_blockers,
         "resolved_prior_blockers": resolved_prior,
         "unresolved_prior_blockers": unresolved_prior,
@@ -1082,6 +1868,13 @@ def _artifact_from_row(row: dict) -> dict:
     unresolved_prior_count = len(gate.get("unresolved_prior_blockers") or [])
     unresolved_allow_blocker_count = unresolved_prior_count if verdict == "ALLOW" else 0
     prior_blocker_count = len(gate.get("prior_blockers_in") or [])
+    affirmative_closures = gate.get("affirmative_closure_ledger") or []
+    affirmative_source_closed_count = sum(
+        1 for item in affirmative_closures if item.get("closure_status") == "SOURCE_CLOSED"
+    )
+    suppressed_false_blocker_count = len(gate.get("suppressed_false_blocker_ledger") or [])
+    packet_repair_required_count = len(gate.get("packet_repair_required_ledger") or [])
+    active_blockers_found = gate.get("blockers_found") or []
     return {
         "artifact_id": row["artifact_id"],
         "verification_verdict": verdict,
@@ -1097,7 +1890,12 @@ def _artifact_from_row(row: dict) -> dict:
             f in {"allow_with_open_blockers", "escalate_without_open_blockers"}
             for f in failures
         ),
-        "deterministic_clean": not any(failure.startswith("deterministic_dependency_mismatch:") for failure in failures),
+        "deterministic_clean": not any(
+            failure.startswith("deterministic_dependency_mismatch:")
+            or failure.startswith("deterministic_affirmative_closure_mismatch:")
+            or failure.startswith("packet_repair_required:")
+            for failure in failures
+        ),
         "blocker_resolution_clean": not any(
             failure.startswith("unresolved_prior_blocker:")
             or failure == "blocker_resolution_missing_source_id"
@@ -1113,11 +1911,21 @@ def _artifact_from_row(row: dict) -> dict:
         "prior_blocker_count": prior_blocker_count,
         "resolved_prior_blocker_count": len(gate.get("resolved_prior_blockers") or []),
         "unresolved_prior_blocker_count": unresolved_prior_count,
-        "blockers_found_count": len(gate.get("blockers_found") or []),
+        "blockers_found_count": len(active_blockers_found),
+        "affirmative_closure_count": len(affirmative_closures),
+        "affirmative_source_closed_count": affirmative_source_closed_count,
+        "suppressed_false_blocker_count": suppressed_false_blocker_count,
+        "packet_repair_required_count": packet_repair_required_count,
+        "false_blocker_only_escalate": bool(
+            verdict == "ESCALATE"
+            and suppressed_false_blocker_count > 0
+            and not active_blockers_found
+            and affirmative_source_closed_count > 0
+        ),
         "source_boundary_open_with_blocker": bool(
             verdict == "ESCALATE"
             and parsed.get("binding_class") == "SOURCE_BOUNDARY_OPEN"
-            and gate.get("blockers_found")
+            and active_blockers_found
         ),
         "blocker_resolution_complete": bool(
             gate.get("prior_blockers_in")
@@ -1142,6 +1950,11 @@ def _criteria_tuple(artifact: dict) -> tuple:
         1 if artifact.get("blocker_resolution_complete") else 0,
         1 if artifact.get("closure_validation_clean", True) else 0,
         1 if artifact.get("all_prior_blockers_source_closed", True) else 0,
+        1 if artifact.get("packet_unresolved_blocker_symmetry_clean", True) else 0,
+        int(artifact.get("affirmative_closure_count") or 0),
+        -int(artifact.get("suppressed_false_blocker_count") or 0),
+        -int(artifact.get("packet_repair_required_count") or 0),
+        0 if artifact.get("false_blocker_only_escalate") else 1,
         -int(artifact.get("invalid_closure_count") or 0),
         -int(artifact.get("unresolved_blocker_count") or 0),
         1 if artifact.get("source_boundary_open_with_blocker") else 0,
@@ -1166,6 +1979,9 @@ def _selector_structurally_valid(artifact: dict) -> bool:
             artifact.get("blocker_resolution_clean", True),
             artifact.get("closure_validation_clean", True),
             artifact.get("all_prior_blockers_source_closed", True),
+            artifact.get("packet_unresolved_blocker_symmetry_clean", True),
+            not artifact.get("false_blocker_only_escalate"),
+            int(artifact.get("packet_repair_required_count") or 0) == 0,
         )
     )
 
@@ -1181,6 +1997,9 @@ def _selector_corroborative(artifact: dict) -> bool:
             artifact.get("blocker_resolution_clean", True),
             artifact.get("closure_validation_clean", True),
             artifact.get("all_prior_blockers_source_closed", True),
+            artifact.get("packet_unresolved_blocker_symmetry_clean", True),
+            not artifact.get("false_blocker_only_escalate"),
+            int(artifact.get("packet_repair_required_count") or 0) == 0,
         )
     )
 
@@ -1220,6 +2039,29 @@ def _with_selector_derived_fields(artifacts: list[dict]) -> list[dict]:
             and prior_same
             and prior_different
         )
+        enriched.append(item)
+    return enriched
+
+
+def _apply_packet_unresolved_blocker_symmetry(
+    artifacts: list[dict],
+    unresolved_blockers: Iterable[dict],
+) -> list[dict]:
+    unresolved = [blocker for blocker in unresolved_blockers if blocker]
+    unresolved_ids = [str(blocker.get("blocker_id")) for blocker in unresolved if blocker.get("blocker_id")]
+    enriched: list[dict] = []
+    for artifact in artifacts:
+        item = dict(artifact)
+        verdict = str(item.get("verification_verdict") or "")
+        unresolved_count = len(unresolved) if verdict == "ALLOW" else 0
+        item["packet_unresolved_active_blocker_count"] = unresolved_count
+        item["packet_unresolved_active_blocker_ids"] = unresolved_ids if verdict == "ALLOW" else []
+        item["packet_unresolved_blocker_symmetry_clean"] = verdict != "ALLOW" or unresolved_count == 0
+        if verdict == "ALLOW" and unresolved_count:
+            item["unresolved_blocker_count"] = max(
+                int(item.get("unresolved_blocker_count") or 0),
+                unresolved_count,
+            )
         enriched.append(item)
     return enriched
 
@@ -1296,6 +2138,9 @@ def run_blind_fixture(
         "turns_completed": [],
         "unresolved_dependencies": [],
         "unresolved_blockers": [],
+        "affirmative_closure_ledger": [],
+        "suppressed_false_blocker_ledger": [],
+        "packet_repair_required_ledger": [],
         "blocked_moves": [],
     }
     baton = {
@@ -1333,8 +2178,14 @@ def run_blind_fixture(
             "scorer_input_sha256": raw_hash,
         }
         deterministic_blockers = _deterministic_blockers_from_dependency_failures(row, gate)
+        affirmative_blockers = _deterministic_blockers_from_affirmative_failures(row, gate)
+        worker_blockers = _blockers_from_parsed(row, parsed, payload)
+        active_worker_blockers, suppressed_false_blockers = _suppress_false_blockers(worker_blockers, gate)
         gate["deterministic_dependency_blockers"] = deterministic_blockers
-        gate["blockers_found"] = _blockers_from_parsed(row, parsed, payload) + deterministic_blockers
+        gate["affirmative_closure_blockers"] = affirmative_blockers
+        gate["worker_blockers_before_suppression"] = worker_blockers
+        gate["suppressed_false_blocker_ledger"] = suppressed_false_blockers
+        gate["blockers_found"] = active_worker_blockers + deterministic_blockers + affirmative_blockers
         worker_rows.append(row)
         call_rows.append(
             {
@@ -1356,6 +2207,28 @@ def run_blind_fixture(
         ]
         next_unresolved.extend(gate.get("blockers_found") or [])
         state["unresolved_blockers"] = next_unresolved
+        if gate.get("affirmative_closure_ledger"):
+            seen_closures = {
+                str(item.get("closure_id"))
+                for item in state.get("affirmative_closure_ledger", [])
+            }
+            for item in gate.get("affirmative_closure_ledger") or []:
+                closure_id = str(item.get("closure_id"))
+                if closure_id not in seen_closures:
+                    state["affirmative_closure_ledger"].append(item)
+                    seen_closures.add(closure_id)
+        if gate.get("suppressed_false_blocker_ledger"):
+            state["suppressed_false_blocker_ledger"].extend(gate.get("suppressed_false_blocker_ledger") or [])
+        if gate.get("packet_repair_required_ledger"):
+            seen_repairs = {
+                str(item.get("closure_id"))
+                for item in state.get("packet_repair_required_ledger", [])
+            }
+            for item in gate.get("packet_repair_required_ledger") or []:
+                closure_id = str(item.get("closure_id"))
+                if closure_id not in seen_repairs:
+                    state["packet_repair_required_ledger"].append(item)
+                    seen_repairs.add(closure_id)
         if gate.get("closure_validation_failures"):
             state["invalid_closure_ledger"] = gate.get("closure_validation_failures")
         state["turns_completed"].append(
@@ -1364,6 +2237,10 @@ def run_blind_fixture(
                 "artifact_id": row["artifact_id"],
                 "gate_passed": gate["passed"],
                 "blockers_found": gate.get("blockers_found") or [],
+                "worker_blockers_before_suppression": gate.get("worker_blockers_before_suppression") or [],
+                "suppressed_false_blocker_ledger": gate.get("suppressed_false_blocker_ledger") or [],
+                "affirmative_closure_ledger": gate.get("affirmative_closure_ledger") or [],
+                "packet_repair_required_ledger": gate.get("packet_repair_required_ledger") or [],
                 "resolved_prior_blockers": gate.get("resolved_prior_blockers") or [],
                 "closure_validation_failures": gate.get("closure_validation_failures") or [],
                 "unresolved_blockers_after_turn": next_unresolved,
@@ -1399,9 +2276,16 @@ def run_blind_fixture(
                     "blocker_ledger": selected.get("blocker_ledger", []),
                     "invalid_closure_ledger": selected.get("invalid_closure_ledger", []),
                     "closure_validation_failures": selected.get("closure_validation_failures", []),
+                    "affirmative_closure_ledger": selected.get("affirmative_closure_ledger", []),
+                    "suppressed_false_blocker_ledger": selected.get("suppressed_false_blocker_ledger", []),
+                    "packet_repair_required_ledger": selected.get("packet_repair_required_ledger", []),
                     "previous_gate_passed": gate["passed"],
                 }
 
+    artifacts = _apply_packet_unresolved_blocker_symmetry(
+        artifacts,
+        state.get("unresolved_blockers") or [],
+    )
     selection = select_final(artifacts)
     selected_id = selection["selected_artifact_id"]
     selected_artifact = next((a for a in artifacts if a.get("artifact_id") == selected_id), {})

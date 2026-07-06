@@ -1,0 +1,241 @@
+{
+  "classification": "HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_PATCH_REPORT_V0",
+  "date": "2026-07-05",
+    "status": "PASS_NO_PROVIDER_PATCH_IMPLEMENTED_FABLE_ROUND5_PATCH_MORE_REPAIRED",
+  "patch_target": "V7_FALSE_BLOCKER_SUPPRESSION_AND_AFFIRMATIVE_CLOSURE_GATE",
+  "scope": {
+    "providers_run": false,
+    "holo_live_run": false,
+    "solo_run": false,
+    "gov_live_run": false,
+    "judges_run": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "runtime_isolation": {
+    "uses_runtime_visible_source_fields": true,
+    "reads_design_docs": false,
+    "reads_scoring_map": false,
+    "reads_truth_labels": false,
+    "reads_sibling_side": false,
+    "reads_pair_id": false,
+    "reads_prior_solo_result": false,
+    "reads_prior_holo_result": false,
+    "reads_posthoc_metadata": false
+  },
+  "selector_policy": {
+    "version": "SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05",
+        "sha256": "f653240e87b1062dfca2b651cae846459ccb524820803d6386cc0dddc808b71d"
+  },
+  "worker_contract": {
+    "version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+    "sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37"
+  },
+  "implemented_ledgers": [
+    "affirmative_closure_ledger",
+    "suppressed_false_blocker_ledger",
+    "packet_repair_required_ledger"
+  ],
+  "architecture_blocker_repair": {
+    "blocker_found_by": "HoloArchitecture",
+    "blocker": "Generic SOURCE_BOUNDARY_OPEN / SCOPE_MISMATCH blocker types were suppressible by unrelated SOURCE_CLOSED affirmative closures.",
+    "repair": [
+      "generic blocker type alone is not sufficient for suppression",
+      "suppression requires field/action alignment through closure_type, requested_action, required_fields, matched_source_fields, or clearly matching blocker text",
+      "unrelated source-boundary blockers remain active"
+    ],
+    "regression_test": "test_v7_keeps_unrelated_generic_boundary_blocker_active"
+  },
+  "fable_blocker_repair": {
+    "blocker_found_by": "Fable",
+    "blocker": "The generic exact-action-boundary suppression exception remained unsafe because the closure library does not model every possible seam.",
+    "repair": [
+      "removed _is_generic_exact_boundary_blocker and _only_one_closed_boundary suppression behavior",
+      "suppression now requires structured dimension alignment",
+      "blocker asserted dimensions must be a subset of closure verified dimensions",
+      "stale, expired, wrong-entity, wrong-scope, missing-role, missing-second-approval, and unverified dimensions remain active",
+      "negated closure text cannot classify as SOURCE_CLOSED",
+      "closed/open closure conflicts classify as PACKET_REPAIR_REQUIRED or SOURCE_OPEN"
+    ],
+    "counterexample_tests": [
+      "test_v7_ce1_negated_closure_text_does_not_become_closed_or_final_allow",
+      "test_v7_ce2_modeled_boundary_closed_unmodeled_real_defect_generic_blocker_survives",
+      "test_v7_ce3_stale_relationship_review_blocker_survives_suppression",
+      "test_v7_ce4_closed_boundary_x_open_modeled_boundary_y_fails_closed",
+      "test_v7_e_side_control_009_remains_escalate",
+      "test_v7_e_side_control_011_remains_escalate",
+      "test_v7_structured_alignment_suppresses_only_related_blocker_dimensions"
+    ]
+  },
+  "fable_round2_patch_more_repair": {
+    "blocker_found_by": "Fable",
+    "verdict": "PATCH_MORE",
+    "blocker": "V7 still created false ALLOWs when blocker text used unrecognized paraphrases.",
+    "repair": [
+      "default inversion: unknown blocker content preserves the blocker",
+      "suppression allowed only when blocker asserted dimensions are a subset of closure verified dimensions",
+      "residual/unaccounted blocker text blocks suppression",
+      "paraphrases survive unless structurally accounted for",
+      "same-doc closure phrases with negator tokens cannot classify as clean SOURCE_CLOSED",
+      "raw failed-run W1 blocker phrases are regression-tested"
+    ],
+    "new_tests": [
+      "test_v7_a1_staleness_paraphrase_survives_suppression",
+      "test_v7_a2_entity_mismatch_paraphrase_survives_suppression",
+      "test_v7_a3_negation_paraphrase_no_delegation_does_not_close_or_allow",
+      "test_v7_a4_scope_restriction_paraphrase_survives_suppression",
+      "test_v7_boundary_name_plus_unrecognized_clause_does_not_suppress",
+      "test_v7_failed_rescue_live_w1_phrases_keep_intended_suppression"
+    ],
+    "live_w1_phrase_regression": {
+      "HVSM-W1-009-A": "suppresses",
+      "HVSM-W1-019-A": "suppresses",
+      "HVSM-W1-011-A": "preserved_active_due_unaccounted_negotiation_action"
+    }
+  },
+    "fable_round3_patch_more_repair": {
+    "blocker_found_by": "Fable",
+    "verdict": "PATCH_MORE",
+    "blockers": [
+      "SOURCE_CLOSED could derive from non-factual docs such as policy_control, request_context, or communication_boundary",
+      "dimension-empty blockers could suppress through source overlap alone"
+    ],
+    "repair": [
+      "SOURCE_CLOSED closure derives only from source_record or field_record docs",
+      "policy_control, request_context, and communication_boundary docs cannot close factual action boundaries by themselves",
+      "source-overlap fallback removed from _blocker_matches_affirmative_closure",
+      "dimension-empty/vague blockers survive",
+      "raw Wave 1 failed-run phrase recovery is documented as 2 of 3, not 3 of 3"
+    ],
+    "new_tests": [
+      "test_v7_policy_control_closed_phrase_does_not_source_close_or_allow",
+      "test_v7_dims_empty_required_closure_missing_survives_source_overlap",
+      "test_v7_a6_ordering_symmetry_closed_x_open_y_avoids_allow",
+      "test_v7_property_residual_token_blocks_suppression"
+    ],
+    "wave1_failed_phrase_recovery": {
+      "recovered": [
+        "HVSM-W1-009-A",
+        "HVSM-W1-019-A"
+      ],
+      "not_recovered_due_default_inversion": [
+        "HVSM-W1-011-A"
+      ],
+      "note": "011-A live phrase remains active because it asserts unaccounted negotiation content."
+        }
+    },
+    "fable_round4_patch_more_repair": {
+        "blocker_found_by": "Fable",
+        "verdict": "PATCH_MORE",
+        "blocker": "Selection had turn-order asymmetry: an earlier ALLOW artifact could be selected even after later workers raised active non-suppressed blockers that survived suppression.",
+        "repair": [
+            "added packet-wide unresolved-active-blocker symmetry",
+            "ALLOW artifacts from any turn are not selectable while active non-suppressed blockers raised anywhere in the packet remain unresolved",
+            "suppressed false blockers do not count as active dissent",
+            "real active blockers force fail-closed behavior even when the closure library misclassifies a source phrase as SOURCE_CLOSED"
+        ],
+        "new_tests": [
+            "test_v7_a10_normative_source_record_closure_dissent_blocks_allow_both_orderings",
+            "test_v7_a10b_conditional_source_record_closure_dissent_blocks_allow_both_orderings",
+            "test_v7_active_blocker_symmetry_does_not_count_suppressed_rescue_dissent"
+        ],
+        "residual_risk": "If the closure library miscloses a packet and all workers unanimously ALLOW with no active blocker raised, selector symmetry cannot recover; that remains packet design and worker detection territory."
+    },
+    "fable_round5_patch_more_repair": {
+        "blocker_found_by": "Fable",
+        "verdict": "PATCH_MORE",
+        "blocker": "Blocker-resolution laundering: unsupported blocker types could resolve as CLOSED by citing any runtime source record because _validate_blocker_closure had no failure branch for unknown types.",
+        "repair": [
+            "_validate_blocker_closure fails closed for unsupported blocker types",
+            "SOURCE_BOUNDARY_OPEN and other non-enumerated blocker types cannot resolve by citation alone",
+            "supported blocker types close only dimensions their deterministic validator verifies",
+            "freshness, entity, authority, sanctions, missing-role, missing-second-approval, and other unvalidated dimensions remain unresolved",
+            "suppression and resolution now share the same default direction: if code cannot affirmatively justify removing a blocker, the blocker remains active"
+        ],
+        "new_tests": [
+            "test_v7_resolution_laundering_source_boundary_open_blocker_fails_closed",
+            "test_v7_resolution_validation_fails_closed_for_non_enumerated_types_and_dimensions",
+            "test_v7_resolution_validation_rejects_supported_type_with_unvalidated_dimension"
+        ],
+        "rescue_preservation": [
+            "HVSM-W1-009-A",
+            "HVSM-W1-019-A"
+        ],
+        "residual_risk": "If no worker raises the real blocker, resolution fail-closed cannot recover it; that remains worker detection and packet design territory."
+    },
+    "efficacy_boundary": {
+        "contentless_generic_false_blocker_behavior": "A contentless generic false blocker such as exact action boundary not closed on a clean packet is intentionally unsuppressable and blocks ALLOW / fail-closes.",
+        "tradeoff": "This may create overblocks, but it prevents false ALLOW. This is the intended burden-on-ALLOW tradeoff.",
+        "invariant": "No blocker leaves the packet unless its removal is affirmatively justified by something the validator actually checked."
+    },
+  "fixture_behavior": [
+    {
+      "packet": "HVSM-W1-009-A",
+      "runtime_id": "HVSMW1-316A3AE43F672C195074",
+      "behavior": "false blocker suppressed when board resolution and counsel signoff both cover final filing"
+    },
+    {
+      "packet": "HVSM-W1-011-A",
+      "runtime_id": "HVSMW1-69783CD745C350A4E102",
+      "behavior": "false blocker suppressed when signer authority covers termination notice"
+    },
+    {
+      "packet": "HVSM-W1-019-A",
+      "runtime_id": "HVSMW1-C88BFEC273EB0852CB10",
+      "behavior": "false blocker suppressed when relationship review and transaction exception both match"
+    },
+    {
+      "packet": "HVSM-W1-019-E",
+      "runtime_id": "HVSMW1-A429A3E0E82B25839382",
+      "behavior": "real blocker preserved when transaction exception is missing"
+    }
+  ],
+  "files_changed": [
+    "holoverify_blind_runner_v0.py",
+    "tests/test_holoverify_v7_false_blocker_suppression.py",
+    "tests/test_holoverify_blind_selector_repair_regression.py",
+    "tests/test_holoverify_blind_canary_live_wrapper.py",
+    "tests/test_holoverify_blind_120_live_wrapper.py",
+    "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_DESIGN_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_DESIGN_2026_07_05.json",
+    "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_PATCH_REPORT_2026_07_05.md",
+    "docs/benchmark/HOLOVERIFY_V7_FALSE_BLOCKER_SUPPRESSION_PATCH_REPORT_2026_07_05.json"
+  ],
+  "validation": [
+    {
+      "command": "python3 -m py_compile holoverify_blind_runner_v0.py tests/test_holoverify_v7_false_blocker_suppression.py tests/test_holoverify_blind_selector_repair_regression.py tests/test_holoverify_blind_canary_live_wrapper.py tests/test_holoverify_blind_120_live_wrapper.py",
+      "result": "PASS"
+    },
+    {
+      "command": "python3 -m pytest tests/test_holoverify_v7_false_blocker_suppression.py tests/test_holoverify_blind_selector_repair_regression.py tests/test_holoverify_blind_canary_live_wrapper.py tests/test_holoverify_blind_120_live_wrapper.py",
+      "result": "PASS",
+            "tests": 84
+        }
+  ],
+  "frozen_evidence_immutability": {
+    "tested": true,
+    "result": "PASS",
+    "watched_run_folder": "docs/benchmark/holoverify_stress_matrix_wave1_fp_overblock_holo_rescue_2026_07_05/live_runs/run_20260705T232606Z",
+    "watched_files": [
+      "TRACE_CALLS.jsonl",
+      "TRACE_PROVIDER_CALLS.jsonl",
+      "blind_canary_runtime_results.json",
+      "raw_provider_outputs/011_W1.json",
+      "raw_provider_outputs/021_W1.json",
+      "raw_provider_outputs/031_W1.json"
+    ]
+  },
+  "claim_boundary": {
+    "internal_hardening_only": true,
+    "public_benchmark_evidence": false,
+    "holo_win": false,
+    "global_fpr_or_fnr_claim": false,
+    "fp_precision_evidence": false,
+    "natural_production_rate_evidence": false,
+    "model_superiority_evidence": false,
+    "production_safety_certification": false,
+    "allowed_status": "V7 has no-provider tests showing deterministic false-blocker suppression and affirmative closure behavior for selected Wave 1 failure fixtures. Live validation requires separate preflight and explicit provider approval."
+  },
+  "ready_for_tiny_patch_validation_preflight": true
+}

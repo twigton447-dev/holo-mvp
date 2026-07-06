@@ -163,15 +163,24 @@ def test_direct_selector_repair_consensus_is_truth_blind():
 def test_selector_policy_identity_is_stable_and_explicit():
     identity = runner.selector_policy_identity()
 
-    assert identity["selector_policy_version"] == "SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05"
+    assert identity["selector_policy_version"] == "SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05"
     assert "deterministic code confirms the closure" in identity["selector_policy_decision"]
-    assert "blocker-closure checks" in identity["selector_policy_decision"]
+    assert "blocker-closure" in identity["selector_policy_decision"]
     assert "authority-scope" in identity["selector_policy_decision"]
+    assert "affirmative ALLOW-support checks" in identity["selector_policy_decision"]
+    assert "suppressed false-blocker ledger" in identity["selector_policy_decision"]
+    assert "active, non-suppressed blocker" in identity["selector_policy_decision"]
+    assert "Unknown blocker types or blocker dimensions" in identity["selector_policy_decision"]
     assert len(identity["selector_policy_sha256"]) == 64
     assert "blocker_resolution_clean" in identity["selector_criteria"]
     assert "blocker_resolution_complete" in identity["selector_criteria"]
     assert "closure_validation_clean" in identity["selector_criteria"]
     assert "all_prior_blockers_source_closed" in identity["selector_criteria"]
+    assert "packet_unresolved_blocker_symmetry_clean" in identity["selector_criteria"]
+    assert "affirmative_closure_count" in identity["selector_criteria"]
+    assert "suppressed_false_blocker_count" in identity["selector_criteria"]
+    assert "packet_repair_required_count" in identity["selector_criteria"]
+    assert "false_blocker_only_escalate" in identity["selector_criteria"]
     assert "source_boundary_open_with_blocker" in identity["selector_criteria"]
     assert "verdict_consensus_count" in identity["selector_criteria"]
     assert "final_turn_consensus_repair" in identity["selector_criteria"]
@@ -246,7 +255,7 @@ def test_runtime_result_stamps_selector_version_and_hash(tmp_path):
 
     result = runner.run_blind_fixture(_cedar_payload(), transcripts, str(tmp_path))
 
-    assert result["selector_policy"]["selector_policy_version"] == "SELECTOR_V6_SCOPE_DEPENDENCY_GATE_2026_07_05"
+    assert result["selector_policy"]["selector_policy_version"] == "SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05"
     assert len(result["selector_policy"]["selector_policy_sha256"]) == 64
     assert result["worker_contract"]["worker_contract_version"] == "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
     assert len(result["worker_contract"]["worker_contract_sha256"]) == 64
@@ -288,8 +297,18 @@ def test_prior_blocker_cannot_be_silently_dropped_by_later_allow(tmp_path):
 
 
 def test_later_allow_can_win_only_when_it_names_prior_blocker_and_source(tmp_path):
-    cited_all = "REQ-CEDAR-033|SPEND-CEDAR-Q1|SPEND-CEDAR-Q2|SPEND-CEDAR-Q3|SPEND-CEDAR-Q4|STD-CEDAR-033-P"
-    blocker_text = "USD 5100 exceeds computed cap"
+    payload = {
+        "packet_id": "SFF-FIXTURE-AMOUNT-CLOSURE",
+        "domain": "fixture amount closure",
+        "action_boundary": "Should the amount-controlled release proceed?",
+        "documents": [
+            {"doc_id": "REQ-AMT-001", "text": "REQ|amount=100"},
+            {"doc_id": "APP-AMT-001", "text": "APP|amount_limit=150"},
+            {"doc_id": "POL-AMT-001", "text": "POL|Amount release requires an approval record with amount_limit at or above the requested amount."},
+        ],
+    }
+    cited_all = "REQ-AMT-001|APP-AMT-001|POL-AMT-001"
+    blocker_text = "amount limit missing"
     blocker_id = runner._blocker_id("ART-001", blocker_text)
     transcripts = [
         _worker_output(
@@ -298,6 +317,7 @@ def test_later_allow_can_win_only_when_it_names_prior_blocker_and_source(tmp_pat
             cited_all,
             blocker_text,
             "ESCALATE because W1 identifies a cap blocker.",
+            blocker_type="AMOUNT_LIMIT_MISSING",
         ),
         _worker_output(
             "W2",
@@ -305,7 +325,7 @@ def test_later_allow_can_win_only_when_it_names_prior_blocker_and_source(tmp_pat
             cited_all,
             "",
             "ALLOW because W2 explicitly closes the prior blocker with source evidence.",
-            blocker_resolution=f"{blocker_id} closed by REQ-CEDAR-033 and STD-CEDAR-033-P",
+            blocker_resolution=f"{blocker_id} closed by REQ-AMT-001 and APP-AMT-001",
         ),
         _worker_output(
             "W3",
@@ -316,7 +336,7 @@ def test_later_allow_can_win_only_when_it_names_prior_blocker_and_source(tmp_pat
         ),
     ]
 
-    result = runner.run_blind_fixture(_cedar_payload(), transcripts, str(tmp_path))
+    result = runner.run_blind_fixture(payload, transcripts, str(tmp_path))
 
     assert result["final"] == {"verdict": "ALLOW", "artifact_id": "ART-002"}
     gates = {row["artifact_id"]: row["gate_result"] for row in result["worker_rows"]}

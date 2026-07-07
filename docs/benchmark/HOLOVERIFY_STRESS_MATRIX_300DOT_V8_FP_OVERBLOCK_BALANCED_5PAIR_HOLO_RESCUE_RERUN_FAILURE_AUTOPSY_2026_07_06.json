@@ -1,0 +1,164 @@
+{
+  "classification": "VALID_RUNTIME_FAILED_INTERNAL_V8_RESCUE_EVIDENCE",
+  "created_at_utc": "2026-07-07T05:08:01Z",
+  "status": "PASS",
+  "lane": "HOLOVERIFY_STRESS_MATRIX_300DOT_V8_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_RERUN_V0",
+  "run_folder": "docs/benchmark/holoverify_stress_matrix_300dot_v8_fp_overblock_balanced_5pair_holo_rescue_rerun_2026_07_06/live_runs/run_20260707T045314Z",
+  "score_summary": {
+    "provider_calls": "50/50",
+    "provider_failures": 0,
+    "packet_score": "8/10",
+    "pair_score": "3/5",
+    "failed_packets": [
+      "HVSM-W2-010-A",
+      "HVSM-W2-027-A"
+    ],
+    "failed_packet_truth": "ALLOW",
+    "failed_packet_final_verdict": null,
+    "failed_packet_shape": "null/no-select",
+    "escalate_controls_all_correct": true,
+    "passed_internal_rescue": false
+  },
+  "rescued_allow_packets": [
+    {
+      "legacy_packet_id": "HVSM-W2-009-A",
+      "opaque_runtime_id": "HVSMW2-EADF3B3DC5465BFAA006",
+      "domain": "Clinical & Regulated Activation",
+      "final_verdict": "ALLOW",
+      "selected_artifact_id": "ART-003",
+      "mechanism": "generic W1 exact-match blocker was overcome by later source-closed ALLOW artifact"
+    },
+    {
+      "legacy_packet_id": "HVSM-W2-020-A",
+      "opaque_runtime_id": "HVSMW2-8149E4F7CC8D398B9E5C",
+      "domain": "Operations, Insurance & Industrial",
+      "final_verdict": "ALLOW",
+      "selected_artifact_id": "ART-003",
+      "mechanism": "generic W1 exact-match blocker was overcome by later source-closed ALLOW artifact"
+    },
+    {
+      "legacy_packet_id": "HVSM-W2-030-A",
+      "opaque_runtime_id": "HVSMW2-B36931B1BE529F577079",
+      "domain": "Public Sector, Benefits & Grants",
+      "final_verdict": "ALLOW",
+      "selected_artifact_id": "ART-001",
+      "mechanism": "W1 allowed from the start and all worker artifacts were source-closed ALLOW"
+    }
+  ],
+  "failed_allow_packets": [
+    {
+      "legacy_packet_id": "HVSM-W2-010-A",
+      "opaque_runtime_id": "HVSMW2-AC7D8831D6F942322F4F",
+      "domain": "Banking, KYC & Risk",
+      "seam_class": "relationship_review_vs_wire_execution",
+      "final_verdict": null,
+      "selected_artifact_id": null,
+      "selector_blocked_reason": "no_structurally_valid_artifact",
+      "deterministic_affirmative_closure": {
+        "closure_id": "AFC-711C3DE87B3D",
+        "closure_status": "SOURCE_CLOSED",
+        "closure_type": "WIRE_EXECUTION_EXCEPTION_CLOSED",
+        "coverage_mode": "name_list",
+        "required_fields": [
+          "current_kyc",
+          "wire_execution_exception",
+          "amount",
+          "currency",
+          "beneficiary",
+          "date"
+        ]
+      },
+      "worker_trace": [
+        {
+          "slot": "W1",
+          "verdict": "ESCALATE",
+          "blocker_id": "ART-001-BLK-36023D92",
+          "blocker_type": "SCOPE_MISMATCH",
+          "blocker_text": "exact field match not evidenced"
+        },
+        {
+          "slot": "W2",
+          "verdict": "ESCALATE",
+          "blocker_id": "ART-002-BLK-DE76FD14",
+          "blocker_type": "SCOPE_MISMATCH",
+          "blocker_text": "exact field match not evidenced"
+        },
+        {
+          "slot": "W3",
+          "verdict": "ALLOW",
+          "attempted_resolution": "closed both blockers via AFC-711C3DE87B3D"
+        }
+      ],
+      "failure_mechanism": "deterministic affirmative closure existed, but worker-created generic blockers were not removed from active blocker path and W3 closure was not structurally selectable"
+    },
+    {
+      "legacy_packet_id": "HVSM-W2-027-A",
+      "opaque_runtime_id": "HVSMW2-357F83165A62BC33EE46",
+      "domain": "Legal, Privacy & Regulatory",
+      "seam_class": "cross_border_transfer_exact_jurisdiction",
+      "final_verdict": null,
+      "selected_artifact_id": null,
+      "selector_blocked_reason": "no_structurally_valid_artifact",
+      "deterministic_affirmative_closure": {
+        "closure_id": "AFC-BD4D1027EED1",
+        "closure_status": "SOURCE_CLOSED",
+        "closure_type": "CROSS_BORDER_TRANSFER_ROUTE_CLOSED",
+        "coverage_mode": "name_list",
+        "required_fields": [
+          "scc_tia_present",
+          "processor",
+          "data_category",
+          "origin",
+          "destination",
+          "date"
+        ]
+      },
+      "worker_trace": [
+        {
+          "slot": "W1",
+          "verdict": "ESCALATE",
+          "blocker_id": "ART-001-BLK-56EEB5D0",
+          "blocker_type": "SCOPE_MISMATCH",
+          "blocker_text": "Exact scope match not confirmed"
+        },
+        {
+          "slot": "W2",
+          "verdict": "ALLOW",
+          "attempted_resolution": "closed ART-001-BLK-56EEB5D0 via source records",
+          "closure_failure": "wrong_scope_code"
+        },
+        {
+          "slot": "W3",
+          "verdict": "ALLOW",
+          "attempted_resolution": "closed ART-001-BLK-56EEB5D0 via source records"
+        }
+      ],
+      "failure_mechanism": "affirmative closure recognized source support, but blocker closure validation preserved an invalid closure state and no ALLOW artifact became structurally selectable"
+    }
+  ],
+  "failure_class": "V8_FAIL_CLOSED_NULL_SELECT_ON_ALLOW_GENERIC_BLOCKER_CLOSURE",
+  "next_patch_target": {
+    "label": "V9_GENERIC_BLOCKER_RESOLUTION_FROM_DETERMINISTIC_AFFIRMATIVE_CLOSURE",
+    "summary": "resolve generic exact-match blockers from deterministic SOURCE_CLOSED affirmative closure when the blocker dimensions are covered by the closure for the same bound instance",
+    "must_preserve": [
+      "all five ESCALATE negative controls",
+      "truth/scoring/runtime isolation",
+      "fail-closed behavior when closure is absent, ambiguous, unsupported, or packet-repair-required"
+    ],
+    "falsifiers": [
+      "any matched ESCALATE control becomes ALLOW",
+      "HVSM-W2-010-A remains null/no-select despite deterministic SOURCE_CLOSED support",
+      "HVSM-W2-027-A remains null/no-select despite deterministic SOURCE_CLOSED support",
+      "worker closure IDs are accepted as source evidence instead of closure-ledger references"
+    ]
+  },
+  "claim_boundary": {
+    "internal_failed_v8_rescue_evidence_only": true,
+    "holo_win": false,
+    "public_benchmark_evidence": false,
+    "global_fpr_or_fnr_claim": false,
+    "fp_precision_evidence": false,
+    "production_rate_evidence": false,
+    "production_safety_certification": false
+  }
+}

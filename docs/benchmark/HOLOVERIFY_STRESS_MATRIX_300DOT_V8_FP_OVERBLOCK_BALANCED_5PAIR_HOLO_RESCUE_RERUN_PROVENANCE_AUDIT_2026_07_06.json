@@ -1,0 +1,92 @@
+{
+  "classification": "VALID_RUNTIME_FAILED_INTERNAL_V8_RESCUE_EVIDENCE",
+  "created_at_utc": "2026-07-07T05:08:01Z",
+  "status": "PASS",
+  "lane": "HOLOVERIFY_STRESS_MATRIX_300DOT_V8_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_RERUN_V0",
+  "run_folder": "docs/benchmark/holoverify_stress_matrix_300dot_v8_fp_overblock_balanced_5pair_holo_rescue_rerun_2026_07_06/live_runs/run_20260707T045314Z",
+  "current_head_at_audit": "ea9d6f875606b315c65bcb9647a63a7023b84670",
+  "runtime_binding": {
+    "runtime_manifest": "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_300DOT_V8_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_RERUN_RUNTIME_MANIFEST_NO_TRUTH_2026_07_06.json",
+    "runtime_manifest_sha256": "5853f5d8257109199b4a98a18b11f8a9b339d5555093b8c1d89fccb89acd2f3c",
+    "selector": "SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06",
+    "selector_sha256": "e23b2ec29c63c4d484c10b17ffd2b5d5f6251b10387458dc8c47125a1f642e45",
+    "worker_contract": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04",
+    "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37"
+  },
+  "runtime_controls": {
+    "expected_provider_calls": 50,
+    "observed_provider_calls": 50,
+    "provider_failures": 0,
+    "worker_calls": 30,
+    "gov_calls": 20,
+    "provider_roster": {
+      "xai": 10,
+      "openai": 10,
+      "minimax": 30
+    },
+    "slot_counts": {
+      "W1": 10,
+      "G1": 10,
+      "W2": 10,
+      "G2": 10,
+      "W3": 10
+    },
+    "trace_provider_calls_present": true,
+    "trace_calls_present": true,
+    "raw_provider_output_count": 50,
+    "runtime_results_present": true,
+    "trace_frozen_before_scoring": true,
+    "scoring_map_loaded_post_freeze_only": true,
+    "mixed_registration_json_loaded_before_trace_freeze": false,
+    "solo_calls": 0,
+    "judges": 0,
+    "invalid_content_contract_count": 0,
+    "passed_runtime_firewall": false,
+    "runtime_firewall_note": "false because final_verdicts_valid=false on two null/no-select packets; this is compatible with valid failed internal rescue evidence"
+  },
+  "trace_hashes": {
+    "TRACE_PROVIDER_CALLS.jsonl": "df04f9637cff8897655727b45eacc16bd27dadc1c4cc5e2cd6c0c8cb7e20e705",
+    "TRACE_CALLS.jsonl": "dc2f3607d10a31640226889081b74a555ac5fd3f12bb646c11e2a4e0ecd4cba7",
+    "blind_canary_live_summary.json": "1bbee369837fce23949247868b1ff7cddd7a2eabb2b1fd580a8627b3cbf4f273",
+    "300dot_v8_fp_overblock_balanced_5pair_holo_rescue_rerun_live_summary.json": "d22af291b3df7e18a60a22c11183803737d1a7dfcc3a3cbc289b6579eccb46e1",
+    "blind_canary_runtime_results.json": "fefb07ba8b15b496e65c7dd091b275691763e0499248e638415d516da986d958",
+    "300dot_v8_fp_overblock_balanced_5pair_holo_rescue_rerun_posthoc_score_trace_bound_v0.json": "2ae18def508bfbaadd813338ef56c24ee7e80bc029aa14f2125345ff5f1ad460"
+  },
+  "score": {
+    "result_classification": "300DOT_V8_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_RERUN_FAILED",
+    "correct_packet_count": 8,
+    "packet_count": 10,
+    "complete_pair_correct_count": 3,
+    "pair_count": 5,
+    "null_or_no_select_count": 2,
+    "passed_internal_rescue": false,
+    "failed_packets": [
+      {
+        "legacy_packet_id": "HVSM-W2-010-A",
+        "opaque_runtime_id": "HVSMW2-AC7D8831D6F942322F4F",
+        "truth": "ALLOW",
+        "final_verdict": null,
+        "final_artifact_id": null,
+        "failure_shape": "null/no-select"
+      },
+      {
+        "legacy_packet_id": "HVSM-W2-027-A",
+        "opaque_runtime_id": "HVSMW2-357F83165A62BC33EE46",
+        "truth": "ALLOW",
+        "final_verdict": null,
+        "final_artifact_id": null,
+        "failure_shape": "null/no-select"
+      }
+    ],
+    "escalate_controls_all_correct": true
+  },
+  "claim_boundary": {
+    "internal_failed_v8_rescue_evidence_only": true,
+    "holo_win": false,
+    "public_benchmark_evidence": false,
+    "global_fpr_or_fnr_claim": false,
+    "fp_precision_evidence": false,
+    "production_rate_evidence": false,
+    "production_safety_certification": false
+  }
+}

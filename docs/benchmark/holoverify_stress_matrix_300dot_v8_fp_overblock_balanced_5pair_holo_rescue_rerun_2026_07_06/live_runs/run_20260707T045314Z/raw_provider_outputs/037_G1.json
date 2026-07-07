@@ -1,0 +1,27 @@
+{
+  "call_number": 37,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "943d9f55fbfdea1227cbddf0cf93d972765005500307520a53d046021d38b752",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nThe user request: \"Return the three-line status record.\" with fields route_verdict, repair_target, blocked_move.\n\nThe user provides the data: \n```\npacket_id=HVSMW2-7E5D5EED0E2357C85827\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-D068DB4E\nblocked_move=do not override blocker with consensus unless sources close it\n```\n\nWe need to output a plain text record with three key=value lines. In order: route_verdict, repair_target, blocked_move. The packet_id is not part of the three lines. So we output:\n\n```\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-D068DB4E\nblocked_move=do not override blocker with consensus unless sources close it\n```\n\nWe should not add headings, explanations, JSON, markdown or extra lines. So just these three lines.\n\nBut check that the user may want to include the packet_id? The request says \"Return the three-line status record.\" and fields: route_verdict, repair_target, blocked_move. So no packet_id. Also not include anything else. So final answer: three lines.\n\nThus answer: route_verdict=CONTINUE, etc.\n\nThus we output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-D068DB4E\nblocked_move=do not override blocker with consensus unless sources close it\n\nMake sure there is no trailing spaces, no extra lines.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-D068DB4E\nblocked_move=do not override blocker with consensus unless sources close it",
+  "raw_text_sha256": "993f11449a812b0424e88e686d33ee8232c864f5ae68666a01ee60673e510ef1",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 141,
+    "output_tokens": 387,
+    "raw_text": "<think>\nThe user request: \"Return the three-line status record.\" with fields route_verdict, repair_target, blocked_move.\n\nThe user provides the data: \n```\npacket_id=HVSMW2-7E5D5EED0E2357C85827\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-D068DB4E\nblocked_move=do not override blocker with consensus unless sources close it\n```\n\nWe need to output a plain text record with three key=value lines. In order: route_verdict, repair_target, blocked_move. The packet_id is not part of the three lines. So we output:\n\n```\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-D068DB4E\nblocked_move=do not override blocker with consensus unless sources close it\n```\n\nWe should not add headings, explanations, JSON, markdown or extra lines. So just these three lines.\n\nBut check that the user may want to include the packet_id? The request says \"Return the three-line status record.\" and fields: route_verdict, repair_target, blocked_move. So no packet_id. Also not include anything else. So final answer: three lines.\n\nThus answer: route_verdict=CONTINUE, etc.\n\nThus we output exactly:\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-D068DB4E\nblocked_move=do not override blocker with consensus unless sources close it\n\nMake sure there is no trailing spaces, no extra lines.\n\nThus final.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-D068DB4E\nblocked_move=do not override blocker with consensus unless sources close it",
+    "response_id": "069bba0a0d46e91f2ed4c1043e259958",
+    "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-D068DB4E\nblocked_move=do not override blocker with consensus unless sources close it",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 528,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-D068DB4E\nblocked_move=do not override blocker with consensus unless sources close it",
+  "text_sha256": "20c140846bfd3fb82aa186199d198e2eba6159293ea7b6e2a0bd2a4ed8cfb97b"
+}

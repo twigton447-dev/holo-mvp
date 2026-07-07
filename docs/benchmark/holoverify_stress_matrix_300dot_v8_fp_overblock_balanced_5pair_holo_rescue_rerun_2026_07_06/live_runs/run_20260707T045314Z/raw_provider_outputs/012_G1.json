@@ -1,0 +1,27 @@
+{
+  "call_number": 12,
+  "error": null,
+  "max_output_tokens": 1024,
+  "model": "MiniMax-M2.5-highspeed",
+  "prompt_sha256": "5251ba8b1f73788837639483ea0b876aa164638cc870b11d9a79c63ce569125a",
+  "provider": "minimax",
+  "provider_call_ok": true,
+  "raw_text": "<think>\nWe need to parse the user's request. The user says:\n\n```\npacket_id=HVSMW2-AC7D8831D6F942322F4F\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-36023D92\nblocked_move=do not override blocker with consensus unless sources close it\nReturn the three-line status record.\n```\n\nThe system says:\n\n```\nData formatting task.\nReturn a plain text record with three key=value lines.\nFields, in order: route_verdict, repair_target, blocked_move.\nDo not add headings, explanations, JSON, Markdown, or extra lines.\nBegin with route_verdict=.\n```\n\nSo we need to produce exactly three lines:\n\n- route_verdict=CONTINUE\n- repair_target=stress-test and preserve blocker ids: ART-001-BLK-36023D92\n- blocked_move=do not override blocker with consensus unless sources close it\n\nWe should output plain text, no extra formatting. Should we include the packet_id? The system says return a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. So we do not include packet_id. The user also gave a packet_id but we ignore it. Also we must not include any headings, explanations, JSON, markdown. So just those three lines.\n\nThus final output:\n\n```\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-36023D92\nblocked_move=do not override blocker with consensus unless sources close it\n```\n\nDouble-check no extra spaces or newlines beyond exactly those three lines. The lines are separated by newline characters. Should we add trailing newline? Usually okay. But we should ensure only three lines.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-36023D92\nblocked_move=do not override blocker with consensus unless sources close it",
+  "raw_text_sha256": "356be8a74e111fb51473643bdbe960482d4ea60792456abe1e5862c45219bb14",
+  "response": {
+    "finish_reason": "stop",
+    "input_tokens": 139,
+    "output_tokens": 423,
+    "raw_text": "<think>\nWe need to parse the user's request. The user says:\n\n```\npacket_id=HVSMW2-AC7D8831D6F942322F4F\nstatus_values:\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-36023D92\nblocked_move=do not override blocker with consensus unless sources close it\nReturn the three-line status record.\n```\n\nThe system says:\n\n```\nData formatting task.\nReturn a plain text record with three key=value lines.\nFields, in order: route_verdict, repair_target, blocked_move.\nDo not add headings, explanations, JSON, Markdown, or extra lines.\nBegin with route_verdict=.\n```\n\nSo we need to produce exactly three lines:\n\n- route_verdict=CONTINUE\n- repair_target=stress-test and preserve blocker ids: ART-001-BLK-36023D92\n- blocked_move=do not override blocker with consensus unless sources close it\n\nWe should output plain text, no extra formatting. Should we include the packet_id? The system says return a plain text record with three key=value lines, fields in order: route_verdict, repair_target, blocked_move. So we do not include packet_id. The user also gave a packet_id but we ignore it. Also we must not include any headings, explanations, JSON, markdown. So just those three lines.\n\nThus final output:\n\n```\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-36023D92\nblocked_move=do not override blocker with consensus unless sources close it\n```\n\nDouble-check no extra spaces or newlines beyond exactly those three lines. The lines are separated by newline characters. Should we add trailing newline? Usually okay. But we should ensure only three lines.\n\nThus answer.\n</think>\n\nroute_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-36023D92\nblocked_move=do not override blocker with consensus unless sources close it",
+    "response_id": "069bb9774aeec585b1cca335e1018c1c",
+    "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-36023D92\nblocked_move=do not override blocker with consensus unless sources close it",
+    "text_stripped_by_thinking_filter": true,
+    "total_tokens": 562,
+    "transport_attempt_count": 1,
+    "transport_recovered": false,
+    "transport_retry_failures": []
+  },
+  "slot": "G1",
+  "text": "route_verdict=CONTINUE\nrepair_target=stress-test and preserve blocker ids: ART-001-BLK-36023D92\nblocked_move=do not override blocker with consensus unless sources close it",
+  "text_sha256": "4240309a5ad11c922da74e142c29e371f09ffbeb56ce32eb983ad6fff427ede4"
+}

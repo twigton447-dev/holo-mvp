@@ -761,14 +761,18 @@ def run_live(approval_statement: str, packet_limit: int | None = None, packet_in
         runtime_result = BLIND.run_blind_runtime_manifest(str(runtime_manifest_path), str(run_dir), transport=transport)
         write_provider_trace(run_dir, transport.provider_rows)
         trace_frozen = True
-        observed = runtime_result.get("observed_call_count")
-        if observed != expected_call_count or len(transport.provider_rows) != expected_call_count:
-            raise RuntimeError(f"observed_call_count_mismatch:{observed}:{len(transport.provider_rows)}")
     except Exception as exc:
         failure = str(exc)
         write_provider_trace(run_dir, transport.provider_rows)
         trace_frozen = True
-        raise
+        runtime_result = runtime_result or {
+            "packet_count": packet_limit or expected_call_count // len(CALL_SEQUENCE),
+            "results": [],
+            "observed_call_count": len(transport.provider_rows),
+            "expected_call_count": expected_call_count,
+            "trace_ref": "TRACE_CALLS.jsonl",
+            "classification": "HOLOVERIFY_BLIND_CANARY_RUNTIME_RESULT_V0",
+        }
     finally:
         provider_failures = [row for row in transport.provider_rows if row.get("provider_call_ok") is not True]
         final_verdicts = [
@@ -776,6 +780,21 @@ def run_live(approval_statement: str, packet_limit: int | None = None, packet_in
             for row in (runtime_result or {}).get("results", [])
         ]
         final_verdicts_valid = bool(final_verdicts) and all(verdict in {"ALLOW", "ESCALATE"} for verdict in final_verdicts)
+        invalid_content_contracts = [
+            row
+            for row in (runtime_result or {}).get("results", [])
+            if row.get("packet_status") == "INVALID_CONTENT_CONTRACT"
+        ]
+        if invalid_content_contracts and failure is None:
+            failure = "; ".join(
+                (
+                    f"{row.get('packet_id')}::{row.get('packet_failure_slot')}::{row.get('packet_failure_tag')}"
+                    for row in invalid_content_contracts
+                )
+            )
+        observed = (runtime_result or {}).get("observed_call_count", len(transport.provider_rows))
+        observed_call_count_ok = observed == expected_call_count
+        provider_rows_count_ok = len(transport.provider_rows) == expected_call_count
         live_wrapper_has_scoring_map_path = "SCORING_MAP" in globals()
         summary = {
             "classification": "HOLOVERIFY_BLIND_CANARY_LIVE_RUN_SUMMARY_V0",
@@ -816,12 +835,21 @@ def run_live(approval_statement: str, packet_limit: int | None = None, packet_in
             "provider_trace_ref": "TRACE_PROVIDER_CALLS.jsonl",
             "posthoc_score_ref": None,
             "failure": failure,
+            "invalid_content_contract_count": len(invalid_content_contracts),
+            "invalid_content_contract_rows": invalid_content_contracts,
+            "observed_call_count_ok": observed_call_count_ok,
+            "provider_rows_count_ok": provider_rows_count_ok,
             "final_verdicts_valid": final_verdicts_valid,
+            "contract_failure_marker_present": any(
+                row.get("contract_failure_marker") for row in (runtime_result or {}).get("results", [])
+            ),
             "passed_runtime_firewall": (
                 runtime_result is not None
-                and len(transport.provider_rows) == expected_call_count
+                and observed_call_count_ok
+                and provider_rows_count_ok
                 and not provider_failures
                 and final_verdicts_valid
+                and not invalid_content_contracts
             ),
         }
         write_json(run_dir / "blind_canary_live_summary.json", summary)

@@ -84,6 +84,51 @@ BUDGET_LIMITS = {
     "max_output_tokens": 1024,
 }
 
+
+def _invalid_content_contract_result(
+    packet_id: str,
+    out_path: Path,
+    failed_slot: str,
+    failure_tag: str,
+    failure_call: str,
+    prompts: list[list[dict]],
+    worker_rows: list[dict],
+    gov_rows: list[dict],
+    call_rows: list[dict],
+    retry_log: list[dict],
+) -> dict:
+    "Build a packet-result summary for a terminal worker content-contract failure."
+    selector = {
+        "selected_artifact_id": None,
+        "criteria_trace": [],
+        "selector_blocked_reason": "content_contract_failure",
+    }
+    return {
+        "prompts": prompts,
+        "worker_rows": worker_rows,
+        "gov_rows": gov_rows,
+        "call_rows": call_rows,
+        "artifacts": [],
+        "final": {
+            "verdict": None,
+            "artifact_id": None,
+            "artifact_text": None,
+            "failure_reason": failure_tag,
+        },
+        "selection": selector,
+        "selector_policy": selector_policy_identity(),
+        "worker_contract": worker_contract_identity(),
+        "retry_log": retry_log,
+        "budget_limits": BUDGET_LIMITS,
+        "packet_status": "INVALID_CONTENT_CONTRACT",
+        "contract_failure_marker": True,
+        "packet_failure_slot": failed_slot,
+        "packet_failure_tag": failure_tag,
+        "packet_failure_call": failure_call,
+        "packet_selectable": False,
+        "artifact_output_path": str(out_path / "invalid_packet.json"),
+    }
+
 WORKER_ROLES = ("W1", "W2", "W3")
 GOV_ROLES = ("G1", "G2")
 REQUIRED_WORKER_KEYS = (
@@ -2117,6 +2162,26 @@ def _call_transport(transport: Callable, messages: list[dict], retry_log: list[d
     raise BlindRunnerTransportFailure("transport exhausted")
 
 
+def _build_failed_worker_call_row(
+    packet_id: str,
+    role: str,
+    idx: int,
+    messages: list[dict],
+    failure_tag: str,
+    raw: str = "",
+) -> dict:
+    return {
+        "packet_id": packet_id,
+        "call_kind": "worker",
+        "role": role,
+        "turn_index": idx,
+        "prompt_sha256": _sha256_text(json.dumps(messages, sort_keys=True)),
+        "raw_output_sha256": _sha256_text(raw),
+        "transport_called": True,
+        "failure": failure_tag,
+    }
+
+
 def _write_prompt(prompt_dir: Path, name: str, messages: list[dict]) -> None:
     prompt_dir.mkdir(parents=True, exist_ok=True)
     payload = {"messages": messages}
@@ -2131,6 +2196,7 @@ def run_blind_fixture(
     call_gov_transport: bool = False,
 ) -> dict:
     out_path = Path(out_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
     prompt_dir = out_path / "prompts"
     packet_id = str(payload.get("packet_id", "PKT-OPAQUE"))
     state = {
@@ -2159,7 +2225,36 @@ def run_blind_fixture(
         messages = _build_worker_messages(payload, idx + 1, state, baton)
         prompts.append(messages)
         _write_prompt(prompt_dir, f"{packet_id}_{role}.json", messages)
-        raw = _call_transport(transport, messages, retry_log) if transport else _next_transcript(transcripts, idx)
+        try:
+            raw = _call_transport(transport, messages, retry_log) if transport else _next_transcript(transcripts, idx)
+        except BlindRunnerContentFailure as exc:
+            failure_tag = str(exc)
+            call_rows.append(
+                _build_failed_worker_call_row(
+                    packet_id,
+                    role,
+                    idx + 1,
+                    messages,
+                    failure_tag,
+                )
+            )
+            result = _invalid_content_contract_result(
+                packet_id=packet_id,
+                out_path=out_path,
+                failed_slot=role,
+                failure_tag=failure_tag,
+                failure_call=json.dumps(call_rows[-1], sort_keys=True),
+                prompts=prompts,
+                worker_rows=worker_rows,
+                gov_rows=gov_rows,
+                call_rows=call_rows,
+                retry_log=retry_log,
+            )
+            out_path.mkdir(parents=True, exist_ok=True)
+            (out_path / "invalid_packet.json").write_text(
+                json.dumps(result, indent=2, sort_keys=True) + "\n",
+            )
+            return result
         parsed = _parse_key_value(raw)
         active_blockers = list(state.get("unresolved_blockers") or [])
         gate = _gate_worker_output(payload, parsed, active_blockers)
@@ -2302,6 +2397,12 @@ def run_blind_fixture(
         "selection": selection,
         "selector_policy": selector_policy_identity(),
         "worker_contract": worker_contract_identity(),
+        "packet_status": "SELECTED",
+        "contract_failure_marker": False,
+        "packet_failure_slot": None,
+        "packet_failure_tag": None,
+        "packet_failure_call": None,
+        "packet_selectable": bool(selection.get("selected_artifact_id")),
         "retry_log": retry_log,
         "budget_limits": BUDGET_LIMITS,
     }
@@ -2334,18 +2435,29 @@ def run_blind_runtime_manifest(runtime_manifest_path: str, out_dir: str, transpo
         payload_ref = Path(row["runtime_payload_ref"])
         payload = _load_runtime_json(payload_ref)
         packet_out = out_path / str(payload.get("packet_id"))
-        result = run_blind_fixture(
-            payload,
-            [],
-            str(packet_out),
-            transport=transport,
-            call_gov_transport=True,
-        )
+        try:
+            result = run_blind_fixture(
+                payload,
+                [],
+                str(packet_out),
+                transport=transport,
+                call_gov_transport=True,
+            )
+        except Exception as exc:
+            # Unexpected transport or runner failures abort the lane; they are not
+            # converted into content-contract invalid states.
+            raise RuntimeError(f"fixture execution failed for packet {payload.get('packet_id')}: {exc}") from exc
         packet_results.append(
             {
                 "packet_id": payload.get("packet_id"),
                 "final": result.get("final"),
                 "selection": result.get("selection"),
+                "packet_status": result.get("packet_status", "SELECTED"),
+                "contract_failure_marker": result.get("contract_failure_marker", False),
+                "packet_failure_slot": result.get("packet_failure_slot"),
+                "packet_failure_tag": result.get("packet_failure_tag"),
+                "packet_failure_call": result.get("packet_failure_call"),
+                "packet_selectable": result.get("packet_selectable", True),
                 "selector_policy": result.get("selector_policy"),
                 "worker_contract": result.get("worker_contract"),
                 "retry_log": result.get("retry_log", []),

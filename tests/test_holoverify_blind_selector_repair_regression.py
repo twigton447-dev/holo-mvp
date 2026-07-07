@@ -163,7 +163,7 @@ def test_direct_selector_repair_consensus_is_truth_blind():
 def test_selector_policy_identity_is_stable_and_explicit():
     identity = runner.selector_policy_identity()
 
-    assert identity["selector_policy_version"] == "SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06"
+    assert identity["selector_policy_version"] == "SELECTOR_V9_GENERIC_BLOCKER_RESOLUTION_2026_07_06"
     assert "deterministic code confirms the closure" in identity["selector_policy_decision"]
     assert "blocker-closure" in identity["selector_policy_decision"]
     assert "authority-scope" in identity["selector_policy_decision"]
@@ -255,7 +255,7 @@ def test_runtime_result_stamps_selector_version_and_hash(tmp_path):
 
     result = runner.run_blind_fixture(_cedar_payload(), transcripts, str(tmp_path))
 
-    assert result["selector_policy"]["selector_policy_version"] == "SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06"
+    assert result["selector_policy"]["selector_policy_version"] == "SELECTOR_V9_GENERIC_BLOCKER_RESOLUTION_2026_07_06"
     assert len(result["selector_policy"]["selector_policy_sha256"]) == 64
     assert result["worker_contract"]["worker_contract_version"] == "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
     assert len(result["worker_contract"]["worker_contract_sha256"]) == 64

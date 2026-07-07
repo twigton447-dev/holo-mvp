@@ -38,8 +38,8 @@ def test_120_preflight_passes_without_provider_calls(tmp_path, monkeypatch):
     assert report["scoring_map_access_control"]["live_wrapper_has_scoring_map_path"] is False
     assert "test_preflight_does_not_read_120_scoring_map_bytes" in report["scoring_map_access_control"]["preflight_read_guard_enforced_by"]
     assert report["posthoc_scoring_required_after_trace_freeze"] is True
-    assert report["selector_policy"]["selector_policy_version"] == "SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06"
-    assert report["selector_policy"]["selector_policy_sha256"] == "e23b2ec29c63c4d484c10b17ffd2b5d5f6251b10387458dc8c47125a1f642e45"
+    assert report["selector_policy"]["selector_policy_version"] == "SELECTOR_V9_GENERIC_BLOCKER_RESOLUTION_2026_07_06"
+    assert report["selector_policy"]["selector_policy_sha256"] == "cb53549bcc01d882836fc47e68e1ec5610b302cdbd8ddfd1967f7fac5a235416"
     assert report["worker_contract"]["worker_contract_version"] == "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
     assert len(report["worker_contract"]["worker_contract_sha256"]) == 64
 

@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 
-SELECTOR_POLICY_VERSION = "SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06"
+SELECTOR_POLICY_VERSION = "SELECTOR_V9_GENERIC_BLOCKER_RESOLUTION_2026_07_06"
 SELECTOR_POLICY_DECISION = (
     "Truth-blind structural selector. Among structurally valid artifacts, "
     "explicit blocker resolution is only eligible when local closure validation "
@@ -46,7 +46,11 @@ SELECTOR_POLICY_DECISION = (
     "source_record, while veto screens scan any request_context, source_record, "
     "or field_record for negating, hedged, conditional, normative, blanket, "
     "or contradictory factual signals. Conditional, normative, hedged, blanket, "
-    "underspecified, or mismatched factual records fail closed."
+    "underspecified, or mismatched factual records fail closed. Generic exact-match "
+    "blockers may be resolved from deterministic affirmative closure only when the "
+    "blocker phrase is in the frozen V9 generic family, contains no concrete token, "
+    "and every asserted dimension is covered by the frozen V9 dimension-equivalence "
+    "table for the same bound instance."
 )
 SELECTOR_CRITERIA = (
     "gate_passed",
@@ -177,6 +181,7 @@ def selector_policy_identity() -> dict:
         "selector_policy_version": SELECTOR_POLICY_VERSION,
         "selector_policy_decision": SELECTOR_POLICY_DECISION,
         "selector_criteria": list(SELECTOR_CRITERIA),
+        "v9_guard_artifacts": V9_GUARD_ARTIFACT_HASHES,
     }
     return {
         **payload,
@@ -575,20 +580,39 @@ def _resolve_prior_blockers(
     active_blockers: list[dict],
     parsed: dict,
     cited: list[str],
-) -> tuple[list[dict], list[dict], list[str], list[dict]]:
+) -> tuple[list[dict], list[dict], list[str], list[dict], list[dict]]:
     if not active_blockers:
-        return [], [], [], []
+        return [], [], [], [], []
     resolution = str(parsed.get("blocker_resolution") or "")
     verdict = parsed.get("verification_verdict")
     if verdict != "ALLOW":
-        return [], list(active_blockers), [], []
+        return [], list(active_blockers), [], [], []
     resolution_sources = _resolution_source_ids(parsed, _source_ids(payload))
     resolved: list[dict] = []
     unresolved: list[dict] = []
     failures: list[str] = []
     closure_results: list[dict] = []
+    generic_resolution_results: list[dict] = []
     for blocker in active_blockers:
         blocker_id = str(blocker.get("blocker_id") or "")
+        generic_resolution = _v9_generic_blocker_resolution(payload, blocker)
+        generic_resolution_results.append(generic_resolution)
+        if generic_resolution.get("resolution_status") == "RESOLVED_BY_DETERMINISTIC_AFFIRMATIVE_CLOSURE":
+            resolved.append(blocker)
+            closure_results.append(
+                {
+                    "blocker_id": blocker_id,
+                    "blocker_type": blocker.get("blocker_type"),
+                    "status": "CLOSED",
+                    "failure_codes": [],
+                    "failures": [],
+                    "cited_source_ids": generic_resolution.get("source_ids") or [],
+                    "required_closure_fields": blocker.get("required_closure_fields") or {},
+                    "resolution_source": "deterministic_affirmative_closure",
+                    "deterministic_resolution": generic_resolution,
+                }
+            )
+            continue
         if blocker_id and blocker_id in resolution:
             closure = _validate_blocker_closure(payload, blocker, resolution_sources)
             closure_results.append(closure)
@@ -607,7 +631,7 @@ def _resolve_prior_blockers(
             failures.append(f"unresolved_prior_blocker:{blocker_id}")
     if any(str(blocker.get("blocker_id") or "") in resolution for blocker in active_blockers) and not resolution_sources:
         failures.append("blocker_resolution_missing_source_id")
-    return resolved, unresolved, failures, closure_results
+    return resolved, unresolved, failures, closure_results, generic_resolution_results
 
 
 def _money_values(text: str) -> list[float]:
@@ -978,6 +1002,73 @@ GENERIC_FALSE_BLOCKER_DISQUALIFIERS = (
     "route mismatch",
 )
 
+V9_DIMENSION_EQUIVALENCE_TABLE = {
+    "exact_support_boundary": (
+        "exact_support_boundary",
+        "source_field_match",
+        "scope",
+    ),
+    "source_field_match": (
+        "exact_support_boundary",
+        "source_field_match",
+    ),
+    "scope": (
+        "exact_support_boundary",
+        "scope",
+    ),
+}
+
+V9_DIMENSION_EQUIVALENCE_TABLE_SHA256 = "3cbd70cf843b4c050a3fe4c51d7910b2c25c0f41a18c053ab6d6260d4879a450"
+
+V9_GENERIC_PHRASE_FAMILY = (
+    "exact field match not evidenced",
+    "exact field match missing",
+    "exact field match not confirmed in visible records",
+    "exact field matches missing",
+    "exact field matches absent",
+    "exact source field match not confirmed",
+    "exact scope match not confirmed",
+    "exact scope matches missing",
+    "missing exact scope matches in records",
+    "no factual source record match visible",
+    "source fields lack exact matches",
+    "source fields mismatch required scopes",
+    "source records lack exact action boundary match",
+    "source records lack exact field matches",
+    "source records lack exact field matches required by policy",
+    "visible source fields do not close action boundary",
+)
+
+V9_GENERIC_PHRASE_FAMILY_SHA256 = "de6cc3a4082fc0f5a5b8098bbb264edd6c85711265d8ecf19263aeb456dabfed"
+
+V9_GUARD_ARTIFACT_HASHES = {
+    "dimension_equivalence_table_sha256": V9_DIMENSION_EQUIVALENCE_TABLE_SHA256,
+    "generic_phrase_family_sha256": V9_GENERIC_PHRASE_FAMILY_SHA256,
+}
+
+CONCRETE_BLOCKER_TOKEN_TERMS = (
+    "account",
+    "amount",
+    "beneficiary",
+    "case",
+    "currency",
+    "customer",
+    "date",
+    "destination",
+    "district",
+    "entity",
+    "jurisdiction",
+    "origin",
+    "patient",
+    "processor",
+    "reference",
+    "registration",
+    "route",
+    "shipment",
+    "vendor",
+    "value",
+)
+
 V8_GENERIC_FALSE_BLOCKER_FAMILIES = (
     {
         "boundary_phrase": "surgical implant use after warning closure",
@@ -1109,6 +1200,48 @@ V8_CLOSURE_TYPES = {
     for family in V8_GENERIC_FALSE_BLOCKER_FAMILIES
 }
 
+V9_REQUIRED_FIELDS_BY_CLOSURE_TYPE = {
+    str(family["closure_type"]): tuple(str(field) for field in family["required_fields"])
+    for family in V8_GENERIC_FALSE_BLOCKER_FAMILIES
+}
+
+
+def v9_dimension_equivalence_artifact() -> dict:
+    return {
+        "classification": "HOLOVERIFY_V9_DIMENSION_EQUIVALENCE_TABLE_V0",
+        "date": "2026-07-06",
+        "status": "FROZEN_PRE_IMPLEMENTATION",
+        "rule": "Runtime must fail closed on any blocker dimension to closure dimension pair not listed here.",
+        "dimension_equivalence": {
+            key: list(values)
+            for key, values in V9_DIMENSION_EQUIVALENCE_TABLE.items()
+        },
+        "claim_boundary": {
+            "internal_hardening_only": True,
+            "public_benchmark_evidence": False,
+            "holo_win": False,
+            "global_fpr_or_fnr_claim": False,
+            "production_rate_evidence": False,
+        },
+    }
+
+
+def v9_generic_phrase_family_artifact() -> dict:
+    return {
+        "classification": "HOLOVERIFY_V9_GENERIC_PHRASE_FAMILY_V0",
+        "date": "2026-07-06",
+        "status": "FROZEN_PRE_IMPLEMENTATION",
+        "rule": "Runtime may resolve only these normalized generic exact-match blocker phrases. Unknown phrases, residual words, and concrete tokens preserve the blocker.",
+        "generic_phrases": list(V9_GENERIC_PHRASE_FAMILY),
+        "claim_boundary": {
+            "internal_hardening_only": True,
+            "public_benchmark_evidence": False,
+            "holo_win": False,
+            "global_fpr_or_fnr_claim": False,
+            "production_rate_evidence": False,
+        },
+    }
+
 
 def _has_hedged_source_signal(text: object) -> bool:
     normalized = f" {_normalized_phrase(text)} "
@@ -1143,6 +1276,7 @@ def _closure_entry(
     checked_dimensions: list[str] | None = None,
     bound_instance: str = "",
     instance_binding_clean: bool | None = None,
+    value_equality: dict | None = None,
 ) -> dict:
     closure_id = hashlib.sha256(
         "|".join(
@@ -1178,6 +1312,10 @@ def _closure_entry(
         "checked_dimensions": list(checked_dimensions or []),
         "bound_instance": bound_instance,
         "instance_binding_clean": instance_binding_clean,
+        "value_equality_status": (value_equality or {}).get("status", "NOT_CHECKED"),
+        "value_equality_checked_fields": (value_equality or {}).get("checked_fields", []),
+        "value_equality_failures": (value_equality or {}).get("failures", []),
+        "required_field_values": (value_equality or {}).get("field_values", {}),
         "confidence": "deterministic_source_text",
     }
 
@@ -1191,6 +1329,86 @@ def _v8_checked_dimensions(required_fields: list[str]) -> list[str]:
             "scope",
         }
     )
+
+
+def _v9_extract_values_for_alias(text: str, alias: str) -> set[str]:
+    values: set[str] = set()
+    normalized_alias = re.escape(_normalized_phrase(alias)).replace("\\ ", r"[\s_-]+")
+    value_pattern = r"([A-Za-z0-9][A-Za-z0-9_./:-]*)"
+    patterns = (
+        rf"\b{normalized_alias}\b\s*(?:=|:)\s*{value_pattern}",
+        rf"\b{normalized_alias}\b\s+(?:is|equals|matches)\s+{value_pattern}",
+    )
+    normalized_text = _normalized_phrase(text)
+    for pattern in patterns:
+        for match in re.finditer(pattern, normalized_text, flags=re.IGNORECASE):
+            values.add(_normalize_value(match.group(1)))
+    return values
+
+
+def _v9_extract_required_field_value(text: str, field: str, family: dict) -> tuple[str | None, str | None]:
+    aliases = [
+        field,
+        field.replace("_", " "),
+        field.replace("_", "-"),
+        *(family.get("dimension_phrases", {}).get(field) or []),
+    ]
+    values: set[str] = set()
+    for alias in aliases:
+        values.update(_v9_extract_values_for_alias(text, alias))
+    if not values:
+        return None, "missing"
+    if len(values) > 1:
+        return None, "ambiguous"
+    return next(iter(values)), None
+
+
+def _v9_value_equality_check(req_text: str, rec_text: str, family: dict) -> dict:
+    checked_fields = [str(field) for field in family.get("required_fields", [])]
+    failures: list[dict] = []
+    field_values: dict[str, dict[str, str | None]] = {}
+    any_value_present = False
+    for field in checked_fields:
+        req_value, req_failure = _v9_extract_required_field_value(req_text, field, family)
+        rec_value, rec_failure = _v9_extract_required_field_value(rec_text, field, family)
+        if req_value is not None or rec_value is not None:
+            any_value_present = True
+        field_values[field] = {
+            "request_value": req_value,
+            "record_value": rec_value,
+        }
+        if req_failure == "ambiguous" or rec_failure == "ambiguous":
+            failures.append({"field": field, "reason": "ambiguous_required_field_value"})
+        elif req_value is None or rec_value is None:
+            failures.append({"field": field, "reason": "missing_required_field_value"})
+        elif req_value != rec_value:
+            failures.append(
+                {
+                    "field": field,
+                    "reason": "value_mismatch",
+                    "request_value": req_value,
+                    "record_value": rec_value,
+                }
+            )
+    if not any_value_present:
+        status = "MISSING_REQUIRED_FIELD_VALUE"
+    elif failures:
+        status = (
+            "AMBIGUOUS_REQUIRED_FIELD_VALUE"
+            if any(item["reason"] == "ambiguous_required_field_value" for item in failures)
+            else "MISSING_REQUIRED_FIELD_VALUE"
+            if any(item["reason"] == "missing_required_field_value" for item in failures)
+            else "VALUE_MISMATCH"
+        )
+    else:
+        status = "VALUE_EQUALITY_PROVEN"
+    return {
+        "status": status,
+        "checked_fields": checked_fields,
+        "field_values": field_values,
+        "failures": failures,
+        "any_value_present": any_value_present,
+    }
 
 
 def _v8_family_closure(payload: dict, family: dict) -> dict | None:
@@ -1380,6 +1598,27 @@ def _v8_family_closure(payload: dict, family: dict) -> dict | None:
             instance_binding_clean=True,
         )
 
+    value_equality = _v9_value_equality_check(req_text, rec_text, family)
+    if value_equality["status"] in {"VALUE_MISMATCH", "AMBIGUOUS_REQUIRED_FIELD_VALUE"} or (
+        value_equality["status"] == "MISSING_REQUIRED_FIELD_VALUE"
+        and value_equality.get("any_value_present")
+    ):
+        return _closure_entry(
+            payload,
+            family["closure_type"],
+            family["requested_action"],
+            "PACKET_REPAIR_REQUIRED",
+            list(family["required_fields"]),
+            matched_source_fields,
+            source_ids,
+            "explicit required field values are missing, ambiguous, or divergent between REQ and REC",
+            coverage_mode=family["coverage_mode"],
+            checked_dimensions=checked_dimensions,
+            bound_instance=req_instance,
+            instance_binding_clean=True,
+            value_equality=value_equality,
+        )
+
     return _closure_entry(
         payload,
         family["closure_type"],
@@ -1393,6 +1632,7 @@ def _v8_family_closure(payload: dict, family: dict) -> dict | None:
         checked_dimensions=checked_dimensions,
         bound_instance=req_instance,
         instance_binding_clean=True,
+        value_equality=value_equality,
     )
 
 
@@ -1884,6 +2124,8 @@ ALLOWED_BLOCKER_RESIDUAL_TOKENS = {
 
 def _blocker_text_residual_tokens(value: object) -> list[str]:
     text = _normalized_phrase(value)
+    if text in V9_GENERIC_PHRASE_FAMILY:
+        return []
     for phrase in sorted(_dimension_phrase_map(), key=len, reverse=True):
         text = re.sub(rf"\b{re.escape(phrase)}\b", " ", text)
     tokens = re.findall(r"[a-z0-9]+", text)
@@ -1947,6 +2189,23 @@ def _blocker_has_unaccounted_content(blocker: dict) -> bool:
     return bool(_blocker_text_residual_tokens(blocker.get("blocker_text")))
 
 
+def _blocker_contains_concrete_token(value: object) -> bool:
+    raw = str(value or "")
+    text = _normalized_phrase(raw)
+    for term in CONCRETE_BLOCKER_TOKEN_TERMS:
+        if re.search(rf"\b{re.escape(term)}\b", text):
+            return True
+    concrete_patterns = (
+        r"\b(?:usd|eur|gbp|cad|aud)\s*[0-9][0-9,]*(?:\.[0-9]+)?\b",
+        r"\$[0-9][0-9,]*(?:\.[0-9]+)?\b",
+        r"\b[0-9]{4}[-/][0-9]{1,2}[-/][0-9]{1,2}\b",
+        r"\b[A-Z]{2,}[-_][A-Z0-9][A-Z0-9_-]*\b",
+        r"\b[A-Z]{2,}[0-9]{2,}[A-Z0-9]*\b",
+        r"\b[0-9]{4,}\b",
+    )
+    return any(re.search(pattern, raw) for pattern in concrete_patterns)
+
+
 def _is_generic_exact_support_blocker(blocker: dict) -> bool:
     text = _normalized_phrase(blocker.get("blocker_text"))
     blocker_type = _normalize_value(blocker.get("blocker_type")).upper()
@@ -1954,7 +2213,146 @@ def _is_generic_exact_support_blocker(blocker: dict) -> bool:
         return False
     if any(phrase in text for phrase in GENERIC_FALSE_BLOCKER_DISQUALIFIERS):
         return False
-    return any(phrase in text for phrase in GENERIC_FALSE_BLOCKER_CANDIDATE_PHRASES)
+    if _blocker_contains_concrete_token(blocker.get("blocker_text")):
+        return False
+    return text in V9_GENERIC_PHRASE_FAMILY
+
+
+def _v9_required_field_tuple_matches(closure: dict) -> bool:
+    closure_type = str(closure.get("closure_type") or "")
+    required_tuple = V9_REQUIRED_FIELDS_BY_CLOSURE_TYPE.get(closure_type)
+    if not required_tuple:
+        return False
+    return tuple(str(field) for field in (closure.get("required_fields") or [])) == required_tuple
+
+
+def _v9_dimensions_covered_by_table(blocker_dimensions: set[str], closure_dimensions: set[str]) -> bool:
+    if not blocker_dimensions:
+        return False
+    for blocker_dimension in blocker_dimensions:
+        allowed = V9_DIMENSION_EQUIVALENCE_TABLE.get(blocker_dimension)
+        if not allowed:
+            return False
+        if not (set(allowed) & closure_dimensions):
+            return False
+    return True
+
+
+def _v9_resolution_failure(
+    blocker: dict,
+    status: str,
+    reason: str,
+    closure: dict | None = None,
+) -> dict:
+    blocker_dimensions = _blocker_asserted_dimensions(blocker)
+    closure_dimensions = _closure_verified_dimensions(closure or {}) if closure else set()
+    return {
+        "blocker_id": blocker.get("blocker_id"),
+        "blocker_type": blocker.get("blocker_type"),
+        "blocker_text": blocker.get("blocker_text"),
+        "resolution_status": status,
+        "resolution_source": "deterministic_affirmative_closure",
+        "reason": reason,
+        "closure_id": (closure or {}).get("closure_id"),
+        "closure_type": (closure or {}).get("closure_type"),
+        "bound_instance": (closure or {}).get("bound_instance"),
+        "blocker_dimensions": sorted(blocker_dimensions),
+        "closure_checked_dimensions": sorted(closure_dimensions),
+        "value_equality_status": (closure or {}).get("value_equality_status"),
+        "value_equality_failures": (closure or {}).get("value_equality_failures") or [],
+        "source_ids": (closure or {}).get("source_ids") or [],
+    }
+
+
+def _v9_resolve_generic_blocker_from_affirmative_closure(blocker: dict, closure: dict) -> dict:
+    if closure.get("closure_status") != "SOURCE_CLOSED":
+        return _v9_resolution_failure(blocker, "PRESERVED_CLOSURE_NOT_SOURCE_CLOSED", "closure is not SOURCE_CLOSED", closure)
+    if closure.get("closure_type") not in V8_CLOSURE_TYPES:
+        return _v9_resolution_failure(blocker, "PRESERVED_UNSUPPORTED_CLOSURE_TYPE", "closure type is not in the V8/V9 generic closure library", closure)
+    if not closure.get("instance_binding_clean"):
+        return _v9_resolution_failure(blocker, "PRESERVED_INSTANCE_BINDING_DIRTY", "closure does not bind to the same visible request instance", closure)
+    if not _v9_required_field_tuple_matches(closure):
+        return _v9_resolution_failure(blocker, "PRESERVED_REQUIRED_FIELD_TUPLE_MISMATCH", "closure required-field tuple is not the frozen family tuple", closure)
+    if not _is_generic_exact_support_blocker(blocker):
+        if _blocker_contains_concrete_token(blocker.get("blocker_text")):
+            return _v9_resolution_failure(blocker, "PRESERVED_CONCRETE_TOKEN", "blocker contains a concrete entity/value/ID/scope token", closure)
+        return _v9_resolution_failure(blocker, "PRESERVED_NOT_FROZEN_GENERIC_PHRASE", "blocker text is not in the frozen generic phrase family", closure)
+    if _blocker_has_unaccounted_content(blocker):
+        return _v9_resolution_failure(blocker, "PRESERVED_RESIDUAL_BLOCKER_TEXT", "blocker has residual unaccounted content", closure)
+    if closure.get("value_equality_status") != "VALUE_EQUALITY_PROVEN":
+        return _v9_resolution_failure(
+            blocker,
+            "PRESERVED_VALUE_EQUALITY_NOT_PROVEN",
+            "deterministic closure does not prove exact value equality for every required field",
+            closure,
+        )
+    blocker_dimensions = _blocker_asserted_dimensions(blocker)
+    closure_dimensions = _closure_verified_dimensions(closure)
+    if not _v9_dimensions_covered_by_table(blocker_dimensions, closure_dimensions):
+        return _v9_resolution_failure(blocker, "PRESERVED_UNLISTED_DIMENSION_EQUIVALENCE", "blocker dimension is not covered by the frozen V9 dimension-equivalence table", closure)
+    return {
+        "blocker_id": blocker.get("blocker_id"),
+        "blocker_type": blocker.get("blocker_type"),
+        "blocker_text": blocker.get("blocker_text"),
+        "resolution_status": "RESOLVED_BY_DETERMINISTIC_AFFIRMATIVE_CLOSURE",
+        "resolution_source": "deterministic_affirmative_closure",
+        "reason": "frozen generic blocker phrase is closed by deterministic SOURCE_CLOSED affirmative closure for the same instance and dimensions",
+        "closure_id": closure.get("closure_id"),
+        "closure_type": closure.get("closure_type"),
+        "bound_instance": closure.get("bound_instance"),
+        "blocker_dimensions": sorted(blocker_dimensions),
+        "closure_checked_dimensions": sorted(closure_dimensions),
+        "value_equality_status": closure.get("value_equality_status"),
+        "required_field_values": closure.get("required_field_values") or {},
+        "required_fields": closure.get("required_fields") or [],
+        "matched_source_fields": closure.get("matched_source_fields") or {},
+        "source_ids": closure.get("source_ids") or [],
+    }
+
+
+def _v9_generic_blocker_resolution(payload: dict, blocker: dict) -> dict:
+    closures = _deterministic_affirmative_allow_support_checks(payload)
+    source_open_or_repair = [
+        closure
+        for closure in closures
+        if closure.get("closure_type") in V8_CLOSURE_TYPES
+        and closure.get("closure_status") in {"SOURCE_OPEN", "PACKET_REPAIR_REQUIRED"}
+    ]
+    if source_open_or_repair:
+        return _v9_resolution_failure(
+            blocker,
+            "PRESERVED_SOURCE_OPEN_OR_REPAIR_REQUIRED",
+            "deterministic affirmative closure library did not produce a clean SOURCE_CLOSED boundary",
+            source_open_or_repair[0],
+        )
+    closed_candidates = [
+        closure
+        for closure in closures
+        if closure.get("closure_type") in V8_CLOSURE_TYPES
+        and closure.get("closure_status") == "SOURCE_CLOSED"
+    ]
+    if not closed_candidates:
+        return _v9_resolution_failure(
+            blocker,
+            "PRESERVED_NO_SOURCE_CLOSED_CLOSURE",
+            "no deterministic SOURCE_CLOSED affirmative closure is available",
+        )
+    results = [
+        _v9_resolve_generic_blocker_from_affirmative_closure(blocker, closure)
+        for closure in closed_candidates
+    ]
+    resolved = next(
+        (
+            item
+            for item in results
+            if item.get("resolution_status") == "RESOLVED_BY_DETERMINISTIC_AFFIRMATIVE_CLOSURE"
+        ),
+        None,
+    )
+    if resolved:
+        return resolved
+    return results[0]
+
 
 
 def _blocker_matches_affirmative_closure(
@@ -1972,7 +2370,9 @@ def _blocker_matches_affirmative_closure(
             return False
         blocker_dimensions = _blocker_asserted_dimensions(blocker)
         closure_dimensions = _closure_verified_dimensions(closure)
-        return bool(blocker_dimensions) and blocker_dimensions.issubset(closure_dimensions)
+        if not _v9_required_field_tuple_matches(closure):
+            return False
+        return _v9_dimensions_covered_by_table(blocker_dimensions, closure_dimensions)
     if _blocker_has_unaccounted_content(blocker):
         return False
     blocker_dimensions = _blocker_asserted_dimensions(blocker)
@@ -2252,6 +2652,14 @@ def _build_worker_messages(payload: dict, turn_index: int, state: dict, baton: d
             json.dumps(baton.get("affirmative_closure_ledger", state.get("affirmative_closure_ledger", [])), sort_keys=True),
             "SUPPRESSED FALSE BLOCKER LEDGER:",
             json.dumps(baton.get("suppressed_false_blocker_ledger", state.get("suppressed_false_blocker_ledger", [])), sort_keys=True),
+            "DETERMINISTIC GENERIC BLOCKER RESOLUTION LEDGER:",
+            json.dumps(
+                baton.get(
+                    "deterministic_generic_blocker_resolution_ledger",
+                    state.get("deterministic_generic_blocker_resolution_ledger", []),
+                ),
+                sort_keys=True,
+            ),
             "PACKET REPAIR REQUIRED LEDGER:",
             json.dumps(baton.get("packet_repair_required_ledger", state.get("packet_repair_required_ledger", [])), sort_keys=True),
             "STATE BRIEF:",
@@ -2277,6 +2685,7 @@ def _selected_gov_baton_from_gate(gate: dict) -> dict:
     prior_unresolved = gate.get("unresolved_prior_blockers") or []
     blockers_found = gate.get("blockers_found") or []
     suppressed_false_blockers = gate.get("suppressed_false_blocker_ledger") or []
+    generic_resolutions = gate.get("deterministic_generic_blocker_resolution_ledger") or []
     packet_repair_required = gate.get("packet_repair_required_ledger") or []
     if closure_failures:
         ids = ",".join(str(item.get("blocker_id")) for item in closure_failures[:3])
@@ -2318,6 +2727,7 @@ def _selected_gov_baton_from_gate(gate: dict) -> dict:
         "closure_validation_failures": closure_failures,
         "affirmative_closure_ledger": gate.get("affirmative_closure_ledger", []),
         "suppressed_false_blocker_ledger": suppressed_false_blockers,
+        "deterministic_generic_blocker_resolution_ledger": generic_resolutions,
         "packet_repair_required_ledger": packet_repair_required,
     }
 
@@ -2362,6 +2772,10 @@ def _parse_gov_baton(raw: str, fallback_gate: dict) -> dict:
         "closure_validation_failures": selected.get("closure_validation_failures", []),
         "affirmative_closure_ledger": selected.get("affirmative_closure_ledger", []),
         "suppressed_false_blocker_ledger": selected.get("suppressed_false_blocker_ledger", []),
+        "deterministic_generic_blocker_resolution_ledger": selected.get(
+            "deterministic_generic_blocker_resolution_ledger",
+            [],
+        ),
         "packet_repair_required_ledger": selected.get("packet_repair_required_ledger", []),
     }
 
@@ -2392,7 +2806,13 @@ def _gate_worker_output(payload: dict, parsed: dict, active_blockers: list[dict]
         failures.append("escalate_without_open_blockers")
     if parsed.get("verification_verdict") == "ESCALATE" and open_blockers and not parsed.get("blocker_type"):
         failures.append("missing_blocker_type_for_open_blocker")
-    resolved_prior, unresolved_prior, blocker_failures, closure_results = _resolve_prior_blockers(
+    (
+        resolved_prior,
+        unresolved_prior,
+        blocker_failures,
+        closure_results,
+        generic_resolution_results,
+    ) = _resolve_prior_blockers(
         payload,
         active_blockers,
         parsed,
@@ -2427,7 +2847,7 @@ def _gate_worker_output(payload: dict, parsed: dict, active_blockers: list[dict]
     for check in packet_repair_required:
         failures.append(f"packet_repair_required:{check['closure_id']}")
     return {
-        "gate_name": "HOLOVERIFY_BLIND_STRUCTURAL_GATE_V2_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION",
+        "gate_name": "HOLOVERIFY_BLIND_STRUCTURAL_GATE_V2_V9_GENERIC_BLOCKER_RESOLUTION",
         "passed": not failures,
         "failures": failures,
         "warnings": warnings,
@@ -2447,6 +2867,7 @@ def _gate_worker_output(payload: dict, parsed: dict, active_blockers: list[dict]
         "unresolved_prior_blockers": unresolved_prior,
         "closure_validation_results": closure_results,
         "closure_validation_failures": closure_failures,
+        "deterministic_generic_blocker_resolution_ledger": generic_resolution_results,
         "invalid_closure_count": len(closure_failures),
         "blockers_found": [],
     }
@@ -2754,6 +3175,7 @@ def run_blind_fixture(
         "unresolved_blockers": [],
         "affirmative_closure_ledger": [],
         "suppressed_false_blocker_ledger": [],
+        "deterministic_generic_blocker_resolution_ledger": [],
         "packet_repair_required_ledger": [],
         "blocked_moves": [],
     }
@@ -2862,6 +3284,10 @@ def run_blind_fixture(
                     seen_closures.add(closure_id)
         if gate.get("suppressed_false_blocker_ledger"):
             state["suppressed_false_blocker_ledger"].extend(gate.get("suppressed_false_blocker_ledger") or [])
+        if gate.get("deterministic_generic_blocker_resolution_ledger"):
+            state["deterministic_generic_blocker_resolution_ledger"].extend(
+                gate.get("deterministic_generic_blocker_resolution_ledger") or []
+            )
         if gate.get("packet_repair_required_ledger"):
             seen_repairs = {
                 str(item.get("closure_id"))
@@ -2882,6 +3308,7 @@ def run_blind_fixture(
                 "blockers_found": gate.get("blockers_found") or [],
                 "worker_blockers_before_suppression": gate.get("worker_blockers_before_suppression") or [],
                 "suppressed_false_blocker_ledger": gate.get("suppressed_false_blocker_ledger") or [],
+                "deterministic_generic_blocker_resolution_ledger": gate.get("deterministic_generic_blocker_resolution_ledger") or [],
                 "affirmative_closure_ledger": gate.get("affirmative_closure_ledger") or [],
                 "packet_repair_required_ledger": gate.get("packet_repair_required_ledger") or [],
                 "resolved_prior_blockers": gate.get("resolved_prior_blockers") or [],
@@ -2921,6 +3348,10 @@ def run_blind_fixture(
                     "closure_validation_failures": selected.get("closure_validation_failures", []),
                     "affirmative_closure_ledger": selected.get("affirmative_closure_ledger", []),
                     "suppressed_false_blocker_ledger": selected.get("suppressed_false_blocker_ledger", []),
+                    "deterministic_generic_blocker_resolution_ledger": selected.get(
+                        "deterministic_generic_blocker_resolution_ledger",
+                        [],
+                    ),
                     "packet_repair_required_ledger": selected.get("packet_repair_required_ledger", []),
                     "previous_gate_passed": gate["passed"],
                 }

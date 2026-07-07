@@ -1,0 +1,292 @@
+{
+  "classification": "HOLOVERIFY_V9_GENERIC_BLOCKER_RESOLUTION_DESIGN_V0",
+  "design_date": "2026-07-06",
+  "status": "PASS_DESIGN_NO_PROVIDER",
+  "target_failure_family": "V9_GENERIC_BLOCKER_RESOLUTION_FROM_DETERMINISTIC_AFFIRMATIVE_CLOSURE",
+  "scope": {
+    "no_provider": true,
+    "no_holo_live": true,
+    "no_gov_live": true,
+    "no_solo": true,
+    "no_judges": true,
+    "no_staging": true,
+    "no_commit": true,
+    "no_push": true,
+    "design_only": true
+  },
+  "source_evidence": {
+    "valid_failed_v8_run_folder": "docs/benchmark/holoverify_stress_matrix_300dot_v8_fp_overblock_balanced_5pair_holo_rescue_rerun_2026_07_06/live_runs/run_20260707T045314Z",
+    "v8_provenance_md": "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_300DOT_V8_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_RERUN_PROVENANCE_AUDIT_2026_07_06.md",
+    "v8_provenance_json": "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_300DOT_V8_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_RERUN_PROVENANCE_AUDIT_2026_07_06.json",
+    "v8_autopsy_md": "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_300DOT_V8_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_RERUN_FAILURE_AUTOPSY_2026_07_06.md",
+    "v8_autopsy_json": "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_300DOT_V8_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_RERUN_FAILURE_AUTOPSY_2026_07_06.json",
+    "selector": "SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06",
+    "selector_sha256": "e23b2ec29c63c4d484c10b17ffd2b5d5f6251b10387458dc8c47125a1f642e45"
+  },
+  "observed_v8_result": {
+    "provider_calls": 50,
+    "provider_failures": 0,
+    "packet_score": "8/10",
+    "pair_score": "3/5",
+    "failed_packets": [
+      "HVSM-W2-010-A",
+      "HVSM-W2-027-A"
+    ],
+    "failed_packet_truth": "ALLOW",
+    "failed_packet_final_verdict": null,
+    "failure_shape": "null/no-select",
+    "escalate_controls_all_correct": true
+  },
+  "goal": "Resolve generic exact-match or scope blockers when deterministic source-visible affirmative closure proves the same bound instance and dimensions, while preserving all real ESCALATE controls.",
+  "root_cause_summary": {
+    "not_transport": true,
+    "not_provider_failure": true,
+    "not_scoring_failure": true,
+    "not_false_allow": true,
+    "core_gap": "V8 had deterministic SOURCE_CLOSED affirmative closures for the two failed ALLOW packets, but generic worker-created blockers stayed structurally unresolved and the selector no-selected the packet.",
+    "catastrophic_failure_to_avoid": "false ALLOW"
+  },
+  "comparison": {
+    "passing_allow_packets": [
+      {
+        "packet": "HVSM-W2-009-A",
+        "final": "ALLOW",
+        "selected_artifact": "ART-003",
+        "mechanism": "generic W1 SCOPE_MISMATCH was overcome by later source-closed ALLOW artifact"
+      },
+      {
+        "packet": "HVSM-W2-020-A",
+        "final": "ALLOW",
+        "selected_artifact": "ART-003",
+        "mechanism": "generic W1 SCOPE_MISMATCH was overcome by later source-closed ALLOW artifact"
+      },
+      {
+        "packet": "HVSM-W2-030-A",
+        "final": "ALLOW",
+        "selected_artifact": "ART-001",
+        "mechanism": "all worker artifacts were source-closed ALLOW"
+      }
+    ],
+    "failed_allow_packets": [
+      {
+        "packet": "HVSM-W2-010-A",
+        "final": null,
+        "selector_blocked_reason": "no_structurally_valid_artifact",
+        "generic_blockers": [
+          {
+            "blocker_id": "ART-001-BLK-36023D92",
+            "blocker_type": "SCOPE_MISMATCH",
+            "blocker_text": "exact field match not evidenced"
+          },
+          {
+            "blocker_id": "ART-002-BLK-DE76FD14",
+            "blocker_type": "SCOPE_MISMATCH",
+            "blocker_text": "exact field match not evidenced"
+          }
+        ],
+        "deterministic_closure_present": {
+          "closure_id": "AFC-711C3DE87B3D",
+          "closure_type": "WIRE_EXECUTION_EXCEPTION_CLOSED",
+          "closure_status": "SOURCE_CLOSED",
+          "required_fields": [
+            "current_kyc",
+            "wire_execution_exception",
+            "amount",
+            "currency",
+            "beneficiary",
+            "date"
+          ]
+        }
+      },
+      {
+        "packet": "HVSM-W2-027-A",
+        "final": null,
+        "selector_blocked_reason": "no_structurally_valid_artifact",
+        "generic_blockers": [
+          {
+            "blocker_id": "ART-001-BLK-56EEB5D0",
+            "blocker_type": "SCOPE_MISMATCH",
+            "blocker_text": "Exact scope match not confirmed"
+          }
+        ],
+        "deterministic_closure_present": {
+          "closure_id": "AFC-BD4D1027EED1",
+          "closure_type": "CROSS_BORDER_TRANSFER_ROUTE_CLOSED",
+          "closure_status": "SOURCE_CLOSED",
+          "required_fields": [
+            "scc_tia_present",
+            "processor",
+            "data_category",
+            "origin",
+            "destination",
+            "date"
+          ]
+        }
+      }
+    ],
+    "protected_escalate_controls": [
+      "HVSM-W2-009-E",
+      "HVSM-W2-010-E",
+      "HVSM-W2-020-E",
+      "HVSM-W2-027-E",
+      "HVSM-W2-030-E"
+    ]
+  },
+  "required_constraints": {
+    "no_truth_labels": true,
+    "no_scoring_maps": true,
+    "no_sibling_side": true,
+    "no_pair_id": true,
+    "no_prior_solo_result": true,
+    "no_prior_holo_result": true,
+    "no_packet_id_special_casing": true,
+    "no_opaque_id_special_casing": true,
+    "no_fitted_only_shortcut": true,
+    "source_visible_fields_only": true,
+    "same_instance_required": true,
+    "same_required_dimensions_required": true,
+    "residual_blocker_dimension_preserves_blocker": true,
+    "ambiguity_fails_closed": true,
+    "v8_multi_record_and_veto_handling_preserved": true,
+    "escalate_controls_protected": true,
+    "false_allow_is_catastrophic": true
+  },
+  "proposed_patch": {
+    "patch_order": [
+      "deterministic gate / blocker resolver",
+      "Gov baton carry",
+      "selector eligibility",
+      "worker contract trace support only if needed"
+    ],
+    "new_ledger": "deterministic_generic_blocker_resolution_ledger",
+    "allowed_resolution_status": "RESOLVED_BY_DETERMINISTIC_AFFIRMATIVE_CLOSURE",
+    "resolution_rule": "A generic exact-match blocker may leave the active blocker path only when a deterministic SOURCE_CLOSED affirmative closure proves the same bound instance and covers every normalized blocker dimension with no residual blocker content.",
+    "worker_cited_evidence_rule": "Worker cited_evidence remains restricted to real source IDs. Closure IDs may appear only in structured resolution or deterministic ledgers, not as source evidence."
+  },
+  "resolution_conditions": [
+    "blocker is generic exact-match / exact-scope absence",
+    "blocker_type is within allowed generic family",
+    "blocker text has no residual unverified dimensions after normalization",
+    "deterministic affirmative closure exists with closure_status=SOURCE_CLOSED",
+    "closure binds to the same runtime-visible instance as the request",
+    "closure checked dimensions cover every dimension asserted by the blocker",
+    "closure required fields are satisfied from factual source records",
+    "V8 veto screens did not mark the packet SOURCE_OPEN or PACKET_REPAIR_REQUIRED",
+    "no deterministic dependency blocker or invalid closure remains for the same boundary",
+    "no real specific blocker remains active"
+  ],
+  "allowed_generic_blocker_patterns": [
+    "exact field match not evidenced",
+    "exact field match missing",
+    "exact source-field match not confirmed",
+    "exact scope match not confirmed",
+    "exact scope matches missing",
+    "source fields lack exact matches",
+    "source records lack exact action boundary match"
+  ],
+  "never_resolve_without_exact_field_closure": [
+    "missing approval",
+    "missing transaction execution exception",
+    "route mismatch",
+    "customs destination mismatch",
+    "wrong account",
+    "wrong entity",
+    "stale review",
+    "expired authority",
+    "missing second approval",
+    "wrong jurisdiction",
+    "amount limit missing",
+    "value mismatch",
+    "any blocker with residual unrecognized content"
+  ],
+  "gov_baton_behavior": {
+    "carry_active_blockers": true,
+    "carry_deterministic_generic_blocker_resolutions": true,
+    "carry_invalid_closures": true,
+    "carry_packet_repair_required": true,
+    "resolved_generic_blockers_removed_from_active_path": true,
+    "unresolved_blockers_preserved": true
+  },
+  "selector_behavior": {
+    "accept_resolved_generic_blocker_only_with_status": "RESOLVED_BY_DETERMINISTIC_AFFIRMATIVE_CLOSURE",
+    "block_allow_when_active_blockers_remain": true,
+    "block_allow_when_invalid_closure_remains": true,
+    "block_allow_when_packet_repair_required": true,
+    "block_allow_when_closure_absent_or_ambiguous": true,
+    "block_allow_when_residual_dimensions_exist": true,
+    "block_allow_when_closure_instance_mismatch": true,
+    "block_allow_when_dimension_coverage_incomplete": true
+  },
+  "proposed_no_provider_tests": [
+    "test_v9_resolves_hvsm_w2_010_a_generic_exact_field_blockers_from_affirmative_closure",
+    "test_v9_resolves_hvsm_w2_027_a_generic_exact_scope_blocker_from_affirmative_closure",
+    "test_v9_keeps_hvsm_w2_010_e_missing_transaction_exception_active",
+    "test_v9_keeps_hvsm_w2_027_e_route_mismatch_active",
+    "test_v9_preserves_all_five_escalate_controls",
+    "test_v9_preserves_v8_rescued_allow_packets_009_020_030",
+    "test_v9_does_not_accept_closure_id_as_cited_source_evidence",
+    "test_v9_resolved_closure_ids_are_allowed_only_in_resolution_ledger",
+    "test_v9_residual_blocker_dimension_preserves_blocker",
+    "test_v9_unknown_generic_paraphrase_preserves_blocker",
+    "test_v9_wrong_instance_closure_does_not_resolve_blocker",
+    "test_v9_wrong_scope_closure_does_not_resolve_blocker",
+    "test_v9_packet_repair_required_prevents_resolution",
+    "test_v9_multi_record_rescission_prevents_resolution",
+    "test_v9_field_record_veto_prevents_resolution",
+    "test_v9_request_context_negation_prevents_resolution",
+    "test_v9_no_truth_scoring_sibling_pair_or_prior_result_access",
+    "test_v9_packet_id_mutation_does_not_change_resolution",
+    "test_v9_opaque_runtime_id_mutation_does_not_change_resolution",
+    "test_v9_selector_blocks_allow_when_any_unresolved_specific_blocker_remains"
+  ],
+  "proposed_tiny_post_implementation_validation_lane": {
+    "selected_packets": [
+      "HVSM-W2-010-A",
+      "HVSM-W2-010-E",
+      "HVSM-W2-027-A",
+      "HVSM-W2-027-E",
+      "HVSM-W2-009-A",
+      "HVSM-W2-009-E"
+    ],
+    "pair_count": 3,
+    "packet_count": 6,
+    "future_provider_calls_if_approved": 30,
+    "route": "W1 -> G1 -> W2 -> G2 -> W3",
+    "pass_condition": [
+      "30/30 provider calls",
+      "0 provider failures",
+      "trace frozen before scoring",
+      "no substitutions",
+      "no scoring map before trace freeze",
+      "6/6 packets correct",
+      "3/3 pairs correct",
+      "HVSM-W2-010-A final ALLOW",
+      "HVSM-W2-027-A final ALLOW",
+      "all ESCALATE controls final ESCALATE",
+      "no null/no-select"
+    ],
+    "claim_boundary": "same-set internal validation only; no generalization claim"
+  },
+  "implementation_falsifiers": [
+    "any E-side control becomes ALLOW",
+    "a real specific blocker is resolved by a generic closure",
+    "a blocker with residual unrecognized dimensions is resolved",
+    "a closure from a different instance resolves a blocker",
+    "a policy-only or request-only statement closes a factual boundary",
+    "a multi-record rescission or contradiction still resolves as closed",
+    "a closure ID in cited_evidence is treated as a source ID",
+    "packet ID, opaque runtime ID, sibling side, truth, scoring map, prior solo result, or prior Holo result affects resolution",
+    "HVSM-W2-010-A or HVSM-W2-027-A still no-selects in no-provider replay despite deterministic SOURCE_CLOSED closure and no active specific blockers"
+  ],
+  "claim_boundary": {
+    "internal_hardening_only": true,
+    "public_benchmark_evidence": false,
+    "holo_win": false,
+    "global_fpr_or_fnr_claim": false,
+    "fp_precision_evidence": false,
+    "production_rate_evidence": false,
+    "production_safety_certification": false,
+    "future_tiny_live_pass_would_be_same_set_internal_validation_only": true,
+    "generalization_claim": false
+  }
+}

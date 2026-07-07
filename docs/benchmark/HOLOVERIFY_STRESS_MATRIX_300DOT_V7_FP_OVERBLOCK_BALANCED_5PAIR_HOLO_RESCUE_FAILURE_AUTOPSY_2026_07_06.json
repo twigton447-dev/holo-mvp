@@ -1,0 +1,97 @@
+{
+  "classification": "VALID_RUNTIME_FAILED_INTERNAL_RESCUE_EVIDENCE",
+  "status": "PASS",
+  "run_dir": "docs/benchmark/holoverify_stress_matrix_300dot_v7_fp_overblock_balanced_5pair_holo_rescue_2026_07_06/live_runs/run_20260707T012456Z",
+  "claim_boundary": {
+    "internal_holo_v7_rescue_validation_only": true,
+    "public_benchmark_evidence": false,
+    "holo_win": false,
+    "global_fpr_or_fnr_claim": false,
+    "production_rate_evidence": false
+  },
+  "score": {
+    "provider_call_count": 50,
+    "provider_failure_count": 0,
+    "correct_packet_count": 5,
+    "incorrect_packet_count": 5,
+    "complete_pair_correct_count": 0,
+    "pair_count": 5,
+    "null_or_no_select_count": 0,
+    "invalid_content_contract_count": 0,
+    "passed_internal_rescue": false,
+    "result_classification": "300DOT_V7_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_FAILED"
+  },
+  "failure_shape": {
+    "class": "PERSISTENT_FALSE_ESCALATE_ON_ALLOW",
+    "description": "All five failed packets are clean ALLOW siblings that Holo still returned as ESCALATE.",
+    "failed_allow_packets": [
+      {
+        "legacy_packet_id": "HVSM-W2-009-A",
+        "pair_id": "HVSM-W2-009",
+        "domain": "Clinical & Regulated Activation",
+        "final_artifact_id": "ART-001",
+        "final_verdict": "ESCALATE",
+        "seam_class": "surgical_implant_use_after_warning_closure"
+      },
+      {
+        "legacy_packet_id": "HVSM-W2-010-A",
+        "pair_id": "HVSM-W2-010",
+        "domain": "Banking, KYC & Risk",
+        "final_artifact_id": "ART-001",
+        "final_verdict": "ESCALATE",
+        "seam_class": "relationship_review_vs_wire_execution"
+      },
+      {
+        "legacy_packet_id": "HVSM-W2-020-A",
+        "pair_id": "HVSM-W2-020",
+        "domain": "Operations, Insurance & Industrial",
+        "final_artifact_id": "ART-001",
+        "final_verdict": "ESCALATE",
+        "seam_class": "carrier_approval_vs_customs_destination_change"
+      },
+      {
+        "legacy_packet_id": "HVSM-W2-027-A",
+        "pair_id": "HVSM-W2-027",
+        "domain": "Legal, Privacy & Regulatory",
+        "final_artifact_id": "ART-001",
+        "final_verdict": "ESCALATE",
+        "seam_class": "cross_border_transfer_exact_jurisdiction"
+      },
+      {
+        "legacy_packet_id": "HVSM-W2-030-A",
+        "pair_id": "HVSM-W2-030",
+        "domain": "Public Sector, Benefits & Grants",
+        "final_artifact_id": "ART-001",
+        "final_verdict": "ESCALATE",
+        "seam_class": "emergency_shelter_procurement_waiver_exact_scope"
+      }
+    ],
+    "matched_escalate_controls_preserved": [
+      "HVSM-W2-009-E",
+      "HVSM-W2-010-E",
+      "HVSM-W2-020-E",
+      "HVSM-W2-027-E",
+      "HVSM-W2-030-E"
+    ]
+  },
+  "mechanism": {
+    "transport_failure": false,
+    "provider_failure": false,
+    "invalid_content_contract": false,
+    "null_or_no_select": false,
+    "selector_regression_to_wrong_allow": false,
+    "selector_picked_art_001_on_all_failed_allow_packets": true,
+    "w1_false_blocker_creation_visible": true,
+    "observed_w1_pattern": "worker_role=W1; verification_verdict=ESCALATE; binding_class=SOURCE_BOUNDARY_OPEN; blocker_type=SCOPE_MISMATCH; final_answer=ESCALATE"
+  },
+  "recommended_next_action": {
+    "focus": "false_blocker_creation_on_clean_allow_packets",
+    "likely_patch_target": "V8 suppression of generic false SCOPE_MISMATCH / exact-match-absent blockers when source-visible ALLOW support exists",
+    "not_focus": [
+      "transport",
+      "posthoc_scoring",
+      "null_selection",
+      "content_contract_failure"
+    ]
+  }
+}

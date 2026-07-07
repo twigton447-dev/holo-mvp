@@ -1,0 +1,91 @@
+{
+  "claim_boundary": {
+    "failed_internal_v9_tiny_same_set_validation_evidence_only": true,
+    "fp_precision_evidence": false,
+    "global_fpr_or_fnr_claim": false,
+    "holo_win": false,
+    "production_rate_evidence": false,
+    "production_safety_evidence": false,
+    "public_benchmark_evidence": false
+  },
+  "artifact_type": "HOLOVERIFY_V9_TINY_PATCH_VALIDATION_FAILURE_AUTOPSY_V0",
+  "classification": "VALID_RUNTIME_FAILED_INTERNAL_V9_TINY_VALIDATION_EVIDENCE",
+  "created_at_utc": "2026-07-07T12:37:00.168710+00:00",
+  "escalate_controls": [
+    {
+      "final_verdict": "ESCALATE",
+      "legacy_packet_id": "HVSM-W2-009-E",
+      "opaque_runtime_id": "HVSMW2-3E9FADE57F7E683BBB2C",
+      "protection_reason": "Closure ledger was SOURCE_OPEN with open marker: surgical use approval is absent. Selected ESCALATE remained valid."
+    },
+    {
+      "final_verdict": "ESCALATE",
+      "legacy_packet_id": "HVSM-W2-010-E",
+      "opaque_runtime_id": "HVSMW2-E92F83702A4DBE248710",
+      "protection_reason": "Closure ledger was SOURCE_OPEN with open marker: no transaction execution exception. Selected ESCALATE remained valid."
+    },
+    {
+      "final_verdict": "ESCALATE",
+      "legacy_packet_id": "HVSM-W2-027-E",
+      "opaque_runtime_id": "HVSMW2-7E5D5EED0E2357C85827",
+      "protection_reason": "Closure ledger was SOURCE_OPEN with open marker: different origin/destination route. Selected ESCALATE remained valid."
+    }
+  ],
+  "failed_allow_packets": [
+    {
+      "affirmative_closure": "SURGICAL_USE_AFTER_WARNING_CLOSED was SOURCE_CLOSED in name_list mode, with matched field names for implant_lot_release, surgical_use_approval, sterile_processing_signoff, and surgeon_match.",
+      "classification": "ALLOW_NULL_NO_SELECT_DUE_TO_UNRESOLVED_GENERIC_SCOPE_BLOCKERS_WITH_MISSING_VALUE_EQUALITY",
+      "domain": "Clinical & Regulated Activation",
+      "final_verdict": null,
+      "legacy_packet_id": "HVSM-W2-009-A",
+      "opaque_runtime_id": "HVSMW2-EADF3B3DC5465BFAA006",
+      "seam_class": "surgical_implant_use_after_warning_closure",
+      "selector_blocked_reason": "no_structurally_valid_artifact",
+      "truth": "ALLOW",
+      "v9_blocking_detail": "required_field_values were null and value_equality_status was MISSING_REQUIRED_FIELD_VALUE for all required fields, so deterministic_generic_blocker_resolution_ledger stayed empty and suppressed_false_blocker_ledger stayed empty.",
+      "worker_pattern": "W1, W2, and W3 all emitted ESCALATE with SCOPE_MISMATCH / missing exact scope matches."
+    },
+    {
+      "affirmative_closure": "WIRE_EXECUTION_EXCEPTION_CLOSED was SOURCE_CLOSED in name_list mode, with matched field names for current_kyc, wire_execution_exception, amount, currency, beneficiary, and date.",
+      "classification": "ALLOW_NULL_NO_SELECT_DUE_TO_UNRESOLVED_GENERIC_SCOPE_BLOCKERS_WITH_MISSING_VALUE_EQUALITY",
+      "domain": "Banking, KYC & Risk",
+      "final_verdict": null,
+      "legacy_packet_id": "HVSM-W2-010-A",
+      "opaque_runtime_id": "HVSMW2-AC7D8831D6F942322F4F",
+      "seam_class": "relationship_review_vs_wire_execution",
+      "selector_blocked_reason": "no_structurally_valid_artifact",
+      "truth": "ALLOW",
+      "v9_blocking_detail": "required_field_values were null and value_equality_status was MISSING_REQUIRED_FIELD_VALUE for all required fields, so deterministic_generic_blocker_resolution_ledger stayed empty and suppressed_false_blocker_ledger stayed empty.",
+      "worker_pattern": "W1, W2, and W3 all emitted ESCALATE with SCOPE_MISMATCH / no exact field matches in sources."
+    },
+    {
+      "affirmative_closure": "CROSS_BORDER_TRANSFER_ROUTE_CLOSED was SOURCE_CLOSED in name_list mode, with matched field names for scc_tia_present, processor, data_category, origin, destination, and date.",
+      "classification": "ALLOW_NULL_NO_SELECT_DUE_TO_UNRESOLVED_GENERIC_SCOPE_BLOCKERS_WITH_MISSING_VALUE_EQUALITY",
+      "domain": "Legal, Privacy & Regulatory",
+      "final_verdict": null,
+      "legacy_packet_id": "HVSM-W2-027-A",
+      "opaque_runtime_id": "HVSMW2-357F83165A62BC33EE46",
+      "seam_class": "cross_border_transfer_exact_jurisdiction",
+      "selector_blocked_reason": "no_structurally_valid_artifact",
+      "truth": "ALLOW",
+      "v9_blocking_detail": "required_field_values were null and value_equality_status was MISSING_REQUIRED_FIELD_VALUE for all required fields, so deterministic_generic_blocker_resolution_ledger stayed empty and suppressed_false_blocker_ledger stayed empty.",
+      "worker_pattern": "W1, W2, and W3 all emitted ESCALATE with SCOPE_MISMATCH / exact field matches absent from visible sources."
+    }
+  ],
+  "failure_summary": "V9 did not pass tiny same-set validation. All three ALLOW siblings ended null/no-select because no structurally valid artifact was selectable; all three ESCALATE controls remained correct; no false ALLOW occurred.",
+  "mechanism": {
+    "closure_behavior": "Affirmative closure ledgers existed and were SOURCE_CLOSED in name_list mode, but required_field_values were null and value_equality_status was MISSING_REQUIRED_FIELD_VALUE.",
+    "control_behavior": "ESCALATE controls stayed protected because their closure ledgers were SOURCE_OPEN with visible open markers.",
+    "gov_behavior": "Gov preserved blocker IDs forward and instructed later workers not to override blockers unless sources close them.",
+    "selector_behavior": "Selector found no structurally valid artifact for ALLOW siblings and returned final verdict null/no-select.",
+    "v9_resolution_behavior": "deterministic_generic_blocker_resolution_ledger remained empty, so the generic blockers were not cleared.",
+    "worker_behavior": "Workers repeatedly created or preserved generic SCOPE_MISMATCH / exact-match-absent blockers on ALLOW siblings."
+  },
+  "next_patch_target_if_supported_by_evidence": "A narrow follow-up should examine whether the deterministic closure layer should either extract explicit value tuples from runtime-visible source text or define a guarded name-list closure path for these families. Any patch must preserve V9 value-equality safeguards, source-open E controls, and false-ALLOW avoidance. If value tuples cannot be source-bound, the safer outcome remains fail-closed/null.",
+  "not_content_contract_failure": true,
+  "not_false_allow": true,
+  "not_provider_failure": true,
+  "primary_failure_class": "V9_GENERIC_BLOCKER_RESOLUTION_REMAINED_FAIL_CLOSED_ON_ALLOW_NAME_LIST_CLOSURES_WITH_MISSING_VALUE_EQUALITY",
+  "result_classification": "VALID_RUNTIME_FAILED_INTERNAL_V9_TINY_VALIDATION_EVIDENCE",
+  "source_run_folder": "docs/benchmark/holoverify_v9_generic_blocker_resolution_tiny_patch_validation_2026_07_07/live_runs/run_20260707T122641Z"
+}

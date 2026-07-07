@@ -1,0 +1,130 @@
+{
+  "claim_boundary": {
+    "failed_internal_v9_tiny_same_set_validation_evidence_only": true,
+    "fp_precision_evidence": false,
+    "global_fpr_or_fnr_claim": false,
+    "holo_win": false,
+    "production_rate_evidence": false,
+    "production_safety_evidence": false,
+    "public_benchmark_evidence": false
+  },
+  "classification": "VALID_RUNTIME_FAILED_INTERNAL_V9_TINY_VALIDATION_EVIDENCE",
+  "controls": {
+    "contract_failure_marker_present": false,
+    "invalid_content_contract_count": 0,
+    "no_judges": true,
+    "no_solo": true,
+    "observed_call_count_ok": true,
+    "observed_provider_calls": 30,
+    "passed_runtime_firewall": false,
+    "posthoc_score_exists": true,
+    "posthoc_score_trace_bound": true,
+    "prompt_file_count": 30,
+    "provider_calls": "30/30",
+    "provider_failures": 0,
+    "provider_rows_count_ok": true,
+    "raw_provider_output_count": 30,
+    "runtime_firewall_failure_reason": "final_verdicts_valid false because three ALLOW packets ended null/no-select",
+    "scoring_map_loaded_post_freeze_only": true,
+    "trace_call_rows": 30,
+    "trace_frozen_before_scoring": true,
+    "trace_provider_call_rows": 30
+  },
+  "created_at_utc": "2026-07-07T12:37:00.168649+00:00",
+  "lane_label": "HOLOVERIFY_V9_GENERIC_BLOCKER_RESOLUTION_TINY_PATCH_VALIDATION_V0",
+  "run_folder": "docs/benchmark/holoverify_v9_generic_blocker_resolution_tiny_patch_validation_2026_07_07/live_runs/run_20260707T122641Z",
+  "runtime_manifest_sha256": "c9087ce57bd39aab8e3e202192c1aea6df31ee2a6b3d7842f1a7832a6c829da5",
+  "score": {
+    "all_escalate_controls_correct": true,
+    "all_failed_packets_are_allow_siblings": true,
+    "all_failed_packets_null_no_select": true,
+    "complete_pair_correct_count": 0,
+    "correct_packet_count": 3,
+    "failed_packets": [
+      "HVSM-W2-009-A",
+      "HVSM-W2-010-A",
+      "HVSM-W2-027-A"
+    ],
+    "false_allow_count": 0,
+    "packet_count": 6,
+    "packet_score": "3/6",
+    "pair_count": 3,
+    "pair_score": "0/3",
+    "passed_patch_validation": false,
+    "result_classification": "V9_GENERIC_BLOCKER_RESOLUTION_TINY_PATCH_VALIDATION_FAILED"
+  },
+  "score_trace_binding": {
+    "live_summary_sha256": "30011ddfd98808448534a57be813d3aa34650440c6d7eedc4dd60a109caf1efa",
+    "runtime_results_sha256": "00b289a5bf389249aa9e485f34d325dfdfaa837f28169650ab832e6c8de5aecf",
+    "scoring_map_sha256": "a3f97a0764add4b6dd20ae222e92b8040f8406c748fba8a9c655dab7124fa331",
+    "trace_calls_sha256": "6c2db3edfa3245f3ff9f02468f19c69db82d51964b3f1c93bf07913843f504c7",
+    "trace_provider_calls_sha256": "893ec17c72c76db48e27906335d792b8eca5736ea2db1360b96bc60ef929bd7a"
+  },
+  "selector": {
+    "selector_criteria": [
+      "gate_passed",
+      "parse_valid",
+      "source_ids_valid",
+      "required_sections_present",
+      "contradiction_free",
+      "deterministic_clean",
+      "blocker_resolution_clean",
+      "blocker_resolution_complete",
+      "closure_validation_clean",
+      "all_prior_blockers_source_closed",
+      "packet_unresolved_blocker_symmetry_clean",
+      "affirmative_closure_count",
+      "suppressed_false_blocker_count",
+      "packet_repair_required_count",
+      "false_blocker_only_escalate",
+      "invalid_closure_count",
+      "unresolved_blocker_count",
+      "source_boundary_open_with_blocker",
+      "verdict_consensus_count",
+      "final_turn_consensus_repair",
+      "verdict_corroboration_count",
+      "sections_present",
+      "cited_evidence_count",
+      "earliest_turn"
+    ],
+    "selector_policy_decision": "Truth-blind structural selector. Among structurally valid artifacts, explicit blocker resolution is only eligible when local closure validation proves the cited source fields close the exact blocker_type. A later ALLOW cannot silently drop a prior SOURCE_BOUNDARY_OPEN blocker, and it also cannot win by textually naming a blocker_id unless deterministic code confirms the closure. Unknown blocker types or blocker dimensions without a deterministic closure validator remain unresolved. A source-grounded ESCALATE blocker can defeat an ALLOW majority unless a later artifact source-closes it. Deterministic source-derived dependency, authority-scope, blocker-closure, and affirmative ALLOW-support checks can emit blockers and disqualify artifacts that contradict computed source boundaries before worker prose, Gov baton text, or selector consensus can miss them. A worker-created ESCALATE blocker that is contradicted by runtime-visible affirmative closure is moved to a suppressed false-blocker ledger and cannot by itself make an ESCALATE artifact selectable. An ALLOW artifact from any turn is not selectable while any active, non-suppressed blocker raised anywhere in the packet remains unresolved. Concise final answers are warnings, not sole disqualifiers, when the artifact is otherwise complete. Within the same blocker/consensus tier, gate-failed corroboration from otherwise usable artifacts is considered before citation count and earliest-turn tie-breaks. Generic exact-match absence blockers can be suppressed only when deterministic REQ/REC grammar checks source-close every required dimension for the same bound instance. Name-list closure requires explicit dimension coverage and instance binding. Value-bearing closure requires value agreement. For fitted V8 generic-support families, affirmative support comes from a single bound source_record, while veto screens scan any request_context, source_record, or field_record for negating, hedged, conditional, normative, blanket, or contradictory factual signals. Conditional, normative, hedged, blanket, underspecified, or mismatched factual records fail closed. Generic exact-match blockers may be resolved from deterministic affirmative closure only when the blocker phrase is in the frozen V9 generic family, contains no concrete token, and every asserted dimension is covered by the frozen V9 dimension-equivalence table for the same bound instance.",
+    "selector_policy_sha256": "cb53549bcc01d882836fc47e68e1ec5610b302cdbd8ddfd1967f7fac5a235416",
+    "selector_policy_version": "SELECTOR_V9_GENERIC_BLOCKER_RESOLUTION_2026_07_06",
+    "v9_guard_artifacts": {
+      "dimension_equivalence_table_sha256": "3cbd70cf843b4c050a3fe4c51d7910b2c25c0f41a18c053ab6d6260d4879a450",
+      "generic_phrase_family_sha256": "de6cc3a4082fc0f5a5b8098bbb264edd6c85711265d8ecf19263aeb456dabfed"
+    }
+  },
+  "trace_hashes": {
+    "TRACE_CALLS.jsonl": "6c2db3edfa3245f3ff9f02468f19c69db82d51964b3f1c93bf07913843f504c7",
+    "TRACE_PROVIDER_CALLS.jsonl": "893ec17c72c76db48e27906335d792b8eca5736ea2db1360b96bc60ef929bd7a",
+    "blind_canary_live_summary.json": "30011ddfd98808448534a57be813d3aa34650440c6d7eedc4dd60a109caf1efa",
+    "blind_canary_runtime_results.json": "00b289a5bf389249aa9e485f34d325dfdfaa837f28169650ab832e6c8de5aecf",
+    "v9_generic_blocker_resolution_tiny_patch_validation_live_summary.json": "4ce7ed3bc360b9767371155fef972e368773192452e7545f6638db74ca7664e5",
+    "v9_generic_blocker_resolution_tiny_patch_validation_posthoc_score_trace_bound_v0.json": "101a42304d3a8cca1cf64588d8833e05ffd8cfa850c329e3a6e128cc73f7d041"
+  },
+  "worker_contract": {
+    "required_worker_keys": [
+      "worker_role",
+      "verification_verdict",
+      "action_boundary",
+      "binding_class",
+      "cited_evidence",
+      "final_answer",
+      "blocker_type",
+      "blocker_resolution",
+      "structured_blocker_resolution"
+    ],
+    "w3_artifact_first_guard": [
+      "W3 ARTIFACT-FIRST CONTRACT V4.",
+      "Start immediately with worker_role=W3 before any reasoning.",
+      "Never output <think>, hidden reasoning, analysis, or deliberation.",
+      "If the source seam is ambiguous, encode that only in verification_verdict, binding_class, open_blockers, blocker_type, blocker_resolution, structured_blocker_resolution, and final_answer.",
+      "If any prior blocker exists, do not return ALLOW unless blocker_resolution names each blocker_id, structured_blocker_resolution cites source evidence, and the source fields close the blocker_type.",
+      "Do not debate competing interpretations outside the key=value fields.",
+      "Emit exactly the required key=value artifact lines, then stop."
+    ],
+    "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37",
+    "worker_contract_version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+  }
+}

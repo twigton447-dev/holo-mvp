@@ -1,0 +1,165 @@
+{
+  "checks": {
+    "expected_provider_calls_is_30": true,
+    "judge_calls_disabled": true,
+    "no_substitutions": true,
+    "packet_count_is_6": true,
+    "posthoc_scoring_required_after_trace_freeze": true,
+    "preflight_passed": true,
+    "prompt_probe_leakage_hits_empty": true,
+    "prompt_probe_observed_30_calls": true,
+    "prompt_probe_role_counts_6_each": true,
+    "prompt_probe_sequence_per_packet": true,
+    "provider_calls_not_yet_made": true,
+    "runtime_input_leakage_hits_empty": true,
+    "runtime_manifest_hash_matches_wrapper": true,
+    "runtime_manifest_truth_free": true,
+    "runtime_packet_rows_only_contain_opaque_id_ref_and_hash": true,
+    "solo_calls_disabled": true,
+    "wrapper_has_no_scoring_map_path_before_trace_freeze": true
+  },
+  "claim_boundary": {
+    "fp_precision_evidence": false,
+    "global_fpr_or_fnr_claim": false,
+    "holo_win": false,
+    "production_rate_evidence": false,
+    "public_benchmark_evidence": false,
+    "tiny_patch_validation_only": true
+  },
+  "classification": "HOLOVERIFY_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_PREFLIGHT_SUMMARY_V0",
+  "commit_under_test": "732370350f6c833ae46ddfcd188cf7f60734ff5d",
+  "created_at_utc": "2026-07-07T03:43:05.789782+00:00",
+  "expected_future_provider_calls": 30,
+  "expected_provider_calls_by_slot": {
+    "G1": {
+      "calls": 6,
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax"
+    },
+    "G2": {
+      "calls": 6,
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax"
+    },
+    "W1": {
+      "calls": 6,
+      "model": "grok-3-mini",
+      "provider": "xai"
+    },
+    "W2": {
+      "calls": 6,
+      "model": "gpt-5.4-mini",
+      "provider": "openai"
+    },
+    "W3": {
+      "calls": 6,
+      "model": "MiniMax-M2.5-highspeed",
+      "provider": "minimax"
+    }
+  },
+  "expected_sequence_per_packet": [
+    "W1",
+    "G1",
+    "W2",
+    "G2",
+    "W3"
+  ],
+  "future_approval_sentence": "I approve live provider execution for HOLOVERIFY_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_V0 using only runtime-only manifest docs/benchmark/HOLOVERIFY_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_RUNTIME_MANIFEST_NO_TRUTH_2026_07_06.json with SHA-256 b588b0b5a459b25d3caf8c49c8b49528994b0b495dfcecad6420100e29c0ba02, selector SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06 hash e23b2ec29c63c4d484c10b17ffd2b5d5f6251b10387458dc8c47125a1f642e45, worker contract WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04 hash 5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37, and exactly 30 provider calls: W1 xai/grok-3-mini x6, G1 minimax/MiniMax-M2.5-highspeed x6, W2 openai/gpt-5.4-mini x6, G2 minimax/MiniMax-M2.5-highspeed x6, W3 minimax/MiniMax-M2.5-highspeed x6. TINY PATCH VALIDATION ONLY for V8 generic false-blocker suppression across three selected Wave 2 pairs and their matching ESCALATE negative controls; not public benchmark evidence, not a Holo win, not a global FPR/FNR claim, not FP precision evidence, and not production-rate evidence. No solo, no judges, no scoring map before trace freeze, no mixed registration JSON before trace freeze, no substitutions, no public claims.",
+  "lane_label": "HOLOVERIFY_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_V0",
+  "live_command": "python3 docs/benchmark/run_holoverify_v8_generic_false_blocker_suppression_tiny_patch_validation_live_2026_07_06.py --run-live --approval-statement \"$APPROVAL\"",
+  "package_folder": "docs/benchmark/holoverify_v8_generic_false_blocker_suppression_tiny_patch_validation_2026_07_06",
+  "packet_count": 6,
+  "pair_count": 3,
+  "preflight_folder": "docs/benchmark/holoverify_v8_generic_false_blocker_suppression_tiny_patch_validation_2026_07_06/live_runs/preflight_20260707T034305Z",
+  "prompt_probe": {
+    "call_count": 30,
+    "packet_sequences": {
+      "HVSMW2-3E9FADE57F7E683BBB2C": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ],
+      "HVSMW2-9038DCC84E958E313876": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ],
+      "HVSMW2-AC7D8831D6F942322F4F": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ],
+      "HVSMW2-B36931B1BE529F577079": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ],
+      "HVSMW2-E92F83702A4DBE248710": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ],
+      "HVSMW2-EADF3B3DC5465BFAA006": [
+        "W1",
+        "G1",
+        "W2",
+        "G2",
+        "W3"
+      ]
+    },
+    "probe_dir": "docs/benchmark/holoverify_v8_generic_false_blocker_suppression_tiny_patch_validation_2026_07_06/live_runs/preflight_20260707T034305Z/preflight_prompt_probe",
+    "provider_calls_made": 0,
+    "role_counts": {
+      "G1": 6,
+      "G2": 6,
+      "W1": 6,
+      "W2": 6,
+      "W3": 6
+    },
+    "runtime_results": "docs/benchmark/holoverify_v8_generic_false_blocker_suppression_tiny_patch_validation_2026_07_06/live_runs/preflight_20260707T034305Z/preflight_prompt_probe/blind_canary_runtime_results.json",
+    "runtime_results_sha256": "03a180d44c946fc33b90669f6cf283fccaf496a9c0eb525c1ae2d287efd7f410",
+    "trace_calls": "docs/benchmark/holoverify_v8_generic_false_blocker_suppression_tiny_patch_validation_2026_07_06/live_runs/preflight_20260707T034305Z/preflight_prompt_probe/TRACE_CALLS.jsonl",
+    "trace_calls_sha256": "7278cfc2b633c41fd54b2f8b622e0f38fe1e71ebe47438e403f8eeef89410d9d"
+  },
+  "runtime_manifest": {
+    "path": "docs/benchmark/HOLOVERIFY_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_TINY_PATCH_VALIDATION_RUNTIME_MANIFEST_NO_TRUTH_2026_07_06.json",
+    "sha256": "b588b0b5a459b25d3caf8c49c8b49528994b0b495dfcecad6420100e29c0ba02",
+    "truth_free": true
+  },
+  "scoring_map": {
+    "path": "docs/benchmark/holoverify_v8_generic_false_blocker_suppression_tiny_patch_validation_2026_07_06/holoverify_v8_generic_false_blocker_suppression_tiny_patch_validation_scoring_map_2026_07_06.json",
+    "posthoc_only": true,
+    "sha256": "e9cf6c57716469ff04bb31b92b859683497ed5acdc8a2913b72dbd53692716a9"
+  },
+  "selected_packets": [
+    "HVSM-W2-009-A",
+    "HVSM-W2-009-E",
+    "HVSM-W2-010-A",
+    "HVSM-W2-010-E",
+    "HVSM-W2-030-A",
+    "HVSM-W2-030-E"
+  ],
+  "selected_pairs": [
+    "HVSM-W2-009",
+    "HVSM-W2-010",
+    "HVSM-W2-030"
+  ],
+  "selector_policy": {
+    "selector_policy_sha256": "e23b2ec29c63c4d484c10b17ffd2b5d5f6251b10387458dc8c47125a1f642e45",
+    "selector_policy_version": "SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06"
+  },
+  "worker_contract": {
+    "worker_contract_sha256": "5606bf87e6757e9635ed0309bcab16364e91a3100ffda30db2003951daefdf37",
+    "worker_contract_version": "WORKER_CONTRACT_V4_BLOCKER_CLOSURE_VALIDATION_2026_07_04"
+  }
+}

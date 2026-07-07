@@ -1,0 +1,626 @@
+{
+  "artifact": "HOLOENGINE_CONTROL_OWNER_MATRIX_V0_1",
+  "program_name": "HoloEngine Trust & Assurance Program",
+  "from": "HoloOps SOC / Taylor",
+  "to": "HoloOps SOC and Taylor",
+  "version": "0.1",
+  "created_date": "2026-07-07",
+  "status": "control_owner_matrix_draft",
+  "audience": [
+    "HoloOps SOC / Taylor",
+    "future Trust owners",
+    "future Legal owners",
+    "future Security owners",
+    "future Privacy owners",
+    "future Engineering owners",
+    "future Product owners",
+    "future SRE owners",
+    "future HoloGov owners",
+    "future HoloVerify owners"
+  ],
+  "source_policy": {
+    "used_only_repo_backed_trust_artifacts": true,
+    "source_artifacts_used": [
+      "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+      "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+      "docs/trust/HOLOENGINE_SECURITY_QUESTIONNAIRE_STARTER_PACK_V0_1.md",
+      "docs/trust/HOLOENGINE_30_60_90_TRUST_SOC_READINESS_ROADMAP_V0_1.md"
+    ]
+  },
+  "claim_boundary": {
+    "not_soc2_report": true,
+    "not_soc2_readiness_claim": true,
+    "not_soc2_certification_claim": true,
+    "not_iso_certification_claim": true,
+    "not_hipaa_readiness_claim": true,
+    "not_dpa_baa_coverage_claim": true,
+    "not_provider_zero_retention_claim": true,
+    "not_data_residency_guarantee": true,
+    "not_production_operating_effectiveness_proof": true,
+    "not_ram_only_processing_claim": true,
+    "not_zero_ms_retention_claim": true,
+    "not_customer_payloads_never_sent_claim": true
+  },
+  "taxonomy_boundary": {
+    "primary_taxonomy": "HoloEngine",
+    "HoloGov": "Included as part of HoloEngine.",
+    "HoloVerify": "Separate benchmark/evidence mode and not production customer mode.",
+    "HoloChat": "Connected surface only where relevant to deployment scope.",
+    "HoloBuild": "Connected surface only where relevant to deployment scope.",
+    "HoloBrain": "Optional/conditional only if enabled in deployment scope."
+  },
+  "status_terms": {
+    "target_only": "Target design, draft, or planned workstream; not operating evidence.",
+    "missing": "The control has not yet been implemented or evidenced in the repo-backed trust artifacts.",
+    "tbd": "Depends on provider, legal, auditor, or deployment confirmation."
+  },
+  "dependency_flag_legend": {
+    "internal_only": "The workstream can move forward with internal owner action.",
+    "external_dependency": "The workstream needs counsel, a provider, an auditor, or another external assessor/contracting party."
+  },
+  "summary": {
+    "rows": 30,
+    "due_window_counts": {
+      "30": 10,
+      "60": 10,
+      "90": 10
+    },
+    "status_counts": {
+      "target_only": 15,
+      "missing": 6,
+      "tbd": 9
+    }
+  },
+  "control_rows": [
+    {
+      "control_id": "HCM-001",
+      "control_workstream_name": "Trust binder operationalization",
+      "primary_owner_role": "Trust Lead",
+      "supporting_owner_roles": [
+        "HoloOps SOC / Taylor",
+        "Security Lead",
+        "Legal"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_V0_2.md"
+      ],
+      "due_window_days": 30,
+      "dependency": "Existing evidence binder index and roadmap",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Centralizes evidence ownership; does not create a buyer claim by itself.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-002",
+      "control_workstream_name": "Buyer claim control and response gating",
+      "primary_owner_role": "Trust Lead / Legal",
+      "supporting_owner_roles": [
+        "Security Lead",
+        "Product Lead"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_SECURITY_QUESTIONNAIRE_STARTER_PACK_V0_1.md"
+      ],
+      "due_window_days": 30,
+      "dependency": "Current claim register and questionnaire starter pack",
+      "buyer_risk_level": "critical",
+      "claim_gate_impact": "Prevents unsupported wording from escaping into buyer materials.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-003",
+      "control_workstream_name": "Deployment scope and system boundary",
+      "primary_owner_role": "Trust Lead / Product Lead",
+      "supporting_owner_roles": [
+        "Engineering Lead",
+        "HoloGov Owner"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_DEPLOYMENT_SCOPE_WORKSHEET_V0_1.md"
+      ],
+      "due_window_days": 30,
+      "dependency": "Current data-flow architecture and roadmap",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Defines whether HoloChat, HoloBuild, and optional HoloBrain are in scope.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-004",
+      "control_workstream_name": "Production versus HoloVerify boundary",
+      "primary_owner_role": "Trust Lead / HoloVerify Owner",
+      "supporting_owner_roles": [
+        "Security Lead",
+        "Product Lead"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md"
+      ],
+      "due_window_days": 30,
+      "dependency": "Existing architecture and evidence binder",
+      "buyer_risk_level": "critical",
+      "claim_gate_impact": "Blocks benchmark/evidence artifacts from being reused as production privacy proof.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-005",
+      "control_workstream_name": "Access control design",
+      "primary_owner_role": "Engineering Lead / Security Lead",
+      "supporting_owner_roles": [
+        "Product Lead",
+        "SRE",
+        "Support Lead"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_ACCESS_CONTROL_DESIGN_PACKET_V0_1.md"
+      ],
+      "due_window_days": 30,
+      "dependency": "System boundary and questionnaire controls",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Unlocks later auth, RBAC, and tenant-isolation claims.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-006",
+      "control_workstream_name": "Logging design",
+      "primary_owner_role": "Engineering Lead / SRE / HoloGov Owner",
+      "supporting_owner_roles": [
+        "Security Lead",
+        "Trust Lead"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_METADATA_AUDIT_LOG_SCHEMA_V0_1.md"
+      ],
+      "due_window_days": 30,
+      "dependency": "Data-flow architecture and questionnaire pack",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Unlocks metadata-only logging claims only after samples exist.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-007",
+      "control_workstream_name": "Provider review prep",
+      "primary_owner_role": "Legal / Trust Lead / Security Lead",
+      "supporting_owner_roles": [
+        "Engineering Lead",
+        "SRE"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_PROVIDER_REVIEW_PACKET_V0_1.md"
+      ],
+      "due_window_days": 30,
+      "dependency": "Provider data-handling matrix",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Keeps DPA, BAA, retention, zero-retention, and residency claims blocked until evidence exists.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-008",
+      "control_workstream_name": "Incident response draft",
+      "primary_owner_role": "Security Lead / Legal",
+      "supporting_owner_roles": [
+        "SRE",
+        "HoloGov Owner"
+      ],
+      "current_status": "missing",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_INCIDENT_RESPONSE_PLAN_V0_1.md"
+      ],
+      "due_window_days": 30,
+      "dependency": "SOC 2 gap assessment and roadmap",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "No production incident-response claim until policy and tabletop evidence exist.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-009",
+      "control_workstream_name": "Secure SDLC baseline",
+      "primary_owner_role": "Engineering Lead / Security Lead",
+      "supporting_owner_roles": [
+        "Trust Lead"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_SECURE_SDLC_AND_CHANGE_CONTROL_POLICY_V0_1.md"
+      ],
+      "due_window_days": 30,
+      "dependency": "SOC 2 gap assessment and roadmap",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Blocks secure SDLC and change-control claims until scanning and approvals exist.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-010",
+      "control_workstream_name": "HoloVerify evidence separation SOP",
+      "primary_owner_role": "HoloVerify Owner / Trust Lead",
+      "supporting_owner_roles": [
+        "Security Lead",
+        "Product Lead"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_HOLOVERIFY_EVIDENCE_SEPARATION_SOP_V0_1.md"
+      ],
+      "due_window_days": 30,
+      "dependency": "Data-flow architecture, provider matrix, and roadmap",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Keeps benchmark evidence separate from production customer-data claims.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-011",
+      "control_workstream_name": "Auth / RBAC / tenant-isolation evidence",
+      "primary_owner_role": "Engineering Lead / Security Lead",
+      "supporting_owner_roles": [
+        "Trust Lead"
+      ],
+      "current_status": "missing",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_AUTH_RBAC_TENANT_ISOLATION_EVIDENCE_PACK_V0_1.md"
+      ],
+      "due_window_days": 60,
+      "dependency": "Access control design",
+      "buyer_risk_level": "critical",
+      "claim_gate_impact": "Unlocks conditional buyer answers for authentication, authorization, and tenant binding.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-012",
+      "control_workstream_name": "Encryption verification",
+      "primary_owner_role": "SRE / Security Lead",
+      "supporting_owner_roles": [
+        "Engineering Lead"
+      ],
+      "current_status": "tbd",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_ENCRYPTION_VERIFICATION_PACKET_V0_1.md"
+      ],
+      "due_window_days": 60,
+      "dependency": "Deployment architecture and environment evidence",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Keeps encryption-in-transit and encryption-at-rest claims conditional until verified in deployment.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-013",
+      "control_workstream_name": "Metadata-only log samples and log integrity",
+      "primary_owner_role": "Engineering Lead / SRE / HoloGov Owner",
+      "supporting_owner_roles": [
+        "Security Lead"
+      ],
+      "current_status": "missing",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_LOG_SAMPLES_AND_INTEGRITY_PACK_V0_1.md"
+      ],
+      "due_window_days": 60,
+      "dependency": "Logging design",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Unlocks metadata-only log claims and excluded-field assertions only if samples and tests exist.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-014",
+      "control_workstream_name": "Secrets management",
+      "primary_owner_role": "Security Lead",
+      "supporting_owner_roles": [
+        "Engineering Lead",
+        "SRE"
+      ],
+      "current_status": "missing",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_SECRETS_MANAGEMENT_PACKET_V0_1.md"
+      ],
+      "due_window_days": 60,
+      "dependency": "Secure SDLC baseline",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Unlocks secrets-handling claims and closes a common SOC 2 gap.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-015",
+      "control_workstream_name": "Vulnerability management",
+      "primary_owner_role": "Security Lead",
+      "supporting_owner_roles": [
+        "Engineering Lead",
+        "SRE"
+      ],
+      "current_status": "missing",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_VULNERABILITY_MANAGEMENT_PACKET_V0_1.md"
+      ],
+      "due_window_days": 60,
+      "dependency": "Secure SDLC baseline",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Unlocks vulnerability-program claims only after scans, SLAs, and remediation evidence exist.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-016",
+      "control_workstream_name": "Retention / deletion / support access / evidence-retention mode",
+      "primary_owner_role": "Privacy Lead / Support Lead",
+      "supporting_owner_roles": [
+        "Legal",
+        "SRE",
+        "Product Lead"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_RETENTION_DELETION_AND_SUPPORT_ACCESS_PACKET_V0_1.md"
+      ],
+      "due_window_days": 60,
+      "dependency": "Privacy/legal review and access-control design",
+      "buyer_risk_level": "critical",
+      "claim_gate_impact": "Unblocks deletion, support-access, and customer evidence-retention claims only with tested procedures.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-017",
+      "control_workstream_name": "Provider contract and configuration evidence",
+      "primary_owner_role": "Legal / Trust Lead",
+      "supporting_owner_roles": [
+        "Security Lead",
+        "SRE"
+      ],
+      "current_status": "tbd",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_PROVIDER_CONTRACT_AND_CONFIGURATION_EVIDENCE_BINDER_V0_1.md"
+      ],
+      "due_window_days": 60,
+      "dependency": "Provider review prep",
+      "buyer_risk_level": "critical",
+      "claim_gate_impact": "Keeps DPA, BAA, zero-retention, and residency claims blocked until contract/config proof exists.",
+      "dependency_flag": "external_dependency"
+    },
+    {
+      "control_id": "HCM-018",
+      "control_workstream_name": "HoloGov route logs, selector hash logging, and model/provider route change control",
+      "primary_owner_role": "HoloGov Owner / AI Governance Lead",
+      "supporting_owner_roles": [
+        "Engineering Lead",
+        "Security Lead",
+        "Legal"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_HOLOGOV_ROUTE_LOG_AND_CHANGE_CONTROL_PACKET_V0_1.md"
+      ],
+      "due_window_days": 60,
+      "dependency": "Logging design and provider review prep",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Unlocks route-log and selector-hash claims and keeps model-change claims conditional.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-019",
+      "control_workstream_name": "Monitoring and alerting plus backup / DR",
+      "primary_owner_role": "SRE / Operations",
+      "supporting_owner_roles": [
+        "Security Lead",
+        "Engineering Lead"
+      ],
+      "current_status": "missing",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_MONITORING_ALERTING_AND_BACKUP_DR_PACKET_V0_1.md"
+      ],
+      "due_window_days": 60,
+      "dependency": "Logging design and incident-response draft",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Unblocks availability-related claims only after monitoring and recovery evidence exist.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-020",
+      "control_workstream_name": "HoloVerify benchmark integrity pack",
+      "primary_owner_role": "HoloVerify Owner / Security Lead",
+      "supporting_owner_roles": [
+        "Trust Lead",
+        "Engineering Lead"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_HOLOVERIFY_BENCHMARK_INTEGRITY_PACK_V0_1.md"
+      ],
+      "due_window_days": 60,
+      "dependency": "HoloVerify evidence separation SOP",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Keeps benchmark storage, scoring-map leakage, trace integrity, and failure autopsy separate from production claims.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-021",
+      "control_workstream_name": "Control readiness review",
+      "primary_owner_role": "Trust Lead / Security Lead",
+      "supporting_owner_roles": [
+        "Legal",
+        "Product Lead",
+        "SRE"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_CONTROL_READINESS_REVIEW_MEMO_V0_1.md"
+      ],
+      "due_window_days": 90,
+      "dependency": "30- and 60-day evidence packs",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Determines which controls can move from target_only to conditional_tbd.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-022",
+      "control_workstream_name": "Auditor scoping packet",
+      "primary_owner_role": "Trust Lead / Security Lead",
+      "supporting_owner_roles": [
+        "Legal",
+        "SRE"
+      ],
+      "current_status": "tbd",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_AUDITOR_SCOPING_PACKET_V0_1.md"
+      ],
+      "due_window_days": 90,
+      "dependency": "Control readiness review",
+      "buyer_risk_level": "critical",
+      "claim_gate_impact": "Prepares, but does not itself confer, a SOC 2 audit-readiness claim.",
+      "dependency_flag": "external_dependency"
+    },
+    {
+      "control_id": "HCM-023",
+      "control_workstream_name": "SOC 2 Type I decision",
+      "primary_owner_role": "HoloOps SOC / Taylor / Legal",
+      "supporting_owner_roles": [
+        "Trust Lead",
+        "Security Lead"
+      ],
+      "current_status": "tbd",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_TYPE_I_GO_NO_GO_DECISION_RECORD_V0_1.md"
+      ],
+      "due_window_days": 90,
+      "dependency": "Auditor scoping packet and budget",
+      "buyer_risk_level": "critical",
+      "claim_gate_impact": "Opens or closes the Type I pursuit path; no external claim by itself.",
+      "dependency_flag": "external_dependency"
+    },
+    {
+      "control_id": "HCM-024",
+      "control_workstream_name": "SOC 2 Type II planning",
+      "primary_owner_role": "Trust Lead / Security Lead / SRE",
+      "supporting_owner_roles": [
+        "Legal"
+      ],
+      "current_status": "tbd",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_TYPE_II_READINESS_PLAN_V0_1.md"
+      ],
+      "due_window_days": 90,
+      "dependency": "Stable controls and Type I decision",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Sets up an observation-period path only if Type I is credible.",
+      "dependency_flag": "external_dependency"
+    },
+    {
+      "control_id": "HCM-025",
+      "control_workstream_name": "Buyer trust packet v0.2 / questionnaire refresh",
+      "primary_owner_role": "Trust Lead / Legal",
+      "supporting_owner_roles": [
+        "Product Lead",
+        "Security Lead"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_2.md",
+        "docs/trust/HOLOENGINE_SECURITY_QUESTIONNAIRE_STARTER_PACK_V0_2.md"
+      ],
+      "due_window_days": 90,
+      "dependency": "Control readiness review and claim gates",
+      "buyer_risk_level": "high",
+      "claim_gate_impact": "Updates buyer-facing language only with verified evidence and preserved caveats.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-026",
+      "control_workstream_name": "Privacy / legal package",
+      "primary_owner_role": "Legal / Privacy Lead",
+      "supporting_owner_roles": [
+        "Trust Lead",
+        "Product Lead"
+      ],
+      "current_status": "tbd",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_PRIVACY_LEGAL_REVIEW_PACKET_V0_1.md"
+      ],
+      "due_window_days": 90,
+      "dependency": "Provider evidence and data map",
+      "buyer_risk_level": "critical",
+      "claim_gate_impact": "Unblocks privacy, DPA, and customer-data terms review without making a DPA/BAA claim.",
+      "dependency_flag": "external_dependency"
+    },
+    {
+      "control_id": "HCM-027",
+      "control_workstream_name": "ISO 27001 / ISO 42001 decision",
+      "primary_owner_role": "Trust Lead / Legal / Security Lead",
+      "supporting_owner_roles": [
+        "Product Lead"
+      ],
+      "current_status": "tbd",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_ISO_DECISION_MEMO_V0_1.md"
+      ],
+      "due_window_days": 90,
+      "dependency": "SOC control maturity and budget",
+      "buyer_risk_level": "medium",
+      "claim_gate_impact": "Decides whether ISO work begins; it is not a certification claim.",
+      "dependency_flag": "internal_only"
+    },
+    {
+      "control_id": "HCM-028",
+      "control_workstream_name": "HIPAA / BAA go-no-go",
+      "primary_owner_role": "Legal / Privacy Lead / Product Lead",
+      "supporting_owner_roles": [
+        "Trust Lead",
+        "Security Lead"
+      ],
+      "current_status": "tbd",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_HIPAA_BAA_GO_NO_GO_MEMO_V0_1.md"
+      ],
+      "due_window_days": 90,
+      "dependency": "Buyer pipeline and provider evidence",
+      "buyer_risk_level": "critical",
+      "claim_gate_impact": "Keeps healthcare claims blocked until counsel and provider evidence are real.",
+      "dependency_flag": "external_dependency"
+    },
+    {
+      "control_id": "HCM-029",
+      "control_workstream_name": "Provider zero-retention review",
+      "primary_owner_role": "Legal / Security Lead / AI Governance Lead",
+      "supporting_owner_roles": [
+        "Trust Lead"
+      ],
+      "current_status": "tbd",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_PROVIDER_ZERO_RETENTION_REVIEW_MEMO_V0_1.md"
+      ],
+      "due_window_days": 90,
+      "dependency": "Provider contract and configuration evidence",
+      "buyer_risk_level": "critical",
+      "claim_gate_impact": "Keeps zero-retention claims blocked until provider-specific proof exists.",
+      "dependency_flag": "external_dependency"
+    },
+    {
+      "control_id": "HCM-030",
+      "control_workstream_name": "External assessment budget",
+      "primary_owner_role": "HoloOps SOC / Taylor",
+      "supporting_owner_roles": [
+        "Trust Lead",
+        "Legal",
+        "Security Lead"
+      ],
+      "current_status": "target_only",
+      "target_evidence_artifact": [
+        "docs/trust/HOLOENGINE_90_DAY_EXTERNAL_SPEND_PLAN_V0_1.md"
+      ],
+      "due_window_days": 90,
+      "dependency": "Control readiness review and buyer pressure",
+      "buyer_risk_level": "medium",
+      "claim_gate_impact": "Selects which external lane opens next; it does not itself create a trust claim.",
+      "dependency_flag": "internal_only"
+    }
+  ],
+  "working_rules": [
+    "Use the owner roles exactly as written here when assigning work.",
+    "Treat target_only as design work, not as operating evidence.",
+    "Treat missing as a real gap that needs a due date and an artifact.",
+    "Treat tbd as a workstream that depends on provider, legal, auditor, or deployment confirmation.",
+    "Keep HoloVerify evidence separate from production customer-mode evidence in both storage and claim language."
+  ]
+}

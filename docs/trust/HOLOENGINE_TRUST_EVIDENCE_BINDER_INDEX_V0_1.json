@@ -1,0 +1,1086 @@
+{
+  "artifact": "HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1",
+  "program_name": "HoloEngine Trust & Assurance Program",
+  "version": "0.1",
+  "created_date": "2026-07-07",
+  "status": "trust_evidence_binder_index_draft",
+  "source_policy": {
+    "used_only_repo_backed_trust_artifacts": true,
+    "source_artifacts_used": [
+      "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+      "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+      "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+    ]
+  },
+  "claim_boundary": {
+    "soc_2_readiness_claim": false,
+    "soc_2_compliance_claim": false,
+    "soc_2_certification_claim": false,
+    "soc_2_type_i_completion_claim": false,
+    "soc_2_type_ii_completion_claim": false,
+    "auditor_validation_claim": false,
+    "hipaa_readiness_claim": false,
+    "hipaa_compliance_claim": false,
+    "dpa_coverage_claim": false,
+    "baa_coverage_claim": false,
+    "provider_zero_retention_claim": false,
+    "production_operating_effectiveness_claim": false,
+    "must_not_claim": [
+      "SOC 2 readiness, compliance, certification, Type I completion, Type II completion, or auditor validation",
+      "HIPAA compliance or HIPAA readiness",
+      "DPA coverage, BAA coverage, subprocessor approval, or provider zero retention",
+      "production control operating effectiveness",
+      "verified encryption, retention, deletion, logging, support access, or tenant isolation",
+      "that HoloEngine production customer payloads are never sent to providers or never stored",
+      "that HoloVerify benchmark/evidence handling is equivalent to production customer data handling"
+    ]
+  },
+  "taxonomy": {
+    "HoloEngine": "Primary evidence binder subject.",
+    "HoloGov": "Included as HoloEngine governance, selector, and control layer.",
+    "HoloVerify": "Separate benchmark/evidence mode; supports evaluation discipline but not production privacy claims.",
+    "HoloChat": "Connected surface where relevant; conditional production scope only.",
+    "HoloBuild": "Connected surface where relevant; conditional production scope only.",
+    "HoloBrain": "Conditional only if enabled in deployment."
+  },
+  "mode_boundary": {
+    "production_customer_mode": "Target design for bounded ALLOW/ESCALATE review with metadata-only audit logging by default.",
+    "benchmark_evidence_mode": "HoloVerify mode may preserve frozen prompts, raw provider outputs, scoring maps, trace files, runtime manifests, failure autopsies, provenance audits, and operational notes for benchmark integrity.",
+    "separation_required": [
+      "storage",
+      "access control",
+      "retention policy",
+      "audit logging",
+      "claim language"
+    ]
+  },
+  "status_terms": {
+    "draft_artifact_exists": "A repo-backed draft artifact exists. This is not implementation or operating-effectiveness proof.",
+    "target_control_only": "A control is described as intended design but has not been verified as implemented.",
+    "TBD": "Evidence, contract posture, or deployment posture is unknown or not captured in these source artifacts.",
+    "missing": "The source artifacts identify a need, but no sufficient evidence artifact is present."
+  },
+  "evidence_categories": [
+    "SOC 2 readiness",
+    "privacy",
+    "provider/vendor handling",
+    "AI governance",
+    "benchmark/evidence separation",
+    "access control",
+    "change management",
+    "incident response",
+    "data retention/deletion",
+    "logging/monitoring",
+    "security architecture",
+    "customer-facing trust materials"
+  ],
+  "evidence_items": [
+    {
+      "id": "TEBI-SA-001",
+      "category": "security_architecture",
+      "control_area": "System description and data flow",
+      "evidence_name": "HoloEngine data-flow architecture",
+      "purpose": "Establish target production customer-mode flow, connected surfaces, audit-log target, and mode boundaries.",
+      "current_status": "draft_artifact_exists",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Final deployment diagram",
+        "Asset inventory",
+        "Environment inventory",
+        "Verified control evidence"
+      ],
+      "likely_owner": "Trust Lead / Engineering Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: foundational buyer security review artifact.",
+      "claim_risk": "Medium: safe as a draft architecture; high if described as implemented."
+    },
+    {
+      "id": "TEBI-SA-002",
+      "category": "security_architecture",
+      "control_area": "System taxonomy",
+      "evidence_name": "HoloEngine primary taxonomy with connected surfaces",
+      "purpose": "Keep HoloEngine primary while listing HoloChat and HoloBuild as conditional connected surfaces.",
+      "current_status": "draft_artifact_exists",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Deployment-specific scope decisions for HoloChat, HoloBuild, and HoloBrain"
+      ],
+      "likely_owner": "Trust Lead / Product Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: prevents scope confusion in buyer reviews.",
+      "claim_risk": "Medium: risk if connected surfaces are implied to be covered automatically."
+    },
+    {
+      "id": "TEBI-SOC2-001",
+      "category": "SOC_2_readiness",
+      "control_area": "SOC 2 TSC mapping",
+      "evidence_name": "SOC 2 readiness/gap assessment",
+      "purpose": "Map Security, Availability, Confidentiality, Privacy, and Processing Integrity to HoloEngine target controls and gaps.",
+      "current_status": "draft_artifact_exists",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Auditor-scoped control matrix",
+        "Management assertion",
+        "Control owner approvals",
+        "Evidence samples"
+      ],
+      "likely_owner": "Trust Lead / Security Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: central SOC 2 planning artifact.",
+      "claim_risk": "High: must not be described as SOC 2 readiness, compliance, certification, or auditor validation."
+    },
+    {
+      "id": "TEBI-SOC2-002",
+      "category": "SOC_2_readiness",
+      "control_area": "Evidence binder checklist",
+      "evidence_name": "SOC 2 evidence binder checklist",
+      "purpose": "Track proof needed for each readiness control with owner role and status.",
+      "current_status": "draft_artifact_exists",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Evidence repository",
+        "Artifact links",
+        "Review dates",
+        "Ticket IDs",
+        "Implementation evidence"
+      ],
+      "likely_owner": "Trust Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: helps answer enterprise evidence requests with status discipline.",
+      "claim_risk": "Medium: safe as an index; high if statuses are softened."
+    },
+    {
+      "id": "TEBI-SOC2-003",
+      "category": "SOC_2_readiness",
+      "control_area": "Claim boundary",
+      "evidence_name": "Do-not-overclaim rules",
+      "purpose": "Prevent unsupported SOC 2, HIPAA, zero-retention, TLS, RAM-only, and production-control claims.",
+      "current_status": "draft_artifact_exists",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Sales/legal approval workflow",
+        "Buyer-facing FAQ review"
+      ],
+      "likely_owner": "Trust Lead / Legal",
+      "priority": "High",
+      "buyer_facing_relevance": "High: reduces buyer-facing misstatement risk.",
+      "claim_risk": "Low if preserved; high if omitted from external materials."
+    },
+    {
+      "id": "TEBI-PRIV-001",
+      "category": "privacy",
+      "control_area": "Privacy notice and purpose",
+      "evidence_name": "Customer-facing privacy/data-handling terms",
+      "purpose": "Explain purposes, data classes, retention choices, deletion handling, and customer instructions if personal data is processed.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Privacy notice",
+        "DPA/customer terms",
+        "Product data map",
+        "Legal review"
+      ],
+      "likely_owner": "Privacy Lead / Legal",
+      "priority": "High",
+      "buyer_facing_relevance": "High: likely enterprise procurement requirement.",
+      "claim_risk": "High: must remain TBD until legal and deployment review."
+    },
+    {
+      "id": "TEBI-PRIV-002",
+      "category": "privacy",
+      "control_area": "Customer deletion requests",
+      "evidence_name": "Data deletion request workflow",
+      "purpose": "Define intake, identity verification, deletion steps, SLA, exceptions, and completion evidence.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Deletion SOP",
+        "Customer request form",
+        "Backup deletion model",
+        "Evidence-retention exceptions"
+      ],
+      "likely_owner": "Privacy Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: important for privacy and enterprise data handling.",
+      "claim_risk": "High: do not claim deletion capability without tested workflow."
+    },
+    {
+      "id": "TEBI-PRIV-003",
+      "category": "privacy",
+      "control_area": "Customer evidence-retention mode",
+      "evidence_name": "Evidence-retention configuration policy",
+      "purpose": "Define explicit customer configuration, retention settings, access controls, deletion, export, and support boundaries.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Product configuration",
+        "Retention controls",
+        "Access logs",
+        "Deletion/export tests",
+        "Customer docs"
+      ],
+      "likely_owner": "Product Lead / Privacy Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: key regulated-audit feature if implemented.",
+      "claim_risk": "High: must not imply payload retention controls are operating."
+    },
+    {
+      "id": "TEBI-PV-001",
+      "category": "provider_vendor_handling",
+      "control_area": "Provider data-handling matrix",
+      "evidence_name": "Provider data-handling matrix",
+      "purpose": "Index OpenAI, xAI, and MiniMax as current benchmark/provider route vendors and list verification workstreams.",
+      "current_status": "draft_artifact_exists",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Provider-specific contract review",
+        "Route/account/config evidence",
+        "Legal review"
+      ],
+      "likely_owner": "Trust Lead / Legal",
+      "priority": "High",
+      "buyer_facing_relevance": "High: buyer questions will focus on provider handling.",
+      "claim_risk": "High: must not imply provider terms are verified."
+    },
+    {
+      "id": "TEBI-PV-002",
+      "category": "provider_vendor_handling",
+      "control_area": "DPA coverage",
+      "evidence_name": "Provider DPA evidence",
+      "purpose": "Confirm whether provider DPAs cover the actual HoloEngine route/account/configuration.",
+      "current_status": "TBD",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Signed/accepted DPAs",
+        "Contract exhibits",
+        "Account mapping",
+        "Legal signoff"
+      ],
+      "likely_owner": "Legal / Trust Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: common enterprise requirement.",
+      "claim_risk": "High: do not claim DPA coverage."
+    },
+    {
+      "id": "TEBI-PV-003",
+      "category": "provider_vendor_handling",
+      "control_area": "BAA/HIPAA eligibility",
+      "evidence_name": "Provider BAA/HIPAA eligibility review",
+      "purpose": "Determine whether healthcare positioning is possible and under what provider/product scope.",
+      "current_status": "TBD",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "BAA availability",
+        "HIPAA scope review",
+        "Legal/security analysis",
+        "Deployment controls"
+      ],
+      "likely_owner": "Legal / Privacy Lead",
+      "priority": "Medium",
+      "buyer_facing_relevance": "Medium if healthcare buyers are pursued.",
+      "claim_risk": "High: do not claim HIPAA readiness or BAA coverage."
+    },
+    {
+      "id": "TEBI-PV-004",
+      "category": "provider_vendor_handling",
+      "control_area": "Provider retention and zero retention",
+      "evidence_name": "Provider retention setting review",
+      "purpose": "Verify retention settings, zero-retention eligibility if available, and route/account applicability.",
+      "current_status": "TBD",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Provider terms",
+        "Admin configuration evidence",
+        "Contract proof",
+        "Route mapping"
+      ],
+      "likely_owner": "Security Lead / Legal",
+      "priority": "High",
+      "buyer_facing_relevance": "High: sensitive buyer data-handling issue.",
+      "claim_risk": "High: do not claim provider zero retention."
+    },
+    {
+      "id": "TEBI-PV-005",
+      "category": "provider_vendor_handling",
+      "control_area": "Subprocessor and residency",
+      "evidence_name": "Subprocessor and data-residency inventory",
+      "purpose": "Track provider subprocessors, update cadence, regional processing/storage options, and customer-region constraints.",
+      "current_status": "TBD",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Subprocessor lists",
+        "Regional-processing proof",
+        "Customer-region policy",
+        "Legal review"
+      ],
+      "likely_owner": "Legal / Trust Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High for enterprise and regulated buyers.",
+      "claim_risk": "High: do not claim subprocessor approval or residency guarantees."
+    },
+    {
+      "id": "TEBI-AI-001",
+      "category": "AI_governance",
+      "control_area": "Model/provider routing logs",
+      "evidence_name": "Provider/model route audit log evidence",
+      "purpose": "Show provider, model, route ID, retry/error status, latency, token counts, and retention mode without default payload logging.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Runtime log samples",
+        "Schema validation",
+        "Access controls",
+        "Retention and redaction tests"
+      ],
+      "likely_owner": "HoloGov Owner / Engineering Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: explains AI route accountability.",
+      "claim_risk": "High: do not claim production logging until samples exist."
+    },
+    {
+      "id": "TEBI-AI-002",
+      "category": "AI_governance",
+      "control_area": "Selector version/hash logging",
+      "evidence_name": "HoloGov selector version/hash evidence",
+      "purpose": "Bind decisions to selector version/hash, worker contract version/hash where applicable, and release manifest.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Runtime audit samples",
+        "Selector release records",
+        "Hash manifests",
+        "Approval records"
+      ],
+      "likely_owner": "HoloGov Owner",
+      "priority": "High",
+      "buyer_facing_relevance": "High: important for decision reproducibility.",
+      "claim_risk": "Medium: safe as target; high if described as fully implemented."
+    },
+    {
+      "id": "TEBI-AI-003",
+      "category": "AI_governance",
+      "control_area": "No scoring-map leakage",
+      "evidence_name": "Scoring-map separation and leakage tests",
+      "purpose": "Prove benchmark scoring maps and answer keys are access-controlled and excluded from production and provider prompts.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Access controls",
+        "Negative tests",
+        "Prompt-leakage tests",
+        "Production runtime separation proof"
+      ],
+      "likely_owner": "HoloVerify Owner / Security Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "Medium: relevant for AI governance and benchmark integrity.",
+      "claim_risk": "High: leakage claims need tests."
+    },
+    {
+      "id": "TEBI-AI-004",
+      "category": "AI_governance",
+      "control_area": "Trace integrity",
+      "evidence_name": "Trace integrity and chain-of-custody evidence",
+      "purpose": "Preserve reviewability through trace hashes, tamper-evident storage, access logs, and chain-of-custody procedures.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Hash manifests",
+        "Immutable storage configuration",
+        "Access logs",
+        "Evidence-retention mode controls"
+      ],
+      "likely_owner": "HoloVerify Owner / Security Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High for technical diligence and dispute review.",
+      "claim_risk": "Medium: benchmark traces exist conceptually, but production integrity is unverified."
+    },
+    {
+      "id": "TEBI-AI-005",
+      "category": "AI_governance",
+      "control_area": "Failure autopsy",
+      "evidence_name": "Failure autopsy template and corrective-action workflow",
+      "purpose": "Define how benchmark and production failures are classified, reviewed, remediated, and turned into regression coverage.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Autopsy template",
+        "Owner workflow",
+        "Corrective-action tickets",
+        "Regression links",
+        "Customer impact review"
+      ],
+      "likely_owner": "HoloGov Owner / Trust Lead",
+      "priority": "Medium",
+      "buyer_facing_relevance": "Medium: useful for mature AI assurance discussions.",
+      "claim_risk": "Medium: do not imply operating process exists."
+    },
+    {
+      "id": "TEBI-AI-006",
+      "category": "AI_governance",
+      "control_area": "Model change control",
+      "evidence_name": "Model/provider route change-control procedure",
+      "purpose": "Govern model onboarding, deprecation, provider fallback, eval gates, rollback, risk signoff, and customer notice criteria.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Change policy",
+        "Approval records",
+        "Evaluation gates",
+        "Route inventory",
+        "Rollback procedure"
+      ],
+      "likely_owner": "AI Governance Lead / Engineering Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: buyers will ask how model changes are controlled.",
+      "claim_risk": "High: do not claim controlled model changes."
+    },
+    {
+      "id": "TEBI-BE-001",
+      "category": "benchmark_evidence_separation",
+      "control_area": "Production vs benchmark mode boundary",
+      "evidence_name": "Production customer mode and benchmark/evidence mode boundary memo",
+      "purpose": "Preserve distinction between metadata-only production target handling and HoloVerify evidence preservation.",
+      "current_status": "draft_artifact_exists",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Storage/access/retention proof",
+        "Environment separation",
+        "Buyer-facing boundary memo approval"
+      ],
+      "likely_owner": "Trust Lead / HoloVerify Owner",
+      "priority": "High",
+      "buyer_facing_relevance": "High: central to safe buyer explanation.",
+      "claim_risk": "Medium: safe as boundary claim; high if used as implementation proof."
+    },
+    {
+      "id": "TEBI-BE-002",
+      "category": "benchmark_evidence_separation",
+      "control_area": "Benchmark storage and retention",
+      "evidence_name": "HoloVerify evidence storage/access/retention proof",
+      "purpose": "Prove benchmark artifacts are stored, accessed, retained, and described separately from production customer data.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Storage location inventory",
+        "Access controls",
+        "Retention policy",
+        "Audit logs",
+        "Claim-language review"
+      ],
+      "likely_owner": "HoloVerify Owner / Security Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "Medium: important when benchmark evidence is discussed externally.",
+      "claim_risk": "High: do not use benchmark retention as production privacy proof."
+    },
+    {
+      "id": "TEBI-AC-001",
+      "category": "access_control",
+      "control_area": "Identity and authentication",
+      "evidence_name": "Authentication implementation evidence",
+      "purpose": "Prove caller authentication, tenant identification, authorization validation, and request binding.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Auth design",
+        "MFA/service auth",
+        "Token/session controls",
+        "Tests",
+        "Account lifecycle evidence"
+      ],
+      "likely_owner": "Engineering Lead / Security Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: core enterprise security requirement.",
+      "claim_risk": "High: do not claim implemented auth."
+    },
+    {
+      "id": "TEBI-AC-002",
+      "category": "access_control",
+      "control_area": "RBAC and least privilege",
+      "evidence_name": "RBAC/access review evidence",
+      "purpose": "Define roles, permissions, admin/support access, service accounts, approvals, and access review cadence.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Role matrix",
+        "Permission model",
+        "Access reviews",
+        "Approval logs",
+        "Break-glass records"
+      ],
+      "likely_owner": "Security Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: common SOC 2 and buyer control.",
+      "claim_risk": "High: do not claim RBAC maturity."
+    },
+    {
+      "id": "TEBI-AC-003",
+      "category": "access_control",
+      "control_area": "Tenant isolation",
+      "evidence_name": "Tenant isolation evidence",
+      "purpose": "Prove tenant/request isolation across runtime, storage, logs, traces, evidence stores, queues, and provider routing.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Tenant model",
+        "Cross-tenant negative tests",
+        "Storage/log partitioning proof",
+        "Provider route isolation evidence"
+      ],
+      "likely_owner": "Engineering Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: critical buyer control.",
+      "claim_risk": "High: do not claim tenant isolation proof."
+    },
+    {
+      "id": "TEBI-AC-004",
+      "category": "access_control",
+      "control_area": "Customer support access",
+      "evidence_name": "Support access procedure",
+      "purpose": "Govern customer support access, just-in-time elevation, customer authorization, redaction, logging, and break-glass review.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Support SOP",
+        "Access logs",
+        "Approval workflow",
+        "Customer authorization",
+        "Break-glass review evidence"
+      ],
+      "likely_owner": "Support Lead / Security Lead",
+      "priority": "Medium",
+      "buyer_facing_relevance": "High if support may access customer data.",
+      "claim_risk": "High: do not claim support controls exist."
+    },
+    {
+      "id": "TEBI-CM-001",
+      "category": "change_management",
+      "control_area": "Release change control",
+      "evidence_name": "Release and emergency change evidence",
+      "purpose": "Track approvals, tests, deployment records, rollback, and emergency changes for HoloEngine.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Release policy",
+        "Approval records",
+        "Deployment logs",
+        "Rollback records",
+        "Emergency change workflow"
+      ],
+      "likely_owner": "Engineering Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: SOC 2 and enterprise review staple.",
+      "claim_risk": "Medium: target versioning exists, operating evidence missing."
+    },
+    {
+      "id": "TEBI-CM-002",
+      "category": "change_management",
+      "control_area": "Secure development lifecycle",
+      "evidence_name": "SDLC control evidence",
+      "purpose": "Prove code review, branch protection, SAST/dependency scanning, secret scanning, threat modeling, and release gates.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "SDLC policy",
+        "Scanning results",
+        "Review records",
+        "Branch protection",
+        "Secure design review artifacts"
+      ],
+      "likely_owner": "Engineering Lead / Security Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: expected in SOC 2 readiness reviews.",
+      "claim_risk": "High: do not claim secure SDLC operating effectiveness."
+    },
+    {
+      "id": "TEBI-CM-003",
+      "category": "change_management",
+      "control_area": "Provider/model route changes",
+      "evidence_name": "Provider/model route change records",
+      "purpose": "Ensure provider fallback, model roster, and data-sharing scope changes receive approval and buyer-impact review if applicable.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Route inventory",
+        "Approval workflow",
+        "Data-sharing review",
+        "Evaluation evidence",
+        "Customer notice criteria"
+      ],
+      "likely_owner": "AI Governance Lead / Legal",
+      "priority": "High",
+      "buyer_facing_relevance": "High: directly affects customer data flow.",
+      "claim_risk": "High: do not claim controlled provider changes."
+    },
+    {
+      "id": "TEBI-IR-001",
+      "category": "incident_response",
+      "control_area": "Security incident response",
+      "evidence_name": "Incident response plan and tabletop evidence",
+      "purpose": "Define severity levels, escalation, customer notification, evidence preservation, remediation, and post-incident review.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "IR policy",
+        "Severity matrix",
+        "On-call/escalation",
+        "Notification templates",
+        "Tabletop records"
+      ],
+      "likely_owner": "Security Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: standard enterprise request.",
+      "claim_risk": "High: do not claim IR readiness."
+    },
+    {
+      "id": "TEBI-IR-002",
+      "category": "incident_response",
+      "control_area": "AI/model failure response",
+      "evidence_name": "AI failure and model-route incident process",
+      "purpose": "Handle false allow, false escalate, no-select, parse failure, provider failure, leakage, and route-change incidents.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Failure taxonomy",
+        "Autopsy workflow",
+        "Incident tickets",
+        "Customer impact criteria",
+        "Regression coverage"
+      ],
+      "likely_owner": "HoloGov Owner / Security Lead",
+      "priority": "Medium",
+      "buyer_facing_relevance": "Medium: differentiates AI assurance program.",
+      "claim_risk": "Medium: do not imply active operating cadence."
+    },
+    {
+      "id": "TEBI-DR-001",
+      "category": "data_retention_deletion",
+      "control_area": "Retention schedule",
+      "evidence_name": "Production retention and disposal policy",
+      "purpose": "Define retention periods, disposal controls, legal holds, customer-enabled evidence retention, and storage classes.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Retention schedule",
+        "Implementation config",
+        "Deletion tests",
+        "Legal hold process",
+        "Owner approval"
+      ],
+      "likely_owner": "Privacy Lead / Trust Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: core buyer and privacy concern.",
+      "claim_risk": "High: do not claim production retention behavior."
+    },
+    {
+      "id": "TEBI-DR-002",
+      "category": "data_retention_deletion",
+      "control_area": "Backup deletion",
+      "evidence_name": "Backup retention and deletion evidence",
+      "purpose": "Show how deleted data and evidence-retention artifacts are handled in backups and restores.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Backup inventory",
+        "Backup retention settings",
+        "Deletion exception handling",
+        "Restore/deletion test evidence"
+      ],
+      "likely_owner": "SRE / Operations",
+      "priority": "High",
+      "buyer_facing_relevance": "Medium: needed for privacy and SOC 2 availability/confidentiality.",
+      "claim_risk": "High: do not claim deletion is complete without backup handling."
+    },
+    {
+      "id": "TEBI-LM-001",
+      "category": "logging_monitoring",
+      "control_area": "Metadata-only audit-log schema",
+      "evidence_name": "Production metadata-only audit-log target",
+      "purpose": "Define fields for timestamp, tenant ID, request ID, route, model/provider versions, selector hash, verdict, latency, tokens, errors, retries, and evidence-retention mode flag.",
+      "current_status": "target_control_only",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Runtime samples",
+        "Log storage",
+        "Access control",
+        "Retention",
+        "Redaction tests",
+        "Integrity protection"
+      ],
+      "likely_owner": "Engineering Lead / SRE",
+      "priority": "High",
+      "buyer_facing_relevance": "High: useful buyer control story if framed as target.",
+      "claim_risk": "High: do not claim logs are operating."
+    },
+    {
+      "id": "TEBI-LM-002",
+      "category": "logging_monitoring",
+      "control_area": "Monitoring and alerting",
+      "evidence_name": "Centralized logging and monitoring evidence",
+      "purpose": "Prove centralized logs, alert rules, anomaly detection, uptime checks, access controls, and retention settings.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Monitoring platform evidence",
+        "Alert catalog",
+        "Access reviews",
+        "Incident records",
+        "On-call runbook"
+      ],
+      "likely_owner": "SRE / Operations",
+      "priority": "High",
+      "buyer_facing_relevance": "High for SOC 2 Security and Availability.",
+      "claim_risk": "High: do not claim monitoring coverage."
+    },
+    {
+      "id": "TEBI-LM-003",
+      "category": "logging_monitoring",
+      "control_area": "Log access and integrity",
+      "evidence_name": "Log access control and tamper-evidence",
+      "purpose": "Show who can access logs, how log integrity is protected, and how sensitive payload fields are excluded by default.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Log access policy",
+        "Access logs",
+        "Integrity controls",
+        "Redaction tests",
+        "Retention settings"
+      ],
+      "likely_owner": "Security Lead / SRE",
+      "priority": "High",
+      "buyer_facing_relevance": "High: supports confidentiality and auditability.",
+      "claim_risk": "High: do not claim payload exclusion without samples/tests."
+    },
+    {
+      "id": "TEBI-SA-003",
+      "category": "security_architecture",
+      "control_area": "Encryption in transit",
+      "evidence_name": "TLS and transport encryption verification",
+      "purpose": "Verify TLS/provider API transport/internal service transport and certificate management in deployment.",
+      "current_status": "TBD",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "TLS configuration evidence",
+        "Certificate management",
+        "Provider API transport verification",
+        "Internal transport verification"
+      ],
+      "likely_owner": "SRE / Operations",
+      "priority": "High",
+      "buyer_facing_relevance": "High: standard buyer request.",
+      "claim_risk": "High: do not claim TLS version or coverage."
+    },
+    {
+      "id": "TEBI-SA-004",
+      "category": "security_architecture",
+      "control_area": "Encryption at rest",
+      "evidence_name": "Storage and backup encryption verification",
+      "purpose": "Verify encryption for databases, object stores, logs, evidence stores, backups, and key management.",
+      "current_status": "TBD",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Storage encryption proof",
+        "Key management evidence",
+        "Backup encryption evidence",
+        "Access controls"
+      ],
+      "likely_owner": "SRE / Operations / Security Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: standard buyer request.",
+      "claim_risk": "High: do not claim encryption coverage."
+    },
+    {
+      "id": "TEBI-SA-005",
+      "category": "security_architecture",
+      "control_area": "Secrets management",
+      "evidence_name": "Secrets inventory and rotation evidence",
+      "purpose": "Centralize secrets storage, rotation, access logging, CI/CD secret handling, and secret scanning.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Secrets inventory",
+        "Vault/config evidence",
+        "Rotation records",
+        "Access logs",
+        "Secret scanning"
+      ],
+      "likely_owner": "Security Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: standard SOC 2 security control.",
+      "claim_risk": "High: do not claim secrets management maturity."
+    },
+    {
+      "id": "TEBI-SA-006",
+      "category": "security_architecture",
+      "control_area": "Vulnerability management",
+      "evidence_name": "Vulnerability management evidence",
+      "purpose": "Define scan cadence, severity SLAs, patch workflow, penetration testing, dependency inventory, and exceptions.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Scan reports",
+        "Dependency inventory",
+        "Remediation tickets",
+        "Exception register",
+        "Pen test plan"
+      ],
+      "likely_owner": "Security Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: standard buyer and SOC 2 evidence request.",
+      "claim_risk": "High: do not claim vulnerability program coverage."
+    },
+    {
+      "id": "TEBI-SA-007",
+      "category": "security_architecture",
+      "control_area": "Backup and disaster recovery",
+      "evidence_name": "Backup/restore and DR evidence",
+      "purpose": "Define backup scope, restore tests, RTO/RPO, DR runbook, dependency failure response, and periodic validation.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Backup policy",
+        "Restore evidence",
+        "RTO/RPO",
+        "DR test",
+        "Dependency map"
+      ],
+      "likely_owner": "SRE / Operations",
+      "priority": "Medium",
+      "buyer_facing_relevance": "Medium to high if production service availability is in scope.",
+      "claim_risk": "High: do not claim availability resilience."
+    },
+    {
+      "id": "TEBI-CFT-001",
+      "category": "customer_facing_trust_materials",
+      "control_area": "Buyer-safe language",
+      "evidence_name": "Buyer-facing safe/TBD/must-not-claim language",
+      "purpose": "Provide safe statements for enterprise buyers while preserving TBD and must-not-claim boundaries.",
+      "current_status": "draft_artifact_exists",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Approved security FAQ",
+        "Privacy FAQ",
+        "Legal review",
+        "Sales enablement controls"
+      ],
+      "likely_owner": "Trust Lead / Legal / Product Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: supports immediate buyer conversations.",
+      "claim_risk": "Medium: low if caveats stay visible; high if shortened into claims."
+    },
+    {
+      "id": "TEBI-CFT-002",
+      "category": "customer_facing_trust_materials",
+      "control_area": "Security FAQ",
+      "evidence_name": "HoloEngine security FAQ",
+      "purpose": "Convert verified and target-only items into a buyer-safe Q&A with explicit TBD boundaries.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Security FAQ draft",
+        "Legal/security review",
+        "Claim register",
+        "Approved responses"
+      ],
+      "likely_owner": "Trust Lead / Security Lead",
+      "priority": "Medium",
+      "buyer_facing_relevance": "High: common procurement artifact.",
+      "claim_risk": "High: must not overstate unverified controls."
+    },
+    {
+      "id": "TEBI-CFT-003",
+      "category": "customer_facing_trust_materials",
+      "control_area": "Privacy/data-handling FAQ",
+      "evidence_name": "HoloEngine privacy/data-handling FAQ",
+      "purpose": "Explain data classes, production versus benchmark mode, provider exposure, retention, deletion, and support access.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Privacy FAQ draft",
+        "Legal/privacy review",
+        "Verified data map",
+        "Provider-contract outcomes"
+      ],
+      "likely_owner": "Privacy Lead / Legal",
+      "priority": "High",
+      "buyer_facing_relevance": "High: critical for buyer review.",
+      "claim_risk": "High: must not claim privacy controls or provider terms are verified."
+    },
+    {
+      "id": "TEBI-CFT-004",
+      "category": "customer_facing_trust_materials",
+      "control_area": "Vendor/subprocessor list",
+      "evidence_name": "Vendor/subprocessor list",
+      "purpose": "Provide approved provider/vendor/subprocessor disclosure when contract and subprocessor review is complete.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Provider contracts",
+        "Subprocessor lists",
+        "Update cadence",
+        "Legal approval"
+      ],
+      "likely_owner": "Legal / Trust Lead",
+      "priority": "High",
+      "buyer_facing_relevance": "High: enterprise requirement.",
+      "claim_risk": "High: do not imply subprocessors are approved."
+    },
+    {
+      "id": "TEBI-CFT-005",
+      "category": "customer_facing_trust_materials",
+      "control_area": "Design-partner secure pilot package",
+      "evidence_name": "Secure pilot trust package",
+      "purpose": "Package target architecture, claim boundaries, provider TBDs, retention mode choices, and evidence gaps for design partners.",
+      "current_status": "missing",
+      "source_artifact": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": [
+        "Pilot terms",
+        "Customer data-handling addendum",
+        "Support/access SOP",
+        "Logging/retention settings",
+        "Legal review"
+      ],
+      "likely_owner": "Product Lead / Trust Lead / Legal",
+      "priority": "Medium",
+      "buyer_facing_relevance": "High for early enterprise pilots.",
+      "claim_risk": "High: must not imply production certification or operating effectiveness."
+    }
+  ],
+  "immediate_binder_actions": [
+    "Assign a named owner to each likely owner role.",
+    "Create evidence folders for Trust, Security, Privacy, Legal, Engineering, SRE, Product, Support, HoloGov, and HoloVerify.",
+    "Convert each missing, TBD, and target_control_only item into tracked work with due date and evidence location.",
+    "Create a buyer-claim register that maps approved phrases to evidence artifacts and blocks unsupported claims.",
+    "Keep HoloVerify benchmark/evidence artifacts physically and semantically separate from production customer-mode evidence."
+  ],
+  "validation_requirements": {
+    "json_parse": true,
+    "git_diff_check": true,
+    "no_staging": true,
+    "no_commit": true,
+    "no_push": true,
+    "no_providers": true,
+    "no_holoengine_live": true,
+    "no_hologov_live": true,
+    "no_solo": true,
+    "no_judges": true
+  }
+}

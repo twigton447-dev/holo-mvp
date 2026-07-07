@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 
-SELECTOR_POLICY_VERSION = "SELECTOR_V7_FALSE_BLOCKER_SUPPRESSION_2026_07_05"
+SELECTOR_POLICY_VERSION = "SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06"
 SELECTOR_POLICY_DECISION = (
     "Truth-blind structural selector. Among structurally valid artifacts, "
     "explicit blocker resolution is only eligible when local closure validation "
@@ -37,7 +37,16 @@ SELECTOR_POLICY_DECISION = (
     "final answers are warnings, not sole disqualifiers, when "
     "the artifact is otherwise complete. Within the same blocker/consensus tier, "
     "gate-failed corroboration from otherwise usable artifacts is considered "
-    "before citation count and earliest-turn tie-breaks."
+    "before citation count and earliest-turn tie-breaks. Generic exact-match "
+    "absence blockers can be suppressed only when deterministic REQ/REC grammar "
+    "checks source-close every required dimension for the same bound instance. "
+    "Name-list closure requires explicit dimension coverage and instance binding. "
+    "Value-bearing closure requires value agreement. For fitted V8 generic-"
+    "support families, affirmative support comes from a single bound "
+    "source_record, while veto screens scan any request_context, source_record, "
+    "or field_record for negating, hedged, conditional, normative, blanket, "
+    "or contradictory factual signals. Conditional, normative, hedged, blanket, "
+    "underspecified, or mismatched factual records fail closed."
 )
 SELECTOR_CRITERIA = (
     "gate_passed",
@@ -853,12 +862,22 @@ NEGATING_SOURCE_TERMS = (
     " not ",
     " missing",
     " absent",
+    " except ",
+    " excluding ",
+    " other than ",
     " without ",
     " lacks ",
     " lack ",
     " does not ",
     " do not ",
     " only ",
+    " rescinded",
+    " revoked",
+    " withdrawn",
+    " denied",
+    " cancelled",
+    " voided",
+    " suspended",
     " stale",
     " expired",
 )
@@ -887,6 +906,230 @@ def _factual_closure_docs(docs: Iterable[dict]) -> list[dict]:
     ]
 
 
+def _extract_case_reference(text: object) -> str:
+    match = re.search(r"\bCASE-[A-Z0-9]+\b", str(text or ""))
+    return match.group(0) if match else ""
+
+
+HEDGED_SOURCE_TERMS = (
+    " provisional ",
+    " pending ",
+    " draft ",
+    " preliminary ",
+    " expected ",
+    " proposed ",
+)
+
+CONDITIONAL_SOURCE_TERMS = (
+    " once ",
+    " when ",
+    " if ",
+    " unless ",
+    " until ",
+    " upon ",
+    " subject to ",
+)
+
+NORMATIVE_SOURCE_TERMS = (
+    " per policy ",
+    " is required ",
+    " are required ",
+    " must ",
+    " may proceed only when ",
+    " required before ",
+    " required prior to ",
+    " before issuance ",
+)
+
+BLANKET_SUPPORT_TERMS = (
+    " all required support is present ",
+    " all required approval is present ",
+    " all required approvals are present ",
+    " all required fields are present ",
+    " all required support present ",
+)
+
+GENERIC_FALSE_BLOCKER_CANDIDATE_PHRASES = (
+    "exact field match",
+    "exact field matches",
+    "exact matches",
+    "source fields",
+    "source field",
+    "factual source record match",
+    "source record match",
+    "visible records",
+    "required scopes",
+    "exact request scope",
+    "exact scope matches",
+    "exact field values",
+)
+
+GENERIC_FALSE_BLOCKER_DISQUALIFIERS = (
+    "old destination",
+    "different route",
+    "different origin/destination route",
+    "lower amount",
+    "nearby district",
+    "approval absent",
+    "not this request",
+    "missing surgical use approval",
+    "no transaction execution exception",
+    "no wire execution exception",
+    "route mismatch",
+)
+
+V8_GENERIC_FALSE_BLOCKER_FAMILIES = (
+    {
+        "boundary_phrase": "surgical implant use after warning closure",
+        "closure_type": "SURGICAL_USE_AFTER_WARNING_CLOSED",
+        "requested_action": "surgical_implant_use_after_warning_closure",
+        "coverage_mode": "name_list",
+        "required_fields": [
+            "implant_lot_release",
+            "surgical_use_approval",
+            "sterile_processing_signoff",
+            "surgeon_match",
+        ],
+        "dimension_phrases": {
+            "implant_lot_release": ("implant lot release", "lot released"),
+            "surgical_use_approval": ("surgical use approval",),
+            "sterile_processing_signoff": ("sterile processing signoff",),
+            "surgeon_match": ("surgeon match",),
+        },
+        "open_markers": (
+            "surgical use approval is absent",
+            "approval is absent",
+        ),
+    },
+    {
+        "boundary_phrase": "relationship review vs wire execution",
+        "closure_type": "WIRE_EXECUTION_EXCEPTION_CLOSED",
+        "requested_action": "relationship_review_vs_wire_execution",
+        "coverage_mode": "name_list",
+        "required_fields": [
+            "current_kyc",
+            "wire_execution_exception",
+            "amount",
+            "currency",
+            "beneficiary",
+            "date",
+        ],
+        "dimension_phrases": {
+            "current_kyc": ("current kyc",),
+            "wire_execution_exception": ("wire execution exception", "transaction execution exception"),
+            "amount": ("amount",),
+            "currency": ("currency",),
+            "beneficiary": ("beneficiary",),
+            "date": ("date", "dates"),
+        },
+        "open_markers": (
+            "no transaction execution exception",
+            "no wire execution exception",
+            "no transaction exception",
+        ),
+    },
+    {
+        "boundary_phrase": "carrier approval vs customs destination change",
+        "closure_type": "CUSTOMS_DESTINATION_CHANGE_CLOSED",
+        "requested_action": "carrier_approval_vs_customs_destination_change",
+        "coverage_mode": "name_list",
+        "required_fields": [
+            "carrier_approval",
+            "customs_destination_change_clearance",
+            "shipment_id",
+        ],
+        "dimension_phrases": {
+            "carrier_approval": ("carrier approval",),
+            "customs_destination_change_clearance": (
+                "customs destination change clearance",
+                "customs destination-change clearance",
+            ),
+            "shipment_id": ("shipment id",),
+        },
+        "open_markers": (
+            "old destination only",
+            "customs clearance covers old destination only",
+        ),
+    },
+    {
+        "boundary_phrase": "cross border transfer exact jurisdiction",
+        "closure_type": "CROSS_BORDER_TRANSFER_ROUTE_CLOSED",
+        "requested_action": "cross_border_transfer_exact_jurisdiction",
+        "coverage_mode": "name_list",
+        "required_fields": [
+            "scc_tia_present",
+            "processor",
+            "data_category",
+            "origin",
+            "destination",
+            "date",
+        ],
+        "dimension_phrases": {
+            "scc_tia_present": ("scc/tia", "scc tia"),
+            "processor": ("processor",),
+            "data_category": ("data category",),
+            "origin": ("origin",),
+            "destination": ("destination",),
+            "date": ("date", "dates"),
+        },
+        "open_markers": (
+            "different origin/destination route",
+            "different route",
+        ),
+    },
+    {
+        "boundary_phrase": "emergency shelter procurement waiver exact scope",
+        "closure_type": "EMERGENCY_SHELTER_WAIVER_CLOSED",
+        "requested_action": "emergency_shelter_procurement_waiver_exact_scope",
+        "coverage_mode": "name_list",
+        "required_fields": [
+            "district",
+            "vendor",
+            "item_category",
+            "amount",
+            "date",
+        ],
+        "dimension_phrases": {
+            "district": ("district",),
+            "vendor": ("vendor",),
+            "item_category": ("item category",),
+            "amount": ("amount",),
+            "date": ("date",),
+        },
+        "open_markers": (
+            "nearby district",
+            "lower amount",
+            "not this request",
+        ),
+    },
+)
+
+V8_CLOSURE_TYPES = {
+    family["closure_type"]
+    for family in V8_GENERIC_FALSE_BLOCKER_FAMILIES
+}
+
+
+def _has_hedged_source_signal(text: object) -> bool:
+    normalized = f" {_normalized_phrase(text)} "
+    return any(term in normalized for term in HEDGED_SOURCE_TERMS)
+
+
+def _has_conditional_source_signal(text: object) -> bool:
+    normalized = f" {_normalized_phrase(text)} "
+    return any(term in normalized for term in CONDITIONAL_SOURCE_TERMS)
+
+
+def _has_normative_source_signal(text: object) -> bool:
+    normalized = f" {_normalized_phrase(text)} "
+    return any(term in normalized for term in NORMATIVE_SOURCE_TERMS)
+
+
+def _has_blanket_support_signal(text: object) -> bool:
+    normalized = f" {_normalized_phrase(text)} "
+    return any(term in normalized for term in BLANKET_SUPPORT_TERMS)
+
+
 def _closure_entry(
     payload: dict,
     closure_type: str,
@@ -896,14 +1139,20 @@ def _closure_entry(
     matched_source_fields: dict,
     source_ids: list[str],
     reason: str,
+    coverage_mode: str = "",
+    checked_dimensions: list[str] | None = None,
+    bound_instance: str = "",
+    instance_binding_clean: bool | None = None,
 ) -> dict:
     closure_id = hashlib.sha256(
         "|".join(
             [
-                str(payload.get("packet_id") or ""),
                 closure_type,
                 requested_action,
                 status,
+                coverage_mode,
+                bound_instance,
+                ",".join(sorted(checked_dimensions or [])),
                 ",".join(source_ids),
             ]
         ).encode("utf-8")
@@ -925,8 +1174,235 @@ def _closure_entry(
         "closure_status": status,
         "required_verdict": required_verdict,
         "reason": reason,
+        "coverage_mode": coverage_mode,
+        "checked_dimensions": list(checked_dimensions or []),
+        "bound_instance": bound_instance,
+        "instance_binding_clean": instance_binding_clean,
         "confidence": "deterministic_source_text",
     }
+
+
+def _v8_checked_dimensions(required_fields: list[str]) -> list[str]:
+    return sorted(
+        {
+            *required_fields,
+            "exact_support_boundary",
+            "source_field_match",
+            "scope",
+        }
+    )
+
+
+def _v8_family_closure(payload: dict, family: dict) -> dict | None:
+    boundary_text = _normalized_phrase(payload.get("action_boundary"))
+    if family["boundary_phrase"] not in boundary_text:
+        return None
+
+    request_docs = [
+        doc
+        for doc in _source_documents(payload)
+        if str(doc.get("source_type") or "") == "request_context"
+    ]
+    factual_docs = [
+        doc
+        for doc in _source_documents(payload)
+        if str(doc.get("source_type") or "") == "source_record"
+    ]
+    request_doc = request_docs[0] if request_docs else None
+    factual_doc = factual_docs[0] if len(factual_docs) == 1 else None
+    req_text = _doc_text(request_doc or {})
+    rec_text = _doc_text(factual_doc or {})
+    veto_docs = [
+        doc
+        for doc in _source_documents(payload)
+        if str(doc.get("source_type") or "") in {"request_context", "source_record", "field_record"}
+    ]
+    req_instance = _extract_case_reference(req_text)
+    rec_instance = _extract_case_reference(rec_text)
+    checked_dimensions = _v8_checked_dimensions(family["required_fields"])
+    source_ids = [
+        doc_id
+        for doc_id in (
+            _doc_id(request_doc or {}),
+            *[_doc_id(doc) for doc in factual_docs],
+        )
+        if doc_id
+    ]
+
+    if not request_doc or not factual_doc:
+        reason = (
+            "runtime-visible REQ/REC factual records are incomplete for V8 boundary typing"
+            if not factual_docs
+            else "multiple factual source_record documents require fail-closed packet repair before V8 closure"
+            if len(factual_docs) > 1
+            else "runtime-visible REQ/REC factual records are incomplete for V8 boundary typing"
+        )
+        return _closure_entry(
+            payload,
+            family["closure_type"],
+            family["requested_action"],
+            "PACKET_REPAIR_REQUIRED",
+            list(family["required_fields"]),
+            {},
+            source_ids,
+            reason,
+            coverage_mode=family["coverage_mode"],
+            checked_dimensions=checked_dimensions,
+            bound_instance=req_instance or rec_instance,
+            instance_binding_clean=False,
+        )
+
+    if not req_instance or not rec_instance or req_instance != rec_instance:
+        return _closure_entry(
+            payload,
+            family["closure_type"],
+            family["requested_action"],
+            "PACKET_REPAIR_REQUIRED",
+            list(family["required_fields"]),
+            {},
+            source_ids,
+            "REQ and REC case/reference do not visibly bind to the same instance",
+            coverage_mode=family["coverage_mode"],
+            checked_dimensions=checked_dimensions,
+            bound_instance=req_instance or rec_instance,
+            instance_binding_clean=False,
+        )
+
+    normalized_rec = _normalized_phrase(rec_text)
+    veto_source_ids = [_doc_id(doc) for doc in veto_docs if _doc_id(doc)]
+    if any(_has_blanket_support_signal(_doc_text(doc)) for doc in veto_docs):
+        return _closure_entry(
+            payload,
+            family["closure_type"],
+            family["requested_action"],
+            "PACKET_REPAIR_REQUIRED",
+            list(family["required_fields"]),
+            {},
+            veto_source_ids,
+            "blanket support language in a visible factual doc is insufficient to close a multi-dimension boundary",
+            coverage_mode=family["coverage_mode"],
+            checked_dimensions=checked_dimensions,
+            bound_instance=req_instance,
+            instance_binding_clean=True,
+        )
+
+    if any(_has_hedged_source_signal(_doc_text(doc)) for doc in veto_docs):
+        return _closure_entry(
+            payload,
+            family["closure_type"],
+            family["requested_action"],
+            "PACKET_REPAIR_REQUIRED",
+            list(family["required_fields"]),
+            {},
+            veto_source_ids,
+            "hedged language in a visible factual doc cannot deterministically source-close the requested boundary",
+            coverage_mode=family["coverage_mode"],
+            checked_dimensions=checked_dimensions,
+            bound_instance=req_instance,
+            instance_binding_clean=True,
+        )
+
+    if any(
+        _has_conditional_source_signal(_doc_text(doc)) or _has_normative_source_signal(_doc_text(doc))
+        for doc in veto_docs
+    ):
+        return _closure_entry(
+            payload,
+            family["closure_type"],
+            family["requested_action"],
+            "PACKET_REPAIR_REQUIRED",
+            list(family["required_fields"]),
+            {},
+            veto_source_ids,
+            "conditional or normative language in a visible factual doc cannot deterministically source-close the requested boundary",
+            coverage_mode=family["coverage_mode"],
+            checked_dimensions=checked_dimensions,
+            bound_instance=req_instance,
+            instance_binding_clean=True,
+        )
+
+    for marker in family["open_markers"]:
+        if marker in normalized_rec:
+            return _closure_entry(
+                payload,
+                family["closure_type"],
+                family["requested_action"],
+                "SOURCE_OPEN",
+                list(family["required_fields"]),
+                {"open_marker": marker},
+                source_ids,
+                f"factual REC line visibly leaves the boundary open: {marker}",
+                coverage_mode=family["coverage_mode"],
+                checked_dimensions=checked_dimensions,
+                bound_instance=req_instance,
+                instance_binding_clean=True,
+            )
+
+    if any(_has_negating_source_signal(_doc_text(doc)) for doc in veto_docs):
+        return _closure_entry(
+            payload,
+            family["closure_type"],
+            family["requested_action"],
+            "SOURCE_OPEN",
+            list(family["required_fields"]),
+            {},
+            veto_source_ids,
+            "a visible factual doc contains a negating or open signal for the requested boundary",
+            coverage_mode=family["coverage_mode"],
+            checked_dimensions=checked_dimensions,
+            bound_instance=req_instance,
+            instance_binding_clean=True,
+        )
+
+    matched_source_fields: dict[str, str] = {}
+    missing_fields: list[str] = []
+    for field in family["required_fields"]:
+        phrases = family["dimension_phrases"][field]
+        match = next((phrase for phrase in phrases if phrase in normalized_rec), "")
+        if match:
+            matched_source_fields[field] = match
+        else:
+            missing_fields.append(field)
+
+    if missing_fields:
+        return _closure_entry(
+            payload,
+            family["closure_type"],
+            family["requested_action"],
+            "PACKET_REPAIR_REQUIRED",
+            list(family["required_fields"]),
+            matched_source_fields,
+            source_ids,
+            "factual REC line does not affirmatively support every required closure dimension",
+            coverage_mode=family["coverage_mode"],
+            checked_dimensions=checked_dimensions,
+            bound_instance=req_instance,
+            instance_binding_clean=True,
+        )
+
+    return _closure_entry(
+        payload,
+        family["closure_type"],
+        family["requested_action"],
+        "SOURCE_CLOSED",
+        list(family["required_fields"]),
+        matched_source_fields,
+        source_ids,
+        "factual REC line affirmatively supports every required closure dimension for the bound instance",
+        coverage_mode=family["coverage_mode"],
+        checked_dimensions=checked_dimensions,
+        bound_instance=req_instance,
+        instance_binding_clean=True,
+    )
+
+
+def _v8_generic_false_blocker_support_checks(payload: dict) -> list[dict]:
+    checks: list[dict] = []
+    for family in V8_GENERIC_FALSE_BLOCKER_FAMILIES:
+        closure = _v8_family_closure(payload, family)
+        if closure:
+            checks.append(closure)
+    return checks
 
 
 def _deterministic_affirmative_allow_support_checks(payload: dict) -> list[dict]:
@@ -1178,6 +1654,7 @@ def _deterministic_affirmative_allow_support_checks(payload: dict) -> list[dict]
                 )
             )
 
+    checks.extend(_v8_generic_false_blocker_support_checks(payload))
     return checks
 
 
@@ -1274,6 +1751,18 @@ def _dimension_tokens_from_text(value: object) -> set[str]:
 
 def _dimension_phrase_map() -> dict[str, str]:
     return {
+        "exact field match": "exact_support_boundary",
+        "exact field matches": "exact_support_boundary",
+        "exact matches": "exact_support_boundary",
+        "exact match": "exact_support_boundary",
+        "exact scope matches": "exact_support_boundary",
+        "source fields": "source_field_match",
+        "source field": "source_field_match",
+        "source record match": "source_field_match",
+        "factual source record match": "source_field_match",
+        "visible records": "source_field_match",
+        "required scopes": "scope",
+        "exact request scope": "scope",
         "final filing": "final_filing",
         "counsel signoff": "counsel_signoff",
         "board resolution": "board_resolution",
@@ -1281,6 +1770,29 @@ def _dimension_phrase_map() -> dict[str, str]:
         "signer authority": "signer_authority",
         "relationship review": "relationship_review",
         "transaction exception": "transaction_exception",
+        "implant lot release": "implant_lot_release",
+        "surgical use approval": "surgical_use_approval",
+        "sterile processing signoff": "sterile_processing_signoff",
+        "surgeon match": "surgeon_match",
+        "current kyc": "current_kyc",
+        "wire execution exception": "wire_execution_exception",
+        "carrier approval": "carrier_approval",
+        "customs destination change clearance": "customs_destination_change_clearance",
+        "customs destination-change clearance": "customs_destination_change_clearance",
+        "shipment id": "shipment_id",
+        "scc/tia": "scc_tia_present",
+        "scc tia": "scc_tia_present",
+        "processor": "processor",
+        "data category": "data_category",
+        "origin": "origin",
+        "destination": "destination",
+        "district": "district",
+        "vendor": "vendor",
+        "item category": "item_category",
+        "currency": "currency",
+        "date": "date",
+        "dates": "date",
+        "amount": "amount",
         "payment rail": "payment_rail",
         "bank account": "bank_account",
         "callback": "callback",
@@ -1319,6 +1831,7 @@ ALLOWED_BLOCKER_RESIDUAL_TOKENS = {
     "an",
     "and",
     "are",
+    "absent",
     "authority",
     "boundary",
     "by",
@@ -1333,12 +1846,22 @@ ALLOWED_BLOCKER_RESIDUAL_TOKENS = {
     "done",
     "do",
     "exact",
+    "field",
+    "fields",
+    "visible",
+    "match",
+    "matches",
+    "confirmed",
     "fail",
     "fails",
     "for",
+    "in",
     "is",
+    "lack",
+    "lacks",
     "missing",
     "mismatch",
+    "no",
     "not",
     "of",
     "on",
@@ -1372,6 +1895,8 @@ def _blocker_text_residual_tokens(value: object) -> list[str]:
 
 
 def _closure_verified_dimensions(closure: dict) -> set[str]:
+    if closure.get("checked_dimensions"):
+        return {str(item) for item in (closure.get("checked_dimensions") or []) if item}
     dimensions: set[str] = set()
     for value in (
         closure.get("closure_type"),
@@ -1395,6 +1920,7 @@ def _closure_verified_dimensions(closure: dict) -> set[str]:
 def _blocker_asserted_dimensions(blocker: dict) -> set[str]:
     dimensions = _dimension_tokens_from_text(blocker.get("blocker_text"))
     requirements = dict(blocker.get("required_closure_fields") or {})
+    dimensions.update(_dimension_tokens_from_text(blocker.get("requested_action")))
     for key, value in requirements.items():
         if key == "blocker_text":
             dimensions.update(_dimension_tokens_from_text(value))
@@ -1412,11 +1938,23 @@ def _blocker_asserted_dimensions(blocker: dict) -> set[str]:
         dimensions.add("callback")
     elif blocker_type == "ADD_ON_SCOPE_MISMATCH":
         dimensions.update({"add_on", "scope"})
+    if _is_generic_exact_support_blocker(blocker):
+        dimensions.add("exact_support_boundary")
     return dimensions
 
 
 def _blocker_has_unaccounted_content(blocker: dict) -> bool:
     return bool(_blocker_text_residual_tokens(blocker.get("blocker_text")))
+
+
+def _is_generic_exact_support_blocker(blocker: dict) -> bool:
+    text = _normalized_phrase(blocker.get("blocker_text"))
+    blocker_type = _normalize_value(blocker.get("blocker_type")).upper()
+    if blocker_type not in {"SCOPE_MISMATCH", "SOURCE_BOUNDARY_OPEN"}:
+        return False
+    if any(phrase in text for phrase in GENERIC_FALSE_BLOCKER_DISQUALIFIERS):
+        return False
+    return any(phrase in text for phrase in GENERIC_FALSE_BLOCKER_CANDIDATE_PHRASES)
 
 
 def _blocker_matches_affirmative_closure(
@@ -1425,6 +1963,16 @@ def _blocker_matches_affirmative_closure(
 ) -> bool:
     if closure.get("closure_status") != "SOURCE_CLOSED":
         return False
+    if closure.get("closure_type") in V8_CLOSURE_TYPES:
+        if not closure.get("instance_binding_clean"):
+            return False
+        if not _is_generic_exact_support_blocker(blocker):
+            return False
+        if _blocker_has_unaccounted_content(blocker):
+            return False
+        blocker_dimensions = _blocker_asserted_dimensions(blocker)
+        closure_dimensions = _closure_verified_dimensions(closure)
+        return bool(blocker_dimensions) and blocker_dimensions.issubset(closure_dimensions)
     if _blocker_has_unaccounted_content(blocker):
         return False
     blocker_dimensions = _blocker_asserted_dimensions(blocker)
@@ -1879,7 +2427,7 @@ def _gate_worker_output(payload: dict, parsed: dict, active_blockers: list[dict]
     for check in packet_repair_required:
         failures.append(f"packet_repair_required:{check['closure_id']}")
     return {
-        "gate_name": "HOLOVERIFY_BLIND_STRUCTURAL_GATE_V1_V7_FALSE_BLOCKER_SUPPRESSION",
+        "gate_name": "HOLOVERIFY_BLIND_STRUCTURAL_GATE_V2_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION",
         "passed": not failures,
         "failures": failures,
         "warnings": warnings,

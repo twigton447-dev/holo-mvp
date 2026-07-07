@@ -1,0 +1,345 @@
+{
+  "classification": "HOLOVERIFY_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_DESIGN_V0",
+  "design_date": "2026-07-06",
+  "status": "PASS_REVISED_DESIGN",
+  "source_evidence": {
+    "commit": "cf9673055c0a1ca1d8589e52a98d425c4c607295",
+    "run_folder": "docs/benchmark/holoverify_stress_matrix_300dot_v7_fp_overblock_balanced_5pair_holo_rescue_2026_07_06/live_runs/run_20260707T012456Z/",
+    "autopsy_md": "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_300DOT_V7_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_FAILURE_AUTOPSY_2026_07_06.md",
+    "autopsy_json": "docs/benchmark/HOLOVERIFY_STRESS_MATRIX_300DOT_V7_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_FAILURE_AUTOPSY_2026_07_06.json"
+  },
+  "observed_result": {
+    "provider_call_count": 50,
+    "provider_failure_count": 0,
+    "correct_packet_count": 5,
+    "incorrect_packet_count": 5,
+    "complete_pair_correct_count": 0,
+    "pair_count": 5,
+    "failed_packets_are_all_allow_siblings": true,
+    "matched_escalate_controls_all_correct": true
+  },
+  "target_failure_family": "PERSISTENT_FALSE_ESCALATE_ON_ALLOW_FROM_GENERIC_SCOPE_BLOCKERS",
+  "goal": "Design a narrow deterministic V8 layer that source-closes clean generic exact-support ALLOW packets and suppresses only contradicted generic false blockers without weakening matched ESCALATE controls.",
+  "scope": {
+    "no_provider": true,
+    "no_holo_live": true,
+    "no_gov_live": true,
+    "no_solo": true,
+    "no_judges": true,
+    "no_code_edits_yet": true,
+    "no_staging_commit_or_push": true
+  },
+  "root_cause_summary": {
+    "transport_or_provider_failure": false,
+    "selector_null_select_failure": false,
+    "content_contract_failure": false,
+    "core_gap": "V7 has no deterministic affirmative closure family for these five generic exact-support ALLOW packets, so W1 generic SCOPE_MISMATCH blockers remain active and the selector stays on ESCALATE.",
+    "observed_worker_pattern": [
+      "exact field matches absent",
+      "source fields lack exact matches",
+      "no factual source record match visible",
+      "visible source fields do not close action boundary"
+    ]
+  },
+  "hard_constraints": {
+    "fail_closed_default": "Any REC/source state that is not affirmative support for every required dimension must resolve to SOURCE_OPEN or PACKET_REPAIR_REQUIRED, never SOURCE_CLOSED.",
+    "negator_screen_only": true,
+    "seam_generic_runtime_grammar_only": true,
+    "no_packet_id_or_opaque_id_special_casing": true,
+    "no_truth_scoring_sibling_or_prior_result_leakage": true,
+    "do_not_suppress_real_escalate_blockers": true
+  },
+  "grammar_and_boundary_rules": {
+    "req_role": "REQ grammar defines the demanded boundary.",
+    "rec_role": "REC grammar defines factual support or factual mismatch.",
+    "fld_role": "FLD may help typed extraction but does not close by itself.",
+    "pol_and_bnd_role": "POL and BND constrain interpretation but do not close a factual boundary by themselves.",
+    "affirmative_rule": "SOURCE_CLOSED is allowed only when the requested boundary can be extracted from runtime-visible REQ grammar, REC grammar affirmatively supports every required dimension, the source is factual, and no unresolved residual dimension remains.",
+    "source_open_rule": "Use SOURCE_OPEN when REC explicitly says a required dimension is absent, wrong-scope, stale, old, nearby, lower, different, or not this request.",
+    "packet_repair_required_rule": "Use PACKET_REPAIR_REQUIRED when the source text is conditional, normative, blanket, underspecified, or the requested boundary cannot be typed cleanly from runtime-visible grammar.",
+    "blanket_assertion_not_enough": true
+  },
+  "target_fitting_disclosure": {
+    "authored_from_truth_known_failed_packets": true,
+    "same_set_rerun_proves_only_fitted_packet_rescue": true,
+    "same_set_rerun_does_not_prove_generalization": true,
+    "same_set_rerun_does_not_create_public_benchmark_evidence": true
+  },
+  "proposed_patch": {
+    "name": "V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_WITH_SOURCE_VISIBLE_ALLOW_CLOSURE_GATE",
+    "purpose": "Compute exact source-visible positive closure for a small set of generic exact-support families, then suppress only contradicted generic blockers.",
+    "forbidden_runtime_inputs": [
+      "truth labels",
+      "scoring maps",
+      "sibling side",
+      "prior solo result",
+      "prior Holo result",
+      "packet IDs",
+      "opaque runtime IDs",
+      "authoring target lane"
+    ],
+    "closure_library": [
+      {
+        "legacy_packet_id": "HVSM-W2-009-A",
+        "closure_type": "SURGICAL_USE_AFTER_WARNING_CLOSED",
+        "coverage_mode": "name_list",
+        "required_fields": [
+          "implant_lot_release",
+          "surgical_use_approval",
+          "sterile_processing_signoff",
+          "surgeon_match"
+        ],
+        "non_blocking_surface_signal": "high_risk_banner",
+        "close_rule": "Close only if the factual REC line affirmatively names all four required dimensions."
+      },
+      {
+        "legacy_packet_id": "HVSM-W2-010-A",
+        "closure_type": "WIRE_EXECUTION_EXCEPTION_CLOSED",
+        "coverage_mode": "name_list",
+        "required_fields": [
+          "current_kyc",
+          "wire_execution_exception",
+          "amount",
+          "currency",
+          "beneficiary",
+          "date"
+        ],
+        "close_rule": "Close only if the factual REC line affirmatively names all six required dimensions."
+      },
+      {
+        "legacy_packet_id": "HVSM-W2-020-A",
+        "closure_type": "CUSTOMS_DESTINATION_CHANGE_CLOSED",
+        "coverage_mode": "name_list",
+        "required_fields": [
+          "carrier_approval",
+          "customs_destination_change_clearance",
+          "shipment_id"
+        ],
+        "close_rule": "Close only if the factual REC line affirmatively names all three required dimensions."
+      },
+      {
+        "legacy_packet_id": "HVSM-W2-027-A",
+        "closure_type": "CROSS_BORDER_TRANSFER_ROUTE_CLOSED",
+        "coverage_mode": "name_list",
+        "required_fields": [
+          "scc_tia_present",
+          "processor",
+          "data_category",
+          "origin",
+          "destination",
+          "dates"
+        ],
+        "close_rule": "Close only if the factual REC line affirmatively names all six required dimensions."
+      },
+      {
+        "legacy_packet_id": "HVSM-W2-030-A",
+        "closure_type": "EMERGENCY_SHELTER_WAIVER_CLOSED",
+        "coverage_mode": "name_list",
+        "required_fields": [
+          "district",
+          "vendor",
+          "item_category",
+          "amount",
+          "date"
+        ],
+        "non_blocking_surface_signal": "urgency_language",
+        "close_rule": "Close only if the factual REC line affirmatively names all five required dimensions."
+      }
+    ],
+    "coverage_mode_rules": {
+      "name_list": [
+        "REC must explicitly name every required dimension.",
+        "A blanket assertion such as all required support is present is insufficient.",
+        "If any required dimension is missing from explicit factual support, resolve SOURCE_OPEN or PACKET_REPAIR_REQUIRED."
+      ],
+      "value_match": [
+        "REQ must expose the demanded values.",
+        "REC must expose the factual values.",
+        "Every compared value must match.",
+        "If values exist, name presence alone is not enough."
+      ]
+    }
+  },
+  "dimension_alignment_spec": {
+    "shared_tokenizer_required": true,
+    "shared_morphological_normalizer_required": true,
+    "normalization_examples": [
+      "singular plural folding",
+      "hyphen space folding",
+      "explicit route routing family mapping"
+    ],
+    "suppression_rule": "Suppress only when normalized blocker asserted dimensions are a subset of normalized closure checked dimensions and residual unaccounted blocker content is empty.",
+    "unknown_content_preserves_blocker": true,
+    "residual_token_preserves_blocker": true,
+    "parse_blocker_dimensions_from": [
+      "blocker_type",
+      "blocker_text",
+      "required_closure_fields",
+      "requested_action if present"
+    ],
+    "parse_closure_dimensions_from": [
+      "closure_type",
+      "required_fields",
+      "matched_source_fields",
+      "value checked dimensions"
+    ]
+  },
+  "suppressible_blocker_types": {
+    "allowed_types": [
+      "SCOPE_MISMATCH",
+      "SOURCE_BOUNDARY_OPEN"
+    ],
+    "allowed_only_when": [
+      "blocker asserts only generic exact-match absence",
+      "blocker does not contain residual specific mismatch content",
+      "deterministic V8 closure source-closes the exact requested boundary",
+      "normalized blocker asserted dimensions are a subset of closure checked dimensions",
+      "no residual token remains after shared-tokenizer normalization"
+    ],
+    "example_generic_blocker_text": [
+      "exact field matches absent",
+      "source fields lack exact matches",
+      "no factual source record match visible",
+      "visible source fields do not close action boundary"
+    ]
+  },
+  "never_suppress_without_exact_field_closure": {
+    "blocker_types": [
+      "MISSING_APPROVAL",
+      "AMOUNT_LIMIT_MISSING",
+      "DATE_WINDOW_MISMATCH",
+      "ENTITY_MISMATCH",
+      "ACCOUNT_MISMATCH",
+      "EXPIRED",
+      "INVALID_CLOSURE",
+      "PACKET_REPAIR_REQUIRED",
+      "ADD_ON_SCOPE_MISMATCH",
+      "ROLE_MISSING",
+      "SECOND_APPROVAL_MISSING",
+      "HOLD_OPEN",
+      "SANCTIONS_HOLD"
+    ],
+    "specific_residual_text_that_must_survive": [
+      "old destination",
+      "different route",
+      "lower amount",
+      "nearby district",
+      "approval absent",
+      "not this request"
+    ],
+    "invariant": "No blocker leaves the packet unless its removal is affirmatively justified by something the validator actually checked."
+  },
+  "negative_controls": [
+    {
+      "legacy_packet_id": "HVSM-W2-009-E",
+      "reason": "factual record explicitly says surgical use approval is absent"
+    },
+    {
+      "legacy_packet_id": "HVSM-W2-010-E",
+      "reason": "factual record says no transaction execution exception exists for the requested wire"
+    },
+    {
+      "legacy_packet_id": "HVSM-W2-020-E",
+      "reason": "factual record says customs clearance covers old destination only"
+    },
+    {
+      "legacy_packet_id": "HVSM-W2-027-E",
+      "reason": "factual record says transfer addendum covers a different origin/destination route"
+    },
+    {
+      "legacy_packet_id": "HVSM-W2-030-E",
+      "reason": "factual record says waiver covers a nearby district or lower amount, not this request"
+    }
+  ],
+  "tiny_no_provider_test_plan": [
+    "test_v8_emits_surgical_use_warning_closure_for_hvsm_w2_009_a",
+    "test_v8_emits_wire_execution_exception_closure_for_hvsm_w2_010_a",
+    "test_v8_emits_customs_destination_change_closure_for_hvsm_w2_020_a",
+    "test_v8_emits_cross_border_route_closure_for_hvsm_w2_027_a",
+    "test_v8_emits_emergency_waiver_exact_scope_closure_for_hvsm_w2_030_a",
+    "test_v8_requires_affirmative_support_for_every_required_dimension",
+    "test_v8_packet_id_and_opaque_id_mutation_do_not_change_closure_result",
+    "test_v8_paraphrased_negation_rec_line_does_not_close",
+    "test_v8_conditional_or_normative_source_record_sentence_does_not_close",
+    "test_v8_blanket_all_required_support_is_present_statement_does_not_close_multi_dimension_family",
+    "test_v8_suppresses_generic_scope_mismatch_on_allow_packets_when_exact_support_is_source_closed",
+    "test_v8_same_live_generic_blocker_text_suppressed_on_a_side_stays_active_on_e_side_of_same_pair",
+    "test_v8_preserves_specific_missing_or_wrong_scope_blockers_on_all_five_escalate_controls",
+    "test_v8_does_not_suppress_generic_blocker_when_residual_specific_mismatch_text_remains",
+    "test_v8_dims_empty_generic_blocker_on_packet_with_no_v8_closure_survives",
+    "test_v8_selector_rejects_escalate_artifact_supported_only_by_suppressed_generic_false_blockers",
+    "test_v8_selector_still_selects_escalate_when_real_specific_blocker_remains",
+    "test_v8_full_v7_sixteen_fixture_battery_remains_unchanged",
+    "test_v8_does_not_read_truth_scoring_map_sibling_side_or_authoring_lane_metadata",
+    "test_v8_does_not_mutate_frozen_v7_live_evidence"
+  ],
+  "tiny_live_validation_set_after_implementation": {
+    "label": "HOLOVERIFY_V8_GENERIC_FALSE_BLOCKER_TINY_PATCH_VALIDATION_V0",
+    "selected_pairs": [
+      "HVSM-W2-009",
+      "HVSM-W2-010",
+      "HVSM-W2-030"
+    ],
+    "selected_packets": [
+      "HVSM-W2-009-A",
+      "HVSM-W2-009-E",
+      "HVSM-W2-010-A",
+      "HVSM-W2-010-E",
+      "HVSM-W2-030-A",
+      "HVSM-W2-030-E"
+    ],
+    "rationale": [
+      "warning-banner pressure with fully closed clinical support",
+      "approval-vs-transaction-execution exact tuple closure",
+      "public-sector exact scope closure across district, vendor, amount, and date"
+    ],
+    "expected_provider_calls": 30,
+    "slot_geometry": {
+      "W1": 6,
+      "G1": 6,
+      "W2": 6,
+      "G2": 6,
+      "W3": 6
+    },
+    "pass_condition": [
+      "30/30 provider calls",
+      "0 provider failures",
+      "6/6 packets correct",
+      "3/3 pairs correct",
+      "all ALLOW siblings final ALLOW",
+      "all ESCALATE controls final ESCALATE",
+      "no null/no-select",
+      "no invalid content-contract packet"
+    ],
+    "next_lane_if_passed": "HOLOVERIFY_STRESS_MATRIX_300DOT_V8_FP_OVERBLOCK_BALANCED_5PAIR_HOLO_RESCUE_RERUN_V0"
+  },
+  "risks": [
+    "Overfitting to descriptive positive record phrasing instead of checked field closure.",
+    "Accidentally suppressing a specific real blocker because it shares a generic SCOPE_MISMATCH type.",
+    "Treating surface-pressure language as factual closure.",
+    "Remaining too conservative and still overblocking some ALLOW fixtures, which is acceptable only if the system stays fail-closed."
+  ],
+  "falsifiers": [
+    "Any one of the five ESCALATE controls becomes ALLOW.",
+    "V8 suppresses a blocker whose text asserts a specific unresolved dimension that V8 did not actually check.",
+    "V8 emits SOURCE_CLOSED from policy-only, request-only, conditional, normative, or blanket assurance text.",
+    "V8 reads truth labels, scoring maps, sibling side, prior solo result, prior Holo result, packet IDs, opaque IDs, or authoring target lane.",
+    "V8 turns a vague ALLOW packet into a clean ALLOW without explicit source-visible closure dimensions.",
+    "V8 mutates frozen V7 run evidence."
+  ],
+  "strongest_falsifier": {
+    "packet": "HVSM-W2-030-E",
+    "reason": "If V8 suppresses nearby district or lower amount, not this request, the patch is too loose."
+  },
+  "claim_boundary": {
+    "internal_hardening_only": true,
+    "public_benchmark_evidence": false,
+    "holo_win": false,
+    "global_fpr_or_fnr_claim": false,
+    "production_rate_evidence": false,
+    "model_superiority_evidence": false,
+    "same_set_rescue_only": true,
+    "not_generalization": true,
+    "allowed_claim": "V8 is a proposed no-provider deterministic patch design for the failed internal 5-pair V7 FP-overblock rescue lane. No live V8 result exists yet."
+  }
+}

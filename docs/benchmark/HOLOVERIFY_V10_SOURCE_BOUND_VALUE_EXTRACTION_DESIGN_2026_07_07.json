@@ -1,0 +1,152 @@
+{
+  "classification": "HOLOVERIFY_V10_SOURCE_BOUND_VALUE_EXTRACTION_DESIGN_V0",
+  "claim_boundary": {
+    "fp_precision_evidence": false,
+    "global_fpr_or_fnr_claim": false,
+    "holoengine_win": false,
+    "internal_hardening_design_only": true,
+    "production_rate_evidence": false,
+    "production_safety_evidence": false,
+    "public_benchmark_evidence": false
+  },
+  "created_date": "2026-07-07",
+  "design_target": "V10_SOURCE_BOUND_VALUE_EXTRACTION_FOR_NAME_LIST_CLOSURE",
+  "evidence": {
+    "v9_autopsy": [
+      "docs/benchmark/HOLOVERIFY_V9_TINY_PATCH_VALIDATION_PROVENANCE_AUDIT_2026_07_07.*",
+      "docs/benchmark/HOLOVERIFY_V9_TINY_PATCH_VALIDATION_FAILURE_AUTOPSY_2026_07_07.*"
+    ],
+    "v9_failed_run": "docs/benchmark/holoverify_v9_generic_blocker_resolution_tiny_patch_validation_2026_07_07/live_runs/run_20260707T122641Z"
+  },
+  "known_result": {
+    "all_escalate_controls_correct": true,
+    "all_failed_packets_allow_siblings": true,
+    "all_failed_packets_null_no_select": true,
+    "failed_packets": [
+      "HVSM-W2-009-A",
+      "HVSM-W2-010-A",
+      "HVSM-W2-027-A"
+    ],
+    "false_allow_count": 0,
+    "packet_score": "3/6",
+    "pair_score": "0/3",
+    "provider_calls": "30/30",
+    "provider_failures": 0
+  },
+  "packet_analysis": [
+    {
+      "current_frozen_packet_viability": "NOT_VIABLE_FOR_VALUE_EQUALITY_PROOF",
+      "exact_source_bound_values_present": false,
+      "legacy_packet_id": "HVSM-W2-009-A",
+      "required_fields_with_null_values": [
+        "implant_lot_release",
+        "surgical_use_approval",
+        "sterile_processing_signoff",
+        "surgeon_match"
+      ],
+      "runtime_visible_record_summary": "source_record names implant lot release, surgical use approval, sterile processing signoff, and surgeon match, but does not expose exact values"
+    },
+    {
+      "current_frozen_packet_viability": "NOT_VIABLE_FOR_VALUE_EQUALITY_PROOF",
+      "exact_source_bound_values_present": false,
+      "legacy_packet_id": "HVSM-W2-010-A",
+      "required_fields_with_null_values": [
+        "current_kyc",
+        "wire_execution_exception",
+        "amount",
+        "currency",
+        "beneficiary",
+        "date"
+      ],
+      "runtime_visible_record_summary": "source_record names current KYC plus wire execution exception for amount, currency, beneficiary, and date, but does not expose exact values"
+    },
+    {
+      "current_frozen_packet_viability": "NOT_VIABLE_FOR_VALUE_EQUALITY_PROOF",
+      "exact_source_bound_values_present": false,
+      "legacy_packet_id": "HVSM-W2-027-A",
+      "required_fields_with_null_values": [
+        "scc_tia_present",
+        "processor",
+        "data_category",
+        "origin",
+        "destination",
+        "date"
+      ],
+      "runtime_visible_record_summary": "source_record names SCC/TIA coverage for processor, data category, origin, destination, and dates, but does not expose exact values"
+    }
+  ],
+  "proposed_runtime_rule": {
+    "allowed_extraction_sources": [
+      "source_record",
+      "field_record"
+    ],
+    "closure_state_required_to_clear_generic_blocker": "SOURCE_CLOSED_VALUE_MATCH",
+    "disallowed_extraction_sources": [
+      "policy_control",
+      "request_context_by_itself",
+      "communication_boundary",
+      "worker_prose",
+      "gov_baton_prose",
+      "scoring_map",
+      "truth_label",
+      "sibling_side",
+      "pair_id",
+      "prior_solo_result",
+      "prior_holoengine_result",
+      "authoring_target_lane"
+    ],
+    "rule": "A name_list closure may become value_equality_proven only when runtime-visible factual records expose exact values for every required field in the closure tuple, and those values match the requested bound instance.",
+    "unacceptable_value_forms": [
+      "field-name presence only",
+      "printed_in_source_record",
+      "nearby approval language without values",
+      "implied values",
+      "derived values",
+      "outside-date inference",
+      "outside-policy inference",
+      "worker-generated values",
+      "policy statements",
+      "all required support is present"
+    ]
+  },
+  "proposed_tests": [
+    "test_v10_current_hvsm_w2_009_a_remains_fail_closed_without_values",
+    "test_v10_current_hvsm_w2_010_a_remains_fail_closed_without_values",
+    "test_v10_current_hvsm_w2_027_a_remains_fail_closed_without_values",
+    "test_v10_repaired_009_a_value_tuple_allows_generic_blocker_resolution",
+    "test_v10_repaired_010_a_value_tuple_allows_generic_blocker_resolution",
+    "test_v10_repaired_027_a_value_tuple_allows_generic_blocker_resolution",
+    "test_v10_009_e_missing_approval_remains_escalate",
+    "test_v10_010_e_no_transaction_exception_remains_escalate",
+    "test_v10_027_e_different_route_remains_escalate",
+    "test_v10_field_name_presence_does_not_equal_value_match",
+    "test_v10_printed_in_source_record_does_not_equal_value_match",
+    "test_v10_policy_control_value_text_cannot_close_factual_boundary",
+    "test_v10_request_context_value_text_cannot_close_without_factual_record",
+    "test_v10_one_digit_value_mismatch_preserves_blocker",
+    "test_v10_wrong_jurisdiction_value_preserves_blocker",
+    "test_v10_wrong_account_or_beneficiary_value_preserves_blocker",
+    "test_v10_missing_one_required_tuple_field_preserves_blocker",
+    "test_v10_packet_id_mutation_does_not_change_closure",
+    "test_v10_no_truth_scoring_sibling_or_pair_access",
+    "test_v10_v7_v8_v9_regression_batteries_remain_green"
+  ],
+  "viability_decision": {
+    "current_frozen_v9_packets_should_remain_fail_closed": true,
+    "implementation_viable_only_with_source_visible_exact_values": true,
+    "live_same_set_validation_recommended_now": false,
+    "reason": "The current A-side runtime payloads expose field names but not exact source-bound values, so value equality cannot be proven without creating false ALLOW risk."
+  },
+  "v10_falsifiers": [
+    "V10 clears a blocker from field-name presence alone.",
+    "V10 clears a blocker when any required field value is missing.",
+    "V10 clears a blocker when values are implied or derived.",
+    "V10 uses truth labels, scoring maps, sibling side, pair ID, prior solo result, prior HoloEngine result, or packet ID.",
+    "V10 makes any matched E control return ALLOW.",
+    "V10 weakens V9 token guard behavior.",
+    "V10 expands generic phrases dynamically.",
+    "V10 accepts policy or communication-boundary text as factual closure.",
+    "V10 suppresses a blocker with concrete entity, account, amount, date, route, jurisdiction, registration, currency, or beneficiary tokens.",
+    "V10 treats printed_in_source_record as a value."
+  ]
+}

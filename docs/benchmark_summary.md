@@ -64,7 +64,7 @@ only under strict labels.
 | V6 same selected-lane rerun | 14/14 packets, 7/7 pairs | Internal selected-lane repair evidence |
 | Wave 1 Top 5 FP-overblock rescue | 7/10 packets, 2/5 pairs | Valid internal failed-live evidence |
 | V7 balanced 5-pair rescue | 5/10 packets, 0/5 pairs | `VALID_RUNTIME_FAILED_INTERNAL_RESCUE_EVIDENCE`; 50/50 provider calls, 0 provider failures, all failed packets were ALLOW siblings, and all ESCALATE controls stayed correct |
-| V8 false-blocker suppression | No live result yet | Internal hardening only: committed at `119c53342`; selector `SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06`, hash `e23b2ec29c63c4d484c10b17ffd2b5d5f6251b10387458dc8c47125a1f642e45`; no-provider patch report preserved; Fable kill test still required before any live lane; no V8 live result yet |
+| V8 false-blocker suppression | Tiny patch validation passed | Internal hardening only: committed at `119c53342`; selector `SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06`, hash `e23b2ec29c63c4d484c10b17ffd2b5d5f6251b10387458dc8c47125a1f642e45`; tiny patch validation preserved at `a7e994010`; broader 5-pair rerun still pending |
 
 The V5 miss class was `V5_SCOPE_DEPENDENCY_NON_DETECTION`: workers failed to
 detect a visible source-field authority/scope blocker. V6 added deterministic
@@ -342,7 +342,7 @@ Current stress-matrix status:
 | --- | --- | --- |
 | Combined Wave 1 + Wave 2 solo control | 50 pairs, 100 packets, 300 solo dots | Internal stress-matrix discovery evidence: 214 green, 86 red, 65 FP overblocks, 0 false allows, 21 parse/admissibility failures |
 | V7 balanced 5-pair Holo rescue | 50/50 provider calls, 5/10 packets, 0/5 pairs | Valid completed failed internal rescue evidence; all five misses were ALLOW siblings and all ESCALATE controls stayed correct |
-| V8 false-blocker suppression | Committed at `119c53342` | Internal hardening only; selector `SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06`; no-provider patch report preserved; Fable kill test still required before any live lane; no V8 live result yet |
+| V8 false-blocker suppression | Committed at `119c53342` | Internal hardening only; selector `SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06`; tiny patch validation passed at `a7e994010`; broader 5-pair rerun still pending |
 
 Solo outputs only count as **KNEW/admissible** when they produce the right
 verdict, valid structure, required source grounding, no invented source IDs,
@@ -513,7 +513,7 @@ This benchmark does not claim:
 - The tested packets cover every possible enterprise failure mode.
 - One-shot solo baselines represent every possible solo prompting method.
 - Wave 1 + Wave 2 stress-matrix evidence, the failed V7 rescue evidence, or V8
-  hardening evidence is public benchmark evidence.
+  tiny patch-validation evidence is public benchmark evidence.
 - V7 has repair-success evidence. The completed 5-pair V7 rescue failed on all
   five ALLOW siblings while the ESCALATE controls stayed correct.
 

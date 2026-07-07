@@ -1,0 +1,440 @@
+{
+  "artifact": "HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1",
+  "program_name": "HoloEngine Trust & Assurance Program",
+  "version": "0.1",
+  "created_date": "2026-07-07",
+  "status": "provider_data_handling_matrix_draft",
+  "source_documents": [
+    "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+    "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+  ],
+  "claim_boundary": {
+    "provider_contract_review_claim": false,
+    "provider_zero_retention_claim": false,
+    "dpa_coverage_claim": false,
+    "baa_coverage_claim": false,
+    "hipaa_compliance_claim": false,
+    "hipaa_readiness_claim": false,
+    "soc_2_compliance_claim": false,
+    "soc_2_certification_claim": false,
+    "soc_2_readiness_claim": false,
+    "production_data_handling_claim": false,
+    "regional_data_residency_claim": false,
+    "allowed_stage_language": [
+      "provider/data-handling matrix draft",
+      "target control",
+      "verification workstream",
+      "to be verified",
+      "TBD",
+      "contract-dependent",
+      "customer-enabled evidence-retention mode",
+      "benchmark/evidence mode"
+    ]
+  },
+  "scope": {
+    "primary_scope": "HoloEngine Trust & Assurance Program",
+    "included_vendors": [
+      "OpenAI",
+      "xAI",
+      "MiniMax"
+    ],
+    "vendor_basis": "current benchmark/provider route vendors",
+    "excluded_claims": [
+      "provider zero retention",
+      "DPA coverage",
+      "BAA coverage",
+      "HIPAA compliance or readiness",
+      "SOC 2 readiness",
+      "verified production data handling",
+      "regional or data-residency guarantees"
+    ]
+  },
+  "status_terms": {
+    "VERIFY/TBD": "Evidence or contractual confirmation may exist or may be available from the provider, but it has not been verified for HoloEngine buyer claims in this artifact.",
+    "TBD": "No sufficient HoloEngine-specific evidence has been captured in this artifact.",
+    "Target": "Intended control design, not a verified operating control.",
+    "benchmark_evidence_mode": "HoloVerify or related benchmark work where frozen prompts, raw outputs, traces, manifests, scoring maps, and failure notes may be preserved for reproducibility.",
+    "production_customer_mode": "Target HoloEngine production flow for bounded ALLOW/ESCALATE review requests."
+  },
+  "mode_boundary": {
+    "production_customer_mode": {
+      "provider_bound_data": [
+        "minimum necessary bounded prompt content under approved configuration",
+        "customer request text or extracted operational facts if needed for review",
+        "source/evidence snippets if needed for review",
+        "role/system instructions",
+        "route metadata required for provider call"
+      ],
+      "default_audit_log_mode": "metadata_only_target",
+      "excluded_from_default_audit_logs": [
+        "customer payload text",
+        "full prompt text",
+        "raw provider output text",
+        "private source documents",
+        "unredacted user conversation text"
+      ],
+      "evidence_retention_mode": "customer_enabled_if_configured",
+      "claim_boundary": "Do not claim implemented production handling, zero retention, or no customer payload exposure until deployment evidence and provider terms are verified."
+    },
+    "benchmark_evidence_mode": {
+      "provider_bound_data": [
+        "frozen benchmark prompts",
+        "benchmark packet text",
+        "synthetic or prepared evaluation facts",
+        "route/role instructions",
+        "model-review prompts"
+      ],
+      "preserved_artifacts": [
+        "frozen prompts",
+        "raw provider outputs",
+        "trace files",
+        "scoring maps",
+        "runtime manifests",
+        "failure autopsies",
+        "provenance audits",
+        "operational notes"
+      ],
+      "production_customer_payload_handling": false,
+      "claim_boundary": "Do not describe benchmark evidence retention as production customer payload handling."
+    }
+  },
+  "provider_matrix": [
+    {
+      "provider": "OpenAI",
+      "provider_key": "openai",
+      "current_status": "current_benchmark_provider_route_vendor",
+      "current_route_role": [
+        "current benchmark/provider route vendor",
+        "may be selected by target HoloEngine provider routing only under approved provider/vendor terms"
+      ],
+      "production_customer_mode": {
+        "handling_status": "VERIFY/TBD",
+        "data_sent_if_selected": [
+          "minimum necessary bounded prompt content needed for ALLOW/ESCALATE review",
+          "role/system instructions for the selected HoloEngine route",
+          "customer request text or extracted operational facts required for review",
+          "source/evidence snippets required for review",
+          "action-boundary facts and governance instructions",
+          "route metadata required for the provider call"
+        ],
+        "customer_payload_text_sent": "VERIFY/TBD - if OpenAI is selected for a production provider route, customer payload text or extracted facts may be sent when needed for model review; deployed behavior must be verified.",
+        "default_logging": "metadata_only_target",
+        "excluded_from_default_audit_logs": [
+          "customer payload text",
+          "full prompt text",
+          "raw provider output text",
+          "private source documents",
+          "unredacted user conversation text"
+        ]
+      },
+      "benchmark_evidence_mode": {
+        "handling_status": "current_benchmark_provider_route_vendor",
+        "data_sent_or_preserved": [
+          "frozen benchmark prompts",
+          "benchmark packet text",
+          "role/route instructions",
+          "benchmark evidence facts",
+          "raw model outputs",
+          "trace metadata",
+          "model/provider identifiers",
+          "token/latency/error metadata",
+          "failure-analysis artifacts"
+        ],
+        "customer_payload_text_sent": "No production customer payload text should be present in benchmark/evidence mode; benchmark packet and prompt text may be sent."
+      },
+      "contract_and_vendor_status": {
+        "retention_setting_status": "VERIFY/TBD",
+        "dpa_status": "TBD",
+        "subprocessor_status": "TBD",
+        "zero_retention_eligibility": "VERIFY/TBD",
+        "baa_hipaa_eligibility": "TBD",
+        "regional_data_residency_status": "TBD"
+      },
+      "risks": [
+        "provider retention settings not verified for HoloEngine claims",
+        "DPA coverage not confirmed",
+        "subprocessor list not confirmed",
+        "zero-retention eligibility could be overstated",
+        "regional/data residency posture unknown"
+      ],
+      "mitigations": [
+        "complete provider-specific terms and retention review",
+        "capture DPA evidence before buyer claims",
+        "review subprocessors and update cadence",
+        "map route/account/configuration to approved retention settings",
+        "keep production and benchmark/evidence mode claims separate"
+      ]
+    },
+    {
+      "provider": "xAI",
+      "provider_key": "xai",
+      "current_status": "current_benchmark_provider_route_vendor",
+      "current_route_role": [
+        "current benchmark/provider route vendor",
+        "may be selected by target HoloEngine provider routing only under approved provider/vendor terms"
+      ],
+      "production_customer_mode": {
+        "handling_status": "VERIFY/TBD",
+        "data_sent_if_selected": [
+          "minimum necessary bounded prompt content needed for ALLOW/ESCALATE review",
+          "role/system instructions for the selected HoloEngine route",
+          "customer request text or extracted operational facts required for review",
+          "source/evidence snippets required for review",
+          "action-boundary facts and governance instructions",
+          "route metadata required for the provider call"
+        ],
+        "customer_payload_text_sent": "VERIFY/TBD - if xAI is selected for a production provider route, customer payload text or extracted facts may be sent when needed for model review; deployed behavior must be verified.",
+        "default_logging": "metadata_only_target",
+        "excluded_from_default_audit_logs": [
+          "customer payload text",
+          "full prompt text",
+          "raw provider output text",
+          "private source documents",
+          "unredacted user conversation text"
+        ]
+      },
+      "benchmark_evidence_mode": {
+        "handling_status": "current_benchmark_provider_route_vendor",
+        "data_sent_or_preserved": [
+          "frozen benchmark prompts",
+          "benchmark packet text",
+          "role/route instructions",
+          "benchmark evidence facts",
+          "raw model outputs",
+          "trace metadata",
+          "model/provider identifiers",
+          "token/latency/error metadata",
+          "failure-analysis artifacts"
+        ],
+        "customer_payload_text_sent": "No production customer payload text should be present in benchmark/evidence mode; benchmark packet and prompt text may be sent."
+      },
+      "contract_and_vendor_status": {
+        "retention_setting_status": "VERIFY/TBD",
+        "dpa_status": "TBD",
+        "subprocessor_status": "TBD",
+        "zero_retention_eligibility": "VERIFY/TBD",
+        "baa_hipaa_eligibility": "TBD",
+        "regional_data_residency_status": "TBD"
+      },
+      "risks": [
+        "provider retention settings not verified for HoloEngine claims",
+        "DPA coverage not confirmed",
+        "subprocessor list not confirmed",
+        "zero-retention eligibility could be overstated",
+        "regional/data residency posture unknown"
+      ],
+      "mitigations": [
+        "complete provider-specific terms and retention review",
+        "capture DPA evidence before buyer claims",
+        "review subprocessors and update cadence",
+        "map route/account/configuration to approved retention settings",
+        "keep production and benchmark/evidence mode claims separate"
+      ]
+    },
+    {
+      "provider": "MiniMax",
+      "provider_key": "minimax",
+      "current_status": "current_benchmark_provider_route_vendor",
+      "current_route_role": [
+        "current benchmark/provider route vendor",
+        "may be selected by target HoloEngine provider routing only under approved provider/vendor terms"
+      ],
+      "production_customer_mode": {
+        "handling_status": "VERIFY/TBD",
+        "data_sent_if_selected": [
+          "minimum necessary bounded prompt content needed for ALLOW/ESCALATE review",
+          "role/system instructions for the selected HoloEngine route",
+          "customer request text or extracted operational facts required for review",
+          "source/evidence snippets required for review",
+          "action-boundary facts and governance instructions",
+          "route metadata required for the provider call"
+        ],
+        "customer_payload_text_sent": "VERIFY/TBD - if MiniMax is selected for a production provider route, customer payload text or extracted facts may be sent when needed for model review; deployed behavior must be verified.",
+        "default_logging": "metadata_only_target",
+        "excluded_from_default_audit_logs": [
+          "customer payload text",
+          "full prompt text",
+          "raw provider output text",
+          "private source documents",
+          "unredacted user conversation text"
+        ]
+      },
+      "benchmark_evidence_mode": {
+        "handling_status": "current_benchmark_provider_route_vendor",
+        "data_sent_or_preserved": [
+          "frozen benchmark prompts",
+          "benchmark packet text",
+          "role/route instructions",
+          "benchmark evidence facts",
+          "raw model outputs",
+          "trace metadata",
+          "model/provider identifiers",
+          "token/latency/error metadata",
+          "failure-analysis artifacts"
+        ],
+        "customer_payload_text_sent": "No production customer payload text should be present in benchmark/evidence mode; benchmark packet and prompt text may be sent."
+      },
+      "contract_and_vendor_status": {
+        "retention_setting_status": "VERIFY/TBD",
+        "dpa_status": "TBD",
+        "subprocessor_status": "TBD",
+        "zero_retention_eligibility": "VERIFY/TBD",
+        "baa_hipaa_eligibility": "TBD",
+        "regional_data_residency_status": "TBD"
+      },
+      "risks": [
+        "provider retention settings not verified for HoloEngine claims",
+        "DPA coverage not confirmed",
+        "subprocessor list not confirmed",
+        "zero-retention eligibility could be overstated",
+        "regional/data residency posture unknown"
+      ],
+      "mitigations": [
+        "complete provider-specific terms and retention review",
+        "capture DPA evidence before buyer claims",
+        "review subprocessors and update cadence",
+        "map route/account/configuration to approved retention settings",
+        "keep production and benchmark/evidence mode claims separate"
+      ]
+    }
+  ],
+  "shared_data_classes": {
+    "potentially_provider_bound_in_production_customer_mode": [
+      "role/system instructions for the selected HoloEngine route",
+      "bounded customer request text or extracted facts needed for review",
+      "operational facts, evidence references, or source snippets needed for ALLOW/ESCALATE evaluation",
+      "action-boundary facts and governance instructions",
+      "route, provider, model, retry, latency, token, and error metadata",
+      "tenant/request identifiers only where required for routing or audit, and only under approved design"
+    ],
+    "excluded_from_default_production_audit_logs": [
+      "customer payload text",
+      "full prompt text",
+      "raw provider output text",
+      "private source documents",
+      "unredacted user conversation text"
+    ],
+    "potentially_preserved_in_benchmark_evidence_mode": [
+      "frozen prompts",
+      "benchmark packet text",
+      "raw provider outputs",
+      "trace files",
+      "scoring maps",
+      "runtime manifests",
+      "model/provider route metadata",
+      "failure autopsies",
+      "provenance audits",
+      "operational notes for invalid or blocked runs"
+    ],
+    "scoring_map_boundary": "Scoring maps and answer keys must remain benchmark evidence artifacts and must not be treated as provider prompt content unless a separate, explicit, non-production evaluation design approves that exposure."
+  },
+  "risks_and_mitigations": [
+    {
+      "risk": "Provider retention settings are not verified for HoloEngine claims.",
+      "current_status": "VERIFY/TBD for all listed providers",
+      "mitigation": "Complete provider-specific retention review, document configuration options, capture contract evidence, and map route behavior to approved settings before buyer commitments."
+    },
+    {
+      "risk": "DPA coverage is not confirmed.",
+      "current_status": "TBD for all listed providers",
+      "mitigation": "Legal/Trust review of provider terms and DPAs; store signed or accepted DPA evidence in the trust binder."
+    },
+    {
+      "risk": "Subprocessor lists are not confirmed.",
+      "current_status": "TBD for all listed providers",
+      "mitigation": "Build provider/subprocessor inventory, review provider subprocessor pages or contract exhibits, and create an update cadence."
+    },
+    {
+      "risk": "Zero-retention eligibility could be overstated.",
+      "current_status": "VERIFY/TBD for all listed providers",
+      "mitigation": "Treat zero retention as unavailable for claims until contractually verified per provider and mapped to the actual HoloEngine route/account/configuration."
+    },
+    {
+      "risk": "BAA/HIPAA eligibility could be overstated.",
+      "current_status": "TBD for all listed providers",
+      "mitigation": "Do not pursue healthcare claims until BAA availability, HIPAA scope, product handling, access controls, audit controls, and legal review are complete."
+    },
+    {
+      "risk": "Regional/data residency requirements may not match provider processing.",
+      "current_status": "TBD for all listed providers",
+      "mitigation": "Define customer region requirements, verify provider regional processing/storage options, and add route-level restrictions where required."
+    },
+    {
+      "risk": "Production customer payloads could be sent to providers without explicit approval or minimization.",
+      "current_status": "target control only",
+      "mitigation": "Require provider route approval, data-sharing scope, prompt minimization, redaction tests, and audit metadata showing provider/model/route and evidence-retention mode."
+    },
+    {
+      "risk": "Benchmark evidence could be confused with production customer data handling.",
+      "current_status": "known separation requirement",
+      "mitigation": "Keep HoloVerify evidence in separate storage, access control, retention policy, and claim language."
+    },
+    {
+      "risk": "Raw prompts or raw provider outputs could be over-retained in production.",
+      "current_status": "target control only",
+      "mitigation": "Default to metadata-only audit logs; require customer-enabled evidence-retention mode for payload artifacts; define retention, deletion, support access, and export controls."
+    },
+    {
+      "risk": "Scoring maps or benchmark answer keys could leak into provider prompts.",
+      "current_status": "partial benchmark discipline",
+      "mitigation": "Access-control scoring maps, exclude scoring maps from provider prompts, and add prompt-leakage tests before production or benchmark expansion."
+    },
+    {
+      "risk": "Provider fallback or model-route changes could alter data-sharing scope.",
+      "current_status": "target control only",
+      "mitigation": "Treat provider/model roster changes as change-managed events requiring approval, data-sharing review, and buyer-impact review if applicable."
+    }
+  ],
+  "buyer_safe_language": [
+    "HoloEngine has a draft provider/data-handling matrix for enterprise trust review.",
+    "The matrix separates target production customer-mode handling from benchmark/evidence mode.",
+    "In target production mode, HoloEngine is designed to minimize provider-bound content to the prompt content needed for ALLOW/ESCALATE review.",
+    "Default production audit logging is a metadata-only target; customer payload text and raw provider outputs are excluded by default in the target design.",
+    "Customer-enabled evidence retention is a separate mode that requires explicit configuration, retention settings, access controls, and deletion procedures.",
+    "Provider retention settings, DPAs, subprocessors, zero-retention eligibility, BAA/HIPAA eligibility, and regional/data-residency posture are verification workstreams.",
+    "HoloVerify benchmark evidence is separate from production customer payload handling."
+  ],
+  "must_not_claim": [
+    "OpenAI, xAI, or MiniMax provide zero retention for HoloEngine data.",
+    "HoloEngine has DPA coverage with OpenAI, xAI, or MiniMax.",
+    "HoloEngine has BAA coverage with OpenAI, xAI, or MiniMax.",
+    "HoloEngine is HIPAA compliant or HIPAA ready.",
+    "HoloEngine is SOC 2 compliant, SOC 2 certified, SOC 2 ready, or auditor validated.",
+    "HoloEngine production customer payloads are never sent to providers.",
+    "HoloEngine production customer payloads are never stored.",
+    "HoloEngine default audit logs, provider payloads, evidence-retention mode, backups, and support workflows have been verified end to end.",
+    "HoloEngine can guarantee customer regional processing or data residency.",
+    "Benchmark/evidence retention controls are equivalent to production customer data handling."
+  ],
+  "evidence_to_collect_next": [
+    "Provider terms review for OpenAI, xAI, and MiniMax.",
+    "DPA review and evidence capture for each provider.",
+    "Subprocessor inventory and update cadence for each provider.",
+    "Provider retention setting review, including route/account/configuration evidence.",
+    "Zero-retention eligibility review for each provider, if available.",
+    "BAA/HIPAA eligibility review before any healthcare positioning.",
+    "Regional/data-residency review for customer deployment scenarios.",
+    "Production prompt-minimization evidence and redaction tests.",
+    "Production metadata-only audit-log samples.",
+    "Customer-enabled evidence-retention configuration, retention, deletion, and support-access controls.",
+    "Benchmark/evidence storage, access-control, and retention separation proof.",
+    "Provider/model route change-control procedure."
+  ],
+  "draft_review_roles": [
+    "Trust",
+    "Legal",
+    "Security",
+    "Privacy",
+    "Engineering",
+    "Product",
+    "HoloGov owners"
+  ],
+  "validation_requirements": {
+    "json_parse": true,
+    "git_diff_check": true,
+    "no_staging": true,
+    "no_commit": true,
+    "no_push": true,
+    "no_provider_calls": true
+  }
+}

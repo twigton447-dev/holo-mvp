@@ -1,0 +1,797 @@
+{
+  "artifact": "HOLOENGINE_SECURITY_QUESTIONNAIRE_STARTER_PACK_V0_1",
+  "program_name": "HoloEngine Trust & Assurance Program",
+  "from": "HoloOps SOC / Taylor",
+  "to": "HoloOps SOC and Taylor",
+  "version": "0.1",
+  "created_date": "2026-07-07",
+  "status": "security_questionnaire_starter_pack_draft",
+  "audience": [
+    "enterprise security questionnaire reviewers",
+    "procurement teams",
+    "privacy/security teams",
+    "design-partner pilot diligence"
+  ],
+  "source_policy": {
+    "used_only_repo_backed_trust_artifacts": true,
+    "source_artifacts_used": [
+      "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+      "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+      "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+      "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+      "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+      "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+    ]
+  },
+  "status_terms": {
+    "safe_draft": "Safe for design-partner diligence if draft/target/TBD caveats remain visible.",
+    "conditional_tbd": "Potential future claim or answer, but implementation, contract, deployment, or operating evidence is still missing.",
+    "blocked": "Do not make the affirmative claim at this stage."
+  },
+  "taxonomy_boundary": {
+    "primary_taxonomy": "HoloEngine",
+    "HoloGov": "Included inside HoloEngine.",
+    "HoloVerify": "Benchmark/evidence mode and separate from production customer payload handling.",
+    "HoloChat": "Connected surface only where relevant to customer-facing deployment scope.",
+    "HoloBuild": "Connected surface only where relevant to customer-facing deployment scope."
+  },
+  "blocked_claim_boundary": [
+    "SOC 2 readiness/certification",
+    "HIPAA readiness",
+    "ISO certification",
+    "DPA/BAA coverage",
+    "provider zero retention",
+    "data residency guarantees",
+    "production operating effectiveness",
+    "RAM-only processing",
+    "0 ms retention",
+    "customer payloads are never sent to providers"
+  ],
+  "sections": [
+    "company/security program status",
+    "SOC 2 / ISO / certification status",
+    "data flow and system scope",
+    "production customer mode vs HoloVerify benchmark/evidence mode",
+    "provider/vendor handling",
+    "customer payload exposure",
+    "logging and retention",
+    "encryption",
+    "access control / RBAC / tenant isolation",
+    "incident response",
+    "vulnerability management / secure SDLC",
+    "privacy / deletion / support access",
+    "AI governance / model routing / HoloGov",
+    "HoloChat and HoloBuild connected-surface scope",
+    "public benchmark vs internal evidence boundary"
+  ],
+  "qa_items": [
+    {
+      "section": "company/security program status",
+      "question": "What is the current HoloEngine trust/security program status?",
+      "short_buyer_safe_answer": "HoloEngine has a trust-readiness buildout underway with draft repo-backed artifacts for data flow, SOC 2 gap assessment, provider handling, evidence indexing, buyer claims, and design-partner diligence.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Formal external-use approval, named control owners, evidence repository, completed control evidence.",
+      "owner": "Trust Lead",
+      "review_gate": "Trust/Legal review before external sharing.",
+      "claim_risk_note": "Safe if framed as buildout/gap-closure; high risk if framed as mature certification."
+    },
+    {
+      "section": "company/security program status",
+      "question": "Is this starter pack public marketing copy?",
+      "short_buyer_safe_answer": "No. It is for enterprise security, privacy, procurement, and design-partner diligence.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md"
+      ],
+      "missing_evidence": "External messaging review if reused outside diligence.",
+      "owner": "Trust Lead / Legal",
+      "review_gate": "Legal review for external reuse.",
+      "claim_risk_note": "Low if audience boundary stays visible."
+    },
+    {
+      "section": "SOC 2 / ISO / certification status",
+      "question": "Is HoloEngine SOC 2 certified, SOC 2 compliant, or SOC 2 ready?",
+      "short_buyer_safe_answer": "No. HoloEngine has a SOC 2 gap-closure roadmap and evidence plan, not SOC 2 readiness, certification, Type I completion, Type II completion, or auditor validation.",
+      "status": "blocked",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Auditor-scoped control matrix, implemented controls, operating evidence, auditor report if pursued.",
+      "owner": "Trust Lead / Legal",
+      "review_gate": "Block until formal auditor/counsel-approved language exists.",
+      "claim_risk_note": "Critical: affirmative SOC 2 claims are blocked."
+    },
+    {
+      "section": "SOC 2 / ISO / certification status",
+      "question": "Does HoloEngine have ISO 27001 or ISO 42001 certification?",
+      "short_buyer_safe_answer": "No certification is claimed. ISO-related work is a readiness/control mapping area only.",
+      "status": "blocked",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md"
+      ],
+      "missing_evidence": "Formal ISO scope, ISMS/AI management system evidence, external audit/certification if pursued.",
+      "owner": "Trust Lead / Legal",
+      "review_gate": "Legal and certification-scope review.",
+      "claim_risk_note": "Critical: do not claim ISO certification."
+    },
+    {
+      "section": "SOC 2 / ISO / certification status",
+      "question": "Is HoloEngine HIPAA ready or HIPAA compliant?",
+      "short_buyer_safe_answer": "No. HIPAA readiness or compliance is not claimed. Healthcare positioning would require legal review, BAA availability, provider scope review, and deployment controls.",
+      "status": "blocked",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md"
+      ],
+      "missing_evidence": "HIPAA legal analysis, BAA coverage, healthcare deployment controls, audit controls.",
+      "owner": "Legal / Privacy Lead",
+      "review_gate": "Healthcare legal/security review.",
+      "claim_risk_note": "Critical: HIPAA readiness and compliance claims are blocked."
+    },
+    {
+      "section": "data flow and system scope",
+      "question": "What is HoloEngine?",
+      "short_buyer_safe_answer": "HoloEngine is the core runtime trust layer and primary assurance scope for bounded ALLOW / ESCALATE review of operational requests, evidence packets, workflow events, or decision-review payloads.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Deployment-specific system description and final architecture diagram.",
+      "owner": "Product Lead / Trust Lead",
+      "review_gate": "Deployment scope review.",
+      "claim_risk_note": "Safe if kept as target system description."
+    },
+    {
+      "section": "data flow and system scope",
+      "question": "What is HoloEngine not?",
+      "short_buyer_safe_answer": "HoloEngine should not be described as a downstream business-action execution layer by default, a certified compliance system, or a wrapper that automatically brings connected surfaces into scope.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Deployment-specific execution boundary and product wording review.",
+      "owner": "Product Lead / Legal",
+      "review_gate": "Product/legal review.",
+      "claim_risk_note": "Medium: avoid implying execution authority or automatic connected-surface coverage."
+    },
+    {
+      "section": "data flow and system scope",
+      "question": "What surfaces are in scope?",
+      "short_buyer_safe_answer": "HoloEngine is primary. HoloGov is included as part of HoloEngine. HoloVerify is separate benchmark/evidence mode. HoloChat, HoloBuild, and HoloBrain are conditional based on deployment.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Customer deployment scope, data inventory, retention/deletion model for connected surfaces.",
+      "owner": "Trust Lead / Product Lead",
+      "review_gate": "Buyer deployment scope review.",
+      "claim_risk_note": "Medium: connected surfaces must not be treated as automatically covered."
+    },
+    {
+      "section": "production customer mode vs HoloVerify benchmark/evidence mode",
+      "question": "How do you separate production customer mode from benchmark/evidence mode?",
+      "short_buyer_safe_answer": "The trust architecture separates target production customer mode from HoloVerify benchmark/evidence mode in purpose, retention, logging, and claim language.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Storage separation proof, access-control evidence, retention policy, environment separation evidence.",
+      "owner": "Trust Lead / HoloVerify Owner",
+      "review_gate": "Trust/security review.",
+      "claim_risk_note": "Safe as architecture boundary; high risk if treated as implemented separation proof."
+    },
+    {
+      "section": "production customer mode vs HoloVerify benchmark/evidence mode",
+      "question": "What happens in HoloVerify benchmark/evidence mode?",
+      "short_buyer_safe_answer": "HoloVerify may preserve frozen prompts, raw outputs, scoring maps, trace files, runtime manifests, failure autopsies, provenance audits, and operational notes for benchmark integrity.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Benchmark storage/access/retention proof and external-claim review.",
+      "owner": "HoloVerify Owner / Trust Lead",
+      "review_gate": "Trust review before external benchmark evidence use.",
+      "claim_risk_note": "Medium: benchmark preservation must not be confused with production customer handling."
+    },
+    {
+      "section": "production customer mode vs HoloVerify benchmark/evidence mode",
+      "question": "Can benchmark evidence be used as production privacy evidence?",
+      "short_buyer_safe_answer": "No. Benchmark/evidence retention must not be used as proof of production customer-data retention, privacy, or deletion behavior.",
+      "status": "blocked",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md"
+      ],
+      "missing_evidence": "Not applicable unless architecture and controls change.",
+      "owner": "Trust Lead / Legal",
+      "review_gate": "Block by default.",
+      "claim_risk_note": "Critical: equivalence claim is blocked."
+    },
+    {
+      "section": "provider/vendor handling",
+      "question": "Which model/provider vendors are currently listed?",
+      "short_buyer_safe_answer": "OpenAI, xAI, and MiniMax are listed as current benchmark/provider route vendors in the draft provider matrix.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Provider account/configuration mapping and contract evidence.",
+      "owner": "Legal / Trust Lead",
+      "review_gate": "Provider/vendor review.",
+      "claim_risk_note": "Safe if route-vendor status and TBD posture remain explicit."
+    },
+    {
+      "section": "provider/vendor handling",
+      "question": "Do you have verified provider retention settings, DPAs, subprocessors, BAA/HIPAA eligibility, or data residency?",
+      "short_buyer_safe_answer": "Not yet for buyer claims. These are VERIFY/TBD or TBD workstreams.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Provider terms, DPAs, subprocessor lists, retention settings, regional review, BAA/HIPAA review.",
+      "owner": "Legal / Trust Lead",
+      "review_gate": "Legal/provider review.",
+      "claim_risk_note": "High: do not soften TBD status."
+    },
+    {
+      "section": "provider/vendor handling",
+      "question": "Do providers offer zero retention for HoloEngine data?",
+      "short_buyer_safe_answer": "Not claimed. Zero-retention eligibility is VERIFY/TBD and requires provider-specific contract and configuration evidence.",
+      "status": "blocked",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Provider-specific contract proof, account/config mapping, route evidence.",
+      "owner": "Legal / Security Lead",
+      "review_gate": "Block until provider-specific retention evidence exists.",
+      "claim_risk_note": "Critical: provider zero-retention claims are blocked."
+    },
+    {
+      "section": "provider/vendor handling",
+      "question": "Can HoloEngine guarantee data residency?",
+      "short_buyer_safe_answer": "Not at this stage. Regional/data-residency posture is TBD and must be reviewed per provider route, infrastructure region, customer requirement, and deployment design.",
+      "status": "blocked",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Regional provider terms, infrastructure mapping, route restrictions, legal approval.",
+      "owner": "Legal / SRE",
+      "review_gate": "Data-residency review.",
+      "claim_risk_note": "Critical: data residency guarantees are blocked."
+    },
+    {
+      "section": "customer payload exposure",
+      "question": "Are customer payloads ever sent to providers?",
+      "short_buyer_safe_answer": "The target production design may send minimum necessary bounded prompt content to selected providers when needed for ALLOW / ESCALATE review. HoloEngine does not claim customer payloads are never sent to providers.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Deployment route evidence, prompt minimization tests, provider terms.",
+      "owner": "Engineering Lead / Legal",
+      "review_gate": "Engineering/security/legal review.",
+      "claim_risk_note": "Critical: never sent is blocked."
+    },
+    {
+      "section": "customer payload exposure",
+      "question": "What data may be provider-bound in target production mode?",
+      "short_buyer_safe_answer": "Potentially provider-bound data may include route instructions, bounded request text or extracted facts, operational facts, evidence snippets, action-boundary facts, governance instructions, route metadata, and limited tenant/request identifiers where required.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Production prompt builder evidence, redaction tests, route logs.",
+      "owner": "Engineering Lead / HoloGov Owner",
+      "review_gate": "Security evidence review.",
+      "claim_risk_note": "High if framed as verified production minimization."
+    },
+    {
+      "section": "customer payload exposure",
+      "question": "Are customer payloads never stored by HoloEngine?",
+      "short_buyer_safe_answer": "Not claimed. Storage and retention behavior must be verified across logs, evidence-retention mode, backups, support workflows, and provider flows before any stronger claim.",
+      "status": "blocked",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md"
+      ],
+      "missing_evidence": "End-to-end deployment storage and retention evidence.",
+      "owner": "Engineering Lead / Privacy Lead",
+      "review_gate": "Privacy/security review.",
+      "claim_risk_note": "Critical: never stored is blocked."
+    },
+    {
+      "section": "logging and retention",
+      "question": "Are production audit logs metadata-only?",
+      "short_buyer_safe_answer": "Metadata-only audit logging is the target default design; implementation evidence is still needed before claiming it as production behavior.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Runtime log samples, schema validation, redaction tests, log storage/access controls, retention settings.",
+      "owner": "Engineering Lead / SRE",
+      "review_gate": "Security evidence review.",
+      "claim_risk_note": "High: safe as target; do not claim operating control."
+    },
+    {
+      "section": "logging and retention",
+      "question": "What is excluded from target default production logs?",
+      "short_buyer_safe_answer": "Target excluded fields are customer payload text, full prompt text, raw provider output text, private source documents, and unredacted user conversation text.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Runtime log samples and redaction tests.",
+      "owner": "Engineering Lead / SRE",
+      "review_gate": "Security review before implementation claim.",
+      "claim_risk_note": "Medium: answer must remain target-language."
+    },
+    {
+      "section": "logging and retention",
+      "question": "Is there an evidence-retention mode?",
+      "short_buyer_safe_answer": "Customer-enabled evidence-retention mode is a target control requiring explicit configuration, retention settings, access controls, deletion/export procedures, and support-access boundaries.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Product configuration, retention controls, deletion/export tests, support-access SOP.",
+      "owner": "Product Lead / Privacy Lead",
+      "review_gate": "Product/privacy/legal review.",
+      "claim_risk_note": "High: do not imply mode is production-ready."
+    },
+    {
+      "section": "logging and retention",
+      "question": "Do you support 0 ms retention, RAM-only processing, or memory zeroing?",
+      "short_buyer_safe_answer": "No such claim is made. These claims are blocked unless implemented and verified later.",
+      "status": "blocked",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Implementation proof, runtime tests, legal/security review.",
+      "owner": "Engineering Lead / Legal",
+      "review_gate": "Block until implemented and verified.",
+      "claim_risk_note": "Critical: these claims are blocked."
+    },
+    {
+      "section": "encryption",
+      "question": "Is data encrypted in transit?",
+      "short_buyer_safe_answer": "Encryption in transit is a high-priority verification item; deployed TLS/provider API/internal transport evidence is still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "TLS configuration, certificate management, provider API transport verification, internal transport verification.",
+      "owner": "SRE / Security Lead",
+      "review_gate": "Deployment security review.",
+      "claim_risk_note": "High: do not claim TLS version or coverage."
+    },
+    {
+      "section": "encryption",
+      "question": "Is data encrypted at rest?",
+      "short_buyer_safe_answer": "Encryption at rest is a high-priority verification item; database, object store, log, evidence store, backup, and key-management evidence is still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Storage encryption proof, backup encryption proof, key-management evidence.",
+      "owner": "SRE / Security Lead",
+      "review_gate": "Deployment security review.",
+      "claim_risk_note": "High: do not claim encryption coverage without evidence."
+    },
+    {
+      "section": "encryption",
+      "question": "Do you claim TLS 1.3?",
+      "short_buyer_safe_answer": "No. TLS 1.3 is not claimed unless verified in the deployed environment.",
+      "status": "blocked",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md"
+      ],
+      "missing_evidence": "Deployment TLS evidence.",
+      "owner": "SRE / Security Lead",
+      "review_gate": "Block until verified.",
+      "claim_risk_note": "High: TLS version claim is blocked."
+    },
+    {
+      "section": "access control / RBAC / tenant isolation",
+      "question": "Do you enforce authentication and authorization?",
+      "short_buyer_safe_answer": "Authentication, authorization, and tenant binding are target controls. Implementation evidence is still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md"
+      ],
+      "missing_evidence": "Auth design, MFA/service auth, token/session controls, tests, account lifecycle evidence.",
+      "owner": "Engineering Lead / Security Lead",
+      "review_gate": "Security architecture review.",
+      "claim_risk_note": "High: do not claim implemented auth."
+    },
+    {
+      "section": "access control / RBAC / tenant isolation",
+      "question": "Do you have RBAC?",
+      "short_buyer_safe_answer": "RBAC and least-privilege access are identified readiness gaps. Role matrix, permission model, admin/support access approval, and access review evidence are still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md"
+      ],
+      "missing_evidence": "Role matrix, permission model, access reviews, approval logs, break-glass records.",
+      "owner": "Security Lead",
+      "review_gate": "Security review.",
+      "claim_risk_note": "High: do not claim RBAC maturity."
+    },
+    {
+      "section": "access control / RBAC / tenant isolation",
+      "question": "Do you enforce tenant isolation?",
+      "short_buyer_safe_answer": "Tenant/request ID binding is a target control. Cross-tenant isolation evidence across runtime, storage, logs, traces, evidence stores, queues, and provider routing is still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md"
+      ],
+      "missing_evidence": "Tenant model, cross-tenant negative tests, storage/log partitioning proof, provider route isolation evidence.",
+      "owner": "Engineering Lead",
+      "review_gate": "Security test review.",
+      "claim_risk_note": "High: do not claim tenant isolation proof."
+    },
+    {
+      "section": "incident response",
+      "question": "Do you have a production incident response program?",
+      "short_buyer_safe_answer": "Incident response is a high-priority gap-closure workstream. A formal IR policy, severity matrix, escalation process, notification templates, and tabletop evidence are still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "IR policy, severity matrix, on-call/escalation process, notification templates, tabletop records.",
+      "owner": "Security Lead",
+      "review_gate": "IR tabletop and legal review.",
+      "claim_risk_note": "High: do not claim IR readiness."
+    },
+    {
+      "section": "incident response",
+      "question": "How are AI/model failures handled?",
+      "short_buyer_safe_answer": "AI/model failure response is identified as a target workstream covering false allow, false escalate, no-select, parse failure, provider failure, leakage, and route-change incidents.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md"
+      ],
+      "missing_evidence": "Failure taxonomy, autopsy workflow, incident tickets, customer-impact criteria, regression coverage.",
+      "owner": "HoloGov Owner / Security Lead",
+      "review_gate": "AI governance/security review.",
+      "claim_risk_note": "Medium: do not imply active operating cadence."
+    },
+    {
+      "section": "vulnerability management / secure SDLC",
+      "question": "Do you have vulnerability management?",
+      "short_buyer_safe_answer": "Vulnerability management is identified as a missing/TBD control area. Scanning cadence, severity SLAs, patch workflow, pen test plan, dependency inventory, and exception process are still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Scan reports, dependency inventory, remediation tickets, exception register, pen test plan.",
+      "owner": "Security Lead",
+      "review_gate": "Security review.",
+      "claim_risk_note": "High: do not claim vulnerability program coverage."
+    },
+    {
+      "section": "vulnerability management / secure SDLC",
+      "question": "Do you have a secure SDLC?",
+      "short_buyer_safe_answer": "Secure SDLC is a high-priority gap-closure workstream. Code review policy, branch protection, SAST/dependency scanning, secret scanning, threat modeling, and release gates are still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "SDLC policy, scanning results, review records, branch protection, secure design review artifacts.",
+      "owner": "Engineering Lead / Security Lead",
+      "review_gate": "Engineering/security review.",
+      "claim_risk_note": "High: do not claim secure SDLC operating effectiveness."
+    },
+    {
+      "section": "vulnerability management / secure SDLC",
+      "question": "Do you manage secrets?",
+      "short_buyer_safe_answer": "Secrets management is identified as a high-priority gap. Secrets inventory, centralized storage, rotation, access logging, CI/CD handling, and secret scanning evidence are still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Secrets inventory, vault/config evidence, rotation records, access logs, secret scanning.",
+      "owner": "Security Lead",
+      "review_gate": "Security review.",
+      "claim_risk_note": "High: do not claim secrets management maturity."
+    },
+    {
+      "section": "privacy / deletion / support access",
+      "question": "Do you have customer data deletion procedures?",
+      "short_buyer_safe_answer": "Deletion is a target/privacy workstream. A deletion SOP, request workflow, identity verification, backup handling, evidence-retention exceptions, and test evidence are still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md"
+      ],
+      "missing_evidence": "Deletion SOP, request workflow, identity verification, backup handling, evidence-retention exceptions, test evidence.",
+      "owner": "Privacy Lead",
+      "review_gate": "Privacy/legal review.",
+      "claim_risk_note": "High: do not claim deletion capability without tests."
+    },
+    {
+      "section": "privacy / deletion / support access",
+      "question": "Do you have a privacy notice or product data map?",
+      "short_buyer_safe_answer": "Privacy notice, purpose limitation, DPA/customer terms, and product data map are missing/TBD artifacts.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md"
+      ],
+      "missing_evidence": "Privacy notice, customer terms, product data map, legal review.",
+      "owner": "Privacy Lead / Legal",
+      "review_gate": "Privacy/legal review.",
+      "claim_risk_note": "High: keep privacy program status as TBD."
+    },
+    {
+      "section": "privacy / deletion / support access",
+      "question": "Do support personnel access customer data?",
+      "short_buyer_safe_answer": "Support access procedures are a missing/TBD control area. Any support access model needs approval workflow, just-in-time access, customer authorization, logging, redaction, and break-glass review.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Support SOP, access logs, approval workflow, customer authorization, break-glass review evidence.",
+      "owner": "Support Lead / Security Lead",
+      "review_gate": "Support/security/privacy review.",
+      "claim_risk_note": "High: do not claim support-access controls exist."
+    },
+    {
+      "section": "AI governance / model routing / HoloGov",
+      "question": "What is HoloGov?",
+      "short_buyer_safe_answer": "HoloGov is the governance, selector, deterministic gate, and final-verdict control layer inside HoloEngine.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Deployment-specific HoloGov runtime evidence and selector logs.",
+      "owner": "HoloGov Owner",
+      "review_gate": "Engineering/HoloGov review.",
+      "claim_risk_note": "Safe if treated as architecture description."
+    },
+    {
+      "section": "AI governance / model routing / HoloGov",
+      "question": "Do you log model/provider route metadata?",
+      "short_buyer_safe_answer": "Route, model/provider versions, selector version/hash, verdict, latency, token counts, error status, retry status, and evidence-retention mode flag are target metadata fields. Runtime evidence is still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md"
+      ],
+      "missing_evidence": "Runtime audit samples, selector release records, provider/model route logs, access/retention evidence.",
+      "owner": "HoloGov Owner / Engineering Lead",
+      "review_gate": "Runtime evidence review.",
+      "claim_risk_note": "High: do not claim production logging until samples exist."
+    },
+    {
+      "section": "AI governance / model routing / HoloGov",
+      "question": "Do you control model/provider route changes?",
+      "short_buyer_safe_answer": "Model/provider route change management is a missing/TBD control area. Route inventory, approval workflow, eval gates, rollback plan, and customer notice criteria are still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md"
+      ],
+      "missing_evidence": "Model route inventory, approval workflow, evaluation gates, rollback plan, customer notice criteria.",
+      "owner": "AI Governance Lead / Engineering Lead",
+      "review_gate": "AI governance change review.",
+      "claim_risk_note": "High: do not claim controlled model changes."
+    },
+    {
+      "section": "AI governance / model routing / HoloGov",
+      "question": "How do you prevent scoring-map leakage?",
+      "short_buyer_safe_answer": "No scoring-map leakage is an identified AI governance workstream. Access controls, prompt-leakage tests, production runtime separation proof, and negative tests are still needed.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md"
+      ],
+      "missing_evidence": "Access controls, prompt-leakage tests, production runtime separation proof, negative tests.",
+      "owner": "HoloVerify Owner / Security Lead",
+      "review_gate": "Security test review.",
+      "claim_risk_note": "High: leakage-prevention evidence is still needed."
+    },
+    {
+      "section": "HoloChat and HoloBuild connected-surface scope",
+      "question": "Is HoloChat automatically in HoloEngine trust scope?",
+      "short_buyer_safe_answer": "No. HoloChat is a connected surface only if deployed as part of a customer-facing production system.",
+      "status": "blocked",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Deployment-specific architecture, data inventory, retention/deletion model, access controls, scope approval.",
+      "owner": "Product Lead / Trust Lead",
+      "review_gate": "Deployment scope review.",
+      "claim_risk_note": "High: automatic coverage claim is blocked."
+    },
+    {
+      "section": "HoloChat and HoloBuild connected-surface scope",
+      "question": "Is HoloBuild automatically in HoloEngine trust scope?",
+      "short_buyer_safe_answer": "No. HoloBuild is a connected surface only if deployed as part of a customer-facing production system.",
+      "status": "blocked",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Deployment-specific architecture, data inventory, retention/deletion model, access controls, scope approval.",
+      "owner": "Product Lead / Trust Lead",
+      "review_gate": "Deployment scope review.",
+      "claim_risk_note": "High: automatic coverage claim is blocked."
+    },
+    {
+      "section": "HoloChat and HoloBuild connected-surface scope",
+      "question": "Can HoloChat or HoloBuild be included in a buyer-specific scope later?",
+      "short_buyer_safe_answer": "Yes, conditionally. Inclusion requires deployment-specific architecture, data inventory, retention/deletion model, access controls, and trust-scope approval.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_BUYER_CLAIM_REGISTER_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Deployment-specific scope package and evidence.",
+      "owner": "Product Lead / Trust Lead",
+      "review_gate": "Buyer deployment scope review.",
+      "claim_risk_note": "High: do not imply default coverage."
+    },
+    {
+      "section": "public benchmark vs internal evidence boundary",
+      "question": "Can public benchmark evidence be used in security questionnaires?",
+      "short_buyer_safe_answer": "Benchmark evidence can help explain evaluation discipline, but it must remain separate from production customer data handling, privacy, retention, and SOC 2 control evidence.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Approved public/internal evidence boundary, storage/access evidence, claim review.",
+      "owner": "Trust Lead / HoloVerify Owner",
+      "review_gate": "Trust/legal review.",
+      "claim_risk_note": "Medium: avoid converting benchmark evidence into production-control proof."
+    },
+    {
+      "section": "public benchmark vs internal evidence boundary",
+      "question": "Are scoring maps or answer keys shared with providers?",
+      "short_buyer_safe_answer": "Scoring maps and answer keys must remain benchmark evidence artifacts and must not be treated as provider prompt content unless a separate explicit non-production evaluation design approves that exposure.",
+      "status": "conditional_tbd",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_PROVIDER_DATA_HANDLING_MATRIX_V0_1.md",
+        "docs/trust/HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md"
+      ],
+      "missing_evidence": "Access controls, prompt-leakage tests, negative tests.",
+      "owner": "HoloVerify Owner / Security Lead",
+      "review_gate": "Security test review.",
+      "claim_risk_note": "High: leakage-prevention evidence is still needed."
+    },
+    {
+      "section": "public benchmark vs internal evidence boundary",
+      "question": "Is internal HoloVerify evidence public by default?",
+      "short_buyer_safe_answer": "No. Public benchmark materials and internal evidence should remain separated by storage, access control, retention, and claim language.",
+      "status": "safe_draft",
+      "evidence_source": [
+        "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+        "docs/trust/HOLOENGINE_TRUST_EVIDENCE_BINDER_INDEX_V0_1.md",
+        "docs/trust/HOLOENGINE_DESIGN_PARTNER_TRUST_PACKET_V0_1.md"
+      ],
+      "missing_evidence": "Formal public/internal evidence boundary and access controls.",
+      "owner": "Trust Lead / HoloVerify Owner",
+      "review_gate": "Trust/legal review.",
+      "claim_risk_note": "Medium: do not expose internal artifacts as public assurance proof without review."
+    }
+  ],
+  "review_gate_before_use": [
+    "Trust Lead review for full response set.",
+    "Legal review for SOC 2, ISO, HIPAA, DPA, BAA, provider, retention, residency, and customer-data claims.",
+    "Security review for authentication, RBAC, tenant isolation, encryption, logging, monitoring, incident response, vulnerability management, and SDLC claims.",
+    "Privacy review for retention, deletion, support access, privacy notice, evidence-retention mode, and data-subject/customer request claims.",
+    "Engineering/HoloGov review for model/provider routing, selector version/hash logging, trace integrity, scoring-map leakage, model change control, and production evidence claims."
+  ],
+  "validation_requirements": {
+    "json_parse": true,
+    "git_diff_check": true,
+    "no_staging": true,
+    "no_commit": true,
+    "no_push": true,
+    "no_providers": true,
+    "no_holoengine_live": true,
+    "no_hologov_live": true,
+    "no_solo": true,
+    "no_judges": true
+  }
+}

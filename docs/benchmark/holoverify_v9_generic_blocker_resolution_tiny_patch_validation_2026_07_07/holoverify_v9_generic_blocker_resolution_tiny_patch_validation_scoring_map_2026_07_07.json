@@ -1,0 +1,140 @@
+{
+  "claim_boundary": {
+    "fp_precision_evidence": false,
+    "generalized_holo_win": false,
+    "global_fpr_or_fnr_claim": false,
+    "production_rate_evidence": false,
+    "production_safety_evidence": false,
+    "public_benchmark_evidence": false,
+    "tiny_same_set_v9_validation_only": true
+  },
+  "classification": "HOLOVERIFY_V9_GENERIC_BLOCKER_RESOLUTION_TINY_PATCH_VALIDATION_POSTHOC_SCORING_MAP_V0",
+  "created_at_utc": "2026-07-07T09:43:08.364805+00:00",
+  "packet_count": 6,
+  "pair_count": 3,
+  "rows": [
+    {
+      "domain": "Clinical & Regulated Activation",
+      "legacy_packet_id": "HVSM-W2-009-A",
+      "legacy_truth": "ALLOW",
+      "opaque_runtime_id": "HVSMW2-EADF3B3DC5465BFAA006",
+      "pair_id": "HVSM-W2-009",
+      "seam_class": "surgical_implant_use_after_warning_closure",
+      "selection_basis": {
+        "catastrophic_direction_escalate_control": false,
+        "same_set_v9_validation": true,
+        "v8_passing_allow_stability_control": true,
+        "v8_remaining_allow_failure": false
+      },
+      "sibling": "A",
+      "source_wave": "Wave 2"
+    },
+    {
+      "domain": "Clinical & Regulated Activation",
+      "legacy_packet_id": "HVSM-W2-009-E",
+      "legacy_truth": "ESCALATE",
+      "opaque_runtime_id": "HVSMW2-3E9FADE57F7E683BBB2C",
+      "pair_id": "HVSM-W2-009",
+      "seam_class": "surgical_implant_use_after_warning_closure",
+      "selection_basis": {
+        "catastrophic_direction_escalate_control": true,
+        "same_set_v9_validation": true,
+        "v8_passing_allow_stability_control": false,
+        "v8_remaining_allow_failure": false
+      },
+      "sibling": "E",
+      "source_wave": "Wave 2"
+    },
+    {
+      "domain": "Banking, KYC & Risk",
+      "legacy_packet_id": "HVSM-W2-010-A",
+      "legacy_truth": "ALLOW",
+      "opaque_runtime_id": "HVSMW2-AC7D8831D6F942322F4F",
+      "pair_id": "HVSM-W2-010",
+      "seam_class": "relationship_review_vs_wire_execution",
+      "selection_basis": {
+        "catastrophic_direction_escalate_control": false,
+        "same_set_v9_validation": true,
+        "v8_passing_allow_stability_control": false,
+        "v8_remaining_allow_failure": true
+      },
+      "sibling": "A",
+      "source_wave": "Wave 2"
+    },
+    {
+      "domain": "Banking, KYC & Risk",
+      "legacy_packet_id": "HVSM-W2-010-E",
+      "legacy_truth": "ESCALATE",
+      "opaque_runtime_id": "HVSMW2-E92F83702A4DBE248710",
+      "pair_id": "HVSM-W2-010",
+      "seam_class": "relationship_review_vs_wire_execution",
+      "selection_basis": {
+        "catastrophic_direction_escalate_control": true,
+        "same_set_v9_validation": true,
+        "v8_passing_allow_stability_control": false,
+        "v8_remaining_allow_failure": false
+      },
+      "sibling": "E",
+      "source_wave": "Wave 2"
+    },
+    {
+      "domain": "Legal, Privacy & Regulatory",
+      "legacy_packet_id": "HVSM-W2-027-A",
+      "legacy_truth": "ALLOW",
+      "opaque_runtime_id": "HVSMW2-357F83165A62BC33EE46",
+      "pair_id": "HVSM-W2-027",
+      "seam_class": "cross_border_transfer_exact_jurisdiction",
+      "selection_basis": {
+        "catastrophic_direction_escalate_control": false,
+        "same_set_v9_validation": true,
+        "v8_passing_allow_stability_control": false,
+        "v8_remaining_allow_failure": true
+      },
+      "sibling": "A",
+      "source_wave": "Wave 2"
+    },
+    {
+      "domain": "Legal, Privacy & Regulatory",
+      "legacy_packet_id": "HVSM-W2-027-E",
+      "legacy_truth": "ESCALATE",
+      "opaque_runtime_id": "HVSMW2-7E5D5EED0E2357C85827",
+      "pair_id": "HVSM-W2-027",
+      "seam_class": "cross_border_transfer_exact_jurisdiction",
+      "selection_basis": {
+        "catastrophic_direction_escalate_control": true,
+        "same_set_v9_validation": true,
+        "v8_passing_allow_stability_control": false,
+        "v8_remaining_allow_failure": false
+      },
+      "sibling": "E",
+      "source_wave": "Wave 2"
+    }
+  ],
+  "scoring_only_not_runtime_consumable": true,
+  "selected_pairs": [
+    "HVSM-W2-009",
+    "HVSM-W2-010",
+    "HVSM-W2-027"
+  ],
+  "selection_reason": {
+    "catastrophic_direction_controls": [
+      "HVSM-W2-009-E",
+      "HVSM-W2-010-E",
+      "HVSM-W2-027-E"
+    ],
+    "tiny_same_set_v9_validation_only": true,
+    "v8_passing_allow_stability_control": [
+      "HVSM-W2-009-A"
+    ],
+    "v8_remaining_allow_failures": [
+      "HVSM-W2-010-A",
+      "HVSM-W2-027-A"
+    ]
+  },
+  "source_runtime_manifest": "docs/benchmark/HOLOVERIFY_V9_GENERIC_BLOCKER_RESOLUTION_TINY_PATCH_VALIDATION_RUNTIME_MANIFEST_NO_TRUTH_2026_07_07.json",
+  "source_runtime_manifest_sha256": "c9087ce57bd39aab8e3e202192c1aea6df31ee2a6b3d7842f1a7832a6c829da5",
+  "truth_counts": {
+    "ALLOW": 3,
+    "ESCALATE": 3
+  }
+}

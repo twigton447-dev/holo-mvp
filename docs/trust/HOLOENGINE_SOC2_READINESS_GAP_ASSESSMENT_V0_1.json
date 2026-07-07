@@ -1,0 +1,1099 @@
+{
+  "artifact": "HOLOENGINE_SOC2_READINESS_GAP_ASSESSMENT_V0_1",
+  "program_name": "HoloEngine Trust & Assurance Program",
+  "version": "0.1",
+  "created_date": "2026-07-07",
+  "status": "readiness_gap_assessment_draft",
+  "source_architecture": [
+    "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.md",
+    "docs/trust/HOLOENGINE_DATA_FLOW_ARCHITECTURE_V0_1.json"
+  ],
+  "claim_boundary": {
+    "soc_2_report": false,
+    "soc_2_compliance_claim": false,
+    "soc_2_certification_claim": false,
+    "soc_2_type_i_completion_claim": false,
+    "soc_2_type_ii_completion_claim": false,
+    "auditor_validation_claim": false,
+    "control_operating_effectiveness_claim": false,
+    "control_readiness_claim": false,
+    "provider_zero_retention_claim": false,
+    "tls_1_3_claim": false,
+    "ram_only_processing_claim": false,
+    "zero_ms_retention_claim": false,
+    "memory_zeroing_claim": false,
+    "allowed_stage_language": [
+      "gap assessment",
+      "target control",
+      "readiness workstream",
+      "evidence to collect",
+      "partially supported",
+      "missing / TBD",
+      "verify in deployment"
+    ]
+  },
+  "scope": {
+    "primary_scope": "HoloEngine Trust & Assurance Program",
+    "surfaces": {
+      "HoloEngine": {
+        "scope_treatment": "primary_target_scope",
+        "notes": "Core runtime trust layer and target SOC 2 readiness workstream."
+      },
+      "HoloGov": {
+        "scope_treatment": "in_scope_as_part_of_holoengine",
+        "notes": "Governance, selector, deterministic gates, and final verdict controls."
+      },
+      "HoloVerify": {
+        "scope_treatment": "separate_benchmark_evidence_scope",
+        "notes": "Supports evaluation discipline but is not production customer payload handling."
+      },
+      "HoloChat": {
+        "scope_treatment": "conditional",
+        "notes": "In scope only if deployed as part of a customer-facing production system."
+      },
+      "HoloBuild": {
+        "scope_treatment": "conditional",
+        "notes": "In scope only if deployed as part of a customer-facing production system."
+      },
+      "HoloBrain": {
+        "scope_treatment": "conditional",
+        "notes": "In scope only if enabled in a deployment."
+      }
+    }
+  },
+  "soc_2_trust_services_mapping": [
+    {
+      "category": "Security",
+      "applicability": "applicable",
+      "holoengine_relevance": [
+        "access control",
+        "tenant isolation",
+        "secure development",
+        "change control",
+        "monitoring",
+        "incident response",
+        "vendor risk",
+        "secrets management",
+        "vulnerability management"
+      ],
+      "current_assessment": "Target controls identified; several implementation and evidence gaps remain."
+    },
+    {
+      "category": "Availability",
+      "applicability": "applicable_if_holoengine_is_offered_as_production_service",
+      "holoengine_relevance": [
+        "uptime",
+        "backup",
+        "disaster recovery",
+        "monitoring",
+        "capacity",
+        "recovery objectives",
+        "dependency availability"
+      ],
+      "current_assessment": "Mostly missing / TBD until deployment architecture, SLOs, DR, and monitoring are defined."
+    },
+    {
+      "category": "Confidentiality",
+      "applicability": "applicable",
+      "holoengine_relevance": [
+        "customer payload minimization",
+        "metadata-only logs by default",
+        "encryption",
+        "provider exposure control",
+        "retention",
+        "access controls"
+      ],
+      "current_assessment": "Partially supported by target architecture; technical verification and policy evidence needed."
+    },
+    {
+      "category": "Privacy",
+      "applicability": "applicable_if_personal_data_is_processed",
+      "holoengine_relevance": [
+        "notice",
+        "purpose limitation",
+        "consent or customer instructions",
+        "deletion",
+        "retention",
+        "support access",
+        "subprocessors"
+      ],
+      "current_assessment": "Conditional and mostly TBD pending product terms, data inventory, and deployment-specific flows."
+    },
+    {
+      "category": "Processing Integrity",
+      "applicability": "applicable_if_customers_rely_on_allow_escalate_decisions",
+      "holoengine_relevance": [
+        "request validation",
+        "source-boundary validation",
+        "selector and version control",
+        "trace integrity",
+        "failure handling",
+        "no scoring-map leakage"
+      ],
+      "current_assessment": "Partially supported by benchmark discipline and HoloGov target design; production evidence needed."
+    }
+  ],
+  "current_control_inventory": {
+    "supported_by_existing_architecture_or_benchmark_discipline": [
+      {
+        "control_area": "Product and scope taxonomy",
+        "tsc_categories": [
+          "Security",
+          "Confidentiality"
+        ],
+        "current_support": "HoloEngine, HoloGov, HoloVerify, HoloChat, HoloBuild, and HoloBrain scope boundaries are explicitly separated.",
+        "evidence_source": "Data-flow architecture draft."
+      },
+      {
+        "control_area": "Production versus benchmark/evidence mode separation",
+        "tsc_categories": [
+          "Security",
+          "Confidentiality",
+          "Processing Integrity"
+        ],
+        "current_support": "Production customer-mode is separated from HoloVerify benchmark/evidence mode.",
+        "evidence_source": "Data-flow architecture draft."
+      },
+      {
+        "control_area": "Metadata-only audit log target",
+        "tsc_categories": [
+          "Security",
+          "Confidentiality"
+        ],
+        "current_support": "Default log design excludes customer payload text, full prompts, raw provider outputs, private source documents, and unredacted conversations.",
+        "evidence_source": "Data-flow architecture draft."
+      },
+      {
+        "control_area": "Bounded runtime payload target",
+        "tsc_categories": [
+          "Confidentiality"
+        ],
+        "current_support": "Production flow calls for bounded payloads and avoidance of unnecessary raw transcript accumulation.",
+        "evidence_source": "Data-flow architecture draft."
+      },
+      {
+        "control_area": "ALLOW/ESCALATE response boundary",
+        "tsc_categories": [
+          "Processing Integrity"
+        ],
+        "current_support": "HoloEngine target response is a decision review output, not a downstream business-action execution claim.",
+        "evidence_source": "Data-flow architecture draft."
+      },
+      {
+        "control_area": "HoloGov selector metadata target",
+        "tsc_categories": [
+          "Security",
+          "Processing Integrity"
+        ],
+        "current_support": "Target metadata includes selector version/hash, route, deterministic gate status, and final verdict metadata.",
+        "evidence_source": "Data-flow architecture draft."
+      },
+      {
+        "control_area": "Benchmark trace and failure preservation discipline",
+        "tsc_categories": [
+          "Processing Integrity"
+        ],
+        "current_support": "HoloVerify may preserve frozen prompts, raw outputs, scoring maps, traces, runtime manifests, failure autopsies, and operational notes for benchmark integrity.",
+        "evidence_source": "Benchmark/evidence mode architecture."
+      },
+      {
+        "control_area": "Claim-safety rules",
+        "tsc_categories": [
+          "Security",
+          "Confidentiality",
+          "Privacy"
+        ],
+        "current_support": "Do-not-overclaim rules already prohibit unsupported claims about SOC 2 certification, provider retention, TLS, HIPAA, HITRUST, RAM-only processing, and related items.",
+        "evidence_source": "Data-flow architecture draft."
+      }
+    ],
+    "partially_supported": [
+      {
+        "control_area": "Identity and authentication",
+        "tsc_categories": [
+          "Security"
+        ],
+        "partial_support": "Identity/auth boundary is described as a target production stage.",
+        "gap_to_close": "Implement authentication mechanism, policies, MFA/service credentials, session/token controls, and evidence."
+      },
+      {
+        "control_area": "RBAC and authorization",
+        "tsc_categories": [
+          "Security"
+        ],
+        "partial_support": "Authorization is included in target request boundary.",
+        "gap_to_close": "Define roles, permissions, least-privilege model, admin access, service access, and review cadence."
+      },
+      {
+        "control_area": "Tenant isolation",
+        "tsc_categories": [
+          "Security",
+          "Confidentiality"
+        ],
+        "partial_support": "Tenant ID/request ID binding is a target control.",
+        "gap_to_close": "Prove cross-tenant isolation in application, storage, logs, queues, evidence stores, and provider routing."
+      },
+      {
+        "control_area": "Encryption in transit",
+        "tsc_categories": [
+          "Security",
+          "Confidentiality"
+        ],
+        "partial_support": "Encryption/TLS verification is identified as a gap.",
+        "gap_to_close": "Verify deployed TLS configuration, provider API transport, internal transport, and certificate management."
+      },
+      {
+        "control_area": "Encryption at rest",
+        "tsc_categories": [
+          "Security",
+          "Confidentiality"
+        ],
+        "partial_support": "Cryptography verification is listed as a target control.",
+        "gap_to_close": "Verify database, object store, log store, backup, and evidence-store encryption."
+      },
+      {
+        "control_area": "Provider/vendor management",
+        "tsc_categories": [
+          "Security",
+          "Confidentiality",
+          "Privacy"
+        ],
+        "partial_support": "Provider risk placeholders exist for OpenAI, xAI, and MiniMax.",
+        "gap_to_close": "Collect DPAs, subprocessor terms, retention settings, zero-retention eligibility, regional handling, and contract evidence."
+      },
+      {
+        "control_area": "Logging and monitoring",
+        "tsc_categories": [
+          "Security",
+          "Availability",
+          "Processing Integrity"
+        ],
+        "partial_support": "Metadata fields are defined for audit logging.",
+        "gap_to_close": "Implement centralized logging, alerting, access control, retention, integrity protection, and operational monitoring."
+      },
+      {
+        "control_area": "Data retention and deletion",
+        "tsc_categories": [
+          "Confidentiality",
+          "Privacy"
+        ],
+        "partial_support": "Metadata-only default and customer-enabled evidence-retention mode are defined.",
+        "gap_to_close": "Define retention schedules, deletion workflows, customer request handling, legal hold handling, and evidence-store disposal."
+      },
+      {
+        "control_area": "Change management",
+        "tsc_categories": [
+          "Security",
+          "Processing Integrity"
+        ],
+        "partial_support": "Selector logic, worker contracts, runtime manifests, and release changes are named as change-control targets.",
+        "gap_to_close": "Formalize approvals, testing gates, release records, rollback, model/provider change control, and emergency change process."
+      },
+      {
+        "control_area": "Secure development lifecycle",
+        "tsc_categories": [
+          "Security"
+        ],
+        "partial_support": "Secure development is listed as a readiness control area.",
+        "gap_to_close": "Define code review, dependency scanning, secret scanning, threat modeling, security tests, and release criteria."
+      },
+      {
+        "control_area": "Trace integrity",
+        "tsc_categories": [
+          "Processing Integrity"
+        ],
+        "partial_support": "Benchmark mode preserves traces and manifests.",
+        "gap_to_close": "Add production trace integrity controls, hashes, tamper-evidence, access controls, and retention policy."
+      },
+      {
+        "control_area": "Failure autopsy process",
+        "tsc_categories": [
+          "Processing Integrity"
+        ],
+        "partial_support": "Benchmark/evidence mode includes failure autopsies.",
+        "gap_to_close": "Define production incident and model-failure autopsy process, owner, timelines, evidence capture, and corrective actions."
+      }
+    ],
+    "missing_or_tbd": [
+      {
+        "control_area": "Incident response",
+        "tsc_categories": [
+          "Security",
+          "Availability",
+          "Confidentiality"
+        ],
+        "current_gap": "Need documented security incident plan, severity model, escalation paths, customer notification process, evidence preservation, and post-incident review."
+      },
+      {
+        "control_area": "Backup and disaster recovery",
+        "tsc_categories": [
+          "Availability"
+        ],
+        "current_gap": "Need backup policy, restore tests, RTO/RPO, DR runbook, dependency mapping, and recovery evidence."
+      },
+      {
+        "control_area": "Vulnerability management",
+        "tsc_categories": [
+          "Security"
+        ],
+        "current_gap": "Need scanning process, severity SLAs, patching workflow, penetration test plan, dependency inventory, and exception process."
+      },
+      {
+        "control_area": "Customer support/access procedures",
+        "tsc_categories": [
+          "Security",
+          "Privacy",
+          "Confidentiality"
+        ],
+        "current_gap": "Need support access approval, just-in-time access, logging, customer authorization, break-glass controls, and support-data minimization."
+      },
+      {
+        "control_area": "Formal risk register",
+        "tsc_categories": [
+          "Security",
+          "Availability",
+          "Confidentiality",
+          "Processing Integrity"
+        ],
+        "current_gap": "Need maintained risk register with owner, likelihood, impact, treatment, residual risk, and review cadence."
+      },
+      {
+        "control_area": "Security awareness and personnel controls",
+        "tsc_categories": [
+          "Security"
+        ],
+        "current_gap": "Need onboarding/offboarding, acceptable use, background check policy if applicable, access reviews, and security training evidence."
+      },
+      {
+        "control_area": "Asset inventory",
+        "tsc_categories": [
+          "Security",
+          "Confidentiality"
+        ],
+        "current_gap": "Need current inventory of services, databases, evidence stores, model routes, providers, logs, secrets, repositories, and production environments."
+      },
+      {
+        "control_area": "Privacy program artifacts",
+        "tsc_categories": [
+          "Privacy"
+        ],
+        "current_gap": "Need data inventory, privacy notice, DPA/customer terms, deletion request handling, purpose limitation, and subprocessor disclosures if personal data is processed."
+      }
+    ]
+  },
+  "control_gaps": [
+    {
+      "gap_area": "identity/authentication",
+      "relevant_tsc": [
+        "Security"
+      ],
+      "current_state": "Target boundary exists, implementation evidence not collected.",
+      "gap_closure_work": "Define authentication architecture, MFA/service auth, token/session controls, account lifecycle, and test evidence.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "RBAC/access control",
+      "relevant_tsc": [
+        "Security",
+        "Confidentiality"
+      ],
+      "current_state": "Authorization is target-state only.",
+      "gap_closure_work": "Define role matrix, least privilege, admin roles, support roles, service accounts, approval workflow, and access review evidence.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "tenant isolation",
+      "relevant_tsc": [
+        "Security",
+        "Confidentiality",
+        "Privacy"
+      ],
+      "current_state": "Tenant/request ID binding target exists.",
+      "gap_closure_work": "Prove isolation across runtime, storage, logs, traces, evidence-retention mode, queues, and provider routing.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "encryption in transit",
+      "relevant_tsc": [
+        "Security",
+        "Confidentiality"
+      ],
+      "current_state": "TLS must be verified in deployment.",
+      "gap_closure_work": "Document TLS configuration, certificate management, provider API transport, internal service transport, and verification evidence.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "encryption at rest",
+      "relevant_tsc": [
+        "Security",
+        "Confidentiality"
+      ],
+      "current_state": "Not yet evidenced.",
+      "gap_closure_work": "Verify encryption for databases, log stores, evidence stores, backups, local artifacts, and key management.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "secrets management",
+      "relevant_tsc": [
+        "Security"
+      ],
+      "current_state": "Not yet evidenced.",
+      "gap_closure_work": "Centralize secrets storage, rotation, access logging, CI/CD secret handling, and secret scanning.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "logging and monitoring",
+      "relevant_tsc": [
+        "Security",
+        "Availability",
+        "Processing Integrity"
+      ],
+      "current_state": "Audit-log field design exists; operational monitoring not evidenced.",
+      "gap_closure_work": "Implement centralized logs, alerts, SIEM or equivalent, anomaly detection, uptime checks, error budgets, and log access controls.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "incident response",
+      "relevant_tsc": [
+        "Security",
+        "Availability",
+        "Confidentiality"
+      ],
+      "current_state": "Missing / TBD.",
+      "gap_closure_work": "Create IR plan, severity levels, communications plan, customer notification rules, evidence preservation, table-top exercises, and corrective-action tracking.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "vendor/subprocessor management",
+      "relevant_tsc": [
+        "Security",
+        "Confidentiality",
+        "Privacy"
+      ],
+      "current_state": "Provider placeholders exist.",
+      "gap_closure_work": "Build provider/subprocessor inventory, DPAs, retention settings, zero-retention verification where available, vendor reviews, and annual review process.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "data retention/deletion",
+      "relevant_tsc": [
+        "Confidentiality",
+        "Privacy"
+      ],
+      "current_state": "Default metadata-only and customer-enabled evidence-retention mode are target controls.",
+      "gap_closure_work": "Define retention schedule, deletion workflow, customer evidence-retention settings, legal holds, backups deletion model, and disposal evidence.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "change management",
+      "relevant_tsc": [
+        "Security",
+        "Processing Integrity"
+      ],
+      "current_state": "Versioning targets exist for selectors, worker contracts, manifests, and releases.",
+      "gap_closure_work": "Implement release approvals, model/provider change reviews, test evidence, rollback records, emergency change process, and production deployment logs.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "secure development lifecycle",
+      "relevant_tsc": [
+        "Security"
+      ],
+      "current_state": "Not yet evidenced as an operating program.",
+      "gap_closure_work": "Add code review policy, branch protection, SAST/dependency scanning, secret scanning, secure design review, security test gate, and release checklist.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "backup/disaster recovery",
+      "relevant_tsc": [
+        "Availability"
+      ],
+      "current_state": "Missing / TBD.",
+      "gap_closure_work": "Define backup scope, restore testing, RTO/RPO, DR runbook, dependency failure response, and periodic validation.",
+      "priority": "medium"
+    },
+    {
+      "gap_area": "vulnerability management",
+      "relevant_tsc": [
+        "Security"
+      ],
+      "current_state": "Missing / TBD.",
+      "gap_closure_work": "Define vulnerability intake, scanning cadence, severity SLAs, patch management, pen test cadence, and exception process.",
+      "priority": "high"
+    },
+    {
+      "gap_area": "customer support/access procedures",
+      "relevant_tsc": [
+        "Security",
+        "Confidentiality",
+        "Privacy"
+      ],
+      "current_state": "Missing / TBD.",
+      "gap_closure_work": "Define support access workflow, customer approval, just-in-time elevation, logging, redaction, break-glass review, and support data minimization.",
+      "priority": "medium"
+    }
+  ],
+  "holoengine_specific_ai_controls": [
+    {
+      "control": "production_vs_benchmark_evidence_mode_separation",
+      "relevant_tsc": [
+        "Security",
+        "Confidentiality",
+        "Processing Integrity"
+      ],
+      "current_support": "Architecture separates production customer-mode from HoloVerify benchmark/evidence mode.",
+      "gap_or_required_evidence": "Prove storage, access, retention, logging, and claim-language separation in deployed environments.",
+      "status": "partial"
+    },
+    {
+      "control": "model_provider_routing_logs",
+      "relevant_tsc": [
+        "Security",
+        "Confidentiality",
+        "Processing Integrity"
+      ],
+      "current_support": "Target audit fields include route and model/provider versions.",
+      "gap_or_required_evidence": "Capture provider, model, route, prompt-minimization flag, latency, token counts, retry/error status, and retention mode without default payload logging.",
+      "status": "partial"
+    },
+    {
+      "control": "selector_version_hash_logging",
+      "relevant_tsc": [
+        "Processing Integrity",
+        "Security"
+      ],
+      "current_support": "Target HoloGov metadata includes selector version/hash.",
+      "gap_or_required_evidence": "Produce runtime logs and release artifacts showing selector hash/version for each decision.",
+      "status": "partial"
+    },
+    {
+      "control": "no_scoring_map_leakage",
+      "relevant_tsc": [
+        "Processing Integrity",
+        "Confidentiality"
+      ],
+      "current_support": "Benchmark/evidence mode recognizes scoring maps as preserved artifacts separate from production.",
+      "gap_or_required_evidence": "Access-control scoring maps, exclude scoring maps from provider prompts, prove production runtime cannot read benchmark scoring maps, and audit leakage tests.",
+      "status": "partial"
+    },
+    {
+      "control": "trace_integrity",
+      "relevant_tsc": [
+        "Processing Integrity",
+        "Security"
+      ],
+      "current_support": "Benchmark traces and runtime manifests are preserved for reproducibility.",
+      "gap_or_required_evidence": "Add hash manifests, immutable/tamper-evident trace storage, access logs, and chain-of-custody for production evidence-retention mode.",
+      "status": "partial"
+    },
+    {
+      "control": "failure_autopsy_process",
+      "relevant_tsc": [
+        "Processing Integrity",
+        "Security"
+      ],
+      "current_support": "Benchmark mode includes failure autopsies and operational notes.",
+      "gap_or_required_evidence": "Define production failure taxonomy, owner, autopsy template, corrective-action workflow, customer impact review, and regression coverage.",
+      "status": "partial"
+    },
+    {
+      "control": "model_change_control",
+      "relevant_tsc": [
+        "Security",
+        "Processing Integrity",
+        "Confidentiality"
+      ],
+      "current_support": "Provider/model versions are target audit metadata.",
+      "gap_or_required_evidence": "Formalize model onboarding, deprecation, route changes, eval gates, rollback, risk signoff, and customer notice criteria.",
+      "status": "missing"
+    },
+    {
+      "control": "customer_evidence_retention_mode",
+      "relevant_tsc": [
+        "Confidentiality",
+        "Privacy",
+        "Processing Integrity"
+      ],
+      "current_support": "Architecture defines explicit customer-enabled evidence-retention mode.",
+      "gap_or_required_evidence": "Implement customer configuration, retention period, access controls, encryption, deletion, export, audit logging, and support-access boundaries.",
+      "status": "partial"
+    },
+    {
+      "control": "prompt_and_payload_minimization",
+      "relevant_tsc": [
+        "Confidentiality",
+        "Privacy"
+      ],
+      "current_support": "Bounded runtime payload target exists.",
+      "gap_or_required_evidence": "Prove minimization with request schemas, prompt builders, redaction tests, and logs showing payload text is excluded by default.",
+      "status": "partial"
+    },
+    {
+      "control": "human_escalation_boundary",
+      "relevant_tsc": [
+        "Processing Integrity"
+      ],
+      "current_support": "HoloEngine returns ALLOW/ESCALATE and does not claim downstream execution by default.",
+      "gap_or_required_evidence": "Define customer responsibility for escalations, operator workflow, support procedures, and product UI/API wording.",
+      "status": "partial"
+    }
+  ],
+  "evidence_binder_checklist": [
+    {
+      "control_id": "SOC2-TRUST-001",
+      "control": "Claim boundary and do-not-overclaim rules",
+      "tsc_categories": [
+        "Security",
+        "Confidentiality",
+        "Privacy"
+      ],
+      "proof_to_collect": "Data-flow architecture claim boundary, this gap assessment claim boundary, buyer-facing do-not-claim list.",
+      "owner_role": "Trust Lead",
+      "status": "exists"
+    },
+    {
+      "control_id": "SOC2-SEC-001",
+      "control": "Scope and system description",
+      "tsc_categories": [
+        "Security"
+      ],
+      "proof_to_collect": "Final system description, architecture diagram, data-flow diagram, in-scope services, out-of-scope surfaces.",
+      "owner_role": "Trust Lead",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-SEC-002",
+      "control": "Identity/authentication",
+      "tsc_categories": [
+        "Security"
+      ],
+      "proof_to_collect": "Auth design, MFA/service credential policy, token/session settings, account lifecycle evidence, test results.",
+      "owner_role": "Engineering Lead",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-SEC-003",
+      "control": "RBAC/access control",
+      "tsc_categories": [
+        "Security",
+        "Confidentiality"
+      ],
+      "proof_to_collect": "Role matrix, permission model, admin/support access approvals, quarterly access reviews.",
+      "owner_role": "Security Lead",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-SEC-004",
+      "control": "Tenant isolation",
+      "tsc_categories": [
+        "Security",
+        "Confidentiality"
+      ],
+      "proof_to_collect": "Tenant model, isolation tests, storage/log/evidence partitioning proof, cross-tenant negative tests.",
+      "owner_role": "Engineering Lead",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-SEC-005",
+      "control": "Secrets management",
+      "tsc_categories": [
+        "Security"
+      ],
+      "proof_to_collect": "Secrets inventory, storage mechanism, rotation policy, access logs, secret scanning results.",
+      "owner_role": "Security Lead",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-SEC-006",
+      "control": "Change management",
+      "tsc_categories": [
+        "Security",
+        "Processing Integrity"
+      ],
+      "proof_to_collect": "Release policy, approvals, test gates, deployment records, rollback procedure, emergency change records.",
+      "owner_role": "Engineering Lead",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-SEC-007",
+      "control": "Secure development lifecycle",
+      "tsc_categories": [
+        "Security"
+      ],
+      "proof_to_collect": "Code review policy, branch protection, SAST/dependency scanning, threat model, secure design review records.",
+      "owner_role": "Engineering Lead",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-SEC-008",
+      "control": "Vulnerability management",
+      "tsc_categories": [
+        "Security"
+      ],
+      "proof_to_collect": "Scan reports, dependency inventory, vulnerability SLAs, remediation tickets, exception register, pen test plan.",
+      "owner_role": "Security Lead",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-SEC-009",
+      "control": "Logging and monitoring",
+      "tsc_categories": [
+        "Security",
+        "Availability"
+      ],
+      "proof_to_collect": "Audit-log schema, centralized logging evidence, alert rules, access controls, log retention settings, sample logs.",
+      "owner_role": "SRE / Operations",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-SEC-010",
+      "control": "Incident response",
+      "tsc_categories": [
+        "Security",
+        "Availability",
+        "Confidentiality"
+      ],
+      "proof_to_collect": "IR policy, severity matrix, on-call/escalation process, customer notification template, tabletop evidence.",
+      "owner_role": "Security Lead",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-SEC-011",
+      "control": "Vendor/subprocessor management",
+      "tsc_categories": [
+        "Security",
+        "Confidentiality",
+        "Privacy"
+      ],
+      "proof_to_collect": "Provider list, subprocessors, DPAs, retention terms, vendor reviews, annual review calendar.",
+      "owner_role": "Legal / Trust Lead",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-CONF-001",
+      "control": "Encryption in transit",
+      "tsc_categories": [
+        "Security",
+        "Confidentiality"
+      ],
+      "proof_to_collect": "TLS configuration, certificate management, provider API transport verification, internal transport verification.",
+      "owner_role": "SRE / Operations",
+      "status": "verify"
+    },
+    {
+      "control_id": "SOC2-CONF-002",
+      "control": "Encryption at rest",
+      "tsc_categories": [
+        "Security",
+        "Confidentiality"
+      ],
+      "proof_to_collect": "Database, log store, object store, backup, and evidence-store encryption proof; key management evidence.",
+      "owner_role": "SRE / Operations",
+      "status": "verify"
+    },
+    {
+      "control_id": "SOC2-CONF-003",
+      "control": "Payload minimization",
+      "tsc_categories": [
+        "Confidentiality",
+        "Privacy"
+      ],
+      "proof_to_collect": "Request schemas, prompt builder controls, redaction tests, default excluded logging fields, sample metadata-only logs.",
+      "owner_role": "Engineering Lead",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-CONF-004",
+      "control": "Data retention/deletion",
+      "tsc_categories": [
+        "Confidentiality",
+        "Privacy"
+      ],
+      "proof_to_collect": "Retention schedule, deletion SOP, customer request workflow, backup deletion model, evidence-retention mode policy.",
+      "owner_role": "Privacy Lead",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-CONF-005",
+      "control": "Customer evidence-retention mode",
+      "tsc_categories": [
+        "Confidentiality",
+        "Privacy",
+        "Processing Integrity"
+      ],
+      "proof_to_collect": "Customer configuration, retention controls, access control, deletion/export workflow, audit logging, support restrictions.",
+      "owner_role": "Product Lead",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-AVAIL-001",
+      "control": "Availability monitoring",
+      "tsc_categories": [
+        "Availability"
+      ],
+      "proof_to_collect": "Uptime checks, alert thresholds, on-call runbook, dependency monitoring, incident records.",
+      "owner_role": "SRE / Operations",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-AVAIL-002",
+      "control": "Backup and restore",
+      "tsc_categories": [
+        "Availability"
+      ],
+      "proof_to_collect": "Backup policy, backup inventory, restore test evidence, RTO/RPO, backup access controls.",
+      "owner_role": "SRE / Operations",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-AVAIL-003",
+      "control": "Disaster recovery",
+      "tsc_categories": [
+        "Availability"
+      ],
+      "proof_to_collect": "DR plan, dependency map, failover runbook, recovery test, post-test corrective actions.",
+      "owner_role": "SRE / Operations",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-PI-001",
+      "control": "Request validation",
+      "tsc_categories": [
+        "Processing Integrity",
+        "Security"
+      ],
+      "proof_to_collect": "Schema validation tests, malformed request rejection tests, action-boundary checks, tenant routing tests.",
+      "owner_role": "Engineering Lead",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-PI-002",
+      "control": "Selector version/hash logging",
+      "tsc_categories": [
+        "Processing Integrity",
+        "Security"
+      ],
+      "proof_to_collect": "Runtime audit samples with selector version/hash, release manifest, selector change approval record.",
+      "owner_role": "HoloGov Owner",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-PI-003",
+      "control": "Model/provider routing logs",
+      "tsc_categories": [
+        "Processing Integrity",
+        "Confidentiality"
+      ],
+      "proof_to_collect": "Route logs with provider/model version, route ID, retry/error status, latency, token counts, retention flag.",
+      "owner_role": "HoloGov Owner",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-PI-004",
+      "control": "No scoring-map leakage",
+      "tsc_categories": [
+        "Processing Integrity",
+        "Confidentiality"
+      ],
+      "proof_to_collect": "Benchmark scoring-map access controls, prompt-leakage tests, production runtime separation proof, negative tests.",
+      "owner_role": "HoloVerify Owner",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-PI-005",
+      "control": "Trace integrity",
+      "tsc_categories": [
+        "Processing Integrity",
+        "Security"
+      ],
+      "proof_to_collect": "Trace hash manifest, immutable/tamper-evident storage configuration, access logs, chain-of-custody procedure.",
+      "owner_role": "HoloVerify Owner",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-PI-006",
+      "control": "Failure autopsy process",
+      "tsc_categories": [
+        "Processing Integrity"
+      ],
+      "proof_to_collect": "Autopsy template, failure taxonomy, corrective-action tickets, regression test links, customer impact review.",
+      "owner_role": "HoloGov Owner",
+      "status": "partial"
+    },
+    {
+      "control_id": "SOC2-PI-007",
+      "control": "Model change control",
+      "tsc_categories": [
+        "Processing Integrity",
+        "Security"
+      ],
+      "proof_to_collect": "Model route inventory, evaluation gate, approval records, rollback plan, deprecation process, customer notice criteria.",
+      "owner_role": "AI Governance Lead",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-PRIV-001",
+      "control": "Privacy notice and purpose",
+      "tsc_categories": [
+        "Privacy"
+      ],
+      "proof_to_collect": "Customer-facing data handling terms, purpose limitation, DPA terms, privacy notice, product data map.",
+      "owner_role": "Privacy Lead / Legal",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-PRIV-002",
+      "control": "Data subject/customer deletion requests",
+      "tsc_categories": [
+        "Privacy"
+      ],
+      "proof_to_collect": "Request intake, identity verification, deletion workflow, SLA, evidence retention exceptions, completion evidence.",
+      "owner_role": "Privacy Lead",
+      "status": "missing"
+    },
+    {
+      "control_id": "SOC2-PRIV-003",
+      "control": "Customer support/access procedure",
+      "tsc_categories": [
+        "Privacy",
+        "Confidentiality",
+        "Security"
+      ],
+      "proof_to_collect": "Support access approval, just-in-time access, customer authorization, access logs, redaction, break-glass review.",
+      "owner_role": "Support Lead",
+      "status": "missing"
+    }
+  ],
+  "buyer_facing_readiness": {
+    "safe_to_say_now": [
+      "HoloEngine has a draft data-flow architecture for enterprise trust review.",
+      "The architecture separates target production customer-mode handling from benchmark/evidence mode.",
+      "The target production design is metadata-only audit logging by default.",
+      "Customer-enabled evidence-retention mode is a planned/target control, not a default payload-retention claim.",
+      "HoloEngine's target output boundary is ALLOW or ESCALATE; it should not be described as executing downstream business actions by default.",
+      "HoloGov target metadata includes model/provider route, selector version/hash, verdict, latency, token counts, error status, retry status, and evidence-retention mode flag.",
+      "Provider/vendor handling is explicitly listed as a verification workstream, including DPAs, subprocessor review, retention settings, and zero-retention eligibility where applicable.",
+      "HoloVerify benchmark evidence is separate from production customer payload handling.",
+      "HoloEngine has a defined list of trust controls and gaps to close before a formal SOC 2 audit."
+    ],
+    "must_remain_tbd": [
+      "Whether any specific deployment is ready for SOC 2 audit.",
+      "The final in-scope system boundary for HoloChat, HoloBuild, or HoloBrain in a customer deployment.",
+      "Authentication and RBAC implementation details.",
+      "Tenant isolation evidence.",
+      "Encryption in transit and at rest verification for the deployed environment.",
+      "Provider retention settings, DPA status, subprocessor terms, data residency, and zero-retention eligibility.",
+      "Production logging, monitoring, SIEM, and incident response operating evidence.",
+      "Backup, restore, and disaster recovery evidence.",
+      "Privacy notices, deletion workflow, retention schedule, and support-access procedures.",
+      "Model change control process and production trace integrity evidence."
+    ],
+    "must_not_be_claimed": [
+      "Do not claim SOC 2 compliance, certification, auditor validation, Type I completion, or Type II completion.",
+      "Do not claim HoloEngine is SOC 2 ready.",
+      "Do not claim controls are implemented or operating effectively unless supported by current evidence.",
+      "Do not claim provider zero retention without provider-specific contract proof.",
+      "Do not claim TLS 1.3, encryption coverage, or key-management specifics without deployment verification.",
+      "Do not claim production customer data is never stored unless the deployed system, logs, provider flows, backups, and evidence modes prove that statement.",
+      "Do not claim benchmark evidence handling is the same as production customer data handling.",
+      "Do not claim HoloEngine executes downstream customer business actions unless a separate deployment explicitly implements and controls that execution layer."
+    ]
+  },
+  "recommended_roadmap": [
+    {
+      "phase": "Phase 0",
+      "name": "trust binder",
+      "goal": "Create the evidence binder before making stronger buyer-facing statements.",
+      "deliverables": [
+        "system description and data-flow diagram",
+        "asset inventory",
+        "control inventory with owners",
+        "evidence binder index",
+        "provider/subprocessor inventory",
+        "model/provider routing inventory",
+        "audit-log schema",
+        "production versus benchmark/evidence mode boundary memo",
+        "claim-safety FAQ for sales and buyer review",
+        "risk register"
+      ],
+      "exit_criteria": [
+        "every control in the binder has an owner, status, evidence location, and next action",
+        "all buyer-facing claims are labeled implemented, target, verify, or TBD",
+        "no SOC 2 compliance, certification, readiness, or auditor-validation claims are present"
+      ]
+    },
+    {
+      "phase": "Phase 1",
+      "name": "SOC 2 readiness/gap closure",
+      "goal": "Close high-priority design and evidence gaps before auditor scoping.",
+      "deliverables": [
+        "authentication and RBAC implementation evidence",
+        "tenant isolation tests",
+        "encryption verification",
+        "secrets management process",
+        "centralized logging and monitoring",
+        "incident response plan and tabletop",
+        "vendor/subprocessor review package",
+        "retention/deletion policy",
+        "secure development lifecycle controls",
+        "change management controls",
+        "vulnerability management program",
+        "backup/restore/DR evidence",
+        "support access procedure",
+        "AI governance controls for model routing, selector hashes, no scoring-map leakage, trace integrity, failure autopsies, and model change control"
+      ],
+      "exit_criteria": [
+        "high-priority missing controls are implemented or explicitly risk-accepted",
+        "evidence samples exist for each implemented control",
+        "auditor can review scope without relying on unsupported claims"
+      ]
+    },
+    {
+      "phase": "Phase 2",
+      "name": "SOC 2 Type I",
+      "goal": "Have an independent auditor assess control design at a point in time.",
+      "prerequisites": [
+        "auditor selected",
+        "system boundary agreed",
+        "control matrix agreed",
+        "evidence binder complete enough for design assessment",
+        "management assertion drafted by qualified counsel/audit advisors"
+      ],
+      "allowed_claim_after_completion_only_if_true_and_reviewed": "HoloEngine completed a SOC 2 Type I examination for the specified scope and report period.",
+      "claim_boundary": "Do not claim Type II operating effectiveness from Type I work."
+    },
+    {
+      "phase": "Phase 3",
+      "name": "SOC 2 Type II",
+      "goal": "Have an independent auditor assess control design and operating effectiveness over an observation period.",
+      "prerequisites": [
+        "stable production scope",
+        "controls operating for the defined period",
+        "recurring evidence collection",
+        "incident/change/access/vendor/security evidence retained",
+        "exceptions tracked and remediated"
+      ],
+      "allowed_claim_after_completion_only_if_true_and_reviewed": "HoloEngine completed a SOC 2 Type II examination for the specified scope and observation period.",
+      "claim_boundary": "Do not claim broader certification, compliance, or control coverage outside the report scope."
+    }
+  ],
+  "immediate_next_actions": [
+    "Assign owners to each evidence binder control.",
+    "Create an evidence folder/index for Trust, Security, Privacy, Engineering, SRE, Legal, Support, HoloGov, and HoloVerify artifacts.",
+    "Convert all partial, missing, and verify items into tracked tickets.",
+    "Produce a buyer-safe security FAQ that uses only target/TBD language where proof is not yet collected.",
+    "Schedule an auditor scoping call after Phase 0 binder artifacts exist."
+  ],
+  "validation_requirements": {
+    "json_parses": true,
+    "git_diff_check": true,
+    "no_staging": true,
+    "no_commit": true,
+    "no_push": true,
+    "no_providers": true,
+    "no_holoengine_live": true,
+    "no_hologov_live": true,
+    "no_solo": true,
+    "no_judges": true
+  }
+}

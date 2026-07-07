@@ -32,21 +32,21 @@ The stress-matrix work is the visual diagnostic target: find packets where the
 same model families are often right, but at least one solo call fails at the
 action boundary.
 
-Current Wave 1 stress-matrix result:
+Current combined Wave 1 + Wave 2 stress-matrix result:
 
 | Metric | Count |
 | --- | ---: |
-| Sibling pairs | 20 |
-| Packets | 40 |
-| Solo calls | 120 |
-| Green dots | 90 |
-| Red dots | 30 |
-| False-positive overblocks | 23 |
-| False negatives | 0 |
-| Parse/admissibility failures | 7 |
-| Pairs with at least one red dot | 16 |
-| Wrong-verdict pairs | 13 |
-| Parse-only holdouts | 3 |
+| Sibling pairs | 50 |
+| Packets | 100 |
+| Solo dots | 300 |
+| Green dots | 214 |
+| Red dots | 86 |
+| False-positive overblocks | 65 |
+| False allows | 0 |
+| Parse/admissibility failures | 21 |
+| Pairs with at least one red dot | 42 |
+| Wrong-verdict pairs | 35 |
+| Domain balance | 10 pairs per domain across 5 domains |
 
 This scoreboard is internal seam evidence. It is not public FPR/FNR evidence by
 itself. Its purpose is to show where solo agents break, then test whether
@@ -63,8 +63,8 @@ only under strict labels.
 | V6 tiny patch validation | 4/4 packets, 2/2 pairs | Internal patch-validation evidence |
 | V6 same selected-lane rerun | 14/14 packets, 7/7 pairs | Internal selected-lane repair evidence |
 | Wave 1 Top 5 FP-overblock rescue | 7/10 packets, 2/5 pairs | Valid internal failed-live evidence |
-| V7 false-blocker hardening | 4/6 packets, 1/3 pairs | Failed internal patch-validation evidence; ESCALATE controls stayed protected, but two ALLOW packets failed closed |
-| Wave 2 stress matrix | No solo result | Designed and frozen; live scout blocked before provider calls in this environment |
+| V7 balanced 5-pair rescue | 5/10 packets, 0/5 pairs | `VALID_RUNTIME_FAILED_INTERNAL_RESCUE_EVIDENCE`; 50/50 provider calls, 0 provider failures, all failed packets were ALLOW siblings, and all ESCALATE controls stayed correct |
+| V8 false-blocker suppression | No live result yet | Internal hardening only: committed at `119c53342`; selector `SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06`, hash `e23b2ec29c63c4d484c10b17ffd2b5d5f6251b10387458dc8c47125a1f642e45`; no-provider patch report preserved; Fable kill test still required before any live lane; no V8 live result yet |
 
 The V5 miss class was `V5_SCOPE_DEPENDENCY_NON_DETECTION`: workers failed to
 detect a visible source-field authority/scope blocker. V6 added deterministic
@@ -340,10 +340,9 @@ Current stress-matrix status:
 
 | Lane | Status | Treatment |
 | --- | --- | --- |
-| Wave 1 solo scout | 120 solo calls, 90 green, 30 red | Internal stress-matrix evidence |
-| Wave 1 Top 5 Holo rescue | 7/10 packets, 2/5 pairs | Failed internal hardening evidence |
-| V7 false-blocker hardening | First live validation ran: 4/6 packets, 1/3 pairs | Failed internal hardening evidence; no repair-success claim |
-| Wave 2 stress matrix | 30 pairs / 60 packets frozen but unrun | No Wave 2 result yet |
+| Combined Wave 1 + Wave 2 solo control | 50 pairs, 100 packets, 300 solo dots | Internal stress-matrix discovery evidence: 214 green, 86 red, 65 FP overblocks, 0 false allows, 21 parse/admissibility failures |
+| V7 balanced 5-pair Holo rescue | 50/50 provider calls, 5/10 packets, 0/5 pairs | Valid completed failed internal rescue evidence; all five misses were ALLOW siblings and all ESCALATE controls stayed correct |
+| V8 false-blocker suppression | Committed at `119c53342` | Internal hardening only; selector `SELECTOR_V8_GENERIC_FALSE_BLOCKER_SUPPRESSION_2026_07_06`; no-provider patch report preserved; Fable kill test still required before any live lane; no V8 live result yet |
 
 Solo outputs only count as **KNEW/admissible** when they produce the right
 verdict, valid structure, required source grounding, no invented source IDs,
@@ -387,9 +386,9 @@ Excluded:
 - Precursors.
 - Old 614-era denominator material.
 - Solo Failure Factory and stress-matrix seam discovery.
-- V5/V6/V7 patch-validation and selected-lane repair evidence.
-- Wave 1 Top 5 rescue evidence.
-- Wave 2 frozen-but-unrun material.
+- V5/V6/V7/V8 patch-validation and selected-lane repair evidence.
+- Failed internal rescue evidence.
+- Wave 1 + Wave 2 stress-matrix discovery evidence.
 - HoloBuild quality rows.
 - Packet/key defects.
 - Anything without a clean blind root package.
@@ -411,10 +410,9 @@ Other locked evidence exists, but is not counted in the public denominator:
 
 | Evidence | Why separate |
 | --- | --- |
-| Wave 1 stress matrix | Seam discovery and red-dot source evidence, not public FPR/FNR denominator |
+| Wave 1 + Wave 2 stress matrix | Internal discovery evidence: 50 pairs / 100 packets / 300 solo dots, not public FPR/FNR denominator |
 | Wave 1 Top 5 Holo rescue | Internal failed-live evidence that exposed a false-blocker gap |
-| V5/V6/V7 repair lanes | Internal hardening and selected-lane repair evidence; V7 first live validation failed closed on 2 of 6 packets |
-| Wave 2 stress matrix | Frozen but unrun; no Wave 2 solo result exists yet |
+| V5/V6/V7/V8 repair lanes | Internal hardening and selected-lane repair evidence; the completed V7 5-pair rescue finished 5/10 packets and 0/5 pairs |
 | Old 614-era material | Historical/internal unless re-admitted under the strict blind rule |
 | HoloBuild mini-suites | Product quality evidence, not HoloVerify public action-boundary denominator |
 
@@ -514,9 +512,10 @@ This benchmark does not claim:
   defense contexts.
 - The tested packets cover every possible enterprise failure mode.
 - One-shot solo baselines represent every possible solo prompting method.
-- Wave 1, V7, or Wave 2 internal evidence is public benchmark evidence.
-- V7 has repair-success evidence. Its first live validation failed closed on 2
-  of 6 packets.
+- Wave 1 + Wave 2 stress-matrix evidence, the failed V7 rescue evidence, or V8
+  hardening evidence is public benchmark evidence.
+- V7 has repair-success evidence. The completed 5-pair V7 rescue failed on all
+  five ALLOW siblings while the ESCALATE controls stayed correct.
 
 This benchmark does claim:
 

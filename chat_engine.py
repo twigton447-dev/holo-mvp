@@ -101,6 +101,22 @@ class ChatSession:
         return max(0, base - char_decay)
 
     @property
+    def thread_health_reasons(self) -> list[str]:
+        reasons: list[str] = []
+        if self.turn_count:
+            reasons.append(f"turn_count:{self.turn_count}")
+        total_chars = sum(len(m["content"]) for m in self.history)
+        if total_chars:
+            reasons.append(f"raw_history_chars:{total_chars}")
+        if self.turn_count >= DEFAULT_THREAD_HANDOFF_MIN_TURNS:
+            reasons.append("handoff_min_turns_reached")
+        elif self.thread_health_level == "RED":
+            reasons.append("red_from_length_decay_before_visible_handoff")
+        if total_chars > DEFAULT_ADAPTER_HISTORY_CHARS:
+            reasons.append("provider_history_bounded")
+        return reasons
+
+    @property
     def thread_health_level(self) -> str:
         score = self.thread_health_score
         if score >= 61:
@@ -136,6 +152,10 @@ FRONTIER_RUNTIME_PROFILES = {"frontier_active", "legacy_frontier"}
 DEFAULT_HOLOCHAT_MODEL_PROVIDERS = ("openai", "xai", "minimax")
 DEFAULT_THREAD_HANDOFF_MIN_TURNS = 24
 THREAD_HANDOFF_FORCE_SCORE = 5
+DEFAULT_ADAPTER_HISTORY_MESSAGES = 8
+DEFAULT_ADAPTER_HISTORY_CHARS = 8_000
+DEFAULT_ADAPTER_HISTORY_MESSAGE_CHARS = 1_800
+HOLOCHAT_MEMORY_PACK_VERSION = "holochat_recovery_pack_v0.1"
 
 _BALANCED_USER_POWER_TERMS = (
     "frontier",
@@ -652,6 +672,166 @@ def _safe_positive_int(value: Any) -> int:
     return max(0, parsed)
 
 
+def _positive_int_env(name: str, default: int, *, minimum: int = 0) -> int:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return max(minimum, int(raw))
+    except ValueError:
+        return default
+
+
+def _adapter_history_message_limit() -> int:
+    return _positive_int_env(
+        "HOLOCHAT_ADAPTER_HISTORY_MESSAGES",
+        DEFAULT_ADAPTER_HISTORY_MESSAGES,
+        minimum=0,
+    )
+
+
+def _adapter_history_char_limit() -> int:
+    return _positive_int_env(
+        "HOLOCHAT_ADAPTER_HISTORY_CHARS",
+        DEFAULT_ADAPTER_HISTORY_CHARS,
+        minimum=1000,
+    )
+
+
+def _adapter_history_message_char_limit() -> int:
+    return _positive_int_env(
+        "HOLOCHAT_ADAPTER_HISTORY_MESSAGE_CHARS",
+        DEFAULT_ADAPTER_HISTORY_MESSAGE_CHARS,
+        minimum=400,
+    )
+
+
+def _bounded_adapter_history(
+    history: list[dict[str, str]],
+    *,
+    max_messages: Optional[int] = None,
+    max_chars: Optional[int] = None,
+    message_char_limit: Optional[int] = None,
+) -> list[dict[str, str]]:
+    """
+    Keep restored Supabase history available in session storage, but do not
+    flood provider calls with the full raw thread after recovery.
+    """
+    if not history:
+        return []
+    message_limit = _adapter_history_message_limit() if max_messages is None else max(0, max_messages)
+    char_limit = _adapter_history_char_limit() if max_chars is None else max(0, max_chars)
+    per_message_limit = (
+        _adapter_history_message_char_limit()
+        if message_char_limit is None
+        else max(1, message_char_limit)
+    )
+    if message_limit <= 0 or char_limit <= 0:
+        return []
+
+    selected: list[dict[str, str]] = []
+    used_chars = 0
+    for message in reversed(history[-message_limit:]):
+        role = str(message.get("role") or "unknown")
+        if role not in {"system", "user", "assistant", "tool"}:
+            role = "unknown"
+        content = _compact_text(message.get("content"), limit=per_message_limit)
+        if not content:
+            continue
+        entry_chars = len(role) + len(content) + 2
+        if selected and used_chars + entry_chars > char_limit:
+            break
+        if used_chars + entry_chars > char_limit:
+            content = _compact_text(content, limit=max(1, char_limit - len(role) - 2))
+            entry_chars = len(role) + len(content) + 2
+        selected.append({"role": role, "content": content})
+        used_chars += entry_chars
+        if used_chars >= char_limit:
+            break
+    return list(reversed(selected))
+
+
+def _history_char_count(history: list[dict[str, str]]) -> int:
+    return sum(
+        len(str(message.get("role", ""))) + len(str(message.get("content", ""))) + 2
+        for message in history or []
+    )
+
+
+def _adapter_history_budget_content(
+    adapter_history: list[dict[str, str]],
+    *,
+    total_history_messages: int,
+) -> str:
+    lines = [
+        f"{message.get('role', 'unknown')}: {message.get('content', '')}"
+        for message in adapter_history
+    ]
+    omitted = max(0, total_history_messages - len(adapter_history))
+    if omitted:
+        lines.insert(0, f"[context_budget] omitted {omitted} older raw history message(s); use HOLOSTATE, HoloBrain, and the recovery memory pack for continuity.")
+    return "\n".join(lines)
+
+
+def _provider_history_metadata(
+    adapter_history: list[dict[str, str]],
+    *,
+    total_history_messages: int,
+    raw_history: list[dict[str, str]],
+) -> dict[str, Any]:
+    bounded_chars = _history_char_count(adapter_history)
+    raw_chars = _history_char_count(raw_history)
+    omitted = max(0, total_history_messages - len(adapter_history))
+    return {
+        "raw_history_messages": max(0, total_history_messages),
+        "bounded_history_messages": len(adapter_history),
+        "omitted_history_messages": omitted,
+        "raw_history_chars": raw_chars,
+        "bounded_history_chars": bounded_chars,
+        "raw_history_token_estimate": estimate_context_tokens("x" * raw_chars),
+        "bounded_history_token_estimate": estimate_context_tokens("x" * bounded_chars),
+        "history_message_cap": _adapter_history_message_limit(),
+        "history_char_cap": _adapter_history_char_limit(),
+        "history_message_char_cap": _adapter_history_message_char_limit(),
+        "omitted_history_marker_inserted": bool(omitted),
+    }
+
+
+def _thread_health_reasons_for_context_budget(
+    session: "ChatSession",
+    provider_history_meta: dict[str, Any],
+) -> list[str]:
+    reasons = [
+        reason
+        for reason in session.thread_health_reasons
+        if reason != "provider_history_bounded"
+    ]
+    raw_chars = _safe_positive_int(provider_history_meta.get("raw_history_chars"))
+    bounded_chars = _safe_positive_int(provider_history_meta.get("bounded_history_chars"))
+    provider_history_bounded = (
+        _safe_positive_int(provider_history_meta.get("omitted_history_messages")) > 0
+        or bounded_chars < raw_chars
+    )
+    if provider_history_bounded:
+        reasons.append("provider_history_bounded")
+    return reasons
+
+
+def _holochat_recovery_memory_pack() -> str:
+    if _env_flag("HOLOCHAT_MEMORY_PACK_DISABLED"):
+        return ""
+    return "\n".join(
+        [
+            f"HOLOBRAIN PINNED MEMORY PACK ({HOLOCHAT_MEMORY_PACK_VERSION}; private, do not surface):",
+            "  identity: HoloChat is the local memory-attached chat surface for HoloEngine work.",
+            "  recovery_state: After OS recovery, prefer compact HoloBrain state, pinned project anchors, and bounded recent history over raw restored transcript flood.",
+            "  randall_continuity: Treat 'Randall felt right' as a voice-calibration anchor: warm, precise, direct, alive, non-generic, and project-aware.",
+            "  voice_anchor: Preserve Holo's one-voice feel; do not let provider rotation, long history, or missing context make the answer bland or amnesic.",
+            "  project_priorities: HoloChat context governor, HoloBrain memory fidelity, HoloEngine/HoloVerify boundary clarity, recovery QA, and no-provider verification before live calls.",
+        ]
+    )
+
+
 _CURRENT_INFO_RE = _re.compile(
     r"\b("
     r"today|tonight|currently|current|latest|recent|right now|now|new|news|"
@@ -976,6 +1156,7 @@ def _turn_runtime_metadata(
     gov_arc_state: Optional[GovArcState] = None,
     frontier_assist: Optional[dict[str, Any]] = None,
     timing_breakdown: Optional[dict[str, Any]] = None,
+    context_budget: Optional[dict[str, Any]] = None,
     handoff_transition: Optional[dict[str, Any]] = None,
     holochat_state: Optional[HoloState] = None,
     auto_reseed_present: bool = False,
@@ -1020,6 +1201,19 @@ def _turn_runtime_metadata(
             **state_meta,
         }
     )
+    if context_budget is not None:
+        metadata["context_telemetry"] = {
+            "selected_model": selected,
+            "gov_model": {
+                "provider": getattr(governor, "provider", None) if governor is not None else None,
+                "model": getattr(governor, "model_id", getattr(governor, "model", None)) if governor is not None else None,
+            },
+            "input_token_estimate": _safe_positive_int(context_budget.get("total_token_estimate")),
+            "history_context": context_budget.get("history_context", {}),
+            "memory_context": context_budget.get("memory_context", {}),
+            "holobrain_injection": context_budget.get("holobrain_injection", {}),
+            "thread_health": context_budget.get("thread_health", {}),
+        }
     if usage is not None:
         metadata["usage"] = usage
     if failover is not None:
@@ -1251,6 +1445,7 @@ class HoloChatEngine:
         adapter = _select_analyst_adapter(session, self._adapters)
         initial_adapter = adapter
         session.turn_count     += 1
+        adapter_history = _bounded_adapter_history(session.history)
 
         gov_pre_timer = _timer_start()
         # Governor rotation policy:
@@ -1346,6 +1541,7 @@ class HoloChatEngine:
 
         pre_gate_context_budget = _runtime_context_budget(
             session=session,
+            adapter_history=adapter_history,
             user_message=user_message,
             capsule_context=capsule_context,
             life_context=life_context,
@@ -1386,6 +1582,7 @@ class HoloChatEngine:
                 "\n\n" + _health_context(session)
                 + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
                 + ("\n\n" + holochat_state_block if holochat_state_block else "")
+                + ("\n\n" + _holochat_recovery_memory_pack() if _holochat_recovery_memory_pack() else "")
                 + ("\n\n" + _thread_handoff_transition_block(active_handoff_transition) if active_handoff_transition else "")
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
@@ -1395,6 +1592,7 @@ class HoloChatEngine:
 
         context_budget = _runtime_context_budget(
             session=session,
+            adapter_history=adapter_history,
             user_message=user_message,
             capsule_context=capsule_context,
             life_context=life_context,
@@ -1447,7 +1645,7 @@ class HoloChatEngine:
         for candidate in candidate_order:
             try:
                 response_text, in_tok, out_tok = candidate.chat_call(
-                    system_prompt, session.history, enriched_message, temperature,
+                    system_prompt, adapter_history, enriched_message, temperature,
                     images=images or None,
                 )
                 adapter = candidate
@@ -1473,7 +1671,7 @@ class HoloChatEngine:
             fallback = random.choice(bench_candidates)
             try:
                 response_text, in_tok, out_tok = fallback.chat_call(
-                    system_prompt, session.history, enriched_message, temperature,
+                    system_prompt, adapter_history, enriched_message, temperature,
                     images=images or None,
                 )
                 adapter = fallback
@@ -1697,6 +1895,7 @@ class HoloChatEngine:
                 timings,
                 turn_started_at=turn_started_at,
             ),
+            context_budget=context_budget,
             handoff_transition=active_handoff_transition,
             holochat_state=session.holochat_state,
             auto_reseed_present=auto_reseed_present,
@@ -1785,6 +1984,7 @@ class HoloChatEngine:
         adapter = _select_analyst_adapter(session, self._adapters)
         initial_adapter = adapter
         session.turn_count     += 1
+        adapter_history = _bounded_adapter_history(session.history)
 
         gov_pre_timer = _timer_start()
         if _should_rotate_governor(session):
@@ -1859,6 +2059,7 @@ class HoloChatEngine:
 
         pre_gate_context_budget = _runtime_context_budget(
             session=session,
+            adapter_history=adapter_history,
             user_message=user_message,
             capsule_context=capsule_context,
             life_context=life_context,
@@ -1897,6 +2098,7 @@ class HoloChatEngine:
                 "\n\n" + _health_context(session)
                 + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
                 + ("\n\n" + holochat_state_block if holochat_state_block else "")
+                + ("\n\n" + _holochat_recovery_memory_pack() if _holochat_recovery_memory_pack() else "")
                 + ("\n\n" + _thread_handoff_transition_block(active_handoff_transition) if active_handoff_transition else "")
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
@@ -1906,6 +2108,7 @@ class HoloChatEngine:
 
         context_budget = _runtime_context_budget(
             session=session,
+            adapter_history=adapter_history,
             user_message=user_message,
             capsule_context=capsule_context,
             life_context=life_context,
@@ -1965,7 +2168,7 @@ class HoloChatEngine:
             emitted = False
             try:
                 for chunk in candidate.stream_chat_call(
-                    system_prompt, session.history, enriched_message, temperature, images=images or None
+                    system_prompt, adapter_history, enriched_message, temperature, images=images or None
                 ):
                     if isinstance(chunk, dict) and chunk.get("done"):
                         in_tok  = chunk.get("in_tok", 0)
@@ -2176,6 +2379,7 @@ class HoloChatEngine:
                 timings,
                 turn_started_at=turn_started_at,
             ),
+            context_budget=context_budget,
             handoff_transition=active_handoff_transition,
             holochat_state=session.holochat_state,
             auto_reseed_present=auto_reseed_present,
@@ -2301,6 +2505,7 @@ def _required_tools_for_turn(search_query: Optional[str], search_results: Option
 def _runtime_context_budget(
     *,
     session: ChatSession,
+    adapter_history: Optional[list[dict[str, str]]] = None,
     user_message: str,
     capsule_context: dict,
     life_context: list,
@@ -2314,6 +2519,13 @@ def _runtime_context_budget(
     holochat_state_block: Optional[str] = None,
     holobrain_injection_plan: Optional[HoloBrainInjectionPlan] = None,
 ) -> dict[str, Any]:
+    provider_history = adapter_history if adapter_history is not None else _bounded_adapter_history(session.history)
+    provider_history_meta = _provider_history_metadata(
+        provider_history,
+        total_history_messages=len(session.history),
+        raw_history=session.history,
+    )
+    memory_pack = _holochat_recovery_memory_pack()
     plan = holobrain_injection_plan or HoloBrainInjectionPlan(
         mode=HoloBrainInjectionMode.NONE,
         payload="",
@@ -2334,13 +2546,13 @@ def _runtime_context_budget(
         },
         {
             "block_name": "recent_session_history",
-            "content": "\n".join(
-                f"{message.get('role', 'unknown')}: {message.get('content', '')}"
-                for message in session.history
+            "content": _adapter_history_budget_content(
+                provider_history,
+                total_history_messages=len(session.history),
             ),
-            "included": bool(session.history),
+            "included": bool(provider_history),
             "source_type": "history",
-            "reason": "passed as adapter history argument" if session.history else "empty",
+            "reason": "bounded adapter history argument" if provider_history else "empty",
         },
         {
             "block_name": "user_message",
@@ -2372,6 +2584,13 @@ def _runtime_context_budget(
                     "content": "",
                     "included": False,
                     "source_type": "system",
+                    "reason": "incognito mode",
+                },
+                {
+                    "block_name": "holochat_memory_pack",
+                    "content": "",
+                    "included": False,
+                    "source_type": "memory",
                     "reason": "incognito mode",
                 },
                 {
@@ -2429,6 +2648,15 @@ def _runtime_context_budget(
                 "included": bool(holochat_state_block),
                 "source_type": "system",
                 "reason": "empty" if not holochat_state_block else None,
+            }
+        )
+        blocks.append(
+            {
+                "block_name": "holochat_memory_pack",
+                "content": memory_pack,
+                "included": bool(memory_pack),
+                "source_type": "memory",
+                "reason": "disabled" if not memory_pack else None,
             }
         )
         blocks.append(
@@ -2494,6 +2722,7 @@ def _runtime_context_budget(
     )
 
     ledger = build_context_budget_ledger(blocks).model_dump(mode="json")
+    rows_by_name = {row.get("block_name"): row for row in ledger.get("rows", [])}
     for row in ledger.get("rows", []):
         if row.get("block_name") == "holochat_state_object":
             row["injection_mode"] = plan.mode.value
@@ -2501,6 +2730,8 @@ def _runtime_context_budget(
             row["state_hash"] = plan.state_hash
             row["char_count"] = plan.char_count
             row["token_estimate"] = plan.token_estimate
+        if row.get("block_name") == "recent_session_history":
+            row.update(provider_history_meta)
     ledger["holobrain_injection"] = {
         "mode": plan.mode.value,
         "reason": plan.reason,
@@ -2508,6 +2739,29 @@ def _runtime_context_budget(
         "included": bool(plan.payload),
         "char_count": plan.char_count,
         "token_estimate": plan.token_estimate,
+    }
+    ledger["history_context"] = provider_history_meta
+    ledger["memory_context"] = {
+        "memory_pack_version": HOLOCHAT_MEMORY_PACK_VERSION,
+        "memory_pack_included": bool(memory_pack) and not incognito,
+        "life_context_entries_available": len(life_context or []),
+        "capsule_context_keys_available": len(capsule_context or {}),
+        "life_context_included": bool(rows_by_name.get("life_context", {}).get("included")),
+        "capsule_context_included": bool(rows_by_name.get("capsule_context", {}).get("included")),
+        "latest_consolidation_included": bool(rows_by_name.get("latest_consolidation", {}).get("included")),
+        "life_context_token_estimate": _safe_positive_int(rows_by_name.get("life_context", {}).get("token_estimate")),
+        "capsule_context_token_estimate": _safe_positive_int(rows_by_name.get("capsule_context", {}).get("token_estimate")),
+        "dropped_memory_blocks": [
+            name
+            for name in ("life_context", "capsule_context", "latest_consolidation", "holochat_state_object")
+            if rows_by_name.get(name) and not rows_by_name[name].get("included")
+        ],
+    }
+    ledger["thread_health"] = {
+        "score": session.thread_health_score,
+        "level": session.thread_health_level,
+        "status": session.thread_status,
+        "reasons": _thread_health_reasons_for_context_budget(session, provider_history_meta),
     }
     return ledger
 
@@ -2614,7 +2868,7 @@ def _build_holo4dna_shadow_turn(
         capsule_context=capsule_context,
         life_context=life_context,
         latest_consolidation=last_session,
-        recent_history=session.history,
+        recent_history=_bounded_adapter_history(session.history),
         web_results=search_results,
         incognito=incognito,
         runtime_info=runtime_info,
@@ -2745,11 +2999,13 @@ def _health_context(session: ChatSession) -> str:
     Build the BATON_PASS snippet that HOLO_CHAT_SYSTEM_PROMPT references.
     Injected at the end of the system prompt every turn.
     """
+    reasons = ", ".join(session.thread_health_reasons) or "none"
     return (
         f"BATON_PASS:\n"
         f"  THREAD_HEALTH_SCORE: {session.thread_health_score}\n"
         f"  THREAD_HEALTH_LEVEL: {session.thread_health_level}\n"
         f"  THREAD_STATUS: {session.thread_status}\n"
+        f"  THREAD_HEALTH_REASONS: {reasons}\n"
         f"  USER_ALERT_RECOMMENDED: {session.user_alert}\n"
         f"  TASK_MODE: DEEP_REASONING"
     )

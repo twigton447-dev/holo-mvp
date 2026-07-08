@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from holo_context import HoloContextBuilder, build_context_budget_ledger
+from holo_context import HoloContextBuilder, build_context_budget_ledger, build_life_context_block
 from holo_router import RouteDecision
 from holo_state import HoloState, RequiredTools
 
@@ -180,6 +180,34 @@ def test_context_memory_blocks_are_capped_and_do_not_include_sensitive_keys(monk
     assert rows["life_context"]["token_estimate"] < 350
     assert rows["capsule_context"]["token_estimate"] < 300
     assert packet.metadata["context_budget"]["largest_blocks"]
+
+
+def test_life_context_ranking_boosts_holochat_recovery_voice_anchors(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_LIFE_CONTEXT_CHARS", "900")
+    entries = [
+        {
+            "category": "patterns",
+            "key": f"generic_high_conf_{idx}",
+            "value": "generic stable memory " + ("x " * 80),
+            "confidence": 0.99,
+            "reinforcement_count": 10,
+        }
+        for idx in range(12)
+    ]
+    entries.append(
+        {
+            "category": "work",
+            "key": "randall_felt_right_holochat_recovery_voice",
+            "value": "[FACT] Randall felt right is the HoloChat recovery voice anchor.",
+            "confidence": 0.7,
+            "reinforcement_count": 1,
+        }
+    )
+
+    block = build_life_context_block(entries)
+
+    assert "randall_felt_right_holochat_recovery_voice" in block
+    assert block.index("randall_felt_right_holochat_recovery_voice") < block.index("generic_high_conf_0")
 
 
 def test_context_budget_rows_do_not_expose_raw_memory_or_search_text():

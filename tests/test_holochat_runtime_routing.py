@@ -179,15 +179,18 @@ class StableStateBrain(DurableStateBrain):
 
 class CapturingAdapter(FakeAdapter):
     last_system_prompt: str = ""
+    last_history: list = None
 
     def chat_call(self, system_prompt, history, user_message, temperature, images=None):
         self.last_system_prompt = system_prompt
+        self.last_history = list(history)
         return super().chat_call(system_prompt, history, user_message, temperature, images=images)
 
 
 class CapturingStreamAdapter(CapturingAdapter):
     def stream_chat_call(self, system_prompt, history, user_message, temperature, images=None):
         self.last_system_prompt = system_prompt
+        self.last_history = list(history)
         yield f"{self.provider} stream answer"
         yield {"done": True, "in_tok": 4, "out_tok": 3}
 
@@ -200,6 +203,47 @@ class NoUsageAdapter(FakeAdapter):
 class FailingAdapter(FakeAdapter):
     def chat_call(self, system_prompt, history, user_message, temperature, images=None):
         raise RuntimeError("provider body should not surface")
+
+
+class RestoredLongHistoryBrain(FakeBrain):
+    def load_chat_history(self, session_id):
+        history = []
+        for idx in range(18):
+            history.append({
+                "role": "user",
+                "content": f"restored user {idx} " + ("old raw transcript " * 120),
+            })
+            history.append({
+                "role": "assistant",
+                "content": f"restored assistant {idx} " + ("Randall felt right continuity " * 120),
+            })
+        return history
+
+    def get_capsule_context(self, capsule_id):
+        return {
+            "project_holochat_randall_voice_anchor": "Randall felt right; keep HoloChat warm, direct, precise, and non-generic.",
+            **{f"noise_{idx}": "n" * 400 for idx in range(12)},
+        }
+
+    def load_life_context(self, capsule_id):
+        return [
+            {
+                "category": "work",
+                "key": "holochat_context_governor_recovery",
+                "value": "[FACT] HoloChat recovery QA must preserve Randall continuity and project-aware voice.",
+                "confidence": 0.7,
+            },
+            *[
+                {
+                    "category": "patterns",
+                    "key": f"generic_high_conf_{idx}",
+                    "value": "generic stable memory " + ("x" * 300),
+                    "confidence": 0.99,
+                    "reinforcement_count": 10,
+                }
+                for idx in range(12)
+            ],
+        ]
 
 
 def _mini_pool():
@@ -265,6 +309,44 @@ def test_holochat_model_provider_allowlist_can_be_overridden(monkeypatch):
     )
 
     assert [adapter.provider for adapter in active] == ["xai", "openai"]
+
+
+def test_restored_history_is_bounded_and_recovery_pack_is_telemetered(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGES", "4")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_CHARS", "1800")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGE_CHARS", "500")
+    adapter = CapturingAdapter("openai", "gpt-5.5")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = RestoredLongHistoryBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    result = engine.send_message(
+        "restored-session",
+        "Why do you feel different after recovery?",
+        capsule_id="capsule-1",
+    )
+
+    assert 0 < len(adapter.last_history) <= 4
+    assert "HOLOBRAIN PINNED MEMORY PACK" in adapter.last_system_prompt
+    assert "Randall felt right" in adapter.last_system_prompt
+    history = result["context_budget"]["history_context"]
+    assert history["raw_history_messages"] == 36
+    assert history["bounded_history_messages"] == len(adapter.last_history)
+    assert history["omitted_history_messages"] == 36 - len(adapter.last_history)
+    assert history["bounded_history_token_estimate"] < history["raw_history_token_estimate"]
+    rows = {row["block_name"]: row for row in result["context_budget"]["rows"]}
+    assert rows["recent_session_history"]["omitted_history_marker_inserted"] is True
+    telemetry = result["runtime"]["context_telemetry"]
+    assert telemetry["selected_model"] == {"provider": "openai", "model": "gpt-5.5"}
+    assert telemetry["gov_model"] == {"provider": "governor", "model": "governor-mini"}
+    assert telemetry["memory_context"]["memory_pack_version"] == "holochat_recovery_pack_v0.1"
+    assert telemetry["history_context"]["omitted_history_messages"] == 36 - len(adapter.last_history)
+    assert "provider_history_bounded" in telemetry["thread_health"]["reasons"]
 
 
 def test_holochat_registry_supports_openai_xai_minimax_models():
@@ -699,6 +781,47 @@ def test_streaming_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypat
         if row["block_name"] == "thread_handoff_seed"
     ]
     assert handoff_rows and handoff_rows[0]["included"] is True
+
+
+def test_streaming_restored_history_is_bounded_and_recovery_pack_is_telemetered(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGES", "4")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_CHARS", "1800")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGE_CHARS", "500")
+    adapter = CapturingStreamAdapter("openai", "gpt-5.5")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = RestoredLongHistoryBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    events = list(engine.stream_message(
+        "restored-stream-session",
+        "Why do you feel different after recovery?",
+        capsule_id="capsule-1",
+    ))
+
+    assert events[0] == "openai stream answer"
+    assert 0 < len(adapter.last_history) <= 4
+    assert "HOLOBRAIN PINNED MEMORY PACK" in adapter.last_system_prompt
+    assert "Randall felt right" in adapter.last_system_prompt
+    done = events[-1]
+    assert done["done"] is True
+    history = done["context_budget"]["history_context"]
+    assert history["raw_history_messages"] == 36
+    assert history["bounded_history_messages"] == len(adapter.last_history)
+    assert history["omitted_history_messages"] == 36 - len(adapter.last_history)
+    assert history["bounded_history_token_estimate"] < history["raw_history_token_estimate"]
+    rows = {row["block_name"]: row for row in done["context_budget"]["rows"]}
+    assert rows["recent_session_history"]["omitted_history_marker_inserted"] is True
+    telemetry = done["runtime"]["context_telemetry"]
+    assert telemetry["selected_model"] == {"provider": "openai", "model": "gpt-5.5"}
+    assert telemetry["gov_model"] == {"provider": "governor", "model": "governor-mini"}
+    assert telemetry["memory_context"]["memory_pack_version"] == "holochat_recovery_pack_v0.1"
+    assert telemetry["history_context"]["omitted_history_messages"] == 36 - len(adapter.last_history)
+    assert "provider_history_bounded" in telemetry["thread_health"]["reasons"]
 
 
 def test_handoff_transition_sanitizer_keeps_only_synthesized_fields():

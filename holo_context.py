@@ -47,6 +47,17 @@ _HIGH_SIGNAL_CONTEXT_KEY_PARTS = (
     "style",
 )
 
+_RECOVERY_CONTEXT_KEY_PARTS = (
+    "holochat",
+    "holoengine",
+    "holo_engine",
+    "randall",
+    "voice",
+    "recovery",
+    "context_governor",
+    "context governor",
+)
+
 
 class ContextPacket(BaseModel):
     system_prompt: str
@@ -174,6 +185,13 @@ def build_runtime_identity_block(
 
 
 def _rank_life_context_entries(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def recovery_signal(entry: dict[str, Any]) -> int:
+        joined = " ".join(
+            str(entry.get(part, ""))
+            for part in ("category", "key", "value")
+        ).lower()
+        return sum(1 for part in _RECOVERY_CONTEXT_KEY_PARTS if part in joined)
+
     def sort_key(entry: dict[str, Any]) -> tuple[Any, ...]:
         confidence = entry.get("confidence", 0)
         try:
@@ -192,6 +210,7 @@ def _rank_life_context_entries(entries: list[dict[str, Any]]) -> list[dict[str, 
             or ""
         )
         return (
+            -recovery_signal(entry),
             -confidence_value,
             -reinforcement_value,
             recency,
@@ -212,7 +231,12 @@ def _rank_capsule_context_items(context: dict[str, Any]) -> list[tuple[str, Any]
     def score_key(key: str) -> tuple[int, int, str]:
         normalized = key.lower()
         signal = sum(1 for part in _HIGH_SIGNAL_CONTEXT_KEY_PARTS if part in normalized)
-        return (-signal, len(str(context.get(key, ""))), normalized)
+        recovery_signal = sum(
+            1
+            for part in _RECOVERY_CONTEXT_KEY_PARTS
+            if part in normalized or part in str(context.get(key, "")).lower()
+        )
+        return (-recovery_signal, -signal, len(str(context.get(key, ""))), normalized)
 
     return sorted(safe_items, key=lambda item: score_key(item[0]))
 

@@ -1087,6 +1087,14 @@ V8_GENERIC_FALSE_BLOCKER_FAMILIES = (
             "sterile_processing_signoff": ("sterile processing signoff",),
             "surgeon_match": ("surgeon match",),
         },
+        "value_aliases": {
+            "implant_lot_release": ("implant_lot_release_id",),
+            "surgical_use_approval": ("surgical_use_approval_id",),
+            "sterile_processing_signoff": ("sterile_processing_signoff_id",),
+            "surgeon_match": ("surgeon_id",),
+        },
+        "requires_value_equality": True,
+        "value_mismatch_status": "SOURCE_OPEN",
         "open_markers": (
             "surgical use approval is absent",
             "approval is absent",
@@ -1333,16 +1341,19 @@ def _v8_checked_dimensions(required_fields: list[str]) -> list[str]:
 
 def _v9_extract_values_for_alias(text: str, alias: str) -> set[str]:
     values: set[str] = set()
-    normalized_alias = re.escape(_normalized_phrase(alias)).replace("\\ ", r"[\s_-]+")
+    normalized_alias = _normalized_phrase(alias)
+    if not normalized_alias:
+        return values
+    normalized_alias = re.escape(normalized_alias).replace("\\ ", r"[\s_-]+")
     value_pattern = r"([A-Za-z0-9][A-Za-z0-9_./:-]*)"
     patterns = (
-        rf"\b{normalized_alias}\b\s*(?:=|:)\s*{value_pattern}",
-        rf"\b{normalized_alias}\b\s+(?:is|equals|matches)\s+{value_pattern}",
+        rf"(?<![A-Za-z0-9]){normalized_alias}(?![A-Za-z0-9])\s*(?:=|:)\s*{value_pattern}",
+        rf"(?<![A-Za-z0-9]){normalized_alias}(?![A-Za-z0-9])\s+(?:is|equals|matches)\s+{value_pattern}",
     )
-    normalized_text = _normalized_phrase(text)
+    raw_text = str(text or "")
     for pattern in patterns:
-        for match in re.finditer(pattern, normalized_text, flags=re.IGNORECASE):
-            values.add(_normalize_value(match.group(1)))
+        for match in re.finditer(pattern, raw_text, flags=re.IGNORECASE):
+            values.add(_normalize_value(match.group(1).rstrip(".,;")))
     return values
 
 
@@ -1352,6 +1363,7 @@ def _v9_extract_required_field_value(text: str, field: str, family: dict) -> tup
         field.replace("_", " "),
         field.replace("_", "-"),
         *(family.get("dimension_phrases", {}).get(field) or []),
+        *(family.get("value_aliases", {}).get(field) or []),
     ]
     values: set[str] = set()
     for alias in aliases:
@@ -1579,6 +1591,8 @@ def _v8_family_closure(payload: dict, family: dict) -> dict | None:
         match = next((phrase for phrase in phrases if phrase in normalized_rec), "")
         if match:
             matched_source_fields[field] = match
+        elif _v9_extract_required_field_value(rec_text, field, family)[0] is not None:
+            matched_source_fields[field] = f"value:{field}"
         else:
             missing_fields.append(field)
 
@@ -1599,6 +1613,38 @@ def _v8_family_closure(payload: dict, family: dict) -> dict | None:
         )
 
     value_equality = _v9_value_equality_check(req_text, rec_text, family)
+    if value_equality["status"] == "VALUE_MISMATCH" and family.get("value_mismatch_status") == "SOURCE_OPEN":
+        return _closure_entry(
+            payload,
+            family["closure_type"],
+            family["requested_action"],
+            "SOURCE_OPEN",
+            list(family["required_fields"]),
+            matched_source_fields,
+            source_ids,
+            "runtime-visible factual record has a missing or mismatched required value",
+            coverage_mode=family["coverage_mode"],
+            checked_dimensions=checked_dimensions,
+            bound_instance=req_instance,
+            instance_binding_clean=True,
+            value_equality=value_equality,
+        )
+    if family.get("requires_value_equality") and value_equality["status"] != "VALUE_EQUALITY_PROVEN":
+        return _closure_entry(
+            payload,
+            family["closure_type"],
+            family["requested_action"],
+            "PACKET_REPAIR_REQUIRED",
+            list(family["required_fields"]),
+            matched_source_fields,
+            source_ids,
+            "name-list support is insufficient without exact source-bound value equality",
+            coverage_mode=family["coverage_mode"],
+            checked_dimensions=checked_dimensions,
+            bound_instance=req_instance,
+            instance_binding_clean=True,
+            value_equality=value_equality,
+        )
     if value_equality["status"] in {"VALUE_MISMATCH", "AMBIGUOUS_REQUIRED_FIELD_VALUE"} or (
         value_equality["status"] == "MISSING_REQUIRED_FIELD_VALUE"
         and value_equality.get("any_value_present")

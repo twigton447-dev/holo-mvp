@@ -1,0 +1,75 @@
+{
+  "classification": "HOLOVERIFY_V10_HVSM_W2_009_NULL_VERDICT_AUTOPSY",
+  "date": "2026-07-08",
+  "owner": "++HoloOps++",
+  "soc_lane_owner": "++HoloOps SOC++",
+  "run_dir": "docs/benchmark/holoverify_v10_repaired_packet_bank_2026_07_07/live_runs/run_20260707T181449Z",
+  "legacy_pair_id": "HVSM-W2-009",
+  "opaque_runtime_ids": {
+    "HVSM-W2-009-A": "PKT-B5B6E467B0E5DA2DC74DDC3D",
+    "HVSM-W2-009-E": "PKT-12511FF461EBEA702CEAF17E"
+  },
+  "root_cause": "In the 07-07 repaired-packet-bank run, a V10 surgical value-tuple closure alias gap produced PACKET_REPAIR_REQUIRED, leaving no structurally valid selector artifact. Original Wave 2 009-A remains a packet-schema insufficiency and must stay fail-closed.",
+  "cause_matrix": {
+    "packet_schema": "SPLIT_ORIGINAL_INSUFFICIENT_REPAIRED_SCHEMA_VIABLE",
+    "v10_value_tuple_closure": "REPAIRED_RUN_ROOT_CAUSE",
+    "selector_behavior": "PROXIMAL_EXPECTED_FAIL_CLOSED",
+    "scorer_extraction": "EXONERATED",
+    "live_wrapper_trace_parsing": "EXONERATED"
+  },
+  "frozen_run_status": {
+    "retroactive_win": false,
+    "provider_calls": "30/30",
+    "provider_failures": 0,
+    "hvsm_w2_009_a_final_verdict": null,
+    "hvsm_w2_009_e_final_verdict": null,
+    "selector_blocked_reason": "no_structurally_valid_artifact"
+  },
+  "patch_applied": {
+    "files": [
+      "holoverify_blind_runner_v0.py",
+      "tests/test_holoverify_v10_value_tuple_closure.py"
+    ],
+    "surgical_value_aliases": {
+      "implant_lot_release": "implant_lot_release_id",
+      "surgical_use_approval": "surgical_use_approval_id",
+      "sterile_processing_signoff": "sterile_processing_signoff_id",
+      "surgeon_match": "surgeon_id"
+    },
+    "value_mismatch_status_for_surgical_family": "SOURCE_OPEN",
+    "missing_tuple_value_status": "PACKET_REPAIR_REQUIRED",
+    "original_wave2_name_list_only_status": "PACKET_REPAIR_REQUIRED"
+  },
+  "verification": {
+    "providers_called_for_patch_validation": false,
+    "pytest_available": true,
+    "pytest_runtime": ".venv312 Python 3.12.13, pytest 9.1.1",
+    "direct_v10_test_functions": "PASS",
+    "unpatched_head_reproduces_packet_repair_required": true,
+    "focused_no_provider_gate": "41 passed after fail-closed guard plus 33 passed for V6/selector/V5 gate",
+    "adjacent_no_provider_safety_gate": "90 passed, 3 skipped",
+    "compileall_with_tmp_cache": "PASS"
+  },
+  "credential_only_smoke": {
+    "providers_called": 3,
+    "prompt_boundary": "credential-only; prompt was Return exactly OK.; no benchmark/customer/source data",
+    "xai_grok_3_mini": "PASS",
+    "openai_gpt_5_4_mini": "PASS",
+    "minimax_m2_5_highspeed": "PASS",
+    "secret_values_printed": false
+  },
+  "denominator_note": {
+    "blind_120_packets": 120,
+    "stress_expansion_packets": 100,
+    "future_combined_packets_if_clean": 220,
+    "future_combined_pairs_if_clean": 110,
+    "future_allow_escalate_if_clean": "110/110",
+    "claim_allowed_now": false
+  },
+  "next_handoff": {
+    "HoloArchitecture": "Review closure patch and extend value-alias tests only after no-provider validation.",
+    "HoloStats": "Do not expand denominators until fresh trace-frozen scoring exists.",
+    "HoloOps SOC": "Own provider smoke, trust/safety claim boundaries, SOC/ISO/design-partner diligence.",
+    "HoloMiner": "Rebuild packet bank only if code-side value-tuple closure support is rejected."
+  }
+}

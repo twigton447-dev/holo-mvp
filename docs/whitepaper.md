@@ -2,7 +2,7 @@
 
 ### Why smart models still need a checkpoint before real-world action
 
-Version 7.82 · July 2026
+Version v8.01 · July 2026
 
 Taylor Wigton
 Founder, HoloEngine
@@ -32,47 +32,21 @@ Patent pending
 
 ## 01. The problem
 
-AI is no longer just talking.
+AI has moved past conversation. It now creates documents that trigger real actions: approving payments, changing vendor bank details, granting system access, releasing funds, or signing contracts. In many organizations, the document the AI produces is the actual authorization. If that document contains a hidden flaw, the action that follows can be flawed too.
 
-It is starting to do real work.
+The risk sits in one specific moment: the instant before something irreversible happens. Money moves. Access is granted. A contract is executed. A report is treated as reliable. We call this moment the action boundary.
 
-It can check invoices, draft contracts, prepare approval packets, recommend payments, grant access, and place orders. In many companies, the document AI produces is what actually authorizes the action. If that document is wrong, the action can be wrong too.
+Current AI safety tools often operate within a narrow scope. They verify whether a user has permission, whether a prompt follows company policy, or whether the model output sounds reasonable. They often do not reach the deeper question of whether the evidence actually supports the proposed action at the boundary where irreversible decisions occur.
 
-That is the opportunity.
+This is the gap HoloEngine is built to close.
 
-But it is also the risk.
+The better comparison is not modern airport security. It is ordinary airport screening versus U.S. Customs and Border Protection. Airport screening is designed for speed and basic compliance, with significant trust built into the system. Customs works differently. It assumes that some cases require real scrutiny. The question is not just whether someone is allowed to proceed. The question is whether the story, the documents, and the contents all match.
 
-There is always a final moment before something real happens. Before money moves. Before access is granted. Before a contract is signed. Before a purchase is placed. Before a report is treated as safe to rely on.
+That is the kind of control high-stakes AI needs.
 
-We call that moment the action boundary.
+Before money moves, access is granted, a contract is signed, or a report is treated as reliable, the system should be able to stop and ask: does the evidence actually support this action?
 
-High-stakes AI needs Customs and Border Protection, not pre-9/11 airport security.
-
-Right now, most AI safety tools are built for the wrong layer. They check whether the user has permission. They check whether the prompt follows policy. They check whether the model sounds careful.
-
-They do not check whether the evidence actually supports the action.
-
-This is the gap.
-
-The current standard for AI action security is closer to pre-9/11 airport security: basic checks, assumed normal traffic, and a system built around the idea that most things passing through are probably fine.
-
-High-stakes AI needs something closer to Customs and Border Protection.
-
-At the border, the question is not just "Are you allowed through?" The question is "Does your story hold up?" What are you carrying? Why today? Does the paperwork match the cargo? Is there a contradiction hiding inside something that looks normal?
-
-That is the missing layer.
-
-We are now trusting AI in two ways at once.
-
-First, we trust the work it produces. A model can write a compliance memo, a payment justification, or a procurement brief that looks complete but still misses the one approval, source, or limit that actually matters.
-
-Second, we trust AI to act. A system can submit a payment or an access request that looks normal on the surface but lacks real authority underneath.
-
-Both failures come from the same root:
-
-The system was never forced to prove that the evidence actually closes the gate.
-
-That is the problem HoloEngine is built to solve.
+HoloEngine is the evidence checkpoint at that boundary.
 
 ---
 
@@ -717,6 +691,6 @@ HoloEngine is built for the space between those two facts.
 ---
 
 HoloEngine
-Version 7.82 · July 2026
+Version v8.01 · July 2026
 holoengine.ai/whitepaper
 holoengine.ai/benchmark

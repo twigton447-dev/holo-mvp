@@ -66,8 +66,8 @@
 <p>It adds a checkpoint where the checkpoint matters most.</p>
 <h3>The Economics of the Checkpoint</h3>
 <p>A strong trust layer doesn't have to be slow and expensive.</p>
-<p>We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a complete, rule-following draft on the first try, the Governor verifies the math and exits early. You don't pay for extra AI turns you don't need.</p>
-<p>In our live D11 tests, the system exited early on clean drafts, cutting token burn by 52%. But when a draft was messy or violated rules, the Governor refused to exit and forced the models to repair it. You only pay the "safety premium" when the system is actively saving you from a failure.</p>
+<p>We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a complete, rule-following draft on the first try, the Governor can verify the math and exit early. You don't pay for extra AI turns you don't need.</p>
+<p>When a draft is messy or violates rules, the Governor can refuse early exit and force repair. The intended economics are simple: you only pay the "safety premium" when the system is actively working to prevent a failure.</p>
 <p>HoloEngine has two main lanes.</p>
 <h3>HoloBuild</h3>
 <p>HoloBuild works early.</p>
@@ -129,7 +129,7 @@
 <p>That is the operating risk.</p>
 <p>If one model owns the final decision, that model's blind spots become part of your process.</p>
 <p>A stronger model helps. But it does not remove the need for structure.</p>
-<p>In our HoloBuild tests against top frontier baselines, including Claude Opus 4.8, the most revealing failures were not dumb failures. The model often understood the task. It knew the domain. It produced strong reasoning.</p>
+<p>In internal HoloBuild traces, the most revealing failures were not dumb failures. The model often understood the task. It knew the domain. It produced strong reasoning.</p>
 <p>Then it failed to finish the job safely.</p>
 <p>It left out claim limits. It missed required disclaimers. It broke the link between claims and sources. It produced something plausible, but not good enough to count as a valid baseline under the rules of the task.</p>
 <p>We call this bounded completion failure.</p>
@@ -137,9 +137,7 @@
 <p>That matters because production has limits. Real systems do not get infinite time, infinite budget, and infinite cleanup passes. The work has to close.</p>
 <p>A smart draft is not enough.</p>
 <p>A reliance-grade artifact has to survive the gate.</p>
-<h3>The Final-Mile Regression</h3>
-<p>Our traces revealed a deeper problem than simple hallucination. We call it Final-Mile Regression.</p>
-<p>A smart model will often find a strong, source-grounded answer early in the process. But when you ask that same model to write the final polished document, it tries to sound helpful. In the process of smoothing out the prose, it accidentally deletes the critical limits or exceptions it established just seconds before. The model delivers a final artifact that is actually weaker than its rough draft.</p>
+<p>Internal traces also showed a recurring last-step failure pattern. A model could find a strong, source-grounded answer early in the process, then lose critical limits or exceptions while polishing the final document. The finished artifact could end up weaker than the intermediate reasoning that came before it.</p>
 <h3>The Oscillation Problem</h3>
 <p>We also found that natural language is a terrible way to enforce rules. If a document is 200 words too long, and an AI Governor says "make it shorter," the worker model will wildly overshoot and cut 500 words. When told to expand, it overwrites. The model oscillates endlessly because language is vague.</p>
 <hr/>
@@ -239,40 +237,11 @@
 <p>The internal packet bank includes clinical activation, AP / vendor-master payment controls, agentic commerce, IT access, HR, privacy, finance, public-sector controls, treasury, legal, cloud infrastructure, security operations, and operational technology.</p>
 <p>Those traces remain preserved as engineering evidence. They are not being erased. The public claim is simply separated from the internal hardening ledger.</p>
 <p>The next proof is not a bigger headline. It is a cleaner, broader lane.</p>
-<h3>HoloBuild and stronger baselines</h3>
+<h3>HoloBuild scope</h3>
 <p>The HoloBuild lane tests a different question than HoloVerify.</p>
 <p>HoloVerify asks whether an action should execute.</p>
 <p>HoloBuild asks whether AI can produce high-stakes work that is complete enough to rely on.</p>
-<p>This is where the Opus-facing tests matter.</p>
-<p>Claude Opus 4.8 is a strong baseline. That made the test more useful. Against a stronger model, the gap should narrow. If it does not, the test is probably too easy.</p>
-<p>But what happened was more interesting than a simple score comparison.</p>
-<p>There were two kinds of HoloBuild wins.</p>
-<p>The first was a scored win.</p>
-<p>In D11, both systems produced work that could be judged. HoloBuild produced an output that cleared all benchmark gates and outperformed Claude Opus 4.8 under blind scoring. Holo gained about 18.4 strict-score points and 24 action-boundary points while using about 1.9x total tokens.</p>
-<p>That is the clean scored proof point.</p>
-<p>There is also D11-lock ledger evidence that is useful but should be labeled separately.</p>
-<p>D10 was an infrastructure configuration-change case. HoloBuild won the full-gated 100-point judgment 95 to 71. D11_CYBER was a cyber incident / contract notice / emergency cloud-access case. HoloBuild won 96 to 94, with both artifacts admissible.</p>
-<p>Those are real HoloBuild wins in the repo ledger. They are not yet packaged like the AP and clinical HoloVerify families, with a public root-signature evidence package. So they should not be described as the same class of evidence. The right label is: D11-lock ledger evidence, split-run disclosed, root package not yet promoted.</p>
-<p>The second kind of win was different.</p>
-<p>In D13 and D14B, HoloBuild completed the governed artifact. Claude Opus 4.8 did not produce a complete, scoreable deliverable under the same bounded production rules.</p>
-<p>That is not a numeric scoring win because there was no valid solo artifact to score against.</p>
-<p>But it is still a major result.</p>
-<p>In production, failing to complete the required artifact is not a technicality. It is failure. If the work needs claim limits, source closure, required disclaimers, and clean completion, then an output that misses those elements is not safe to rely on.</p>
-<p>This is the uncomfortable finding: Opus 4.8 often understood the task, but still failed to finish the job safely under real constraints.</p>
-<p>That is different from being dumb.</p>
-<p>It is more important.</p>
-<p>A weak model failing is not surprising. A top model reasoning well and still failing the production gate is the kind of failure enterprises need to know about.</p>
-<p>D13 and D14B should therefore be treated as completion-gate wins for HoloBuild and production-gate failures for the solo baseline.</p>
-<p>They are not score-margin wins.</p>
-<p>They are delivery wins.</p>
-<p>That distinction makes the claim stronger, not weaker.</p>
-<p>D14 is separate again. In D14, HoloBuild denied itself proof credit because an internal source-review step failed validation. That is not a benchmark win. It is hardening evidence. It shows that Holo can fail closed when its own process breaks.</p>
-<p>So the evidence should be read this way:</p>
-<p>D11 shows HoloBuild beating Opus in a clean scored comparison.</p>
-<p>D13 and D14B show HoloBuild completing governed work that solo Opus failed to complete under bounded conditions.</p>
-<p>D14 shows HoloBuild refusing to claim victory when its internal chain did not clear.</p>
-<p>That is the honest story.</p>
-<p>And it is a strong one.</p>
+<p>Internal HoloBuild traces remain useful architecture evidence, but they are not presented here as a separate public baseline claim. The public benchmark denominator described in this whitepaper remains the blind-120 HoloVerify lane above.</p>
 <h3>D12: The Form-Control Diagnosis</h3>
 <p>In early D12 runs, we found that models failed mechanically, not epistemically. The models understood the business logic, but repeatedly failed strict word-band limits. The AI Governor diagnosed the failure correctly, but the worker models could not execute the repair.</p>
 <p>This proved that an AI Governor without a deterministic actuator is insufficient for hard admissibility gates. We froze this failure, built the Form Actuator to pass exact mathematical constraints to the models, and locked it into the architecture. We don't hide our losses; we use them to build the infrastructure.</p>

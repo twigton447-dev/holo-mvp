@@ -94,9 +94,9 @@ It adds a checkpoint where the checkpoint matters most.
 
 A strong trust layer doesn't have to be slow and expensive.
 
-We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a complete, rule-following draft on the first try, the Governor verifies the math and exits early. You don't pay for extra AI turns you don't need.
+We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a complete, rule-following draft on the first try, the Governor can verify the math and exit early. You don't pay for extra AI turns you don't need.
 
-In our live D11 tests, the system exited early on clean drafts, cutting token burn by 52%. But when a draft was messy or violated rules, the Governor refused to exit and forced the models to repair it. You only pay the "safety premium" when the system is actively saving you from a failure.
+When a draft is messy or violates rules, the Governor can refuse early exit and force repair. The intended economics are simple: you only pay the "safety premium" when the system is actively working to prevent a failure.
 
 HoloEngine has two main lanes.
 
@@ -216,7 +216,7 @@ If one model owns the final decision, that model's blind spots become part of yo
 
 A stronger model helps. But it does not remove the need for structure.
 
-In our HoloBuild tests against top frontier baselines, including Claude Opus 4.8, the most revealing failures were not dumb failures. The model often understood the task. It knew the domain. It produced strong reasoning.
+In internal HoloBuild traces, the most revealing failures were not dumb failures. The model often understood the task. It knew the domain. It produced strong reasoning.
 
 Then it failed to finish the job safely.
 
@@ -232,11 +232,7 @@ A smart draft is not enough.
 
 A reliance-grade artifact has to survive the gate.
 
-### The Final-Mile Regression
-
-Our traces revealed a deeper problem than simple hallucination. We call it Final-Mile Regression.
-
-A smart model will often find a strong, source-grounded answer early in the process. But when you ask that same model to write the final polished document, it tries to sound helpful. In the process of smoothing out the prose, it accidentally deletes the critical limits or exceptions it established just seconds before. The model delivers a final artifact that is actually weaker than its rough draft.
+Internal traces also showed a recurring last-step failure pattern. A model could find a strong, source-grounded answer early in the process, then lose critical limits or exceptions while polishing the final document. The finished artifact could end up weaker than the intermediate reasoning that came before it.
 
 ### The Oscillation Problem
 
@@ -438,7 +434,7 @@ Those traces remain preserved as engineering evidence. They are not being erased
 
 The next proof is not a bigger headline. It is a cleaner, broader lane.
 
-### HoloBuild and stronger baselines
+### HoloBuild scope
 
 The HoloBuild lane tests a different question than HoloVerify.
 
@@ -446,65 +442,7 @@ HoloVerify asks whether an action should execute.
 
 HoloBuild asks whether AI can produce high-stakes work that is complete enough to rely on.
 
-This is where the Opus-facing tests matter.
-
-Claude Opus 4.8 is a strong baseline. That made the test more useful. Against a stronger model, the gap should narrow. If it does not, the test is probably too easy.
-
-But what happened was more interesting than a simple score comparison.
-
-There were two kinds of HoloBuild wins.
-
-The first was a scored win.
-
-In D11, both systems produced work that could be judged. HoloBuild produced an output that cleared all benchmark gates and outperformed Claude Opus 4.8 under blind scoring. Holo gained about 18.4 strict-score points and 24 action-boundary points while using about 1.9x total tokens.
-
-That is the clean scored proof point.
-
-There is also D11-lock ledger evidence that is useful but should be labeled separately.
-
-D10 was an infrastructure configuration-change case. HoloBuild won the full-gated 100-point judgment 95 to 71. D11_CYBER was a cyber incident / contract notice / emergency cloud-access case. HoloBuild won 96 to 94, with both artifacts admissible.
-
-Those are real HoloBuild wins in the repo ledger. They are not yet packaged like the AP and clinical HoloVerify families, with a public root-signature evidence package. So they should not be described as the same class of evidence. The right label is: D11-lock ledger evidence, split-run disclosed, root package not yet promoted.
-
-The second kind of win was different.
-
-In D13 and D14B, HoloBuild completed the governed artifact. Claude Opus 4.8 did not produce a complete, scoreable deliverable under the same bounded production rules.
-
-That is not a numeric scoring win because there was no valid solo artifact to score against.
-
-But it is still a major result.
-
-In production, failing to complete the required artifact is not a technicality. It is failure. If the work needs claim limits, source closure, required disclaimers, and clean completion, then an output that misses those elements is not safe to rely on.
-
-This is the uncomfortable finding: Opus 4.8 often understood the task, but still failed to finish the job safely under real constraints.
-
-That is different from being dumb.
-
-It is more important.
-
-A weak model failing is not surprising. A top model reasoning well and still failing the production gate is the kind of failure enterprises need to know about.
-
-D13 and D14B should therefore be treated as completion-gate wins for HoloBuild and production-gate failures for the solo baseline.
-
-They are not score-margin wins.
-
-They are delivery wins.
-
-That distinction makes the claim stronger, not weaker.
-
-D14 is separate again. In D14, HoloBuild denied itself proof credit because an internal source-review step failed validation. That is not a benchmark win. It is hardening evidence. It shows that Holo can fail closed when its own process breaks.
-
-So the evidence should be read this way:
-
-D11 shows HoloBuild beating Opus in a clean scored comparison.
-
-D13 and D14B show HoloBuild completing governed work that solo Opus failed to complete under bounded conditions.
-
-D14 shows HoloBuild refusing to claim victory when its internal chain did not clear.
-
-That is the honest story.
-
-And it is a strong one.
+Internal HoloBuild traces remain useful architecture evidence, but they are not presented here as a separate public baseline claim. The public benchmark denominator described in this whitepaper remains the blind-120 HoloVerify lane above.
 
 ### D12: The Form-Control Diagnosis
 

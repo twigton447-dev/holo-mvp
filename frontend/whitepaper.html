@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HoloEngine · AI at the Action Boundary · Version 7.84 · July 2026</title>
+<title>HoloEngine · AI at the Action Boundary · Version v8.01 · July 2026</title>
 <meta name="description" content="Why smart models still need a checkpoint before real-world action.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,40 +20,27 @@
     <div class="toplinks"><a href="/">Home</a><a href="/whitepaper">Whitepaper</a><a href="/benchmark">Benchmark</a><a href="/payloads/">Payloads</a></div>
   </nav>
   <header class="hero">
-    <div class="eyebrow">Version 7.84 · July 2026</div>
+    <div class="eyebrow">Version v8.01 · July 2026</div>
     <h1>HoloEngine</h1>
     <p class="subtitle">AI at the Action Boundary</p>
   </header>
   <main class="wrap">
     <section class="paper-section" id="ai-at-the-action-boundary"><h2>AI at the Action Boundary</h2>
 <h3>Why smart models still need a checkpoint before real-world action</h3>
-<p>Version 7.84 · July 2026</p>
+<p>Version v8.01 · July 2026</p>
 <p>Taylor Wigton Founder, HoloEngine</p>
 <p>Patent pending</p>
 <hr/>
 </section>
 <section class="paper-section" id="01-the-problem"><h2>01. The problem</h2>
-<p>AI is no longer just talking.</p>
-<p>It is starting to do real work.</p>
-<p>It can check invoices, draft contracts, prepare approval packets, recommend payments, grant access, and place orders. In many companies, the document AI produces is what actually authorizes the action. If that document is wrong, the action can be wrong too.</p>
-<p>That is the opportunity.</p>
-<p>But it is also the risk.</p>
-<p>There is always a final moment before something real happens. Before money moves. Before access is granted. Before a contract is signed. Before a purchase is placed. Before a report is treated as safe to rely on.</p>
-<p>We call that moment the action boundary.</p>
-<p>High-stakes AI needs Customs and Border Protection, not pre-9/11 airport security.</p>
-<p>Right now, most AI safety tools are built for the wrong layer. They check whether the user has permission. They check whether the prompt follows policy. They check whether the model sounds careful.</p>
-<p>They do not check whether the evidence actually supports the action.</p>
-<p>This is the gap.</p>
-<p>The current standard for AI action security is closer to pre-9/11 airport security: basic checks, assumed normal traffic, and a system built around the idea that most things passing through are probably fine.</p>
-<p>High-stakes AI needs something closer to Customs and Border Protection.</p>
-<p>At the border, the question is not just "Are you allowed through?" The question is "Does your story hold up?" What are you carrying? Why today? Does the paperwork match the cargo? Is there a contradiction hiding inside something that looks normal?</p>
-<p>That is the missing layer.</p>
-<p>We are now trusting AI in two ways at once.</p>
-<p>First, we trust the work it produces. A model can write a compliance memo, a payment justification, or a procurement brief that looks complete but still misses the one approval, source, or limit that actually matters.</p>
-<p>Second, we trust AI to act. A system can submit a payment or an access request that looks normal on the surface but lacks real authority underneath.</p>
-<p>Both failures come from the same root:</p>
-<p>The system was never forced to prove that the evidence actually closes the gate.</p>
-<p>That is the problem HoloEngine is built to solve.</p>
+<p>AI has moved past conversation. It now creates documents that trigger real actions: approving payments, changing vendor bank details, granting system access, releasing funds, or signing contracts. In many organizations, the document the AI produces is the actual authorization. If that document contains a hidden flaw, the action that follows can be flawed too.</p>
+<p>The risk sits in one specific moment: the instant before something irreversible happens. Money moves. Access is granted. A contract is executed. A report is treated as reliable. We call this moment the action boundary.</p>
+<p>Current AI safety tools often operate within a narrow scope. They verify whether a user has permission, whether a prompt follows company policy, or whether the model output sounds reasonable. They often do not reach the deeper question of whether the evidence actually supports the proposed action at the boundary where irreversible decisions occur.</p>
+<p>This is the gap HoloEngine is built to close.</p>
+<p>The better comparison is not modern airport security. It is ordinary airport screening versus U.S. Customs and Border Protection. Airport screening is designed for speed and basic compliance, with significant trust built into the system. Customs works differently. It assumes that some cases require real scrutiny. The question is not just whether someone is allowed to proceed. The question is whether the story, the documents, and the contents all match.</p>
+<p>That is the kind of control high-stakes AI needs.</p>
+<p>Before money moves, access is granted, a contract is signed, or a report is treated as reliable, the system should be able to stop and ask: does the evidence actually support this action?</p>
+<p>HoloEngine is the evidence checkpoint at that boundary.</p>
 <hr/>
 </section>
 <section class="paper-section" id="02-two-kinds-of-trust"><h2>02. Two kinds of trust</h2>
@@ -79,8 +66,8 @@
 <p>It adds a checkpoint where the checkpoint matters most.</p>
 <h3>The Economics of the Checkpoint</h3>
 <p>A strong trust layer doesn't have to be slow and expensive.</p>
-<p>We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a complete, rule-following draft on the first try, the Governor verifies the math and exits early. You don't pay for extra AI turns you don't need.</p>
-<p>In our live D11 tests, the system exited early on clean drafts, cutting token burn by 52%. But when a draft was messy or violated rules, the Governor refused to exit and forced the models to repair it. You only pay the "safety premium" when the system is actively saving you from a failure.</p>
+<p>We built a Dynamic Governor Router into HoloEngine. It acts like a tollbooth. If a worker model produces a complete, rule-following draft on the first try, the Governor can verify the math and exit early. You don't pay for extra AI turns you don't need.</p>
+<p>When a draft is messy or violates rules, the Governor can refuse early exit and force repair. The intended economics are simple: you only pay the "safety premium" when the system is actively working to prevent a failure.</p>
 <p>HoloEngine has two main lanes.</p>
 <h3>HoloBuild</h3>
 <p>HoloBuild works early.</p>
@@ -142,7 +129,7 @@
 <p>That is the operating risk.</p>
 <p>If one model owns the final decision, that model's blind spots become part of your process.</p>
 <p>A stronger model helps. But it does not remove the need for structure.</p>
-<p>In our HoloBuild tests against top frontier baselines, including Claude Opus 4.8, the most revealing failures were not dumb failures. The model often understood the task. It knew the domain. It produced strong reasoning.</p>
+<p>In internal HoloBuild traces, the most revealing failures were not dumb failures. The model often understood the task. It knew the domain. It produced strong reasoning.</p>
 <p>Then it failed to finish the job safely.</p>
 <p>It left out claim limits. It missed required disclaimers. It broke the link between claims and sources. It produced something plausible, but not good enough to count as a valid baseline under the rules of the task.</p>
 <p>We call this bounded completion failure.</p>
@@ -150,9 +137,7 @@
 <p>That matters because production has limits. Real systems do not get infinite time, infinite budget, and infinite cleanup passes. The work has to close.</p>
 <p>A smart draft is not enough.</p>
 <p>A reliance-grade artifact has to survive the gate.</p>
-<h3>The Final-Mile Regression</h3>
-<p>Our traces revealed a deeper problem than simple hallucination. We call it Final-Mile Regression.</p>
-<p>A smart model will often find a strong, source-grounded answer early in the process. But when you ask that same model to write the final polished document, it tries to sound helpful. In the process of smoothing out the prose, it accidentally deletes the critical limits or exceptions it established just seconds before. The model delivers a final artifact that is actually weaker than its rough draft.</p>
+<p>Internal traces also showed a recurring last-step failure pattern. A model could find a strong, source-grounded answer early in the process, then lose critical limits or exceptions while polishing the final document. The finished artifact could end up weaker than the intermediate reasoning that came before it.</p>
 <h3>The Oscillation Problem</h3>
 <p>We also found that natural language is a terrible way to enforce rules. If a document is 200 words too long, and an AI Governor says "make it shorter," the worker model will wildly overshoot and cut 500 words. When told to expand, it overwrites. The model oscillates endlessly because language is vague.</p>
 <hr/>
@@ -252,40 +237,11 @@
 <p>The internal packet bank includes clinical activation, AP / vendor-master payment controls, agentic commerce, IT access, HR, privacy, finance, public-sector controls, treasury, legal, cloud infrastructure, security operations, and operational technology.</p>
 <p>Those traces remain preserved as engineering evidence. They are not being erased. The public claim is simply separated from the internal hardening ledger.</p>
 <p>The next proof is not a bigger headline. It is a cleaner, broader lane.</p>
-<h3>HoloBuild and stronger baselines</h3>
+<h3>HoloBuild scope</h3>
 <p>The HoloBuild lane tests a different question than HoloVerify.</p>
 <p>HoloVerify asks whether an action should execute.</p>
 <p>HoloBuild asks whether AI can produce high-stakes work that is complete enough to rely on.</p>
-<p>This is where the Opus-facing tests matter.</p>
-<p>Claude Opus 4.8 is a strong baseline. That made the test more useful. Against a stronger model, the gap should narrow. If it does not, the test is probably too easy.</p>
-<p>But what happened was more interesting than a simple score comparison.</p>
-<p>There were two kinds of HoloBuild wins.</p>
-<p>The first was a scored win.</p>
-<p>In D11, both systems produced work that could be judged. HoloBuild produced an output that cleared all benchmark gates and outperformed Claude Opus 4.8 under blind scoring. Holo gained about 18.4 strict-score points and 24 action-boundary points while using about 1.9x total tokens.</p>
-<p>That is the clean scored proof point.</p>
-<p>There is also D11-lock ledger evidence that is useful but should be labeled separately.</p>
-<p>D10 was an infrastructure configuration-change case. HoloBuild won the full-gated 100-point judgment 95 to 71. D11_CYBER was a cyber incident / contract notice / emergency cloud-access case. HoloBuild won 96 to 94, with both artifacts admissible.</p>
-<p>Those are real HoloBuild wins in the repo ledger. They are not yet packaged like the AP and clinical HoloVerify families, with a public root-signature evidence package. So they should not be described as the same class of evidence. The right label is: D11-lock ledger evidence, split-run disclosed, root package not yet promoted.</p>
-<p>The second kind of win was different.</p>
-<p>In D13 and D14B, HoloBuild completed the governed artifact. Claude Opus 4.8 did not produce a complete, scoreable deliverable under the same bounded production rules.</p>
-<p>That is not a numeric scoring win because there was no valid solo artifact to score against.</p>
-<p>But it is still a major result.</p>
-<p>In production, failing to complete the required artifact is not a technicality. It is failure. If the work needs claim limits, source closure, required disclaimers, and clean completion, then an output that misses those elements is not safe to rely on.</p>
-<p>This is the uncomfortable finding: Opus 4.8 often understood the task, but still failed to finish the job safely under real constraints.</p>
-<p>That is different from being dumb.</p>
-<p>It is more important.</p>
-<p>A weak model failing is not surprising. A top model reasoning well and still failing the production gate is the kind of failure enterprises need to know about.</p>
-<p>D13 and D14B should therefore be treated as completion-gate wins for HoloBuild and production-gate failures for the solo baseline.</p>
-<p>They are not score-margin wins.</p>
-<p>They are delivery wins.</p>
-<p>That distinction makes the claim stronger, not weaker.</p>
-<p>D14 is separate again. In D14, HoloBuild denied itself proof credit because an internal source-review step failed validation. That is not a benchmark win. It is hardening evidence. It shows that Holo can fail closed when its own process breaks.</p>
-<p>So the evidence should be read this way:</p>
-<p>D11 shows HoloBuild beating Opus in a clean scored comparison.</p>
-<p>D13 and D14B show HoloBuild completing governed work that solo Opus failed to complete under bounded conditions.</p>
-<p>D14 shows HoloBuild refusing to claim victory when its internal chain did not clear.</p>
-<p>That is the honest story.</p>
-<p>And it is a strong one.</p>
+<p>Internal HoloBuild traces remain useful architecture evidence, but they are not presented here as a separate public baseline claim. The public benchmark denominator described in this whitepaper remains the blind-120 HoloVerify lane above.</p>
 <h3>D12: The Form-Control Diagnosis</h3>
 <p>In early D12 runs, we found that models failed mechanically, not epistemically. The models understood the business logic, but repeatedly failed strict word-band limits. The AI Governor diagnosed the failure correctly, but the worker models could not execute the repair.</p>
 <p>This proved that an AI Governor without a deterministic actuator is insufficient for hard admissibility gates. We froze this failure, built the Form Actuator to pass exact mathematical constraints to the models, and locked it into the architecture. We don't hide our losses; we use them to build the infrastructure.</p>
@@ -383,11 +339,11 @@
 <p>It is also too consequential to let it act without a better gate.</p>
 <p>HoloEngine is built for the space between those two facts.</p>
 <hr/>
-<p>HoloEngine Version 7.83 · July 2026 holoengine.ai/whitepaper holoengine.ai/benchmark</p>
+<p>HoloEngine Version v8.01 · July 2026 holoengine.ai/whitepaper holoengine.ai/benchmark</p>
 </section>
   </main>
   <footer>
-    <div><strong>HoloEngine</strong><br>Version 7.83 · July 2026</div>
+    <div><strong>HoloEngine</strong><br>Version v8.01 · July 2026</div>
     <div><a href="/whitepaper">holoengine.ai/whitepaper</a><br><a href="/benchmark">holoengine.ai/benchmark</a></div>
   </footer>
 </body>

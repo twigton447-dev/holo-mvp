@@ -54,6 +54,62 @@ class HoloBrainInjectionPlan:
     char_count: int = 0
     token_estimate: int = 0
 
+
+@dataclass(frozen=True)
+class GovAdvisorAdmission:
+    admitted: bool
+    value: Any = None
+    reason: str = ""
+    repaired: bool = False
+    blocked_terms: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class GovTurnPolicy:
+    tier: str
+    reasons: tuple[str, ...]
+    advisor_allowed: bool
+    fallback_allowed: bool
+
+
+@dataclass(frozen=True)
+class GovVisibleReleaseDecision:
+    release: bool
+    text: str
+    reason: str
+    repaired: bool = False
+
+
+FALLBACK_ONLY_ADVISOR_PROVIDERS = {"minimax"}
+_RUPTURE_RE = re.compile(
+    r"(?i)\b("
+    r"you sound cold|sound cold|you sound like a dick|acting like a dick|"
+    r"not acting right|not like you|too sterile|too robotic|you are scolding|"
+    r"that was curt|you feel off|you lost the thread"
+    r")\b"
+)
+_SCOLDING_DIRECTIVE_RE = re.compile(
+    r"(?i)\b("
+    r"scold|gotcha|sterile|curt|cold|lecture|punish|shame|dismiss|"
+    r"call (?:him|her|them|the user) out|be harsh|make (?:him|her|them|the user) admit"
+    r")\b"
+)
+_HIGH_TIER_RE = re.compile(
+    r"(?i)\b("
+    r"safety|unsafe|harm|medical|legal|financial|crisis|emergency|credential|"
+    r"password|secret|api key|memory|remember|forget|persona|voice|relationship|"
+    r"you sound|not acting right|tool|search|send|delete|deploy|purchase|pay|"
+    r"provider|governor|state|conflict|uncertain|product critical"
+    r")\b"
+)
+_LOW_TIER_RE = re.compile(r"(?i)^\s*(hi|hey|thanks|thank you|ok|okay|lol|nice)\s*[.!?]*\s*$")
+_ADVISOR_SECRET_OR_CONTROL_RE = re.compile(
+    r"(?i)\b(system prompt|ignore previous|developer message|api[_ -]?key|token|secret|password|bearer)\b"
+)
+_VISIBLE_STERILE_RE = re.compile(
+    r"(?i)^\s*(no\.?|incorrect\.?|you are wrong\.?|that is false\.?|can't help\.?)\s*$"
+)
+
 _SECRET_ENV_RE = re.compile(
     r"\b([A-Z][A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*)\s*=\s*([^\s,;]+)"
 )
@@ -122,6 +178,223 @@ def sanitize_text(value: Any, *, limit: int = 320) -> str:
     if len(text) > limit:
         return text[: max(0, limit - 3)].rstrip() + "..."
     return text
+
+
+def relationship_rupture_detected(text: Any) -> bool:
+    return bool(_RUPTURE_RE.search(str(text or "")))
+
+
+def advisor_provider_allowed(provider: Any, *, fallback_eligible: bool = False) -> bool:
+    normalized = str(provider or "").strip().lower()
+    if not normalized:
+        return False
+    if normalized in FALLBACK_ONLY_ADVISOR_PROVIDERS:
+        return bool(fallback_eligible)
+    return True
+
+
+def deterministic_turn_policy(
+    user_message: Any,
+    *,
+    history: list[dict[str, Any]] | None = None,
+    governor_uncertain: bool = False,
+    conflict: bool = False,
+    product_critical: bool = False,
+) -> GovTurnPolicy:
+    text = str(user_message or "")
+    reasons: list[str] = []
+    if relationship_rupture_detected(text):
+        reasons.append("relationship_rupture")
+    if _HIGH_TIER_RE.search(text):
+        reasons.append("high_risk_turn_class")
+    if governor_uncertain:
+        reasons.append("governor_uncertainty")
+    if conflict:
+        reasons.append("state_or_advisor_conflict")
+    if product_critical:
+        reasons.append("product_critical_ux")
+    if any(term in text.lower() for term in ("search", "look up", "today", "right now", "current")):
+        reasons.append("tool_or_current_info_boundary")
+    if not reasons and history and len(history) >= 12:
+        reasons.append("long_thread_state_risk")
+
+    if reasons:
+        tier = "max" if any(reason in reasons for reason in ("relationship_rupture", "governor_uncertainty", "state_or_advisor_conflict")) else "high"
+        return GovTurnPolicy(tier=tier, reasons=tuple(reasons), advisor_allowed=True, fallback_allowed=False)
+    if _LOW_TIER_RE.match(text):
+        return GovTurnPolicy(tier="fast", reasons=("routine_low_risk",), advisor_allowed=False, fallback_allowed=False)
+    return GovTurnPolicy(tier="standard", reasons=("normal_turn",), advisor_allowed=True, fallback_allowed=False)
+
+
+def _warm_relationship_repair_directive() -> str:
+    return (
+        "Relationship repair mode: answer warmly, own any tone mismatch without defensiveness, "
+        "stay concrete, avoid scolding or trap framing, and help the user feel met before moving on."
+    )
+
+
+def admit_advisor_prompt_directive(
+    proposal: Any,
+    *,
+    user_message: Any = "",
+) -> GovAdvisorAdmission:
+    text = sanitize_text(proposal, limit=700)
+    if relationship_rupture_detected(user_message):
+        return GovAdvisorAdmission(
+            admitted=True,
+            value=_warm_relationship_repair_directive(),
+            reason="deterministic_relationship_repair_overrode_advisor_directive",
+            repaired=True,
+            blocked_terms=tuple(_SCOLDING_DIRECTIVE_RE.findall(text)),
+        )
+    if not text:
+        return GovAdvisorAdmission(admitted=False, value="", reason="empty_advisor_directive")
+    blocked = tuple(term if isinstance(term, str) else str(term) for term in _SCOLDING_DIRECTIVE_RE.findall(text))
+    if blocked or _ADVISOR_SECRET_OR_CONTROL_RE.search(text):
+        return GovAdvisorAdmission(
+            admitted=True,
+            value=_warm_relationship_repair_directive(),
+            reason="deterministic_gov_repaired_unsafe_advisor_directive",
+            repaired=True,
+            blocked_terms=blocked,
+        )
+    return GovAdvisorAdmission(
+        admitted=True,
+        value=text,
+        reason="deterministic_gov_admitted_sanitized_advisor_directive",
+    )
+
+
+def admit_advisor_search_query(user_message: Any, advisor_query: Any) -> GovAdvisorAdmission:
+    query = sanitize_text(advisor_query, limit=180)
+    if not query:
+        return GovAdvisorAdmission(admitted=False, value=None, reason="empty_advisor_search_query")
+    text = str(user_message or "").lower()
+    current_markers = (
+        "today",
+        "right now",
+        "current",
+        "latest",
+        "recent",
+        "this week",
+        "news",
+        "weather",
+        "stock",
+        "price",
+        "score",
+        "look up",
+        "search",
+    )
+    if any(marker in text for marker in current_markers):
+        return GovAdvisorAdmission(admitted=True, value=query, reason="deterministic_gov_authorized_current_info_search")
+    return GovAdvisorAdmission(admitted=False, value=None, reason="deterministic_gov_denied_advisor_search")
+
+
+def admit_advisor_claim_corrections(
+    flagged_claims: list[dict[str, Any]] | None,
+) -> GovAdvisorAdmission:
+    admitted: list[str] = []
+    blocked: list[str] = []
+    for item in flagged_claims or []:
+        claim = sanitize_text(item.get("claim"), limit=220) if isinstance(item, dict) else ""
+        correction = sanitize_text(item.get("correction"), limit=260) if isinstance(item, dict) else ""
+        if not claim or not correction:
+            blocked.append("missing_claim_or_correction")
+            continue
+        if _ADVISOR_SECRET_OR_CONTROL_RE.search(correction) or _SCOLDING_DIRECTIVE_RE.search(correction):
+            blocked.append("unsafe_correction")
+            continue
+        admitted.append(correction)
+    return GovAdvisorAdmission(
+        admitted=bool(admitted),
+        value=admitted,
+        reason="deterministic_gov_admitted_claim_corrections" if admitted else "no_admissible_claim_corrections",
+        blocked_terms=tuple(blocked),
+    )
+
+
+def admit_advisor_memory_updates(updates: dict[str, Any] | None) -> GovAdvisorAdmission:
+    admitted: dict[str, str] = {}
+    blocked: list[str] = []
+    for raw_key, raw_value in (updates or {}).items():
+        key = sanitize_text(raw_key, limit=60).lower().replace(" ", "_").replace("-", "_")
+        value = sanitize_text(raw_value, limit=500)
+        if not key or key in {"none", "key"}:
+            blocked.append("invalid_key")
+            continue
+        if not value.startswith("[FACT]"):
+            blocked.append(key)
+            continue
+        if _ADVISOR_SECRET_OR_CONTROL_RE.search(value):
+            blocked.append(key)
+            continue
+        admitted[key] = value
+    return GovAdvisorAdmission(
+        admitted=bool(admitted),
+        value=admitted,
+        reason="deterministic_gov_admitted_explicit_fact_memory_updates" if admitted else "no_admissible_memory_updates",
+        blocked_terms=tuple(blocked),
+    )
+
+
+def admit_advisor_consolidation(result: dict[str, Any] | None) -> GovAdvisorAdmission:
+    if not isinstance(result, dict):
+        return GovAdvisorAdmission(admitted=False, value={}, reason="invalid_consolidation_shape")
+    session_note = result.get("session_note") if isinstance(result.get("session_note"), dict) else {}
+    life_context = []
+    for entry in result.get("life_context") or []:
+        if not isinstance(entry, dict):
+            continue
+        value = sanitize_text(entry.get("value"), limit=700)
+        if not value or _ADVISOR_SECRET_OR_CONTROL_RE.search(value):
+            continue
+        clean = dict(entry)
+        clean["value"] = value
+        life_context.append(clean)
+    clean_note = {
+        sanitize_text(key, limit=80): sanitize_text(value, limit=600)
+        for key, value in session_note.items()
+        if sanitize_text(key, limit=80)
+    }
+    return GovAdvisorAdmission(
+        admitted=bool(clean_note or life_context),
+        value={"session_note": clean_note, "life_context": life_context},
+        reason="deterministic_gov_admitted_sanitized_consolidation",
+    )
+
+
+def admit_advisor_thread_name(name: Any) -> GovAdvisorAdmission:
+    text = sanitize_text(name, limit=60)
+    if not text or _ADVISOR_SECRET_OR_CONTROL_RE.search(text):
+        return GovAdvisorAdmission(admitted=False, value="", reason="thread_name_not_admitted")
+    return GovAdvisorAdmission(admitted=True, value=text, reason="deterministic_gov_admitted_thread_name")
+
+
+def deterministic_visible_release(
+    user_message: Any,
+    response_text: Any,
+) -> GovVisibleReleaseDecision:
+    text = str(response_text or "")
+    if relationship_rupture_detected(user_message) and (
+        _VISIBLE_STERILE_RE.match(text) or _SCOLDING_DIRECTIVE_RE.search(text)
+    ):
+        return GovVisibleReleaseDecision(
+            release=True,
+            text=(
+                "You're right to call out the tone. Let me reset: I should stay warm, direct, "
+                "and useful here. " + sanitize_text(text, limit=500)
+            ),
+            reason="deterministic_relationship_repair_before_visible_release",
+            repaired=True,
+        )
+    if _ADVISOR_SECRET_OR_CONTROL_RE.search(text):
+        return GovVisibleReleaseDecision(
+            release=False,
+            text="I need to repair that response before showing it.",
+            reason="visible_output_blocked_for_secret_or_control_text",
+            repaired=True,
+        )
+    return GovVisibleReleaseDecision(release=True, text=text, reason="visible_output_admitted")
 
 
 def _unique_compact(items: list[str], *, limit: int, item_limit: int = 240) -> list[str]:

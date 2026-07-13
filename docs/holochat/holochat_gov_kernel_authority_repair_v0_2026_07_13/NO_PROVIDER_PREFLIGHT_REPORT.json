@@ -1,0 +1,31 @@
+{
+  "package_id": "HOLOCHAT_GOV_KERNEL_AUTHORITY_REPAIR_V0",
+  "preflight_status": "PASS",
+  "provider_calls_performed": 0,
+  "credential_reads_performed": 0,
+  "live_holochat_conversations_performed": false,
+  "deploy_performed": false,
+  "external_sends_performed": false,
+  "watcher_or_queue_actions_performed": false,
+  "holoverify_files_edited": false,
+  "tests": [
+    {
+      "command": ".venv312/bin/pytest -q tests/test_holochat_gov_kernel_authority_repair.py",
+      "result": "8 passed in 0.14s"
+    },
+    {
+      "command": ".venv312/bin/pytest -q tests/test_holochat_runtime_routing.py tests/test_holochat_gov_kernel_authority_repair.py",
+      "result": "46 passed in 0.12s"
+    }
+  ],
+  "verified_controls": {
+    "advisor_memory_requires_deterministic_admission": true,
+    "advisor_private_directive_sanitized_before_worker_prompt": true,
+    "advisor_claim_correction_requires_deterministic_admission": true,
+    "minimax_fallback_only_for_advisor_pool": true,
+    "relationship_rupture_triggers_warm_repair": true,
+    "turn_class_policy_escalates_high_risk_turns": true,
+    "runtime_metadata_marks_deterministic_gov_kernel_authority": true
+  },
+  "live_provider_deploy_authorized_now": false
+}

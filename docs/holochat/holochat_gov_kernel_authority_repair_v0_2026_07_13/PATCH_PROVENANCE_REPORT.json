@@ -1,0 +1,56 @@
+{
+  "package_id": "HOLOCHAT_GOV_KERNEL_AUTHORITY_REPAIR_V0",
+  "changed_surfaces": [
+    {
+      "path": "holochat_context_governor.py",
+      "role": "deterministic Gov Kernel helpers",
+      "changes": [
+        "added GovAdvisorAdmission, GovTurnPolicy, and GovVisibleReleaseDecision",
+        "added MiniMax fallback-only advisor eligibility",
+        "added deterministic turn-class policy",
+        "added advisor search, tenor/directive, claim-correction, memory-update, consolidation, and thread-name admission helpers",
+        "added deterministic relationship rupture visible-release repair"
+      ]
+    },
+    {
+      "path": "chat_engine.py",
+      "role": "actual visible-path wiring",
+      "changes": [
+        "instantiates provider-backed GovernorAdapter as _gov_advisor with legacy _governor alias",
+        "bounds advisor temperature by deterministic turn policy",
+        "passes advisor search proposals through deterministic tool/search admission",
+        "passes private tenor/directive through deterministic admission before prompt insertion",
+        "passes claim corrections through deterministic admission before visible append",
+        "passes provider-advisor memory updates through deterministic explicit-fact admission before capsule writes",
+        "passes consolidation and thread names through deterministic admission before persistence",
+        "applies deterministic visible-release repair in normal and streaming paths",
+        "adds runtime metadata distinguishing provider advisor proposal source from deterministic Gov Kernel authority"
+      ]
+    },
+    {
+      "path": "tests/test_holochat_gov_kernel_authority_repair.py",
+      "role": "focused no-provider regression tests",
+      "changes": [
+        "tests advisor directive sanitization in actual send_message path",
+        "tests advisor memory write admission in actual send_message path",
+        "tests claim correction admission in actual send_message path",
+        "tests MiniMax fallback-only advisor eligibility",
+        "tests relationship rupture visible-release repair",
+        "tests high/max turn-class escalation",
+        "tests explicit-fact memory gate and scolding directive replacement"
+      ]
+    }
+  ],
+  "pre_existing_dirty_changes_carried_forward": [
+    "chat_engine.py already had local MiniMax fallback rotation changes before this repair",
+    "tests/test_holochat_runtime_routing.py already had local MiniMax fallback tests before this repair",
+    "this repair preserves those local changes and does not revert them"
+  ],
+  "forbidden_surfaces_touched": {
+    "holoverify": false,
+    "provider_credentials": false,
+    "live_runs": false,
+    "deploy": false,
+    "watcher_queue": false
+  }
+}

@@ -16,6 +16,8 @@ from chat_engine import (
     _safe_handoff_transition,
     _thread_handoff_markdown,
     _runtime_metadata,
+    _adapter_candidate_order,
+    _select_analyst_adapter,
     _select_runtime_pools,
 )
 from holochat_context_governor import (
@@ -246,12 +248,16 @@ class RestoredLongHistoryBrain(FakeBrain):
         ]
 
 
-def _mini_pool():
-    return [
+def _mini_pool(provider_allowlist=None):
+    adapters = [
         FakeAdapter("openai", "gpt-5.5"),
         FakeAdapter("xai", "grok-4.3"),
         FakeAdapter("minimax", "MiniMax-M2.5-highspeed"),
     ]
+    if provider_allowlist is None:
+        return adapters
+    allowed = set(provider_allowlist)
+    return [adapter for adapter in adapters if adapter.provider in allowed]
 
 
 def test_default_runtime_profile_is_mini_only(monkeypatch):
@@ -271,7 +277,7 @@ def test_default_runtime_profile_is_mini_only(monkeypatch):
     assert bench == []
 
 
-def test_holochat_default_model_provider_allowlist_is_openai_xai_minimax(monkeypatch):
+def test_holochat_default_model_provider_allowlist_keeps_minimax_loaded_as_fallback(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_RUNTIME_PROFILE", raising=False)
     monkeypatch.delenv("HOLOCHAT_MODEL_PROVIDERS", raising=False)
     seen = {}
@@ -292,6 +298,22 @@ def test_holochat_default_model_provider_allowlist_is_openai_xai_minimax(monkeyp
     assert seen["provider_allowlist"] == ("openai", "xai", "minimax")
     assert [adapter.provider for adapter in active] == ["openai", "xai", "minimax"]
     assert bench == []
+
+
+def test_holochat_normal_rotation_skips_minimax_fallback_provider():
+    session = ChatSession(session_id="rotation-test")
+    adapters = _mini_pool()
+
+    selected = [
+        _select_analyst_adapter(session, adapters).provider
+        for _ in range(5)
+    ]
+    order_from_xai = [
+        adapter.provider for adapter in _adapter_candidate_order(adapters, adapters[1])
+    ]
+
+    assert selected == ["openai", "xai", "openai", "xai", "openai"]
+    assert order_from_xai == ["xai", "openai", "minimax"]
 
 
 def test_holochat_model_provider_allowlist_can_be_overridden(monkeypatch):
@@ -1000,6 +1022,46 @@ def test_browser_chat_skips_failed_mini_and_reports_safe_failover(monkeypatch):
     runtime_text = json.dumps(result["runtime"]).lower()
     assert "provider body should not surface" not in runtime_text
     assert ("raw " + "prompt") not in runtime_text
+
+
+def test_browser_chat_uses_minimax_only_after_primary_failures(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [
+        FailingAdapter("openai", "gpt-5.5"),
+        FailingAdapter("xai", "grok-4.3"),
+        FakeAdapter("minimax", "MiniMax-M2.5-highspeed"),
+    ]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    result = engine.send_message(str(uuid4()), "Use fallback if primaries are out.")
+
+    assert result["_provider"] == "minimax"
+    assert result["response"] == "minimax mini answer"
+    failover = result["runtime"]["failover"]
+    assert failover["attempted"] is True
+    assert failover["count"] == 2
+    assert failover["initial"] == {"provider": "openai", "model": "gpt-5.5"}
+    assert failover["final"] == {
+        "provider": "minimax",
+        "model": "MiniMax-M2.5-highspeed",
+    }
+    assert failover["skipped"] == [
+        {
+            "provider": "openai",
+            "model": "gpt-5.5",
+            "error_type": "RuntimeError",
+        },
+        {
+            "provider": "xai",
+            "model": "grok-4.3",
+            "error_type": "RuntimeError",
+        },
+    ]
 
 
 def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeypatch):

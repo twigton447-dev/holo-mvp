@@ -33,8 +33,16 @@ from holochat_context_governor import (
     HOLOCHAT_STATE_CONTEXT_KEY,
     HoloBrainInjectionMode,
     HoloBrainInjectionPlan,
+    admit_advisor_claim_corrections,
+    admit_advisor_consolidation,
+    admit_advisor_memory_updates,
+    admit_advisor_prompt_directive,
+    admit_advisor_search_query,
+    admit_advisor_thread_name,
     build_holobrain_injection_plan,
     build_holochat_state,
+    deterministic_turn_policy,
+    deterministic_visible_release,
     has_meaningful_holobrain_delta,
     load_state_from_capsule_context,
     should_auto_compact,
@@ -150,6 +158,7 @@ DEFAULT_RUNTIME_PROFILE = "mini_only"
 BALANCED_RUNTIME_PROFILE = "balanced"
 FRONTIER_RUNTIME_PROFILES = {"frontier_active", "legacy_frontier"}
 DEFAULT_HOLOCHAT_MODEL_PROVIDERS = ("openai", "xai", "minimax")
+FALLBACK_HOLOCHAT_MODEL_PROVIDERS = {"minimax"}
 DEFAULT_THREAD_HANDOFF_MIN_TURNS = 24
 THREAD_HANDOFF_FORCE_SCORE = 5
 DEFAULT_ADAPTER_HISTORY_MESSAGES = 8
@@ -635,6 +644,8 @@ def _governor_turn_metadata(governor: Any, *, checked_this_turn: bool) -> dict[s
         "governor_model": model,
         "governor_status": "checked_this_turn" if present and checked_this_turn else "not_checked",
         "governor_role": "controller_check_layer" if present else "off",
+        "governor_adapter_role": "provider_advisor_proposal_source" if present else "off",
+        "deterministic_gov_kernel": "authority_admission_layer" if present else "off",
     }
 
 
@@ -859,7 +870,9 @@ def _deterministic_search_query(user_message: str) -> Optional[str]:
 def _resolve_search_query(user_message: str, governor_query: Optional[str]) -> tuple[Optional[str], str, str]:
     gov_query = _compact_text(governor_query, limit=180) if governor_query else ""
     if gov_query:
-        return gov_query, "governor", "search_requested_by_governor"
+        admission = admit_advisor_search_query(user_message, gov_query)
+        if admission.admitted:
+            return admission.value, "deterministic_governor", admission.reason
     forced = _deterministic_search_query(user_message)
     if forced:
         return forced, "deterministic", "forced_currentness_trigger"
@@ -1364,7 +1377,9 @@ class HoloChatEngine:
             self._adapters,
             self._bench,
         )
-        self._governor = GovernorAdapter(self._adapters) # separate controller; not another analyst answer
+        advisor_pool = _rotation_analyst_adapters(self._adapters)
+        self._gov_advisor = GovernorAdapter(advisor_pool) # provider advisor; deterministic Gov admits its proposals
+        self._governor = self._gov_advisor  # legacy test/API alias; not canonical authority
         self._brain    = ProjectBrain()
         self._holo_context_builder = HoloContextBuilder()
         self._holo_router = None
@@ -1372,8 +1387,11 @@ class HoloChatEngine:
             f"HoloChatEngine initialized. Runtime profile: {self._runtime_profile} | Active: "
             + ", ".join(a.provider for a in self._adapters)
             + (" | Bench: " + ", ".join(a.provider for a in self._bench) if self._bench else "")
-            + " | GovernorAdapter ready"
+            + " | deterministic Gov Kernel ready | GovAdvisor ready"
         )
+
+    def _gov_advisor_adapter(self):
+        return getattr(self, "_gov_advisor", None) or getattr(self, "_governor", None)
 
     def get_or_create_session(self, session_id: Optional[str] = None) -> ChatSession:
         if session_id and session_id in _sessions:
@@ -1388,7 +1406,7 @@ class HoloChatEngine:
             if prior:
                 session.history      = prior
                 session.turn_count   = sum(1 for m in prior if m["role"] == "user")
-                session.rotation_index = session.turn_count % len(self._adapters)
+                session.rotation_index = session.turn_count % len(_rotation_analyst_adapters(self._adapters))
                 logger.info(f"Restored session {session_id[:8]} from brain ({session.turn_count} turns).")
 
         _sessions[new_id] = session
@@ -1446,6 +1464,11 @@ class HoloChatEngine:
         initial_adapter = adapter
         session.turn_count     += 1
         adapter_history = _bounded_adapter_history(session.history)
+        gov_advisor = self._gov_advisor_adapter()
+        turn_policy = deterministic_turn_policy(
+            user_message,
+            history=session.history,
+        )
 
         gov_pre_timer = _timer_start()
         # Governor rotation policy:
@@ -1453,8 +1476,8 @@ class HoloChatEngine:
         # healthy and no active work is mid-resolution. The no-same-family rule
         # is enforced by prepare_for_turn() on every rotation.
         if _should_rotate_governor(session):
-            self._governor.prepare_for_turn(adapter)
-            session.governor_provider        = self._governor.provider
+            gov_advisor.prepare_for_turn(adapter)
+            session.governor_provider        = gov_advisor.provider
             session.governor_locked_since    = session.turn_count
             session.governor_rotation_threshold = random.randint(7, 11)
             if session.turn_count > 1:
@@ -1463,15 +1486,22 @@ class HoloChatEngine:
                     f"(next rotation in {session.governor_rotation_threshold} turns)"
                 )
         else:
-            self._governor.lock_to_provider(session.governor_provider)
+            gov_advisor.lock_to_provider(session.governor_provider)
 
-        # Governor runs the instruments: temperature + search decision
-        temperature  = self._governor.assess_chat_temperature(user_message, session.history)
-        governor_search_query = self._governor.should_search(user_message, session.history)
+        # Provider advisor proposes instruments; deterministic Gov bounds/adopts.
+        advisor_temperature  = gov_advisor.assess_chat_temperature(user_message, session.history)
+        temperature = max(0.2, min(0.9, float(advisor_temperature or 0.5)))
+        if turn_policy.tier in {"high", "max"}:
+            temperature = min(temperature, 0.35)
+        elif turn_policy.tier == "fast":
+            temperature = min(temperature, 0.4)
+        governor_search_query = gov_advisor.should_search(user_message, session.history)
 
         # Governor thinks about the human — skipped in incognito (would introduce bias)
-        thought = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
-        tenor   = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
+        thought = None if incognito else gov_advisor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
+        raw_tenor = None if incognito else gov_advisor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
+        tenor_admission = admit_advisor_prompt_directive(raw_tenor, user_message=user_message) if raw_tenor or not incognito else None
+        tenor = tenor_admission.value if tenor_admission and tenor_admission.admitted else None
         _add_timing(timings, "governor_pre_ms", gov_pre_timer)
 
         web_timer = _timer_start()
@@ -1501,7 +1531,7 @@ class HoloChatEngine:
             _select_frontier_assist_adapter(
                 self._bench,
                 initial_adapter=initial_adapter,
-                governor=self._governor,
+                governor=gov_advisor,
             )
             if frontier_assist_reason
             else None
@@ -1530,7 +1560,7 @@ class HoloChatEngine:
 
         logger.info(
             f"Chat turn {session.turn_count} | session={session.session_id[:8]} | "
-            f"analyst={adapter.provider} | governor={self._governor.provider} | temp={temperature:.2f}"
+            f"analyst={adapter.provider} | gov_advisor={gov_advisor.provider} | temp={temperature:.2f}"
             + (" | INCOGNITO" if incognito else "")
         )
 
@@ -1701,17 +1731,20 @@ class HoloChatEngine:
         gov_post_timer = _timer_start()
         # Hallucination check — Governor scans for specific low-confidence claims
         # and verifies them against live search. Silent on clean responses.
-        response_text, flagged_claims = self._governor.verify_claims(
+        response_text, flagged_claims = gov_advisor.verify_claims(
             response_text, web_search.search
         )
         if flagged_claims:
-            corrections = [f["correction"] for f in flagged_claims if f.get("correction")]
+            correction_admission = admit_advisor_claim_corrections(flagged_claims)
+            corrections = list(correction_admission.value or []) if correction_admission.admitted else []
             if corrections:
-                # Quietly inline the correction so the user gets accurate information
                 note = " · ".join(corrections)
                 response_text += f"\n\n*One thing worth correcting: {note}*"
 
-        path_generator = getattr(self._governor, "generate_conversation_paths", None)
+        release_decision = deterministic_visible_release(user_message, response_text)
+        response_text = release_decision.text
+
+        path_generator = getattr(gov_advisor, "generate_conversation_paths", None)
         conversation_paths = []
         if path_generator and not incognito:
             conversation_paths = path_generator(
@@ -1748,7 +1781,9 @@ class HoloChatEngine:
         if capsule_id and not incognito:
             memory_extraction_attempted = True
             gov_post_timer = _timer_start()
-            updates = self._governor.extract_context_updates(session.history, capsule_context)
+            proposed_updates = gov_advisor.extract_context_updates(session.history, capsule_context)
+            memory_admission = admit_advisor_memory_updates(proposed_updates)
+            updates = dict(memory_admission.value or {}) if memory_admission.admitted else {}
             for key, value in updates.items():
                 self._brain.set_capsule_context(capsule_id, key, value)
             memory_writes_count = len(updates)
@@ -1765,9 +1800,11 @@ class HoloChatEngine:
         ):
             def _consolidate():
                 try:
-                    result = self._governor.consolidate_session(
+                    proposed_result = gov_advisor.consolidate_session(
                         session.history, capsule_context, session.session_id
                     )
+                    consolidation_admission = admit_advisor_consolidation(proposed_result)
+                    result = dict(consolidation_admission.value or {}) if consolidation_admission.admitted else {}
                     if result.get("session_note"):
                         self._brain.save_consolidation(
                             capsule_id, session.session_id, result["session_note"]
@@ -1795,9 +1832,9 @@ class HoloChatEngine:
             _cid  = capsule_id
             def _name_thread():
                 try:
-                    name = self._governor.name_session(_hist)
-                    if name:
-                        self._brain.update_session_name(_cid, _sid, name)
+                    name_admission = admit_advisor_thread_name(gov_advisor.name_session(_hist))
+                    if name_admission.admitted and name_admission.value:
+                        self._brain.update_session_name(_cid, _sid, name_admission.value)
                 except Exception as e:
                     logger.warning(f"Thread naming failed: {e}")
             threading.Thread(target=_name_thread, daemon=True).start()
@@ -1877,7 +1914,7 @@ class HoloChatEngine:
                 _runtime_metadata("test_runtime", self._adapters, self._bench),
             ),
             analyst_adapter=adapter,
-            governor=self._governor,
+            governor=gov_advisor,
             governor_checked_this_turn=True,
             usage=usage,
             failover=failover,
@@ -1985,20 +2022,32 @@ class HoloChatEngine:
         initial_adapter = adapter
         session.turn_count     += 1
         adapter_history = _bounded_adapter_history(session.history)
+        gov_advisor = self._gov_advisor_adapter()
+        turn_policy = deterministic_turn_policy(
+            user_message,
+            history=session.history,
+        )
 
         gov_pre_timer = _timer_start()
         if _should_rotate_governor(session):
-            self._governor.prepare_for_turn(adapter)
-            session.governor_provider             = self._governor.provider
+            gov_advisor.prepare_for_turn(adapter)
+            session.governor_provider             = gov_advisor.provider
             session.governor_locked_since         = session.turn_count
             session.governor_rotation_threshold   = random.randint(7, 11)
         else:
-            self._governor.lock_to_provider(session.governor_provider)
+            gov_advisor.lock_to_provider(session.governor_provider)
 
-        temperature  = self._governor.assess_chat_temperature(user_message, session.history)
-        governor_search_query = self._governor.should_search(user_message, session.history)
-        thought      = None if incognito else self._governor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
-        tenor        = None if incognito else self._governor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
+        advisor_temperature  = gov_advisor.assess_chat_temperature(user_message, session.history)
+        temperature = max(0.2, min(0.9, float(advisor_temperature or 0.5)))
+        if turn_policy.tier in {"high", "max"}:
+            temperature = min(temperature, 0.35)
+        elif turn_policy.tier == "fast":
+            temperature = min(temperature, 0.4)
+        governor_search_query = gov_advisor.should_search(user_message, session.history)
+        thought      = None if incognito else gov_advisor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
+        raw_tenor    = None if incognito else gov_advisor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
+        tenor_admission = admit_advisor_prompt_directive(raw_tenor, user_message=user_message) if raw_tenor or not incognito else None
+        tenor        = tenor_admission.value if tenor_admission and tenor_admission.admitted else None
         _add_timing(timings, "governor_pre_ms", gov_pre_timer)
 
         web_timer = _timer_start()
@@ -2028,7 +2077,7 @@ class HoloChatEngine:
             _select_frontier_assist_adapter(
                 self._bench,
                 initial_adapter=initial_adapter,
-                governor=self._governor,
+                governor=gov_advisor,
             )
             if frontier_assist_reason
             else None
@@ -2220,16 +2269,23 @@ class HoloChatEngine:
 
         gov_post_timer = _timer_start()
         # Post-stream: claims check (may append a correction to response_text)
-        response_text, flagged_claims = self._governor.verify_claims(response_text, web_search.search)
+        response_text, flagged_claims = gov_advisor.verify_claims(response_text, web_search.search)
         if flagged_claims:
-            corrections = [f["correction"] for f in flagged_claims if f.get("correction")]
+            correction_admission = admit_advisor_claim_corrections(flagged_claims)
+            corrections = list(correction_admission.value or []) if correction_admission.admitted else []
             if corrections:
                 note = " · ".join(corrections)
                 correction_text = f"\n\n*One thing worth correcting: {note}*"
                 response_text  += correction_text
                 yield correction_text
 
-        path_generator = getattr(self._governor, "generate_conversation_paths", None)
+        release_decision = deterministic_visible_release(user_message, response_text)
+        if release_decision.repaired and release_decision.text != response_text:
+            repair_text = "\n\n" + release_decision.text
+            yield repair_text
+        response_text = release_decision.text
+
+        path_generator = getattr(gov_advisor, "generate_conversation_paths", None)
         conversation_paths = []
         if path_generator and not incognito:
             conversation_paths = path_generator(
@@ -2263,7 +2319,9 @@ class HoloChatEngine:
         def _post_stream():
             try:
                 if capsule_id and not incognito:
-                    updates = self._governor.extract_context_updates(session.history, capsule_context)
+                    proposed_updates = gov_advisor.extract_context_updates(session.history, capsule_context)
+                    memory_admission = admit_advisor_memory_updates(proposed_updates)
+                    updates = dict(memory_admission.value or {}) if memory_admission.admitted else {}
                     for key, value in updates.items():
                         self._brain.set_capsule_context(capsule_id, key, value)
                     if _claim_autocompact_for_context_window(
@@ -2272,7 +2330,9 @@ class HoloChatEngine:
                         incognito=incognito,
                         context_budget=context_budget,
                     ):
-                        result = self._governor.consolidate_session(session.history, capsule_context, session.session_id)
+                        proposed_result = gov_advisor.consolidate_session(session.history, capsule_context, session.session_id)
+                        consolidation_admission = admit_advisor_consolidation(proposed_result)
+                        result = dict(consolidation_admission.value or {}) if consolidation_admission.admitted else {}
                         if result.get("session_note"):
                             self._brain.save_consolidation(capsule_id, session.session_id, result["session_note"])
                         if result.get("life_context"):
@@ -2284,9 +2344,9 @@ class HoloChatEngine:
                             consolidation=result,
                         )
                     if session.turn_count == 2:
-                        name = self._governor.name_session(list(session.history))
-                        if name:
-                            self._brain.update_session_name(capsule_id, session.session_id, name)
+                        name_admission = admit_advisor_thread_name(gov_advisor.name_session(list(session.history)))
+                        if name_admission.admitted and name_admission.value:
+                            self._brain.update_session_name(capsule_id, session.session_id, name_admission.value)
                 self._brain.save_chat_turn(
                     session_id    = session.session_id,
                     turn_number   = session.turn_count,
@@ -2361,7 +2421,7 @@ class HoloChatEngine:
                 _runtime_metadata("test_runtime", self._adapters, self._bench),
             ),
             analyst_adapter=adapter,
-            governor=self._governor,
+            governor=gov_advisor,
             governor_checked_this_turn=True,
             usage=usage,
             failover=failover,
@@ -2453,10 +2513,36 @@ def _adapter_identity_dict(adapter: Any) -> dict[str, Optional[str]]:
     }
 
 
+def _adapter_provider_name(adapter: Any) -> str:
+    return str(getattr(adapter, "provider", "") or "").strip().lower()
+
+
+def _is_fallback_analyst_adapter(adapter: Any) -> bool:
+    return _adapter_provider_name(adapter) in FALLBACK_HOLOCHAT_MODEL_PROVIDERS
+
+
+def _rotation_analyst_adapters(adapters: list[Any]) -> list[Any]:
+    primary = [adapter for adapter in adapters if not _is_fallback_analyst_adapter(adapter)]
+    return primary or list(adapters)
+
+
+def _ordered_adapter_pool(pool: list[Any], selected: Any) -> list[Any]:
+    if not pool:
+        return []
+    try:
+        selected_index = next(
+            idx for idx, adapter in enumerate(pool) if adapter is selected
+        )
+    except StopIteration:
+        return list(pool)
+    return pool[selected_index:] + pool[:selected_index]
+
+
 def _select_analyst_adapter(session: ChatSession, adapters: list[Any]) -> Any:
     if not adapters:
         raise RuntimeError("HoloChat runtime has no analyst adapters.")
-    adapter = adapters[session.rotation_index % len(adapters)]
+    rotation_pool = _rotation_analyst_adapters(adapters)
+    adapter = rotation_pool[session.rotation_index % len(rotation_pool)]
     session.rotation_index += 1
     return adapter
 
@@ -2464,13 +2550,13 @@ def _select_analyst_adapter(session: ChatSession, adapters: list[Any]) -> Any:
 def _adapter_candidate_order(adapters: list[Any], selected: Any) -> list[Any]:
     if not adapters:
         return []
-    try:
-        selected_index = next(
-            idx for idx, adapter in enumerate(adapters) if adapter is selected
-        )
-    except StopIteration:
-        return [selected, *[adapter for adapter in adapters if adapter is not selected]]
-    return adapters[selected_index:] + adapters[:selected_index]
+    primary = [adapter for adapter in adapters if not _is_fallback_analyst_adapter(adapter)]
+    fallback = [adapter for adapter in adapters if _is_fallback_analyst_adapter(adapter)]
+    if selected in primary:
+        return _ordered_adapter_pool(primary, selected) + fallback
+    if selected in fallback:
+        return [selected, *_ordered_adapter_pool(primary, selected), *[adapter for adapter in fallback if adapter is not selected]]
+    return [selected, *primary, *fallback]
 
 
 def _safe_adapter_error(adapter: Any, exc: Exception) -> dict[str, Optional[str]]:

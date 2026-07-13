@@ -1,0 +1,47 @@
+{
+  "package_id": "HOLOCHAT_GOVTURNPLAN_CONTROL_PLANE_V0",
+  "changed_product_files": [
+    {
+      "path": "holochat_context_governor.py",
+      "sha256": "61ef5ce5ed0fd66aad70aec8a569fa2a578d30b7de9eb204ff71967608444bf2",
+      "changes": [
+        "Added typed GovTurnPlan dataclass with all required architecture-law fields.",
+        "Added deterministic GovTurnPlan builder, validator, and worker renderer.",
+        "Added MiniMax fallback-only validation for advisor and worker selection.",
+        "Added worker-baton validation preventing raw advisor/surface-thought carry-through."
+      ]
+    },
+    {
+      "path": "chat_engine.py",
+      "sha256": "8e1412ac3a32c64bca8b0ea80e63f9a59fa888c10080bfa0b38e71e55378d8c6",
+      "changes": [
+        "Builds one GovTurnPlan after deterministic Gov/advisor admission and before each worker provider call.",
+        "Replaces direct CAPTAIN BRIEF prompt insertion with the rendered GovTurnPlan control packet in non-streaming and streaming paths.",
+        "Records GovTurnPlan in runtime metadata and context-budget telemetry.",
+        "Preserves existing deterministic visible-release, memory-admission, search/tool authorization, and streaming buffering boundaries."
+      ]
+    }
+  ],
+  "changed_test_files": [
+    {
+      "path": "tests/test_holochat_govturnplan_control_plane.py",
+      "sha256": "d00129b46e245924909e6a6939ee88990c3e0a06ed4ffd623adf23b450108a92",
+      "coverage": "GovTurnPlan required fields, hash, MiniMax fallback-only gates, single worker-facing packet, no raw advisor carry-through, search/tool authorization, and runtime metadata."
+    },
+    {
+      "path": "tests/test_holochat_constitutional_tone_release_guard.py",
+      "sha256": "66253f9425ec2408d4968db346f9d9f8dbe89deddff02138761cbdd2d83fee5a",
+      "coverage": "Updated prompt assertion from direct CAPTAIN BRIEF to admitted GovTurnPlan control packet while preserving constitutional tone law."
+    }
+  ],
+  "unchanged_reference_tests": [
+    {
+      "path": "tests/test_holochat_gov_kernel_authority_repair.py",
+      "sha256": "d0ad3e4fa97e1362553dfc823fe764f8a793c9eeeb27003b4a8f03de51a2a991"
+    },
+    {
+      "path": "tests/test_holochat_runtime_routing.py",
+      "sha256": "a8c2f88035ed4cb300dbd00601ec3d67ee0a8e4fe09b34981a3d28eeac570c51"
+    }
+  ]
+}

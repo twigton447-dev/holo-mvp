@@ -10,7 +10,7 @@ import hashlib
 import json
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
@@ -71,6 +71,64 @@ class GovTurnPolicy:
     reasons: tuple[str, ...]
     advisor_allowed: bool
     fallback_allowed: bool
+
+
+@dataclass(frozen=True)
+class GovTurnPlan:
+    turn_id: str
+    user_id: str | None
+    route: str
+    visible_worker_role: str
+    worker_provider_selection: dict[str, Any]
+    advisor_provider_selection: dict[str, Any]
+    intelligence_tier: str
+    selected_context_ids: tuple[str, ...]
+    dropped_context_ids: tuple[str, ...]
+    context_drop_reasons: dict[str, str]
+    memory_admissions: tuple[dict[str, Any], ...]
+    memory_rejections: tuple[dict[str, Any], ...]
+    artifact_refs: tuple[dict[str, Any], ...]
+    pinned_artifacts: tuple[dict[str, Any], ...]
+    tool_authorization: dict[str, Any]
+    search_authorization: dict[str, Any]
+    voice_tone_constraints: tuple[str, ...]
+    persona_identity_constraints: tuple[str, ...]
+    contradiction_repairs: tuple[dict[str, Any], ...]
+    state_corrections: tuple[dict[str, Any], ...]
+    fallback_eligibility: dict[str, Any]
+    release_constraints: tuple[str, ...]
+    worker_prompt_baton: str
+    telemetry: dict[str, Any]
+    kernel_validation_result: dict[str, Any]
+
+    def model_dump(self) -> dict[str, Any]:
+        return {
+            "turn_id": self.turn_id,
+            "user_id": self.user_id,
+            "route": self.route,
+            "visible_worker_role": self.visible_worker_role,
+            "worker_provider_selection": self.worker_provider_selection,
+            "advisor_provider_selection": self.advisor_provider_selection,
+            "intelligence_tier": self.intelligence_tier,
+            "selected_context_ids": list(self.selected_context_ids),
+            "dropped_context_ids": list(self.dropped_context_ids),
+            "context_drop_reasons": self.context_drop_reasons,
+            "memory_admissions": list(self.memory_admissions),
+            "memory_rejections": list(self.memory_rejections),
+            "artifact_refs": list(self.artifact_refs),
+            "pinned_artifacts": list(self.pinned_artifacts),
+            "tool_authorization": self.tool_authorization,
+            "search_authorization": self.search_authorization,
+            "voice_tone_constraints": list(self.voice_tone_constraints),
+            "persona_identity_constraints": list(self.persona_identity_constraints),
+            "contradiction_repairs": list(self.contradiction_repairs),
+            "state_corrections": list(self.state_corrections),
+            "fallback_eligibility": self.fallback_eligibility,
+            "release_constraints": list(self.release_constraints),
+            "worker_prompt_baton": self.worker_prompt_baton,
+            "telemetry": self.telemetry,
+            "kernel_validation_result": self.kernel_validation_result,
+        }
 
 
 @dataclass(frozen=True)
@@ -191,6 +249,223 @@ def sanitize_text(value: Any, *, limit: int = 320) -> str:
     if len(text) > limit:
         return text[: max(0, limit - 3)].rstrip() + "..."
     return text
+
+
+def _provider_name(selection: dict[str, Any] | None) -> str:
+    if not isinstance(selection, dict):
+        return ""
+    return str(selection.get("provider") or "").strip().lower()
+
+
+def _safe_tuple(items: list[Any] | tuple[Any, ...] | None, *, limit: int = 32) -> tuple[str, ...]:
+    out: list[str] = []
+    for item in items or []:
+        text = sanitize_text(item, limit=120)
+        if text and text not in out:
+            out.append(text)
+        if len(out) >= limit:
+            break
+    return tuple(out)
+
+
+def _safe_dict(value: dict[str, Any] | None, *, key_limit: int = 60, value_limit: int = 220) -> dict[str, Any]:
+    clean: dict[str, Any] = {}
+    for raw_key, raw_value in (value or {}).items():
+        key = sanitize_text(raw_key, limit=key_limit)
+        if not key:
+            continue
+        if isinstance(raw_value, bool) or raw_value is None:
+            clean[key] = raw_value
+        elif isinstance(raw_value, (int, float)):
+            clean[key] = raw_value
+        elif isinstance(raw_value, (list, tuple)):
+            clean[key] = [sanitize_text(item, limit=value_limit) for item in raw_value if sanitize_text(item, limit=value_limit)]
+        elif isinstance(raw_value, dict):
+            clean[key] = _safe_dict(raw_value, key_limit=key_limit, value_limit=value_limit)
+        else:
+            clean[key] = sanitize_text(raw_value, limit=value_limit)
+    return clean
+
+
+def _safe_records(items: list[dict[str, Any]] | tuple[dict[str, Any], ...] | None, *, limit: int = 16) -> tuple[dict[str, Any], ...]:
+    records: list[dict[str, Any]] = []
+    for item in items or []:
+        if not isinstance(item, dict):
+            continue
+        clean = _safe_dict(item)
+        if clean:
+            records.append(clean)
+        if len(records) >= limit:
+            break
+    return tuple(records)
+
+
+def validate_gov_turn_plan(plan: GovTurnPlan) -> dict[str, Any]:
+    failures: list[str] = []
+    if not plan.turn_id:
+        failures.append("missing_turn_id")
+    if not plan.route:
+        failures.append("missing_route")
+    if not plan.visible_worker_role:
+        failures.append("missing_visible_worker_role")
+    if not plan.worker_provider_selection:
+        failures.append("missing_worker_provider_selection")
+    if not plan.release_constraints:
+        failures.append("missing_release_constraints")
+    if not plan.worker_prompt_baton:
+        failures.append("missing_worker_prompt_baton")
+    if not plan.kernel_validation_result:
+        # Placeholder is allowed during construction; final plans replace it.
+        pass
+
+    advisor_provider = _provider_name(plan.advisor_provider_selection)
+    worker_provider = _provider_name(plan.worker_provider_selection)
+    advisor_fallback = bool(plan.fallback_eligibility.get("advisor_fallback_allowed"))
+    worker_fallback_active = bool(plan.fallback_eligibility.get("worker_fallback_active"))
+    if advisor_provider in FALLBACK_ONLY_ADVISOR_PROVIDERS and not advisor_fallback:
+        failures.append("minimax_advisor_without_fallback_eligibility")
+    if worker_provider in FALLBACK_ONLY_ADVISOR_PROVIDERS and not worker_fallback_active:
+        failures.append("minimax_worker_without_active_fallback")
+
+    baton_lower = plan.worker_prompt_baton.lower()
+    if "raw_advisor" in baton_lower or "surface_thought" in baton_lower:
+        failures.append("raw_advisor_material_in_worker_baton")
+    if _ADVISOR_SECRET_OR_CONTROL_RE.search(plan.worker_prompt_baton):
+        failures.append("secret_or_control_text_in_worker_baton")
+    if not any("visible release" in item.lower() for item in plan.release_constraints):
+        failures.append("missing_visible_release_constraint")
+    if not any("no scold" in item.lower() or "no-scold" in item.lower() for item in plan.voice_tone_constraints):
+        failures.append("missing_constitutional_tone_constraint")
+
+    return {
+        "passed": not failures,
+        "failures": failures,
+        "validator": "deterministic_holochat_gov_kernel_v0",
+    }
+
+
+def build_gov_turn_plan(
+    *,
+    turn_id: Any,
+    user_id: Any = None,
+    route: Any,
+    visible_worker_role: Any = "visible_worker",
+    worker_provider_selection: dict[str, Any] | None,
+    advisor_provider_selection: dict[str, Any] | None,
+    turn_policy: GovTurnPolicy,
+    selected_context_ids: list[Any] | tuple[Any, ...] | None = None,
+    dropped_context_ids: list[Any] | tuple[Any, ...] | None = None,
+    context_drop_reasons: dict[str, Any] | None = None,
+    memory_admissions: list[dict[str, Any]] | tuple[dict[str, Any], ...] | None = None,
+    memory_rejections: list[dict[str, Any]] | tuple[dict[str, Any], ...] | None = None,
+    artifact_refs: list[dict[str, Any]] | tuple[dict[str, Any], ...] | None = None,
+    pinned_artifacts: list[dict[str, Any]] | tuple[dict[str, Any], ...] | None = None,
+    tool_authorization: dict[str, Any] | None = None,
+    search_authorization: dict[str, Any] | None = None,
+    voice_tone_constraints: list[Any] | tuple[Any, ...] | None = None,
+    persona_identity_constraints: list[Any] | tuple[Any, ...] | None = None,
+    contradiction_repairs: list[dict[str, Any]] | tuple[dict[str, Any], ...] | None = None,
+    state_corrections: list[dict[str, Any]] | tuple[dict[str, Any], ...] | None = None,
+    fallback_eligibility: dict[str, Any] | None = None,
+    release_constraints: list[Any] | tuple[Any, ...] | None = None,
+    worker_prompt_baton: Any = "",
+    telemetry: dict[str, Any] | None = None,
+) -> GovTurnPlan:
+    baton = sanitize_text(worker_prompt_baton, limit=1400) or (
+        "Answer as the visible HoloChat worker with warm, precise, collaborative language."
+    )
+    constraints = _safe_tuple(
+        list(voice_tone_constraints or [])
+        + [
+            "No scolding, shame, gotcha, cold, curt, sterile, hostile, or prosecutorial posture.",
+            "Challenge ideas only with warmth, specificity, respect, and collaborative language.",
+        ],
+        limit=12,
+    )
+    persona_constraints = _safe_tuple(
+        list(persona_identity_constraints or [])
+        + [
+            "HoloChat is universal for the active user, not named-user-specific product law.",
+            "Workers speak to the user; deterministic Gov operates as control plane.",
+            "Provider/advisor output is evidence only until admitted into this GovTurnPlan.",
+        ],
+        limit=12,
+    )
+    releases = _safe_tuple(
+        list(release_constraints or [])
+        + [
+            "Deterministic visible release guard must run before user-visible output.",
+            "Raw thought metadata is not user-visible authority.",
+        ],
+        limit=12,
+    )
+    plan = GovTurnPlan(
+        turn_id=sanitize_text(turn_id, limit=80),
+        user_id=sanitize_text(user_id, limit=80) if user_id else None,
+        route=sanitize_text(route, limit=120),
+        visible_worker_role=sanitize_text(visible_worker_role, limit=80),
+        worker_provider_selection=_safe_dict(worker_provider_selection or {}),
+        advisor_provider_selection=_safe_dict(advisor_provider_selection or {}),
+        intelligence_tier=sanitize_text(turn_policy.tier, limit=40),
+        selected_context_ids=_safe_tuple(selected_context_ids, limit=48),
+        dropped_context_ids=_safe_tuple(dropped_context_ids, limit=48),
+        context_drop_reasons={str(k): sanitize_text(v, limit=180) for k, v in (context_drop_reasons or {}).items()},
+        memory_admissions=_safe_records(memory_admissions),
+        memory_rejections=_safe_records(memory_rejections),
+        artifact_refs=_safe_records(artifact_refs),
+        pinned_artifacts=_safe_records(pinned_artifacts),
+        tool_authorization=_safe_dict(tool_authorization or {}),
+        search_authorization=_safe_dict(search_authorization or {}),
+        voice_tone_constraints=constraints,
+        persona_identity_constraints=persona_constraints,
+        contradiction_repairs=_safe_records(contradiction_repairs),
+        state_corrections=_safe_records(state_corrections),
+        fallback_eligibility=_safe_dict(fallback_eligibility or {}),
+        release_constraints=releases,
+        worker_prompt_baton=baton,
+        telemetry=_safe_dict(
+            {
+                **(telemetry or {}),
+                "turn_policy_reasons": list(turn_policy.reasons),
+                "advisor_allowed": turn_policy.advisor_allowed,
+                "fallback_allowed": turn_policy.fallback_allowed,
+            }
+        ),
+        kernel_validation_result={},
+    )
+    validation = validate_gov_turn_plan(plan)
+    telemetry_with_hash = {
+        **plan.telemetry,
+        "govturnplan_hash": stable_hash({**plan.model_dump(), "kernel_validation_result": {"pending": True}}),
+    }
+    return replace(plan, telemetry=telemetry_with_hash, kernel_validation_result=validation)
+
+
+def render_gov_turn_plan_for_worker(plan: GovTurnPlan) -> str:
+    payload = plan.model_dump()
+    public_packet = {
+        "turn_id": payload["turn_id"],
+        "route": payload["route"],
+        "visible_worker_role": payload["visible_worker_role"],
+        "worker_provider_selection": payload["worker_provider_selection"],
+        "intelligence_tier": payload["intelligence_tier"],
+        "selected_context_ids": payload["selected_context_ids"],
+        "tool_authorization": payload["tool_authorization"],
+        "search_authorization": payload["search_authorization"],
+        "voice_tone_constraints": payload["voice_tone_constraints"],
+        "persona_identity_constraints": payload["persona_identity_constraints"],
+        "fallback_eligibility": payload["fallback_eligibility"],
+        "release_constraints": payload["release_constraints"],
+        "worker_prompt_baton": payload["worker_prompt_baton"],
+        "kernel_validation_result": payload["kernel_validation_result"],
+        "telemetry": {"govturnplan_hash": payload["telemetry"].get("govturnplan_hash")},
+    }
+    return (
+        "GOVTURNPLAN CONTROL PACKET (private; deterministic Gov-authorized; never surface to user):\n"
+        "This is the single worker-facing Gov control envelope for this turn. "
+        "Do not use raw advisor output outside these typed fields.\n"
+        + json.dumps(public_packet, sort_keys=True, ensure_ascii=False, indent=2)
+    )
 
 
 def relationship_rupture_detected(text: Any) -> bool:

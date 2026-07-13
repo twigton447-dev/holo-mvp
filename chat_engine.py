@@ -33,6 +33,7 @@ from holochat_context_governor import (
     HOLOCHAT_STATE_CONTEXT_KEY,
     HoloBrainInjectionMode,
     HoloBrainInjectionPlan,
+    GovTurnPlan,
     admit_advisor_claim_corrections,
     admit_advisor_consolidation,
     admit_advisor_memory_updates,
@@ -42,10 +43,12 @@ from holochat_context_governor import (
     admit_advisor_thread_name,
     build_holobrain_injection_plan,
     build_holochat_state,
+    build_gov_turn_plan,
     deterministic_turn_policy,
     deterministic_visible_release,
     has_meaningful_holobrain_delta,
     load_state_from_capsule_context,
+    render_gov_turn_plan_for_worker,
     should_auto_compact,
     stable_hash,
     state_context_value,
@@ -1188,6 +1191,7 @@ def _turn_runtime_metadata(
     auto_reseed_present: bool = False,
     holobrain_injection_plan: Optional[HoloBrainInjectionPlan] = None,
     holobrain_state_persisted: bool = False,
+    gov_turn_plan: Optional[GovTurnPlan] = None,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
@@ -1248,6 +1252,8 @@ def _turn_runtime_metadata(
         metadata["governor_trace"] = governor_trace
     if gov_arc_state is not None:
         metadata["gov_arc_state"] = gov_arc_state.model_dump(mode="json")
+    if gov_turn_plan is not None:
+        metadata["gov_turn_plan"] = gov_turn_plan.model_dump()
     if frontier_assist is not None:
         metadata["frontier_assist"] = frontier_assist
     if timing_breakdown is not None:
@@ -1599,6 +1605,7 @@ class HoloChatEngine:
             handoff_transition=active_handoff_transition,
             holochat_state_block="",
             holobrain_injection_plan=holobrain_injection_plan,
+            gov_turn_plan_block="",
         )
         if not incognito and session.holochat_state:
             holobrain_injection_plan = build_holobrain_injection_plan(
@@ -1619,7 +1626,31 @@ class HoloChatEngine:
                 session.auto_reseed_applied = True
                 session.auto_reseed_hash = stable_hash(holochat_state_block)
 
-        # Inject runtime identity + thread-health context + portrait + working memory + Governor brief.
+        gov_turn_plan = _build_worker_gov_turn_plan(
+            session=session,
+            capsule_id=capsule_id,
+            adapter=adapter,
+            gov_advisor=gov_advisor,
+            turn_policy=turn_policy,
+            temperature=temperature,
+            tenor=tenor,
+            tenor_admission=tenor_admission,
+            thought_admission=thought_admission,
+            search_query=search_query,
+            search_results=search_results,
+            web_trace=web_trace,
+            capsule_context=capsule_context,
+            life_context=life_context,
+            last_session=last_session,
+            incognito=incognito,
+            active_handoff_transition=active_handoff_transition,
+            holochat_state_block=holochat_state_block,
+            holobrain_injection_plan=holobrain_injection_plan,
+            frontier_assist=frontier_assist,
+        )
+        gov_turn_plan_block = render_gov_turn_plan_for_worker(gov_turn_plan)
+
+        # Inject runtime identity + thread-health context + portrait + working memory + single GovTurnPlan.
         # Incognito: keeps runtime identity but strips memory context.
         system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
         if not incognito:
@@ -1632,8 +1663,8 @@ class HoloChatEngine:
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
-                + ("\n\n" + _captain_brief_block(tenor) if tenor else "")
             )
+        system_prompt += "\n\n" + gov_turn_plan_block
 
         context_budget = _runtime_context_budget(
             session=session,
@@ -1650,6 +1681,7 @@ class HoloChatEngine:
             handoff_transition=active_handoff_transition,
             holochat_state_block=holochat_state_block,
             holobrain_injection_plan=holobrain_injection_plan,
+            gov_turn_plan_block=gov_turn_plan_block,
         )
 
         holo4dna_shadow = None
@@ -1953,6 +1985,7 @@ class HoloChatEngine:
             auto_reseed_present=auto_reseed_present,
             holobrain_injection_plan=holobrain_injection_plan,
             holobrain_state_persisted=holobrain_state_persisted,
+            gov_turn_plan=gov_turn_plan,
         )
 
         return {
@@ -2138,6 +2171,7 @@ class HoloChatEngine:
             handoff_transition=active_handoff_transition,
             holochat_state_block="",
             holobrain_injection_plan=holobrain_injection_plan,
+            gov_turn_plan_block="",
         )
         if not incognito and session.holochat_state:
             holobrain_injection_plan = build_holobrain_injection_plan(
@@ -2158,6 +2192,30 @@ class HoloChatEngine:
                 session.auto_reseed_applied = True
                 session.auto_reseed_hash = stable_hash(holochat_state_block)
 
+        gov_turn_plan = _build_worker_gov_turn_plan(
+            session=session,
+            capsule_id=capsule_id,
+            adapter=adapter,
+            gov_advisor=gov_advisor,
+            turn_policy=turn_policy,
+            temperature=temperature,
+            tenor=tenor,
+            tenor_admission=tenor_admission,
+            thought_admission=thought_admission,
+            search_query=search_query,
+            search_results=search_results,
+            web_trace=web_trace,
+            capsule_context=capsule_context,
+            life_context=life_context,
+            last_session=last_session,
+            incognito=incognito,
+            active_handoff_transition=active_handoff_transition,
+            holochat_state_block=holochat_state_block,
+            holobrain_injection_plan=holobrain_injection_plan,
+            frontier_assist=frontier_assist,
+        )
+        gov_turn_plan_block = render_gov_turn_plan_for_worker(gov_turn_plan)
+
         system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
         if not incognito:
             system_prompt += (
@@ -2169,8 +2227,8 @@ class HoloChatEngine:
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
-                + ("\n\n" + _captain_brief_block(tenor) if tenor else "")
             )
+        system_prompt += "\n\n" + gov_turn_plan_block
 
         context_budget = _runtime_context_budget(
             session=session,
@@ -2187,6 +2245,7 @@ class HoloChatEngine:
             handoff_transition=active_handoff_transition,
             holochat_state_block=holochat_state_block,
             holobrain_injection_plan=holobrain_injection_plan,
+            gov_turn_plan_block=gov_turn_plan_block,
         )
 
         holo4dna_shadow = None
@@ -2458,6 +2517,7 @@ class HoloChatEngine:
             auto_reseed_present=auto_reseed_present,
             holobrain_injection_plan=holobrain_injection_plan,
             holobrain_state_persisted=holobrain_state_persisted,
+            gov_turn_plan=gov_turn_plan,
         )
 
         yield {
@@ -2524,6 +2584,165 @@ def _adapter_identity_dict(adapter: Any) -> dict[str, Optional[str]]:
         "provider": getattr(adapter, "provider", None),
         "model": getattr(adapter, "model_id", getattr(adapter, "model", None)),
     }
+
+
+def _govturnplan_context_selection(
+    *,
+    incognito: bool,
+    capsule_context: dict,
+    life_context: list,
+    last_session: Optional[dict],
+    handoff_transition: Optional[dict[str, Any]],
+    holochat_state_block: Optional[str],
+    holobrain_injection_plan: HoloBrainInjectionPlan,
+    search_results: Optional[str],
+) -> tuple[list[str], list[str], dict[str, str], list[dict[str, Any]], list[dict[str, Any]]]:
+    selected = ["runtime_identity", "thread_health", "gov_arc_state", "user_message"]
+    dropped: list[str] = []
+    reasons: dict[str, str] = {}
+    memory_admissions: list[dict[str, Any]] = []
+    memory_rejections: list[dict[str, Any]] = []
+
+    def mark_context(context_id: str, present: bool, *, reason: str, memory: bool = False) -> None:
+        if present and not incognito:
+            selected.append(context_id)
+            if memory:
+                memory_admissions.append({"context_id": context_id, "admission": "selected_for_prompt_by_deterministic_gov"})
+        else:
+            dropped.append(context_id)
+            reasons[context_id] = "incognito_mode" if incognito else reason
+            if memory:
+                memory_rejections.append({"context_id": context_id, "reason": reasons[context_id]})
+
+    mark_context("holochat_state_object", bool(holochat_state_block), reason="empty", memory=True)
+    mark_context("holochat_memory_pack", bool(_holochat_recovery_memory_pack()), reason="disabled", memory=True)
+    mark_context("life_context", bool(life_context), reason="empty", memory=True)
+    mark_context("latest_consolidation", bool(last_session), reason="empty", memory=True)
+    mark_context("capsule_context", bool(capsule_context), reason="empty", memory=True)
+    mark_context("thread_handoff_seed", bool(handoff_transition), reason="empty", memory=False)
+    if search_results:
+        selected.append("web_results")
+    else:
+        dropped.append("web_results")
+        reasons["web_results"] = "no web results"
+    if holobrain_injection_plan.mode != HoloBrainInjectionMode.NONE:
+        selected.append(f"holobrain_injection:{holobrain_injection_plan.mode.value}")
+    return selected, dropped, reasons, memory_admissions, memory_rejections
+
+
+def _build_worker_gov_turn_plan(
+    *,
+    session: ChatSession,
+    capsule_id: Optional[str],
+    adapter: Any,
+    gov_advisor: Any,
+    turn_policy: Any,
+    temperature: float,
+    tenor: Optional[str],
+    tenor_admission: Any,
+    thought_admission: Any,
+    search_query: Optional[str],
+    search_results: Optional[str],
+    web_trace: dict[str, Any],
+    capsule_context: dict,
+    life_context: list,
+    last_session: Optional[dict],
+    incognito: bool,
+    active_handoff_transition: Optional[dict[str, Any]],
+    holochat_state_block: Optional[str],
+    holobrain_injection_plan: HoloBrainInjectionPlan,
+    frontier_assist: dict[str, Any],
+) -> GovTurnPlan:
+    selected, dropped, drop_reasons, memory_admissions, memory_rejections = _govturnplan_context_selection(
+        incognito=incognito,
+        capsule_context=capsule_context,
+        life_context=life_context,
+        last_session=last_session,
+        handoff_transition=active_handoff_transition,
+        holochat_state_block=holochat_state_block,
+        holobrain_injection_plan=holobrain_injection_plan,
+        search_results=search_results,
+    )
+    contradiction_repairs: list[dict[str, Any]] = []
+    if tenor_admission is not None and getattr(tenor_admission, "repaired", False):
+        contradiction_repairs.append(
+            {
+                "surface": "advisor_prompt_directive",
+                "reason": getattr(tenor_admission, "reason", "repaired"),
+            }
+        )
+    if thought_admission is not None and not getattr(thought_admission, "admitted", False):
+        contradiction_repairs.append(
+            {
+                "surface": "surface_thought",
+                "reason": getattr(thought_admission, "reason", "not_admitted"),
+            }
+        )
+    baton = tenor or (
+        "Answer as the visible HoloChat worker with warm, precise, collaborative language. "
+        "Do not scold, prosecute, or use gotcha framing."
+    )
+    return build_gov_turn_plan(
+        turn_id=f"{session.session_id}:{session.turn_count}",
+        user_id=stable_hash(capsule_id) if capsule_id and not incognito else None,
+        route="Visible Worker -> Deterministic Gov State Update -> GovTurnPlan -> Visible Worker",
+        visible_worker_role="holochat_visible_worker",
+        worker_provider_selection=_adapter_identity_dict(adapter),
+        advisor_provider_selection={
+            **_adapter_identity_dict(gov_advisor),
+            "role": "gov_advisor_proposal_source",
+        },
+        turn_policy=turn_policy,
+        selected_context_ids=selected,
+        dropped_context_ids=dropped,
+        context_drop_reasons=drop_reasons,
+        memory_admissions=memory_admissions,
+        memory_rejections=memory_rejections,
+        artifact_refs=[],
+        pinned_artifacts=[],
+        tool_authorization={
+            "web_search": bool(search_query or search_results),
+            "authorized_tools": [tool.value for tool in _required_tools_for_turn(search_query, search_results)],
+            "authorization_source": "deterministic_gov_kernel",
+        },
+        search_authorization={
+            "authorized": bool(search_query),
+            "query_hash": stable_hash(search_query) if search_query else None,
+            "results_present": bool(search_results),
+            "decision": web_trace.get("status"),
+            "source": web_trace.get("source"),
+        },
+        voice_tone_constraints=[
+            "No scolding, shame, gotcha, cold, curt, sterile, hostile, or prosecutorial posture.",
+            "Relationship repair beats cleverness, pressure, or hard-truth performance.",
+            "HoloBrain memory grounds continuity; it must never become accusatory theory about the user.",
+        ],
+        persona_identity_constraints=[
+            "HoloChat is universal for every active user.",
+            "Gov operates; visible workers speak.",
+            "Provider output is subordinate work product until admitted.",
+        ],
+        contradiction_repairs=contradiction_repairs,
+        state_corrections=[],
+        fallback_eligibility={
+            "worker_fallback_allowed": True,
+            "worker_fallback_condition": "primary_provider_failure_only",
+            "worker_fallback_active": False,
+            "advisor_fallback_allowed": bool(getattr(turn_policy, "fallback_allowed", False)),
+            "minimax_normal_routing_allowed": False,
+        },
+        release_constraints=[
+            "Deterministic visible release guard must run before user-visible output.",
+            "Streaming chunks are buffered until release admission.",
+            "Surface thought metadata must be admitted before UI exposure.",
+        ],
+        worker_prompt_baton=baton,
+        telemetry={
+            "temperature": round(float(temperature), 3),
+            "frontier_assist_triggered": bool((frontier_assist or {}).get("triggered")),
+            "incognito": bool(incognito),
+        },
+    )
 
 
 def _adapter_provider_name(adapter: Any) -> str:
@@ -2617,6 +2836,7 @@ def _runtime_context_budget(
     handoff_transition: Optional[dict[str, Any]] = None,
     holochat_state_block: Optional[str] = None,
     holobrain_injection_plan: Optional[HoloBrainInjectionPlan] = None,
+    gov_turn_plan_block: Optional[str] = None,
 ) -> dict[str, Any]:
     provider_history = adapter_history if adapter_history is not None else _bounded_adapter_history(session.history)
     provider_history_meta = _provider_history_metadata(
@@ -2642,6 +2862,13 @@ def _runtime_context_budget(
             "content": runtime_identity,
             "included": True,
             "source_type": "system",
+        },
+        {
+            "block_name": "gov_turn_plan",
+            "content": gov_turn_plan_block or "",
+            "included": bool(gov_turn_plan_block),
+            "source_type": "deterministic_gov",
+            "reason": "not_built" if not gov_turn_plan_block else None,
         },
         {
             "block_name": "recent_session_history",
@@ -2718,7 +2945,7 @@ def _runtime_context_budget(
                     "content": "",
                     "included": False,
                     "source_type": "governor",
-                    "reason": "incognito mode",
+                    "reason": "superseded_by_govturnplan_control_plane",
                 },
             ]
         )
@@ -2788,10 +3015,10 @@ def _runtime_context_budget(
         blocks.append(
             {
                 "block_name": "captain_brief",
-                "content": _captain_brief_block(tenor),
-                "included": bool(tenor),
+                "content": "",
+                "included": False,
                 "source_type": "governor",
-                "reason": "empty" if not tenor else None,
+                "reason": "superseded_by_govturnplan_control_plane",
             }
         )
 

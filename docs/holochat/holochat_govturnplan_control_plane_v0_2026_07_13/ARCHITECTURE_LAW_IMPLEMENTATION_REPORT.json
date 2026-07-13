@@ -1,0 +1,72 @@
+{
+  "package_id": "HOLOCHAT_GOVTURNPLAN_CONTROL_PLANE_V0",
+  "created_at_utc": "2026-07-13T00:00:00Z",
+  "scope": "no-provider HoloChat GovTurnPlan control-plane repair",
+  "architecture_disposition": "PASS_TO_HOLOOPS",
+  "implemented_law": {
+    "loop": "Visible Worker -> Deterministic Gov State Update -> GovTurnPlan -> Visible Worker -> Deterministic Gov State Update",
+    "gov_speaks_to_user": false,
+    "worker_speaks_to_user": true,
+    "provider_is_gov": false,
+    "advisor_output_authority": "evidence_only_until_admitted_into_govturnplan",
+    "single_worker_facing_control_packet": true
+  },
+  "govturnplan_fields": [
+    "turn_id",
+    "user_id",
+    "route",
+    "visible_worker_role",
+    "worker_provider_selection",
+    "advisor_provider_selection",
+    "intelligence_tier",
+    "selected_context_ids",
+    "dropped_context_ids",
+    "context_drop_reasons",
+    "memory_admissions",
+    "memory_rejections",
+    "artifact_refs",
+    "pinned_artifacts",
+    "tool_authorization",
+    "search_authorization",
+    "voice_tone_constraints",
+    "persona_identity_constraints",
+    "contradiction_repairs",
+    "state_corrections",
+    "fallback_eligibility",
+    "release_constraints",
+    "worker_prompt_baton",
+    "telemetry",
+    "kernel_validation_result"
+  ],
+  "active_invariants": {
+    "universal_holochat": true,
+    "same_architecture_every_user": true,
+    "minimax_fallback_only": true,
+    "no_scolding_cold_gotcha_visible_release": true,
+    "deterministic_gov_final_state_memory_tool_route_fallback_release_authority": true,
+    "single_admitted_worker_plan_before_worker_provider_call": true,
+    "raw_advisor_thought_not_worker_prompt_authority": true,
+    "streaming_buffered_until_release_admission": true
+  },
+  "blocked_patterns_covered": [
+    "provider_as_gov",
+    "multiple_advisor_freeform_outputs_passed_to_worker",
+    "worker_visible_gov_text_as_user_speech",
+    "raw_thought_metadata_in_worker_prompt",
+    "tool_or_search_without_gov_authorization",
+    "memory_write_without_gov_admission",
+    "fallback_without_gov_eligibility",
+    "worker_prompt_without_govturnplan",
+    "persona_identity_drift_outside_gov_constraints",
+    "visible_release_without_gov_release_constraints",
+    "minimax_normal_routing_without_fallback_approval"
+  ],
+  "non_goals": [
+    "No provider calls",
+    "No live HoloChat conversations",
+    "No credential reads",
+    "No deploy",
+    "No HoloVerify edits",
+    "No release-ready claim"
+  ]
+}

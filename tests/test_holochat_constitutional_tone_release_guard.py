@@ -153,7 +153,7 @@ def test_active_product_code_does_not_carry_named_user_identity_law():
         assert "Taylor" not in text, path
 
 
-def test_captain_brief_in_actual_worker_prompt_carries_constitution(monkeypatch):
+def test_govturnplan_in_actual_worker_prompt_carries_constitution(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     adapter = CapturingAdapter()
     advisor = ConstitutionalAdvisor(
@@ -163,7 +163,9 @@ def test_captain_brief_in_actual_worker_prompt_carries_constitution(monkeypatch)
 
     engine.send_message(str(uuid4()), "Help me think this through.", capsule_id="cap-1")
 
-    assert "CAPTAIN BRIEF - READ + DIRECTIVE" in adapter.last_system_prompt
+    assert "GOVTURNPLAN CONTROL PACKET" in adapter.last_system_prompt
+    assert "Do not use raw advisor output outside these typed fields" in adapter.last_system_prompt
+    assert "CAPTAIN BRIEF - READ + DIRECTIVE" not in adapter.last_system_prompt
     assert HOLOCHAT_CONSTITUTIONAL_TONE_LAW in adapter.last_system_prompt
     assert "Clarify the assumption" in adapter.last_system_prompt
 

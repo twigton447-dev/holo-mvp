@@ -4,6 +4,7 @@ import chat_engine
 from chat_engine import HoloChatEngine, _holochat_recovery_memory_pack, _runtime_metadata
 from holochat_constitution import HOLOCHAT_CONSTITUTIONAL_TONE_LAW
 from holochat_context_governor import deterministic_visible_release
+from holo_context import build_runtime_identity_block
 from llm_adapters import GOVERNOR_SYSTEM_PROMPT, HOLO_CHAT_SYSTEM_PROMPT
 
 
@@ -123,12 +124,33 @@ def test_constitution_and_active_prompt_law_are_universal_not_randall_or_taylor_
         "governor_prompt": GOVERNOR_SYSTEM_PROMPT,
         "gov_doctrine": gov_doctrine,
         "built_in_recovery_pack": _holochat_recovery_memory_pack(),
+        "runtime_identity": build_runtime_identity_block(
+            {"runtime_profile": "mini_only", "active_pool": [{"provider": "openai", "model": "gpt-4o-mini"}]},
+            capsule_attached=True,
+        ),
     }
 
     for name, text in active_surfaces.items():
         assert "Randall" not in text, name
         assert "Taylor" not in text, name
-        assert "the user" in text or "the person" in text, name
+        assert "the user" in text or "the person" in text or "active user" in text, name
+
+
+def test_active_product_code_does_not_carry_named_user_identity_law():
+    active_product_paths = [
+        "holo_context.py",
+        "holochat_context_governor.py",
+        "chat_engine.py",
+        "llm_adapters.py",
+        "holochat_constitution.py",
+        "docs/gov_chat_doctrine.md",
+        "docs/holo_chat_doctrine.md",
+    ]
+
+    for path in active_product_paths:
+        text = open(path, encoding="utf-8").read()
+        assert "Randall" not in text, path
+        assert "Taylor" not in text, path
 
 
 def test_captain_brief_in_actual_worker_prompt_carries_constitution(monkeypatch):

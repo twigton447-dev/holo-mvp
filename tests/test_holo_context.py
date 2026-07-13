@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 
-from holo_context import HoloContextBuilder, build_context_budget_ledger, build_life_context_block
+from holo_context import (
+    HoloContextBuilder,
+    build_context_budget_ledger,
+    build_life_context_block,
+    build_runtime_identity_block,
+)
 from holo_router import RouteDecision
 from holo_state import HoloState, RequiredTools
 
@@ -122,7 +127,7 @@ def test_runtime_identity_block_is_present_and_safe():
 
     identity_block = packet.system_prompt.split("HOLOCHAT RUNTIME IDENTITY:", 1)[1].split("\n\n", 1)[0]
     assert "HoloChat" in identity_block
-    assert "local memory-attached workspace and chat surface" in identity_block
+    assert "a local memory-attached workspace and chat surface for the active user" in identity_block
     assert "capsule_attached: true" in identity_block
     assert "signed-in capsule" in identity_block
     assert "conversation, memory, context, drafts, planning, project continuity" in identity_block
@@ -137,9 +142,29 @@ def test_runtime_identity_block_is_present_and_safe():
     assert "evaluates agent actions before execution" not in identity_block
     assert "raw-capsule-id" not in identity_block
     assert "taylor@example.com" not in identity_block
+    assert "Taylor" not in identity_block
+    assert "Randall" not in identity_block
     for unsafe_word in ("token", "cookie", "auth", "Supabase", "secret", "password"):
         assert unsafe_word.lower() not in identity_block.lower()
     assert "runtime_identity" in packet.metadata["included_blocks"]
+
+
+def test_runtime_identity_block_is_universal_product_identity():
+    identity_block = build_runtime_identity_block(
+        {
+            "runtime_profile": "mini_only",
+            "active_pool": [{"provider": "openai", "model": "gpt-4o-mini"}],
+            "name": "Taylor",
+            "user_name": "Randall",
+        },
+        capsule_attached=True,
+    )
+
+    assert "HoloChat, a local memory-attached workspace and chat surface for the active user" in identity_block
+    assert "Taylor" not in identity_block
+    assert "Randall" not in identity_block
+    assert "signed-in capsule" in identity_block
+    assert "openai:gpt-4o-mini" in identity_block
 
 
 def test_context_memory_blocks_are_capped_and_do_not_include_sensitive_keys(monkeypatch):

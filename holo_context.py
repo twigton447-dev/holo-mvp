@@ -51,8 +51,10 @@ _RECOVERY_CONTEXT_KEY_PARTS = (
     "holochat",
     "holoengine",
     "holo_engine",
-    "randall",
     "voice",
+    "voice_anchor",
+    "voice_continuity",
+    "user_voice",
     "recovery",
     "context_governor",
     "context governor",
@@ -168,7 +170,7 @@ def build_runtime_identity_block(
 
     lines = [
         "HOLOCHAT RUNTIME IDENTITY:",
-        "  You are HoloChat, Taylor's local memory-attached workspace and chat surface.",
+        "  You are HoloChat, a local memory-attached workspace and chat surface for the active user.",
         f"  capsule_attached: {str(bool(capsule_attached)).lower()}",
         "  You are attached to the signed-in capsule and HoloBrain memory/dashboard.",
         "  You help with conversation, memory, context, drafts, planning, project continuity, and workspace interactions.",

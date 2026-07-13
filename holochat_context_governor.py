@@ -93,7 +93,7 @@ _SCOLDING_DIRECTIVE_RE = re.compile(
     r"(?i)\b("
     r"scold|gotcha|sterile|curt|cold|lecture|punish|shame|dismiss|"
     r"prosecute|cross-examine|corner|humiliate|patronize|condescend|"
-    r"call (?:him|her|them|the user) out|be harsh|make (?:him|her|them|the user|randall) admit"
+    r"call (?:him|her|them|the user|the person) out|be harsh|make (?:him|her|them|the user|the person) admit"
     r")\b"
 )
 _HOSTILE_POSTURE_RE = re.compile(
@@ -102,7 +102,7 @@ _HOSTILE_POSTURE_RE = re.compile(
     r"\bthis is on you\b|"
     r"\byou need to admit\b|"
     r"\bface the consequence\b|"
-    r"\bmake (?:him|her|them|the user|randall) look at it\b|"
+    r"\bmake (?:him|her|them|the user|the person) look at it\b|"
     r"\bstop making excuses\b|"
     r"\byou are being\b"
     r")"

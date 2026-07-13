@@ -1,0 +1,36 @@
+{
+  "package_id": "HOLOCHAT_UNIVERSAL_RUNTIME_IDENTITY_REPAIR_V0",
+  "preflight_result": "PASS",
+  "scope": "no-provider HoloChat runtime identity repair",
+  "commands": [
+    {
+      "command": ".venv312/bin/python -m compileall -q holo_context.py holochat_context_governor.py chat_engine.py llm_adapters.py tests/test_holo_context.py tests/test_holochat_constitutional_tone_release_guard.py tests/test_holochat_runtime_routing.py",
+      "result": "PASS"
+    },
+    {
+      "command": ".venv312/bin/pytest -q tests/test_holo_context.py tests/test_holochat_constitutional_tone_release_guard.py tests/test_holochat_gov_kernel_authority_repair.py tests/test_holochat_runtime_routing.py tests/test_holochat_web_checked.py",
+      "result": "PASS",
+      "summary": "85 passed in 0.24s"
+    },
+    {
+      "command": "rg -n \"Randall|Taylor|randall|taylor\" holo_context.py holochat_context_governor.py chat_engine.py llm_adapters.py docs/gov_chat_doctrine.md holochat_constitution.py docs/holo_chat_doctrine.md",
+      "result": "PASS",
+      "summary": "No matches in active product surfaces."
+    }
+  ],
+  "side_effect_controls": {
+    "provider_calls": 0,
+    "credential_reads": 0,
+    "live_holochat_conversations": 0,
+    "deploy_performed": false,
+    "external_sends": false,
+    "watcher_or_queue_actions": false,
+    "holoverify_edits": false,
+    "destructive_git_ops": false
+  },
+  "release_boundary": {
+    "live_provider_deploy_authorized_now": false,
+    "holochat_release_ready_claim": false,
+    "requires_holochat_qa_review": true
+  }
+}

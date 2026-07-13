@@ -473,9 +473,13 @@ def test_frontend_uses_editorial_reader_typography_without_heavy_default_bold():
     html = Path("frontend/chat.html").read_text()
 
     assert "--reader-font: Georgia, 'Times New Roman', Times, serif;" in html
-    assert ".holo-body .bubble { font-family: var(--reader-font); font-size: 19px; font-weight: 400;" in html
+    assert ".holo-body .bubble { font-family: var(--reader-font); font-size: 18.5px; font-weight: 390;" in html
+    assert "text-shadow: 0 1px 0 rgba(255,255,255,0.035)" in html
     assert ".holo-body strong { font-weight: 600;" in html
+    assert "rgba(91,122,229,0.18)" in html
+    assert ".holo-body em { font-style: italic; color: #c9c2b6;" in html
     assert ".holo-body blockquote { border-left: 2px solid var(--accent);" in html
+    assert "box-shadow: inset 10px 0 22px rgba(91,122,229,0.06);" in html
     assert ".holo-body .bubble" in html
     assert "font-weight: 500; line-height: 1.82" not in html
 

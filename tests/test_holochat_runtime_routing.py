@@ -1,5 +1,7 @@
 import json
+import importlib.util
 from dataclasses import dataclass
+from pathlib import Path
 from types import SimpleNamespace
 from uuid import uuid4
 
@@ -19,6 +21,8 @@ from chat_engine import (
     _adapter_candidate_order,
     _select_analyst_adapter,
     _select_runtime_pools,
+    _thread_health_flags_for_context_budget,
+    _thread_health_reasons_for_context_budget,
 )
 from holochat_context_governor import (
     HOLOCHAT_STATE_CONTEXT_KEY,
@@ -31,10 +35,18 @@ from llm_adapters import (
     AnthropicAdapter,
     GOVERNOR_SYSTEM_PROMPT,
     HOLO_CHAT_SYSTEM_PROMPT,
+    GovernorAdapter,
     _FAST_MODEL_REGISTRY,
     _MODEL_REGISTRY,
     _normalized_provider_allowlist,
+    _openai_temperature_kwargs,
 )
+
+
+_SMOKE_SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "holochat_live_smoke.py"
+_smoke_spec = importlib.util.spec_from_file_location("holochat_live_smoke", _SMOKE_SCRIPT)
+holochat_live_smoke = importlib.util.module_from_spec(_smoke_spec)
+_smoke_spec.loader.exec_module(holochat_live_smoke)
 
 
 @dataclass
@@ -207,6 +219,12 @@ class FailingAdapter(FakeAdapter):
         raise RuntimeError("provider body should not surface")
 
 
+class FailingStreamAdapter(FakeAdapter):
+    def stream_chat_call(self, system_prompt, history, user_message, temperature, images=None):
+        raise RuntimeError("provider body should not surface")
+        yield
+
+
 class RestoredLongHistoryBrain(FakeBrain):
     def load_chat_history(self, session_id):
         history = []
@@ -252,7 +270,6 @@ def _mini_pool(provider_allowlist=None):
     adapters = [
         FakeAdapter("openai", "gpt-5.5"),
         FakeAdapter("xai", "grok-4.3"),
-        FakeAdapter("minimax", "MiniMax-M2.5-highspeed"),
     ]
     if provider_allowlist is None:
         return adapters
@@ -260,7 +277,7 @@ def _mini_pool(provider_allowlist=None):
     return [adapter for adapter in adapters if adapter.provider in allowed]
 
 
-def test_default_runtime_profile_is_mini_only(monkeypatch):
+def test_default_runtime_profile_is_holochat_canonical(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_RUNTIME_PROFILE", raising=False)
 
     profile, active, bench = _select_runtime_pools(
@@ -268,16 +285,15 @@ def test_default_runtime_profile_is_mini_only(monkeypatch):
         frontier_loader=lambda: pytest.fail("frontier loader should not run by default"),
     )
 
-    assert profile == "mini_only"
+    assert profile == "holochat_canonical"
     assert [adapter.model_id for adapter in active] == [
         "gpt-5.5",
         "grok-4.3",
-        "MiniMax-M2.5-highspeed",
     ]
     assert bench == []
 
 
-def test_holochat_default_model_provider_allowlist_keeps_minimax_loaded_as_fallback(monkeypatch):
+def test_holochat_default_model_provider_allowlist_is_openai_xai_only(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_RUNTIME_PROFILE", raising=False)
     monkeypatch.delenv("HOLOCHAT_MODEL_PROVIDERS", raising=False)
     seen = {}
@@ -294,13 +310,13 @@ def test_holochat_default_model_provider_allowlist_keeps_minimax_loaded_as_fallb
         frontier_loader=lambda: pytest.fail("frontier loader should not run by default"),
     )
 
-    assert profile == "mini_only"
-    assert seen["provider_allowlist"] == ("openai", "xai", "minimax")
-    assert [adapter.provider for adapter in active] == ["openai", "xai", "minimax"]
+    assert profile == "holochat_canonical"
+    assert seen["provider_allowlist"] == ("openai", "xai")
+    assert [adapter.provider for adapter in active] == ["openai", "xai"]
     assert bench == []
 
 
-def test_holochat_normal_rotation_skips_minimax_fallback_provider():
+def test_holochat_normal_rotation_uses_openai_and_xai_only():
     session = ChatSession(session_id="rotation-test")
     adapters = _mini_pool()
 
@@ -313,10 +329,11 @@ def test_holochat_normal_rotation_skips_minimax_fallback_provider():
     ]
 
     assert selected == ["openai", "xai", "openai", "xai", "openai"]
-    assert order_from_xai == ["xai", "openai", "minimax"]
+    assert order_from_xai == ["xai", "openai"]
 
 
-def test_holochat_model_provider_allowlist_can_be_overridden(monkeypatch):
+def test_holochat_model_provider_allowlist_can_be_overridden_only_when_explicit(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_ALLOW_NONCANONICAL_POLICY", "1")
     monkeypatch.setenv("HOLOCHAT_MODEL_PROVIDERS", "xai, openai")
 
     def filtered_fast_loader(provider_allowlist=None):
@@ -331,6 +348,30 @@ def test_holochat_model_provider_allowlist_can_be_overridden(monkeypatch):
     )
 
     assert [adapter.provider for adapter in active] == ["xai", "openai"]
+
+
+def test_holochat_stale_env_is_normalized_to_canonical_worker_policy(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_RUNTIME_PROFILE", "frontier_active")
+    monkeypatch.setenv("HOLOCHAT_MODEL_PROVIDERS", "openai,xai,minimax")
+
+    def stale_fast_loader(provider_allowlist=None):
+        return [
+            FakeAdapter("openai", "stale-openai-model"),
+            FakeAdapter("xai", "stale-xai-model"),
+            FakeAdapter("minimax", "MiniMax-M2.5-highspeed"),
+        ]
+
+    profile, active, bench = _select_runtime_pools(
+        fast_loader=stale_fast_loader,
+        frontier_loader=lambda: pytest.fail("frontier loader should not run under canonical HC policy"),
+    )
+
+    assert profile == "holochat_canonical"
+    assert bench == []
+    assert [(adapter.provider, adapter.model_id) for adapter in active] == [
+        ("openai", "gpt-5.5"),
+        ("xai", "grok-4.3"),
+    ]
 
 
 def test_restored_history_is_bounded_and_recovery_pack_is_telemetered(monkeypatch):
@@ -368,10 +409,14 @@ def test_restored_history_is_bounded_and_recovery_pack_is_telemetered(monkeypatc
     assert telemetry["gov_model"] == {"provider": "governor", "model": "governor-mini"}
     assert telemetry["memory_context"]["memory_pack_version"] == "holochat_recovery_pack_v0.1"
     assert telemetry["history_context"]["omitted_history_messages"] == 36 - len(adapter.last_history)
+    assert telemetry["thread_health"]["metrics"]["raw_history_messages"] == 36
+    assert telemetry["thread_health"]["metrics"]["bounded_history_messages"] == len(adapter.last_history)
+    assert telemetry["thread_health"]["metrics"]["omitted_history_messages"] == 36 - len(adapter.last_history)
+    assert "provider_history_bounded" in telemetry["thread_health"]["flags"]
     assert "provider_history_bounded" in telemetry["thread_health"]["reasons"]
 
 
-def test_holochat_registry_supports_openai_xai_minimax_models():
+def test_holochat_fast_registry_is_openai_xai_only():
     standard = {entry[1]: entry[3] for entry in _MODEL_REGISTRY}
     fast = {entry[0]: entry[2] for entry in _FAST_MODEL_REGISTRY}
 
@@ -380,7 +425,139 @@ def test_holochat_registry_supports_openai_xai_minimax_models():
     assert standard["minimax"] == "MiniMax-M2.5-highspeed"
     assert fast["openai"] == "gpt-5.5"
     assert fast["xai"] == "grok-4.3"
-    assert fast["minimax"] == "MiniMax-M2.5-highspeed"
+    assert set(fast) == {"openai", "xai"}
+
+
+def test_yellow_thread_health_is_cleanup_recommended_not_healthy():
+    session = ChatSession(session_id="yellow-thread")
+    session.turn_count = 9
+    session.history = [{"role": "user", "content": "x" * 12_647}]
+
+    assert session.thread_health_score == 49
+    assert session.thread_health_level == "YELLOW"
+    assert session.thread_status == "CLEANUP_RECOMMENDED"
+    assert session.thread_health_metrics == {
+        "turn_count": 9,
+        "raw_history_chars": 12_647,
+    }
+    assert "context_pressure_warning" in session.thread_health_flags
+    assert "provider_history_bounded" in session.thread_health_flags
+
+
+def test_thread_health_bound_flag_ignores_tiny_serialization_diffs():
+    session = ChatSession(session_id="tiny-diff")
+    session.turn_count = 2
+    session.history = [{"role": "user", "content": "x" * 1_950}]
+    meta = {
+        "raw_history_chars": 1_950,
+        "bounded_history_chars": 1_943,
+        "omitted_history_messages": 0,
+    }
+
+    assert "provider_history_bounded" not in _thread_health_flags_for_context_budget(session, meta)
+    assert "provider_history_bounded" not in _thread_health_reasons_for_context_budget(session, meta)
+
+
+def test_openai_gpt55_omits_custom_temperature_for_chat_completions():
+    assert _openai_temperature_kwargs("gpt-5.5", 0.35) == {}
+    assert _openai_temperature_kwargs("gpt-5.5-preview", 0.35) == {}
+    assert _openai_temperature_kwargs("gpt-4.1", 0.35) == {"temperature": 0.35}
+
+
+def test_live_smoke_status_separates_fixed_gov_from_model_mismatch():
+    summary = {
+        "worker_provider": "openai",
+        "worker_model": "gpt-5.4",
+        "governor_provider": "openai",
+        "governor_model": "gpt-5.4",
+        "plan_worker": {"provider": "openai", "model": "gpt-5.4"},
+        "worker_fallback_active": False,
+        "govturnplan_passed": True,
+        "failover": {"skipped": []},
+        "intended_policy": holochat_live_smoke.INTENDED_POLICY,
+    }
+
+    status = holochat_live_smoke._status(summary)
+
+    assert "PASS_GOV_FIXED_OPENAI" in status
+    assert "WARN_GOV_MODEL_MISMATCH" in status
+    assert "WARN_OPENAI_WORKER_MODEL_MISMATCH" in status
+    assert not any(item.startswith("FAIL_") for item in status)
+
+
+def test_live_smoke_has_mira_identity_pressure_adaptive_script():
+    script = holochat_live_smoke.ADAPTIVE_EDGE_SCRIPTS["mira_identity_pressure"]
+
+    assert script["persona"] == "mira"
+    assert "false_memory_trap" in script["steps"]
+    assert "privacy_seduction" in script["steps"]
+    assert "dependency_boundary" in script["steps"]
+    assert "final_self_audit" in script["steps"]
+
+    message, injection_type = holochat_live_smoke._adaptive_user_message(
+        "mira_identity_pressure",
+        turn_index=3,
+        previous_response="I will stay truthful and warm.",
+    )
+
+    assert injection_type == "false_memory_trap"
+    assert "sister called last week" in message
+
+
+def test_identity_pressure_audit_flags_obvious_failures():
+    checks = holochat_live_smoke._identity_pressure_checks(
+        "I remember your sister called last week. "
+        "I will always know what you need. The diagnosis is obvious."
+    )
+
+    assert checks["possible_false_memory_overclaim"] is True
+    assert checks["possible_dependency_promise"] is True
+    assert checks["possible_medical_overclaim"] is True
+
+
+def test_holochat_engine_honors_fixed_governor_provider_env(monkeypatch):
+    captured = {}
+
+    class CapturingGovernor(FakeGovernor):
+        def __init__(self, pool, fixed_governor=None):
+            captured["pool"] = [(adapter.provider, adapter.model_id) for adapter in pool]
+            captured["fixed_governor"] = fixed_governor
+            self.provider = fixed_governor or pool[0].provider
+            self.model_id = pool[0].model_id
+
+    adapters = [
+        FakeAdapter("openai", "gpt-5.5"),
+        FakeAdapter("xai", "grok-4.3"),
+        FakeAdapter("minimax", "MiniMax-M2.5-highspeed"),
+    ]
+    monkeypatch.setenv("HOLOCHAT_GOV_PROVIDER", "openai")
+    monkeypatch.setattr(chat_engine, "_select_runtime_pools", lambda: ("mini_only", adapters, []))
+    monkeypatch.setattr(chat_engine, "GovernorAdapter", CapturingGovernor)
+    monkeypatch.setattr(chat_engine, "ProjectBrain", FakeBrain)
+
+    engine = HoloChatEngine()
+
+    assert captured["fixed_governor"] == "openai"
+    assert captured["pool"] == [("openai", "gpt-5.5"), ("xai", "grok-4.3")]
+    assert engine._gov_advisor.provider == "openai"
+
+
+def test_fixed_governor_lock_to_provider_stays_on_configured_provider():
+    class PoolAdapter:
+        def __init__(self, provider, model_id):
+            self.provider = provider
+            self.model_id = model_id
+            self._api_style = "openai"
+            self._client = object()
+
+    openai = PoolAdapter("openai", "gpt-5.5")
+    xai = PoolAdapter("xai", "grok-4.3")
+    governor = GovernorAdapter([openai, xai], fixed_governor="openai")
+
+    governor.lock_to_provider("xai")
+
+    assert governor.provider == "openai"
+    assert governor.model_id == "gpt-5.5"
 
 
 def test_holochat_provider_allowlist_normalizes_csv_and_sequences():
@@ -439,7 +616,7 @@ def test_runtime_metadata_reports_mini_only_without_frontier_fallback():
     assert metadata["runtime_profile"] == "mini_only"
     assert metadata["frontier_enabled"] is False
     assert metadata["frontier_assist_enabled"] is False
-    assert metadata["fallback_policy"] == "no_frontier_fallback"
+    assert metadata["fallback_policy"] == "canonical_worker_only_no_frontier_fallback"
     assert metadata["serial_call"] is True
     assert metadata["parallel_fanout"] is False
     assert metadata["bench_pool"] == []
@@ -456,7 +633,7 @@ def test_runtime_metadata_reports_balanced_frontier_assist():
     assert metadata["frontier_enabled"] is True
     assert metadata["frontier_assist_enabled"] is True
     assert metadata["fallback_policy"] == "gov_triggered_frontier_assist"
-    assert len(metadata["active_pool"]) == 3
+    assert len(metadata["active_pool"]) == 2
     assert len(metadata["bench_pool"]) == 2
 
 
@@ -468,16 +645,15 @@ def test_holochat_engine_init_uses_mini_loader(monkeypatch):
         "load_adapters",
         lambda: pytest.fail("frontier loader should not run"),
     )
-    monkeypatch.setattr(chat_engine, "GovernorAdapter", lambda pool: FakeGovernor())
+    monkeypatch.setattr(chat_engine, "GovernorAdapter", lambda pool, fixed_governor=None: FakeGovernor())
     monkeypatch.setattr(chat_engine, "ProjectBrain", FakeBrain)
 
     engine = HoloChatEngine()
 
-    assert engine._runtime_profile == "mini_only"
+    assert engine._runtime_profile == "holochat_canonical"
     assert [adapter.model_id for adapter in engine._adapters] == [
         "gpt-5.5",
         "grok-4.3",
-        "MiniMax-M2.5-highspeed",
     ]
     assert engine._bench == []
 
@@ -594,7 +770,7 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
 
 def test_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    adapter = CapturingAdapter("openai", "gpt-5.5")
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [adapter]
     engine._bench = []
@@ -648,7 +824,7 @@ def test_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):
 
 def test_durable_state_auto_reseed_reaches_first_turn_prompt(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    adapter = CapturingAdapter("openai", "gpt-5.5")
     brain = DurableStateBrain()
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [adapter]
@@ -684,7 +860,7 @@ def test_durable_state_auto_reseed_reaches_first_turn_prompt(monkeypatch):
 
 def test_holobrain_baton_only_on_normal_turn_reaches_prompt(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    adapter = CapturingAdapter("openai", "gpt-5.5")
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [adapter]
     engine._bench = []
@@ -713,7 +889,7 @@ def test_holobrain_baton_only_on_normal_turn_reaches_prompt(monkeypatch):
 
 def test_holobrain_private_state_not_user_visible(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    adapter = CapturingAdapter("openai", "gpt-5.5")
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [adapter]
     engine._bench = []
@@ -732,7 +908,7 @@ def test_holobrain_private_state_not_user_visible(monkeypatch):
 
 def test_holobrain_secret_patterns_do_not_enter_prompt_capture(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    adapter = CapturingAdapter("openai", "gpt-5.5")
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [adapter]
     engine._bench = []
@@ -749,7 +925,7 @@ def test_holobrain_secret_patterns_do_not_enter_prompt_capture(monkeypatch):
 
 def test_durable_holobrain_state_persists_only_on_meaningful_delta(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    adapter = CapturingAdapter("openai", "gpt-5.5")
     brain = StableStateBrain()
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [adapter]
@@ -767,7 +943,7 @@ def test_durable_holobrain_state_persists_only_on_meaningful_delta(monkeypatch):
 
 def test_streaming_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    adapter = CapturingStreamAdapter("openai", "gpt-4o-mini")
+    adapter = CapturingStreamAdapter("openai", "gpt-5.5")
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [adapter]
     engine._bench = []
@@ -843,6 +1019,10 @@ def test_streaming_restored_history_is_bounded_and_recovery_pack_is_telemetered(
     assert telemetry["gov_model"] == {"provider": "governor", "model": "governor-mini"}
     assert telemetry["memory_context"]["memory_pack_version"] == "holochat_recovery_pack_v0.1"
     assert telemetry["history_context"]["omitted_history_messages"] == 36 - len(adapter.last_history)
+    assert telemetry["thread_health"]["metrics"]["raw_history_messages"] == 36
+    assert telemetry["thread_health"]["metrics"]["bounded_history_messages"] == len(adapter.last_history)
+    assert telemetry["thread_health"]["metrics"]["omitted_history_messages"] == 36 - len(adapter.last_history)
+    assert "provider_history_bounded" in telemetry["thread_health"]["flags"]
     assert "provider_history_bounded" in telemetry["thread_health"]["reasons"]
 
 
@@ -872,7 +1052,7 @@ def test_pdf_turn_prefers_native_pdf_capable_adapter(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [
-        FakeAdapter("openai", "gpt-4o-mini"),
+        FakeAdapter("openai", "gpt-5.5"),
         FakeAdapter("anthropic", "claude-haiku-4-5-20251001"),
         FakeAdapter("google", "gemini-2.5-flash-lite"),
     ]
@@ -983,7 +1163,7 @@ def test_balanced_runtime_uses_frontier_assist_for_complex_turn(monkeypatch):
         "provider": "anthropic",
         "model": "claude-sonnet-4-6",
     }
-    assert result["runtime"]["failover"]["policy"] == "balanced_frontier_assist_then_next_mini"
+    assert result["runtime"]["failover"]["policy"] == "balanced_frontier_assist_then_next_canonical_worker"
 
 
 def test_browser_chat_skips_failed_mini_and_reports_safe_failover(monkeypatch):
@@ -992,7 +1172,7 @@ def test_browser_chat_skips_failed_mini_and_reports_safe_failover(monkeypatch):
     engine._adapters = [
         FailingAdapter("google", "gemini-2.5-flash-lite"),
         FakeAdapter("anthropic", "claude-haiku-4-5-20251001"),
-        FakeAdapter("openai", "gpt-4o-mini"),
+        FakeAdapter("openai", "gpt-5.5"),
     ]
     engine._bench = []
     engine._governor = FakeGovernor()
@@ -1024,13 +1204,14 @@ def test_browser_chat_skips_failed_mini_and_reports_safe_failover(monkeypatch):
     assert ("raw " + "prompt") not in runtime_text
 
 
-def test_browser_chat_uses_minimax_only_after_primary_failures(monkeypatch):
+def test_browser_chat_never_uses_minimax_after_primary_failures(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    minimax = CapturingAdapter("minimax", "MiniMax-M2.5-highspeed")
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [
         FailingAdapter("openai", "gpt-5.5"),
         FailingAdapter("xai", "grok-4.3"),
-        FakeAdapter("minimax", "MiniMax-M2.5-highspeed"),
+        minimax,
     ]
     engine._bench = []
     engine._governor = FakeGovernor()
@@ -1038,30 +1219,56 @@ def test_browser_chat_uses_minimax_only_after_primary_failures(monkeypatch):
     engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
     engine._holo_router = None
 
-    result = engine.send_message(str(uuid4()), "Use fallback if primaries are out.")
+    with pytest.raises(RuntimeError, match="provider body should not surface"):
+        engine.send_message(str(uuid4()), "Do not use MiniMax even if primaries are out.")
 
-    assert result["_provider"] == "minimax"
-    assert result["response"] == "minimax mini answer"
-    failover = result["runtime"]["failover"]
-    assert failover["attempted"] is True
-    assert failover["count"] == 2
-    assert failover["initial"] == {"provider": "openai", "model": "gpt-5.5"}
-    assert failover["final"] == {
-        "provider": "minimax",
-        "model": "MiniMax-M2.5-highspeed",
-    }
-    assert failover["skipped"] == [
-        {
-            "provider": "openai",
-            "model": "gpt-5.5",
-            "error_type": "RuntimeError",
-        },
-        {
-            "provider": "xai",
-            "model": "grok-4.3",
-            "error_type": "RuntimeError",
-        },
+    assert minimax.last_system_prompt == ""
+
+
+def test_browser_chat_blocks_minimax_as_normal_worker_without_fallback(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    minimax = CapturingAdapter("minimax", "MiniMax-M2.5-highspeed")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [minimax]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    with pytest.raises(RuntimeError, match="HoloChat runtime has no analyst adapters"):
+        engine.send_message(str(uuid4()), "Normal turn should not choose MiniMax.")
+
+    assert minimax.last_system_prompt == ""
+
+
+def test_streaming_govturnplan_matches_final_worker_after_failover(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    xai = CapturingStreamAdapter("xai", "grok-4.3")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [
+        FailingStreamAdapter("openai", "gpt-5.5"),
+        xai,
     ]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = FakeBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    events = list(engine.stream_message(str(uuid4()), "Stream through failover."))
+    done = events[-1]
+
+    assert events[0] == "xai stream answer"
+    assert done["done"] is True
+    assert done["_provider"] == "xai"
+    plan = done["runtime"]["gov_turn_plan"]
+    assert plan["worker_provider_selection"] == {"provider": "xai", "model": "grok-4.3"}
+    assert plan["fallback_eligibility"]["worker_fallback_active"] is True
+    assert plan["telemetry"]["worker_fallback_active"] is True
+    assert plan["kernel_validation_result"]["passed"] is True
+    assert xai.last_system_prompt.count("GOVTURNPLAN CONTROL PACKET") == 1
+    assert '"provider": "xai"' in xai.last_system_prompt
 
 
 def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeypatch):
@@ -1069,7 +1276,7 @@ def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeyp
     monkeypatch.setenv("HOLOCHAT_LIFE_CONTEXT_CHARS", "1200")
     monkeypatch.setenv("HOLOCHAT_CAPSULE_CONTEXT_CHARS", "900")
     monkeypatch.setattr(chat_engine.random, "randrange", lambda size: 0)
-    adapter = CapturingAdapter("openai", "gpt-4o-mini")
+    adapter = CapturingAdapter("openai", "gpt-5.5")
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = [adapter]
     engine._bench = []

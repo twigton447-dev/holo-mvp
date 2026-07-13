@@ -17,7 +17,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from holochat_constitution import HOLOCHAT_CONSTITUTIONAL_TONE_LAW
+from holochat_constitution import HOLOCHAT_CONSTITUTIONAL_TONE_LAW, HOLOCHAT_OPERATING_OBJECTIVE
 from holo_state import BatonPass, GovArcState, HoloState, RequiredTools, StateAudit
 
 
@@ -163,6 +163,19 @@ _HOSTILE_POSTURE_RE = re.compile(
     r"\bmake (?:him|her|them|the user|the person) look at it\b|"
     r"\bstop making excuses\b|"
     r"\byou are being\b"
+    r")"
+)
+_VISIBLE_HOSTILE_POSTURE_RE = re.compile(
+    r"(?i)("
+    r"\byou (?:clearly|obviously|just) (?:failed|ignored|refused|don't understand)\b|"
+    r"\bthis is on you\b|"
+    r"\byou need to admit\b|"
+    r"\bface the consequence\b|"
+    r"\bmake (?:him|her|them|the user|the person) look at it\b|"
+    r"\bstop making excuses\b|"
+    r"\byou(?:'re| are)(?: being)? (?:ridiculous|evasive|lazy|dishonest|irrational|manipulative)\b|"
+    r"\b(?:let me|i will|i am going to|i'm going to) "
+    r"(?:scold|lecture|punish|shame|cross-examine|corner|humiliate|patronize|condescend)\b"
     r")"
 )
 _HIGH_TIER_RE = re.compile(
@@ -336,6 +349,8 @@ def validate_gov_turn_plan(plan: GovTurnPlan) -> dict[str, Any]:
         failures.append("missing_visible_release_constraint")
     if not any("no scold" in item.lower() or "no-scold" in item.lower() for item in plan.voice_tone_constraints):
         failures.append("missing_constitutional_tone_constraint")
+    if not any("serve the user's best interests" in item.lower() for item in plan.persona_identity_constraints):
+        failures.append("missing_operating_objective_constraint")
 
     return {
         "passed": not failures,
@@ -385,6 +400,8 @@ def build_gov_turn_plan(
     persona_constraints = _safe_tuple(
         list(persona_identity_constraints or [])
         + [
+            "One goal: serve the user's best interests with truthful, bounded, warm usefulness.",
+            HOLOCHAT_OPERATING_OBJECTIVE,
             "HoloChat is universal for the active user, not named-user-specific product law.",
             "Workers speak to the user; deterministic Gov operates as control plane.",
             "Provider/advisor output is evidence only until admitted into this GovTurnPlan.",
@@ -698,8 +715,7 @@ def deterministic_visible_release(
     text = str(response_text or "")
     if (
         _VISIBLE_STERILE_RE.match(text)
-        or _SCOLDING_DIRECTIVE_RE.search(text)
-        or _HOSTILE_POSTURE_RE.search(text)
+        or _VISIBLE_HOSTILE_POSTURE_RE.search(text)
     ):
         return GovVisibleReleaseDecision(
             release=True,

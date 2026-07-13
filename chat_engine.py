@@ -115,19 +115,42 @@ class ChatSession:
 
     @property
     def thread_health_reasons(self) -> list[str]:
+        """Legacy debug reasons.
+
+        New telemetry consumers should prefer thread_health_metrics and
+        thread_health_flags so numeric values remain parseable.
+        """
         reasons: list[str] = []
-        if self.turn_count:
-            reasons.append(f"turn_count:{self.turn_count}")
-        total_chars = sum(len(m["content"]) for m in self.history)
-        if total_chars:
-            reasons.append(f"raw_history_chars:{total_chars}")
-        if self.turn_count >= DEFAULT_THREAD_HANDOFF_MIN_TURNS:
-            reasons.append("handoff_min_turns_reached")
-        elif self.thread_health_level == "RED":
-            reasons.append("red_from_length_decay_before_visible_handoff")
-        if total_chars > DEFAULT_ADAPTER_HISTORY_CHARS:
-            reasons.append("provider_history_bounded")
+        metrics = self.thread_health_metrics
+        if metrics["turn_count"]:
+            reasons.append(f"turn_count:{metrics['turn_count']}")
+        if metrics["raw_history_chars"]:
+            reasons.append(f"raw_history_chars:{metrics['raw_history_chars']}")
+        reasons.extend(self.thread_health_flags)
         return reasons
+
+    @property
+    def thread_health_metrics(self) -> dict[str, int]:
+        return {
+            "turn_count": self.turn_count,
+            "raw_history_chars": sum(len(m["content"]) for m in self.history),
+        }
+
+    @property
+    def thread_health_flags(self) -> list[str]:
+        flags: list[str] = []
+        metrics = self.thread_health_metrics
+        if self.thread_health_level == "YELLOW":
+            flags.append("context_pressure_warning")
+        elif self.thread_health_level == "RED":
+            flags.append("context_pressure_critical")
+        if self.turn_count >= DEFAULT_THREAD_HANDOFF_MIN_TURNS:
+            flags.append("handoff_min_turns_reached")
+        elif self.thread_health_level == "RED":
+            flags.append("red_from_length_decay_before_visible_handoff")
+        if metrics["raw_history_chars"] > DEFAULT_ADAPTER_HISTORY_CHARS:
+            flags.append("provider_history_bounded")
+        return flags
 
     @property
     def thread_health_level(self) -> str:
@@ -143,7 +166,7 @@ class ChatSession:
         score = self.thread_health_score
         if score <= 20:
             return "ROTATION_RECOMMENDED"
-        elif score <= 40:
+        elif score <= 60:
             return "CLEANUP_RECOMMENDED"
         return "HEALTHY"
 
@@ -159,16 +182,25 @@ class ChatSession:
 # Governor rotation helpers
 # ---------------------------------------------------------------------------
 
-DEFAULT_RUNTIME_PROFILE = "mini_only"
+CANONICAL_RUNTIME_PROFILE = "holochat_canonical"
+DEFAULT_RUNTIME_PROFILE = CANONICAL_RUNTIME_PROFILE
+LEGACY_CANONICAL_RUNTIME_PROFILES = {CANONICAL_RUNTIME_PROFILE, "mini_only"}
 BALANCED_RUNTIME_PROFILE = "balanced"
 FRONTIER_RUNTIME_PROFILES = {"frontier_active", "legacy_frontier"}
-DEFAULT_HOLOCHAT_MODEL_PROVIDERS = ("openai", "xai", "minimax")
-FALLBACK_HOLOCHAT_MODEL_PROVIDERS = {"minimax"}
+DEFAULT_HOLOCHAT_MODEL_PROVIDERS = ("openai", "xai")
+FALLBACK_HOLOCHAT_MODEL_PROVIDERS: set[str] = set()
+DISABLED_HOLOCHAT_MODEL_PROVIDERS = {"minimax"}
+CANONICAL_HOLOCHAT_MODEL_BY_PROVIDER = {
+    "openai": "gpt-5.5",
+    "xai": "grok-4.3",
+}
+CANONICAL_HOLOCHAT_GOV_PROVIDER = "openai"
 DEFAULT_THREAD_HANDOFF_MIN_TURNS = 24
 THREAD_HANDOFF_FORCE_SCORE = 5
 DEFAULT_ADAPTER_HISTORY_MESSAGES = 8
 DEFAULT_ADAPTER_HISTORY_CHARS = 8_000
 DEFAULT_ADAPTER_HISTORY_MESSAGE_CHARS = 1_800
+MATERIAL_HISTORY_BOUNDING_CHARS = 200
 HOLOCHAT_MEMORY_PACK_VERSION = "holochat_recovery_pack_v0.1"
 
 _BALANCED_USER_POWER_TERMS = (
@@ -225,20 +257,36 @@ _BALANCED_GOV_ESCALATION_TERMS = (
 
 # Local, non-authoritative pricing estimates. Only include model prices when we
 # are comfortable showing a rough estimate; otherwise the UI reports unknown.
-_STATIC_CHAT_PRICING_USD_PER_M_TOKEN: dict[tuple[str, str], tuple[float, float]] = {
-    ("openai", "gpt-4o-mini"): (0.15, 0.60),
-}
+_STATIC_CHAT_PRICING_USD_PER_M_TOKEN: dict[tuple[str, str], tuple[float, float]] = {}
 
 THREAD_HANDOFF_MESSAGE = "This thread is getting long. Start a fresh thread to keep Holo sharp."
 
 
+def _truthy_env(name: str) -> bool:
+    return str(os.getenv(name, "")).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _holochat_allow_noncanonical_policy() -> bool:
+    return _truthy_env("HOLOCHAT_ALLOW_NONCANONICAL_POLICY")
+
+
 def _holochat_runtime_profile() -> str:
-    return (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
+    runtime_profile = (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
+    if runtime_profile in LEGACY_CANONICAL_RUNTIME_PROFILES:
+        return DEFAULT_RUNTIME_PROFILE
+    if runtime_profile != DEFAULT_RUNTIME_PROFILE and not _holochat_allow_noncanonical_policy():
+        logger.warning(
+            "HoloChat canonical runtime policy forced %s; ignored HOLOCHAT_RUNTIME_PROFILE=%s",
+            DEFAULT_RUNTIME_PROFILE,
+            runtime_profile,
+        )
+        return DEFAULT_RUNTIME_PROFILE
+    return runtime_profile
 
 
 def _holochat_model_providers() -> tuple[str, ...]:
     raw = os.getenv("HOLOCHAT_MODEL_PROVIDERS")
-    if raw is None:
+    if raw is None or not _holochat_allow_noncanonical_policy():
         return DEFAULT_HOLOCHAT_MODEL_PROVIDERS
     providers = tuple(
         provider.strip().lower()
@@ -253,6 +301,34 @@ def _call_pool_loader(loader: Any, provider_allowlist: tuple[str, ...]) -> Any:
     if "provider_allowlist" in params:
         return loader(provider_allowlist=provider_allowlist)
     return loader()
+
+
+def _normalize_holochat_model_policy(adapters: list[Any]) -> list[Any]:
+    for adapter in adapters:
+        provider = str(getattr(adapter, "provider", "") or "").strip().lower()
+        canonical_model = CANONICAL_HOLOCHAT_MODEL_BY_PROVIDER.get(provider)
+        if not canonical_model:
+            continue
+        current_model = getattr(adapter, "model_id", getattr(adapter, "model", None))
+        if current_model != canonical_model:
+            logger.warning(
+                "HoloChat canonical model policy forced %s/%s; ignored configured model %s",
+                provider,
+                canonical_model,
+                current_model,
+            )
+            adapter.model_id = canonical_model
+            if hasattr(adapter, "model"):
+                adapter.model = canonical_model
+    return adapters
+
+
+def _filter_holochat_enabled_adapters(adapters: list[Any]) -> list[Any]:
+    return [
+        adapter for adapter in adapters
+        if str(getattr(adapter, "provider", "") or "").strip().lower()
+        not in DISABLED_HOLOCHAT_MODEL_PROVIDERS
+    ]
 
 
 def _contains_any(text: str, terms: tuple[str, ...]) -> bool:
@@ -826,11 +902,50 @@ def _thread_health_reasons_for_context_budget(
     bounded_chars = _safe_positive_int(provider_history_meta.get("bounded_history_chars"))
     provider_history_bounded = (
         _safe_positive_int(provider_history_meta.get("omitted_history_messages")) > 0
-        or bounded_chars < raw_chars
+        or raw_chars - bounded_chars > MATERIAL_HISTORY_BOUNDING_CHARS
     )
     if provider_history_bounded:
         reasons.append("provider_history_bounded")
     return reasons
+
+
+def _thread_health_metrics_for_context_budget(
+    session: "ChatSession",
+    provider_history_meta: dict[str, Any],
+) -> dict[str, int]:
+    metrics = dict(session.thread_health_metrics)
+    metrics.update(
+        {
+            "bounded_history_chars": _safe_positive_int(provider_history_meta.get("bounded_history_chars")),
+            "raw_history_messages": _safe_positive_int(provider_history_meta.get("raw_history_messages")),
+            "bounded_history_messages": _safe_positive_int(provider_history_meta.get("bounded_history_messages")),
+            "omitted_history_messages": _safe_positive_int(provider_history_meta.get("omitted_history_messages")),
+        }
+    )
+    raw_chars = _safe_positive_int(provider_history_meta.get("raw_history_chars"))
+    if raw_chars:
+        metrics["raw_history_chars"] = raw_chars
+    return metrics
+
+
+def _thread_health_flags_for_context_budget(
+    session: "ChatSession",
+    provider_history_meta: dict[str, Any],
+) -> list[str]:
+    flags = [
+        flag
+        for flag in session.thread_health_flags
+        if flag != "provider_history_bounded"
+    ]
+    raw_chars = _safe_positive_int(provider_history_meta.get("raw_history_chars"))
+    bounded_chars = _safe_positive_int(provider_history_meta.get("bounded_history_chars"))
+    provider_history_bounded = (
+        _safe_positive_int(provider_history_meta.get("omitted_history_messages")) > 0
+        or raw_chars - bounded_chars > MATERIAL_HISTORY_BOUNDING_CHARS
+    )
+    if provider_history_bounded:
+        flags.append("provider_history_bounded")
+    return flags
 
 
 def _holochat_recovery_memory_pack() -> str:
@@ -1192,6 +1307,7 @@ def _turn_runtime_metadata(
     holobrain_injection_plan: Optional[HoloBrainInjectionPlan] = None,
     holobrain_state_persisted: bool = False,
     gov_turn_plan: Optional[GovTurnPlan] = None,
+    visible_release_decision: Optional[Any] = None,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
@@ -1254,6 +1370,12 @@ def _turn_runtime_metadata(
         metadata["gov_arc_state"] = gov_arc_state.model_dump(mode="json")
     if gov_turn_plan is not None:
         metadata["gov_turn_plan"] = gov_turn_plan.model_dump()
+    if visible_release_decision is not None:
+        metadata["visible_release"] = {
+            "release": bool(getattr(visible_release_decision, "release", False)),
+            "repaired": bool(getattr(visible_release_decision, "repaired", False)),
+            "reason": getattr(visible_release_decision, "reason", None),
+        }
     if frontier_assist is not None:
         metadata["frontier_assist"] = frontier_assist
     if timing_breakdown is not None:
@@ -1272,7 +1394,7 @@ def _runtime_metadata(
     active_pool: list[Any],
     bench_pool: list[Any],
 ) -> dict[str, Any]:
-    mini_only = runtime_profile == "mini_only"
+    mini_only = runtime_profile in LEGACY_CANONICAL_RUNTIME_PROFILES
     balanced = runtime_profile == BALANCED_RUNTIME_PROFILE
     frontier_assist_enabled = balanced and bool(bench_pool)
     return {
@@ -1282,7 +1404,7 @@ def _runtime_metadata(
         "frontier_enabled": not mini_only,
         "frontier_assist_enabled": frontier_assist_enabled,
         "fallback_policy": (
-            "no_frontier_fallback"
+            "canonical_worker_only_no_frontier_fallback"
             if mini_only
             else ("gov_triggered_frontier_assist" if balanced else "bench_failover_enabled")
         ),
@@ -1301,28 +1423,40 @@ def _select_runtime_pools(
     frontier_loader = frontier_loader or load_adapters
     runtime_profile = (profile or _holochat_runtime_profile()).strip().lower()
     provider_allowlist = _holochat_model_providers()
-    if runtime_profile == "mini_only":
-        active_pool = _call_pool_loader(fast_loader, provider_allowlist)
+    if runtime_profile in LEGACY_CANONICAL_RUNTIME_PROFILES:
+        active_pool = _filter_holochat_enabled_adapters(
+            _normalize_holochat_model_policy(_call_pool_loader(fast_loader, provider_allowlist))
+        )
         if not active_pool:
             raise RuntimeError(
-                "HoloChat mini_only runtime has no mini adapters; "
+                "HoloChat canonical runtime has no worker adapters; "
                 "frontier fallback is disabled."
             )
         return runtime_profile, active_pool, []
     if runtime_profile == BALANCED_RUNTIME_PROFILE:
-        active_pool = _call_pool_loader(fast_loader, provider_allowlist)
+        active_pool = _filter_holochat_enabled_adapters(
+            _normalize_holochat_model_policy(_call_pool_loader(fast_loader, provider_allowlist))
+        )
         if not active_pool:
-            raise RuntimeError("HoloChat balanced runtime has no mini adapters.")
+            raise RuntimeError("HoloChat balanced runtime has no worker adapters.")
         frontier_active, frontier_bench = _call_pool_loader(
             frontier_loader,
             provider_allowlist,
         )
-        frontier_pool = [*frontier_active, *frontier_bench]
+        frontier_pool = _filter_holochat_enabled_adapters(
+            _normalize_holochat_model_policy([*frontier_active, *frontier_bench])
+        )
         return runtime_profile, active_pool, frontier_pool
     if runtime_profile in FRONTIER_RUNTIME_PROFILES:
         active_pool, bench_pool = _call_pool_loader(
             frontier_loader,
             provider_allowlist,
+        )
+        active_pool = _filter_holochat_enabled_adapters(
+            _normalize_holochat_model_policy(active_pool)
+        )
+        bench_pool = _filter_holochat_enabled_adapters(
+            _normalize_holochat_model_policy(bench_pool)
         )
         if not active_pool:
             raise RuntimeError("HoloChat frontier runtime has no active adapters.")
@@ -1397,7 +1531,8 @@ class HoloChatEngine:
             self._bench,
         )
         advisor_pool = _rotation_analyst_adapters(self._adapters)
-        self._gov_advisor = GovernorAdapter(advisor_pool) # provider advisor; deterministic Gov admits its proposals
+        fixed_governor = (os.getenv("HOLOCHAT_GOV_PROVIDER") or "openai").strip().lower() or None
+        self._gov_advisor = GovernorAdapter(advisor_pool, fixed_governor=fixed_governor) # provider advisor; deterministic Gov admits its proposals
         self._governor = self._gov_advisor  # legacy test/API alias; not canonical authority
         self._brain    = ProjectBrain()
         self._holo_context_builder = HoloContextBuilder()
@@ -1456,10 +1591,11 @@ class HoloChatEngine:
             life_context    = []
             last_session    = None
         else:
-            capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
+            raw_capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
+            capsule_context = _capsule_context_for_depth_preference(raw_capsule_context)
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
-            durable_state   = load_state_from_capsule_context(capsule_context)
+            durable_state   = load_state_from_capsule_context(raw_capsule_context)
             if durable_state and session.turn_count == 0:
                 session.holochat_state = durable_state
         fresh_thread = session.turn_count == 0
@@ -1478,7 +1614,7 @@ class HoloChatEngine:
             handoff_transition,
         )
 
-        # Rotate through the active mini pool so every configured analyst gets turns.
+        # Rotate through the canonical worker pool so every configured worker gets turns.
         adapter = _select_analyst_adapter(session, self._adapters)
         initial_adapter = adapter
         session.turn_count     += 1
@@ -1626,35 +1762,13 @@ class HoloChatEngine:
                 session.auto_reseed_applied = True
                 session.auto_reseed_hash = stable_hash(holochat_state_block)
 
-        gov_turn_plan = _build_worker_gov_turn_plan(
-            session=session,
-            capsule_id=capsule_id,
-            adapter=adapter,
-            gov_advisor=gov_advisor,
-            turn_policy=turn_policy,
-            temperature=temperature,
-            tenor=tenor,
-            tenor_admission=tenor_admission,
-            thought_admission=thought_admission,
-            search_query=search_query,
-            search_results=search_results,
-            web_trace=web_trace,
-            capsule_context=capsule_context,
-            life_context=life_context,
-            last_session=last_session,
-            incognito=incognito,
-            active_handoff_transition=active_handoff_transition,
-            holochat_state_block=holochat_state_block,
-            holobrain_injection_plan=holobrain_injection_plan,
-            frontier_assist=frontier_assist,
-        )
-        gov_turn_plan_block = render_gov_turn_plan_for_worker(gov_turn_plan)
-
-        # Inject runtime identity + thread-health context + portrait + working memory + single GovTurnPlan.
+        # Inject runtime identity + thread-health context + portrait + working memory.
+        # A candidate-specific GovTurnPlan is appended immediately before each
+        # visible worker provider call, after deterministic fallback state is known.
         # Incognito: keeps runtime identity but strips memory context.
-        system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
+        base_system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
         if not incognito:
-            system_prompt += (
+            base_system_prompt += (
                 "\n\n" + _health_context(session)
                 + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
                 + ("\n\n" + holochat_state_block if holochat_state_block else "")
@@ -1664,25 +1778,9 @@ class HoloChatEngine:
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
             )
-        system_prompt += "\n\n" + gov_turn_plan_block
-
-        context_budget = _runtime_context_budget(
-            session=session,
-            adapter_history=adapter_history,
-            user_message=user_message,
-            capsule_context=capsule_context,
-            life_context=life_context,
-            last_session=last_session,
-            tenor=tenor,
-            search_results=search_results,
-            images=images,
-            incognito=incognito,
-            runtime_identity=runtime_identity,
-            handoff_transition=active_handoff_transition,
-            holochat_state_block=holochat_state_block,
-            holobrain_injection_plan=holobrain_injection_plan,
-            gov_turn_plan_block=gov_turn_plan_block,
-        )
+        gov_turn_plan = None
+        gov_turn_plan_block = ""
+        context_budget = None
 
         holo4dna_shadow = None
         if _holo4dna_shadow_enabled():
@@ -1721,11 +1819,59 @@ class HoloChatEngine:
         candidate_order = _adapter_candidate_order_for_attachments(self._adapters, adapter, images)
         for candidate in candidate_order:
             try:
+                candidate_plan = _build_worker_gov_turn_plan(
+                    session=session,
+                    capsule_id=capsule_id,
+                    adapter=candidate,
+                    gov_advisor=gov_advisor,
+                    turn_policy=turn_policy,
+                    temperature=temperature,
+                    tenor=tenor,
+                    tenor_admission=tenor_admission,
+                    thought_admission=thought_admission,
+                    search_query=search_query,
+                    search_results=search_results,
+                    web_trace=web_trace,
+                    capsule_context=capsule_context,
+                    life_context=life_context,
+                    last_session=last_session,
+                    incognito=incognito,
+                    active_handoff_transition=active_handoff_transition,
+                    holochat_state_block=holochat_state_block,
+                    holobrain_injection_plan=holobrain_injection_plan,
+                    frontier_assist=frontier_assist,
+                    worker_fallback_active=bool(failover_attempts),
+                )
+                if not candidate_plan.kernel_validation_result.get("passed"):
+                    failures = ",".join(candidate_plan.kernel_validation_result.get("failures") or [])
+                    raise RuntimeError(f"GovTurnPlan validation failed: {failures}")
+                candidate_plan_block = render_gov_turn_plan_for_worker(candidate_plan)
+                candidate_system_prompt = base_system_prompt + "\n\n" + candidate_plan_block
+                candidate_context_budget = _runtime_context_budget(
+                    session=session,
+                    adapter_history=adapter_history,
+                    user_message=user_message,
+                    capsule_context=capsule_context,
+                    life_context=life_context,
+                    last_session=last_session,
+                    tenor=tenor,
+                    search_results=search_results,
+                    images=images,
+                    incognito=incognito,
+                    runtime_identity=runtime_identity,
+                    handoff_transition=active_handoff_transition,
+                    holochat_state_block=holochat_state_block,
+                    holobrain_injection_plan=holobrain_injection_plan,
+                    gov_turn_plan_block=candidate_plan_block,
+                )
                 response_text, in_tok, out_tok = candidate.chat_call(
-                    system_prompt, adapter_history, enriched_message, temperature,
+                    candidate_system_prompt, adapter_history, enriched_message, temperature,
                     images=images or None,
                 )
                 adapter = candidate
+                gov_turn_plan = candidate_plan
+                gov_turn_plan_block = candidate_plan_block
+                context_budget = candidate_context_budget
                 break
             except Exception as exc:
                 failover_attempts.append(_safe_adapter_error(candidate, exc))
@@ -1747,11 +1893,59 @@ class HoloChatEngine:
                 raise RuntimeError("HoloChat runtime has no available analyst adapters.")
             fallback = random.choice(bench_candidates)
             try:
+                fallback_plan = _build_worker_gov_turn_plan(
+                    session=session,
+                    capsule_id=capsule_id,
+                    adapter=fallback,
+                    gov_advisor=gov_advisor,
+                    turn_policy=turn_policy,
+                    temperature=temperature,
+                    tenor=tenor,
+                    tenor_admission=tenor_admission,
+                    thought_admission=thought_admission,
+                    search_query=search_query,
+                    search_results=search_results,
+                    web_trace=web_trace,
+                    capsule_context=capsule_context,
+                    life_context=life_context,
+                    last_session=last_session,
+                    incognito=incognito,
+                    active_handoff_transition=active_handoff_transition,
+                    holochat_state_block=holochat_state_block,
+                    holobrain_injection_plan=holobrain_injection_plan,
+                    frontier_assist=frontier_assist,
+                    worker_fallback_active=True,
+                )
+                if not fallback_plan.kernel_validation_result.get("passed"):
+                    failures = ",".join(fallback_plan.kernel_validation_result.get("failures") or [])
+                    raise RuntimeError(f"GovTurnPlan validation failed: {failures}")
+                fallback_plan_block = render_gov_turn_plan_for_worker(fallback_plan)
+                fallback_system_prompt = base_system_prompt + "\n\n" + fallback_plan_block
+                fallback_context_budget = _runtime_context_budget(
+                    session=session,
+                    adapter_history=adapter_history,
+                    user_message=user_message,
+                    capsule_context=capsule_context,
+                    life_context=life_context,
+                    last_session=last_session,
+                    tenor=tenor,
+                    search_results=search_results,
+                    images=images,
+                    incognito=incognito,
+                    runtime_identity=runtime_identity,
+                    handoff_transition=active_handoff_transition,
+                    holochat_state_block=holochat_state_block,
+                    holobrain_injection_plan=holobrain_injection_plan,
+                    gov_turn_plan_block=fallback_plan_block,
+                )
                 response_text, in_tok, out_tok = fallback.chat_call(
-                    system_prompt, adapter_history, enriched_message, temperature,
+                    fallback_system_prompt, adapter_history, enriched_message, temperature,
                     images=images or None,
                 )
                 adapter = fallback
+                gov_turn_plan = fallback_plan
+                gov_turn_plan_block = fallback_plan_block
+                context_budget = fallback_context_budget
             except Exception as exc:
                 failover_attempts.append(_safe_adapter_error(fallback, exc))
                 raise
@@ -1762,9 +1956,9 @@ class HoloChatEngine:
             final_adapter=adapter,
             attempts=failover_attempts,
             policy=(
-                "balanced_frontier_assist_then_next_mini"
+                "balanced_frontier_assist_then_next_canonical_worker"
                 if frontier_assist.get("triggered")
-                else "try_next_active_mini_then_bench"
+                else "try_next_canonical_worker_then_bench"
             ),
         )
 
@@ -1986,6 +2180,7 @@ class HoloChatEngine:
             holobrain_injection_plan=holobrain_injection_plan,
             holobrain_state_persisted=holobrain_state_persisted,
             gov_turn_plan=gov_turn_plan,
+            visible_release_decision=release_decision,
         )
 
         return {
@@ -2044,10 +2239,11 @@ class HoloChatEngine:
             life_context    = []
             last_session    = None
         else:
-            capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
+            raw_capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
+            capsule_context = _capsule_context_for_depth_preference(raw_capsule_context)
             life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
             last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
-            durable_state   = load_state_from_capsule_context(capsule_context)
+            durable_state   = load_state_from_capsule_context(raw_capsule_context)
             if durable_state and session.turn_count == 0:
                 session.holochat_state = durable_state
         fresh_thread = session.turn_count == 0
@@ -2192,33 +2388,11 @@ class HoloChatEngine:
                 session.auto_reseed_applied = True
                 session.auto_reseed_hash = stable_hash(holochat_state_block)
 
-        gov_turn_plan = _build_worker_gov_turn_plan(
-            session=session,
-            capsule_id=capsule_id,
-            adapter=adapter,
-            gov_advisor=gov_advisor,
-            turn_policy=turn_policy,
-            temperature=temperature,
-            tenor=tenor,
-            tenor_admission=tenor_admission,
-            thought_admission=thought_admission,
-            search_query=search_query,
-            search_results=search_results,
-            web_trace=web_trace,
-            capsule_context=capsule_context,
-            life_context=life_context,
-            last_session=last_session,
-            incognito=incognito,
-            active_handoff_transition=active_handoff_transition,
-            holochat_state_block=holochat_state_block,
-            holobrain_injection_plan=holobrain_injection_plan,
-            frontier_assist=frontier_assist,
-        )
-        gov_turn_plan_block = render_gov_turn_plan_for_worker(gov_turn_plan)
-
-        system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
+        # Build the stable prompt body once, then append a candidate-specific
+        # GovTurnPlan immediately before each streaming worker call.
+        base_system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
         if not incognito:
-            system_prompt += (
+            base_system_prompt += (
                 "\n\n" + _health_context(session)
                 + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
                 + ("\n\n" + holochat_state_block if holochat_state_block else "")
@@ -2228,25 +2402,9 @@ class HoloChatEngine:
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
             )
-        system_prompt += "\n\n" + gov_turn_plan_block
-
-        context_budget = _runtime_context_budget(
-            session=session,
-            adapter_history=adapter_history,
-            user_message=user_message,
-            capsule_context=capsule_context,
-            life_context=life_context,
-            last_session=last_session,
-            tenor=tenor,
-            search_results=search_results,
-            images=images,
-            incognito=incognito,
-            runtime_identity=runtime_identity,
-            handoff_transition=active_handoff_transition,
-            holochat_state_block=holochat_state_block,
-            holobrain_injection_plan=holobrain_injection_plan,
-            gov_turn_plan_block=gov_turn_plan_block,
-        )
+        gov_turn_plan = None
+        gov_turn_plan_block = ""
+        context_budget = None
 
         holo4dna_shadow = None
         if _holo4dna_shadow_enabled():
@@ -2292,8 +2450,53 @@ class HoloChatEngine:
             candidate_chunks: list[str] = []
             emitted = False
             try:
+                candidate_plan = _build_worker_gov_turn_plan(
+                    session=session,
+                    capsule_id=capsule_id,
+                    adapter=candidate,
+                    gov_advisor=gov_advisor,
+                    turn_policy=turn_policy,
+                    temperature=temperature,
+                    tenor=tenor,
+                    tenor_admission=tenor_admission,
+                    thought_admission=thought_admission,
+                    search_query=search_query,
+                    search_results=search_results,
+                    web_trace=web_trace,
+                    capsule_context=capsule_context,
+                    life_context=life_context,
+                    last_session=last_session,
+                    incognito=incognito,
+                    active_handoff_transition=active_handoff_transition,
+                    holochat_state_block=holochat_state_block,
+                    holobrain_injection_plan=holobrain_injection_plan,
+                    frontier_assist=frontier_assist,
+                    worker_fallback_active=bool(failover_attempts),
+                )
+                if not candidate_plan.kernel_validation_result.get("passed"):
+                    failures = ",".join(candidate_plan.kernel_validation_result.get("failures") or [])
+                    raise RuntimeError(f"GovTurnPlan validation failed: {failures}")
+                candidate_plan_block = render_gov_turn_plan_for_worker(candidate_plan)
+                candidate_system_prompt = base_system_prompt + "\n\n" + candidate_plan_block
+                candidate_context_budget = _runtime_context_budget(
+                    session=session,
+                    adapter_history=adapter_history,
+                    user_message=user_message,
+                    capsule_context=capsule_context,
+                    life_context=life_context,
+                    last_session=last_session,
+                    tenor=tenor,
+                    search_results=search_results,
+                    images=images,
+                    incognito=incognito,
+                    runtime_identity=runtime_identity,
+                    handoff_transition=active_handoff_transition,
+                    holochat_state_block=holochat_state_block,
+                    holobrain_injection_plan=holobrain_injection_plan,
+                    gov_turn_plan_block=candidate_plan_block,
+                )
                 for chunk in candidate.stream_chat_call(
-                    system_prompt, adapter_history, enriched_message, temperature, images=images or None
+                    candidate_system_prompt, adapter_history, enriched_message, temperature, images=images or None
                 ):
                     if isinstance(chunk, dict) and chunk.get("done"):
                         in_tok  = chunk.get("in_tok", 0)
@@ -2303,6 +2506,9 @@ class HoloChatEngine:
                         candidate_chunks.append(chunk)
                 accumulated.extend(candidate_chunks)
                 adapter = candidate
+                gov_turn_plan = candidate_plan
+                gov_turn_plan_block = candidate_plan_block
+                context_budget = candidate_context_budget
                 stream_completed = True
                 break
             except Exception as exc:
@@ -2329,9 +2535,9 @@ class HoloChatEngine:
             final_adapter=adapter,
             attempts=failover_attempts,
             policy=(
-                "balanced_frontier_assist_then_next_mini"
+                "balanced_frontier_assist_then_next_canonical_worker"
                 if frontier_assist.get("triggered")
-                else "try_next_active_mini"
+                else "try_next_canonical_worker"
             ),
         )
 
@@ -2518,6 +2724,7 @@ class HoloChatEngine:
             holobrain_injection_plan=holobrain_injection_plan,
             holobrain_state_persisted=holobrain_state_persisted,
             gov_turn_plan=gov_turn_plan,
+            visible_release_decision=release_decision,
         )
 
         yield {
@@ -2652,6 +2859,7 @@ def _build_worker_gov_turn_plan(
     holochat_state_block: Optional[str],
     holobrain_injection_plan: HoloBrainInjectionPlan,
     frontier_assist: dict[str, Any],
+    worker_fallback_active: bool = False,
 ) -> GovTurnPlan:
     selected, dropped, drop_reasons, memory_admissions, memory_rejections = _govturnplan_context_selection(
         incognito=incognito,
@@ -2727,7 +2935,7 @@ def _build_worker_gov_turn_plan(
         fallback_eligibility={
             "worker_fallback_allowed": True,
             "worker_fallback_condition": "primary_provider_failure_only",
-            "worker_fallback_active": False,
+            "worker_fallback_active": bool(worker_fallback_active),
             "advisor_fallback_allowed": bool(getattr(turn_policy, "fallback_allowed", False)),
             "minimax_normal_routing_allowed": False,
         },
@@ -2741,6 +2949,7 @@ def _build_worker_gov_turn_plan(
             "temperature": round(float(temperature), 3),
             "frontier_assist_triggered": bool((frontier_assist or {}).get("triggered")),
             "incognito": bool(incognito),
+            "worker_fallback_active": bool(worker_fallback_active),
         },
     )
 
@@ -2754,6 +2963,7 @@ def _is_fallback_analyst_adapter(adapter: Any) -> bool:
 
 
 def _rotation_analyst_adapters(adapters: list[Any]) -> list[Any]:
+    adapters = _filter_holochat_enabled_adapters(adapters)
     primary = [adapter for adapter in adapters if not _is_fallback_analyst_adapter(adapter)]
     return primary or list(adapters)
 
@@ -2774,12 +2984,15 @@ def _select_analyst_adapter(session: ChatSession, adapters: list[Any]) -> Any:
     if not adapters:
         raise RuntimeError("HoloChat runtime has no analyst adapters.")
     rotation_pool = _rotation_analyst_adapters(adapters)
+    if not rotation_pool:
+        raise RuntimeError("HoloChat runtime has no analyst adapters.")
     adapter = rotation_pool[session.rotation_index % len(rotation_pool)]
     session.rotation_index += 1
     return adapter
 
 
 def _adapter_candidate_order(adapters: list[Any], selected: Any) -> list[Any]:
+    adapters = _filter_holochat_enabled_adapters(adapters)
     if not adapters:
         return []
     primary = [adapter for adapter in adapters if not _is_fallback_analyst_adapter(adapter)]
@@ -3087,6 +3300,8 @@ def _runtime_context_budget(
         "score": session.thread_health_score,
         "level": session.thread_health_level,
         "status": session.thread_status,
+        "metrics": _thread_health_metrics_for_context_budget(session, provider_history_meta),
+        "flags": _thread_health_flags_for_context_budget(session, provider_history_meta),
         "reasons": _thread_health_reasons_for_context_budget(session, provider_history_meta),
     }
     return ledger
@@ -3173,6 +3388,9 @@ def _build_holo4dna_shadow_turn(
         user_message=user_message,
         thread_health_score=session.thread_health_score,
         thread_status=session.thread_status,
+        thread_health_metrics=session.thread_health_metrics,
+        thread_health_flags=session.thread_health_flags,
+        thread_health_reasons=session.thread_health_reasons,
         required_tools=required_tools,
         gov_arc_state=session.gov_arc_state,
     )
@@ -3292,6 +3510,27 @@ def _capsule_context_block(context: dict) -> str:
         context,
         header="WORKING MEMORY (facts extracted this and recent sessions — less refined than portrait):",
     )
+
+
+def _capsule_context_for_depth_preference(context: dict) -> dict:
+    """Apply the user's onboarding depth choice before prompt injection."""
+    if not context:
+        return {}
+    preference = str(context.get("holo_depth_preference") or "personal").strip().lower()
+    if preference not in {"surface", "personal", "deep"}:
+        preference = "personal"
+
+    filtered: dict = {}
+    for key, value in context.items():
+        key_str = str(key)
+        if key_str == "holo_seed_deep_v1" and preference != "deep":
+            continue
+        if key_str == "holo_seed_personal_v1" and preference == "surface":
+            continue
+        if key_str == "holo_depth_consent_v1":
+            continue
+        filtered[key] = value
+    return filtered
 
 
 def _extract_and_save_artifacts(

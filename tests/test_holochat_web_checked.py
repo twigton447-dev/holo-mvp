@@ -258,12 +258,18 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     html = Path("frontend/chat.html").read_text()
 
     assert "<span>HoloChat</span>" in html
-    assert '<span id="brand-sub">4DNA</span>' in html
+    assert '<span id="brand-sub" aria-hidden="true">4DNA</span>' in html
+    assert "#brand-sub { display: none;" in html
     assert "Memory-attached workspace" not in html
     assert "updateRuntimePanel(data)" in html
     assert 'id="runtime-toggle"' not in html
-    assert 'id="holobrain-toggle"' in html
-    assert "Engine data" in html
+    assert 'id="holobrain-toggle" class="dev-only header-btn header-label-btn"' in html
+    assert "Engine data" not in html
+    assert "DEV_TOOLS_ENABLED" in html
+    assert "window.enableHoloDevTools" in html
+    assert "window.disableHoloDevTools" in html
+    assert 'title="Open diagnostics"' in html
+    assert ">Diagnostics</button>" in html
     assert 'id="runtime-panel"' in html
     assert "Runtime/System" in html
     assert "renderRuntimeRail(data)" not in html
@@ -353,9 +359,11 @@ def test_frontend_thread_meter_uses_thread_health_score():
     chat_engine_py = Path("chat_engine.py").read_text()
     main_py = Path("main.py").read_text()
 
-    assert 'id="thread-meter"' in html
+    assert 'id="thread-meter" class="dev-only"' in html
     assert 'id="thread-meter-fill"' in html
     assert 'id="thread-meter-label"' in html
+    assert ".dev-only { display: none !important; }" in html
+    assert "body.dev-tools #thread-meter.dev-only" in html
     assert "function updateThreadMeter(score)" in html
     assert "updateThreadMeter(doneData.thread_health_score)" in html
     assert "updateThreadMeter(data.thread_health_score)" in html
@@ -403,8 +411,8 @@ def test_mobile_header_keeps_core_controls_available():
     assert 'id="mobile-composer-controls" aria-label="Mobile composer controls"' in html
     assert '<button onclick="toggleThreadPanel()">Threads</button>' in html
     assert '<button onclick="newThread()">New</button>' in html
-    assert '<button onclick="openHoloBrainPanel()">Engine</button>' in html
-    assert '<button onclick="toggleIncognito()">Incognito</button>' in html
+    assert '<button onclick="toggleIncognito()">Private</button>' in html
+    assert '<button onclick="openHoloBrainPanel()">Engine</button>' not in html
     assert "#mobile-action-bar { display: none; }" in html
     assert "#mobile-composer-controls { display: none; }" in html
     assert "#mobile-action-bar,\n      #mobile-composer-controls { display: none !important; }" in html
@@ -412,15 +420,19 @@ def test_mobile_header_keeps_core_controls_available():
     assert "#thread-toggle,\n      #new-thread" in html
     assert "display: inline-flex !important;" in html
     assert '#thread-toggle::before { content: "‹";' in html
-    assert '#new-thread::before { content: "✎";' in html
+    assert '#new-thread svg { width: 15px; height: 15px; }' in html
     assert "#holobrain-toggle, #incognito-btn, #theme-toggle { display: none !important; }" in html
     assert '#user-avatar .avatar-placeholder::before' in html
     assert 'content: "•••";' in html
     assert '#avatar-menu .mobile-only { display: block; }' in html
-    assert '<button class="mobile-only" onclick="closeAvatarMenu();openMemoryPanel()">Memory</button>' in html
-    assert '<button class="mobile-only" onclick="closeAvatarMenu();openHoloBrainPanel()">Engine data</button>' in html
+    assert '#avatar-menu .dev-only.mobile-only { display: none !important; }' in html
+    assert 'body.dev-tools #avatar-menu .dev-only.mobile-only { display: block !important; }' in html
+    assert '<button onclick="closeAvatarMenu();openMemoryPanel()">Memory</button>' in html
+    assert '<button onclick="closeAvatarMenu();injectDepthChoice(true)">Depth</button>' in html
+    assert '<button class="mobile-only" onclick="closeAvatarMenu();openHoloBrainPanel()">Engine data</button>' not in html
+    assert '<button class="mobile-only dev-only" onclick="closeAvatarMenu();openHoloBrainPanel()">Diagnostics</button>' in html
     assert '<button class="mobile-only" onclick="closeAvatarMenu();toggleTheme()">Switch theme</button>' in html
-    assert '<button class="mobile-only" onclick="closeAvatarMenu();toggleIncognito()">Start incognito thread</button>' in html
+    assert '<button class="mobile-only" onclick="closeAvatarMenu();toggleIncognito()">Private thread</button>' in html
     assert "#incognito-btn, #thread-toggle, #new-thread, #theme-toggle { display: none; }" not in html
 
 
@@ -434,6 +446,21 @@ def test_frontend_streaming_uses_paced_text_reveal():
     assert "pacedStream.push(evt.text);" in html
     assert "if (pacedStream) await pacedStream.drain();" in html
     assert "bubbleEl.innerHTML = renderMarkdown(accumulated);" not in html
+
+
+def test_frontend_streaming_keeps_reader_anchored_at_message_top():
+    html = Path("frontend/chat.html").read_text()
+
+    assert 'msg.className = "msg holo streaming";' in html
+    assert 'scrollMessageTopIntoReadingPosition(holoEl, "smooth");' in html
+    assert 'function scrollMessageTopIntoReadingPosition(msgEl, behavior = "auto")' in html
+    assert "function preserveMessageTopAfterRender(msgEl, previousTop)" in html
+    assert "preserveMessageTopAfterRender(msgEl, anchorTop);" in html
+    renderer = html[
+        html.index("function createPacedStreamRenderer"):
+        html.index("function finalizeStreamingBubble")
+    ]
+    assert "scrollToBottom()" not in renderer
 
 
 def test_holochat_runtime_prompt_prefers_structured_human_answers():
@@ -475,18 +502,38 @@ def test_password_reset_sender_uses_hologroup_domain():
     assert "noreply@hololgroup.io" not in auth_py
 
 
-def test_frontend_onboarding_memory_seed_prompt_is_safe_and_specific():
+def test_frontend_onboarding_depth_choice_is_consent_first_and_revocable():
     html = Path("frontend/chat.html").read_text()
+    main_py = Path("main.py").read_text()
+    chat_engine_py = Path("chat_engine.py").read_text()
+    brain_py = Path("project_brain.py").read_text()
 
-    assert "Ask your favorite chatbot to create a memory seed profile for HoloChat." in html
-    assert "detailed and nuanced operating profile" in html
-    assert "Aim for about 1,000 words" in html
-    assert "Do not include passwords, account numbers" in html
-    assert "Do not include secrets or highly sensitive information." in html
-    assert "how I like an AI assistant to help me" in html
-    assert "what an AI assistant should avoid doing with me" in html
-    assert "Copy prompt" in html
-    assert "You can edit it before saving." in html
+    assert "How deep should Holo know you?" in html
+    assert "Surface</strong>" in html
+    assert "Personal</strong>" in html
+    assert "Deep</strong>" in html
+    assert "By choosing Personal or Deep you are confirming you understand what will be asked and stored." in html
+    assert "Skip any question." in html
+    assert "Do not include passwords, financial account numbers, medical records" in html
+    assert "If anything here feels like too much, just say so and we’ll stop or go lighter." in html
+    assert "holo_depth_preference" in html
+    assert "holo_depth_consent_v1" in html
+    assert "holo_seed_personal_v1" in html
+    assert "holo_seed_deep_v1" in html
+    assert "maybePromptDepthChoice();" in html
+    assert "maybePromptDepthChoiceOnLaunch();" in html
+    assert "renderRecentThemes(userName);" in html
+    assert "editMemoryEntry" in html
+    assert "deleteMemoryEntry" in html
+    assert 'method: "DELETE"' in html
+    assert '@app.delete("/v1/capsule/context/{key}")' in main_py
+    assert "delete_capsule_context" in brain_py
+    assert "_capsule_context_for_depth_preference" in chat_engine_py
+    assert 'key_str == "holo_seed_deep_v1" and preference != "deep"' in chat_engine_py
+    assert 'key_str == "holo_seed_personal_v1" and preference == "surface"' in chat_engine_py
+    assert "value_limit = 3000" in main_py
+    assert "delete_capsule_context(capsule" in main_py
+    assert "Ask your favorite chatbot to create a memory seed profile for HoloChat." not in html
     assert "Meet Holo Chat 1.1" not in html
     assert "Why Holo?" not in html
     assert "What is Holo Chat?" not in html

@@ -403,7 +403,7 @@ class ProjectBrain:
         key = os.getenv("SUPABASE_KEY")
         if not url or not key:
             logger.warning(
-                "ProjectBrain: SUPABASE_URL or SUPABASE_KEY not set. "
+                "HoloBrain: SUPABASE_URL or SUPABASE_KEY not set. "
                 "Running without persistent memory."
             )
             self._client = None
@@ -413,10 +413,10 @@ class ProjectBrain:
             from supabase import create_client
             self._client = create_client(url, key)
             self._client.table("holo_vendor_profiles").select("vendor_domain").limit(1).execute()
-            logger.info("ProjectBrain: connected.")
+            logger.info("HoloBrain: connected.")
         except Exception as e:
             logger.warning(
-                f"ProjectBrain: connection failed ({e}). "
+                f"HoloBrain: connection failed ({e}). "
                 "Run the schema SQL in the Supabase dashboard."
             )
             self._client = None
@@ -430,9 +430,9 @@ class ProjectBrain:
         try:
             from supabase import create_client
             self._client = create_client(url, key)
-            logger.info("ProjectBrain: reconnected to Supabase.")
+            logger.info("HoloBrain: reconnected to Supabase.")
         except Exception as e:
-            logger.warning(f"ProjectBrain: reconnect failed: {e}")
+            logger.warning(f"HoloBrain: reconnect failed: {e}")
             self._client = None
 
     # -------------------------------------------------------------------------
@@ -590,7 +590,7 @@ class ProjectBrain:
             ]
 
             logger.info(
-                f"ProjectBrain.retrieve_recipient_history: '{vendor_domain}' — "
+                f"HoloBrain.retrieve_recipient_history: '{vendor_domain}' — "
                 f"allow_count={allow_count}, first_seen={first_seen}, "
                 f"prior_fingerprints={len(prior_fps)}."
             )
@@ -602,7 +602,7 @@ class ProjectBrain:
             )
 
         except Exception as e:
-            logger.warning(f"ProjectBrain.retrieve_recipient_history failed: {e}")
+            logger.warning(f"HoloBrain.retrieve_recipient_history failed: {e}")
             return None
 
     # Pre-evaluation: retrieve relevant prior experience
@@ -639,7 +639,7 @@ class ProjectBrain:
             profile = profile_resp.data
 
             if not profile:
-                logger.info(f"ProjectBrain: first evaluation for '{vendor_domain}'.")
+                logger.info(f"HoloBrain: first evaluation for '{vendor_domain}'.")
                 return None
 
             # 2. Recent evaluations
@@ -671,7 +671,7 @@ class ProjectBrain:
             prior_high_findings = findings_resp.data or []
 
             logger.info(
-                f"ProjectBrain: '{vendor_domain}' — "
+                f"HoloBrain: '{vendor_domain}' — "
                 f"{profile['total_evaluations']} total, "
                 f"{profile['allow_count']} ALLOW / "
                 f"{profile['escalate_count']} ESCALATE, "
@@ -723,7 +723,7 @@ class ProjectBrain:
             }
 
         except Exception as e:
-            logger.warning(f"ProjectBrain.retrieve_context failed: {e}")
+            logger.warning(f"HoloBrain.retrieve_context failed: {e}")
             return None
 
     # -------------------------------------------------------------------------
@@ -836,13 +836,13 @@ class ProjectBrain:
                 self._client.table("holo_findings").insert(finding_rows).execute()
 
             logger.info(
-                f"ProjectBrain: saved {result.get('evaluation_id')} — "
+                f"HoloBrain: saved {result.get('evaluation_id')} — "
                 f"vendor '{vendor_domain}', decision {result.get('decision')}, "
                 f"{len(finding_rows)} finding(s) written."
             )
 
         except Exception as e:
-            logger.warning(f"ProjectBrain.save_evaluation failed: {e}")
+            logger.warning(f"HoloBrain.save_evaluation failed: {e}")
 
     # -------------------------------------------------------------------------
     # Internal helpers
@@ -961,10 +961,10 @@ class ProjectBrain:
                 "last_active": datetime.now(timezone.utc).isoformat(),
             }
             self._client.table("holo_capsules").insert(row).execute()
-            logger.info(f"ProjectBrain: new capsule created for {email}.")
+            logger.info(f"HoloBrain: new capsule created for {email}.")
             return row
         except Exception as e:
-            logger.warning(f"ProjectBrain.get_or_create_capsule failed: {e}")
+            logger.warning(f"HoloBrain.get_or_create_capsule failed: {e}")
             return None
 
     def get_capsule_by_google_id(self, google_id: str) -> Optional[dict]:
@@ -1006,7 +1006,7 @@ class ProjectBrain:
                 "mode": mode
             }).eq("capsule_id", capsule_id).execute()
         except Exception as e:
-            logger.warning(f"ProjectBrain.set_capsule_mode failed: {e}")
+            logger.warning(f"HoloBrain.set_capsule_mode failed: {e}")
 
     def get_capsule_context(self, capsule_id: str) -> dict:
         """Return all context key/value pairs for a capsule."""
@@ -1035,7 +1035,18 @@ class ProjectBrain:
                 "updated_at": datetime.now(timezone.utc).isoformat(),
             }, on_conflict="capsule_id,key").execute()
         except Exception as e:
-            logger.warning(f"ProjectBrain.set_capsule_context failed: {e}")
+            logger.warning(f"HoloBrain.set_capsule_context failed: {e}")
+
+    def delete_capsule_context(self, capsule_id: str, key: str) -> bool:
+        """Delete one context entry from a capsule."""
+        if not self._client:
+            return False
+        try:
+            self._client.table("holo_capsule_context").delete().eq("capsule_id", capsule_id).eq("key", key).execute()
+            return True
+        except Exception as e:
+            logger.warning(f"HoloBrain.delete_capsule_context failed: {e}")
+            return False
 
     # -------------------------------------------------------------------------
     # Chat storage
@@ -1092,9 +1103,9 @@ class ProjectBrain:
                 },
             ]).execute()
 
-            logger.info(f"ProjectBrain: saved chat turn {turn_number} for session {session_id[:8]}.")
+            logger.info(f"HoloBrain: saved chat turn {turn_number} for session {session_id[:8]}.")
         except Exception as e:
-            logger.warning(f"ProjectBrain.save_chat_turn failed: {e}")
+            logger.warning(f"HoloBrain.save_chat_turn failed: {e}")
 
     def load_chat_history(self, session_id: str) -> Optional[List[Dict[str, Any]]]:
         """
@@ -1118,7 +1129,7 @@ class ProjectBrain:
                     return None
                 return [{"role": r["role"], "content": r["content"]} for r in rows]
             except Exception as e:
-                logger.warning(f"ProjectBrain.load_chat_history attempt {attempt+1} failed: {e}")
+                logger.warning(f"HoloBrain.load_chat_history attempt {attempt+1} failed: {e}")
                 if attempt == 0:
                     self._reconnect()
         return None
@@ -1146,10 +1157,10 @@ class ProjectBrain:
             # Delete messages first, then session
             self._client.table("holo_chat_messages").delete().eq("session_id", session_id).execute()
             self._client.table("holo_chat_sessions").delete().eq("session_id", session_id).execute()
-            logger.info(f"ProjectBrain: deleted session {session_id} for capsule {capsule_id}.")
+            logger.info(f"HoloBrain: deleted session {session_id} for capsule {capsule_id}.")
             return True
         except Exception as e:
-            logger.warning(f"ProjectBrain.delete_session failed: {e}")
+            logger.warning(f"HoloBrain.delete_session failed: {e}")
             return False
 
     def list_sessions(self, capsule_id: str, limit: int = 40) -> list:
@@ -1198,7 +1209,7 @@ class ProjectBrain:
 
             return rows
         except Exception as e:
-            logger.warning(f"ProjectBrain.list_sessions failed: {e}")
+            logger.warning(f"HoloBrain.list_sessions failed: {e}")
             return []
 
     def save_consolidation(self, capsule_id: str, session_id: str, session_note: dict) -> None:
@@ -1215,9 +1226,9 @@ class ProjectBrain:
                 "captain_note": session_note.get("captain_note", ""),
                 "created_at":   datetime.now(timezone.utc).isoformat(),
             }).execute()
-            logger.info(f"ProjectBrain: session consolidation saved for {capsule_id[:8]}.")
+            logger.info(f"HoloBrain: session consolidation saved for {capsule_id[:8]}.")
         except Exception as e:
-            logger.warning(f"ProjectBrain.save_consolidation failed: {e}")
+            logger.warning(f"HoloBrain.save_consolidation failed: {e}")
 
     def upsert_life_context(self, capsule_id: str, entries: list) -> None:
         """
@@ -1253,9 +1264,9 @@ class ProjectBrain:
                 }, on_conflict="capsule_id,key").execute()
 
             except Exception as e:
-                logger.warning(f"ProjectBrain.upsert_life_context failed for key '{key}': {e}")
+                logger.warning(f"HoloBrain.upsert_life_context failed for key '{key}': {e}")
 
-        logger.info(f"ProjectBrain: {len(entries)} life_context entries upserted for {capsule_id[:8]}.")
+        logger.info(f"HoloBrain: {len(entries)} life_context entries upserted for {capsule_id[:8]}.")
 
     def load_life_context(self, capsule_id: str) -> list:
         """
@@ -1275,7 +1286,7 @@ class ProjectBrain:
             )
             return resp.data or []
         except Exception as e:
-            logger.warning(f"ProjectBrain.load_life_context failed: {e}")
+            logger.warning(f"HoloBrain.load_life_context failed: {e}")
             return []
 
     def get_prior_unconsolidated_session(self, capsule_id: str, current_session_id: str) -> Optional[str]:
@@ -1322,7 +1333,7 @@ class ProjectBrain:
 
             return None
         except Exception as e:
-            logger.warning(f"ProjectBrain.get_prior_unconsolidated_session failed: {e}")
+            logger.warning(f"HoloBrain.get_prior_unconsolidated_session failed: {e}")
             return None
 
     def load_last_consolidation(self, capsule_id: str) -> Optional[dict]:
@@ -1340,7 +1351,7 @@ class ProjectBrain:
             )
             return resp.data[0] if resp.data else None
         except Exception as e:
-            logger.warning(f"ProjectBrain.load_last_consolidation failed: {e}")
+            logger.warning(f"HoloBrain.load_last_consolidation failed: {e}")
             return None
 
     def append_session_history(self, capsule_id: str, session_id: str, first_message: str) -> None:
@@ -1363,9 +1374,10 @@ class ProjectBrain:
                 .execute()
             )
             existing: list = []
-            if resp.data:
+            data = getattr(resp, "data", None)
+            if data:
                 try:
-                    existing = json.loads(resp.data["value"]) or []
+                    existing = json.loads(data["value"]) or []
                 except Exception:
                     existing = []
 
@@ -1389,7 +1401,7 @@ class ProjectBrain:
             }, on_conflict="capsule_id,key").execute()
 
         except Exception as e:
-            logger.warning(f"ProjectBrain.append_session_history failed: {e}")
+            logger.warning(f"HoloBrain.append_session_history failed: {e}")
 
     def generate_portrait_md(self, capsule_id: str) -> str:
         """
@@ -1518,9 +1530,9 @@ class ProjectBrain:
             self._client.table("holo_chat_sessions").update({
                 "title": name,
             }).eq("session_id", session_id).execute()
-            logger.info(f"ProjectBrain: session {session_id[:8]} named '{name}'.")
+            logger.info(f"HoloBrain: session {session_id[:8]} named '{name}'.")
         except Exception as e:
-            logger.warning(f"ProjectBrain.update_session_name failed: {e}")
+            logger.warning(f"HoloBrain.update_session_name failed: {e}")
 
     # ------------------------------------------------------------------
     # Artifact registry
@@ -1548,10 +1560,10 @@ class ProjectBrain:
                 "content":       content,
             }).execute()
             aid = resp.data[0]["artifact_id"] if resp.data else None
-            logger.info(f"ProjectBrain: artifact saved '{title}' ({aid}).")
+            logger.info(f"HoloBrain: artifact saved '{title}' ({aid}).")
             return aid
         except Exception as e:
-            logger.warning(f"ProjectBrain.save_artifact failed: {e}")
+            logger.warning(f"HoloBrain.save_artifact failed: {e}")
             return None
 
     def list_artifacts(self, capsule_id: str, limit: int = 50) -> list:
@@ -1569,7 +1581,7 @@ class ProjectBrain:
             ).data or []
             return rows
         except Exception as e:
-            logger.warning(f"ProjectBrain.list_artifacts failed: {e}")
+            logger.warning(f"HoloBrain.list_artifacts failed: {e}")
             return []
 
     def get_artifact(self, capsule_id: str, artifact_id: str) -> Optional[dict]:
@@ -1587,7 +1599,7 @@ class ProjectBrain:
             )
             return resp.data if resp else None
         except Exception as e:
-            logger.warning(f"ProjectBrain.get_artifact failed: {e}")
+            logger.warning(f"HoloBrain.get_artifact failed: {e}")
             return None
 
     def load_session_list(self, capsule_id: str) -> list:
@@ -1612,7 +1624,7 @@ class ProjectBrain:
             entries = json.loads(resp.data["value"]) or []
             return list(reversed(entries))  # newest first
         except Exception as e:
-            logger.warning(f"ProjectBrain.load_session_list failed: {e}")
+            logger.warning(f"HoloBrain.load_session_list failed: {e}")
             return []
 
     def _extract_vendor_domain(self, context: dict) -> Optional[str]:

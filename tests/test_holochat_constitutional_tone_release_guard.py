@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import chat_engine
 from chat_engine import HoloChatEngine, _holochat_recovery_memory_pack, _runtime_metadata
-from holochat_constitution import HOLOCHAT_CONSTITUTIONAL_TONE_LAW
+from holochat_constitution import HOLOCHAT_CONSTITUTIONAL_TONE_LAW, HOLOCHAT_OPERATING_OBJECTIVE
 from holochat_context_governor import deterministic_visible_release
 from holo_context import build_runtime_identity_block
 from llm_adapters import GOVERNOR_SYSTEM_PROMPT, HOLO_CHAT_SYSTEM_PROMPT
@@ -110,15 +110,26 @@ def _engine(adapter, advisor, brain=None):
 def test_worker_and_governor_prompts_contain_constitutional_tone_law():
     assert "HOLOCHAT CONSTITUTIONAL TONE LAW" in HOLO_CHAT_SYSTEM_PROMPT
     assert "HOLOCHAT CONSTITUTIONAL TONE LAW" in GOVERNOR_SYSTEM_PROMPT
+    assert "HOLOCHAT OPERATING OBJECTIVE" in HOLO_CHAT_SYSTEM_PROMPT
+    assert "HOLOCHAT OPERATING OBJECTIVE" in GOVERNOR_SYSTEM_PROMPT
+    assert "serve the user's best interests" in HOLO_CHAT_SYSTEM_PROMPT
+    assert "serve the user's best interests" in GOVERNOR_SYSTEM_PROMPT
     assert "Never scold, shame, punish" in HOLO_CHAT_SYSTEM_PROMPT
     assert "warm collaborative precision only" in GOVERNOR_SYSTEM_PROMPT
     assert "Gov should push harder than a normal assistant." not in GOVERNOR_SYSTEM_PROMPT
     assert "at least one path should be a pressure path" not in GOVERNOR_SYSTEM_PROMPT
 
 
+def test_worker_prompt_keeps_intelligence_bounded_not_omniscient():
+    assert "You also happen to know everything" not in HOLO_CHAT_SYSTEM_PROMPT
+    assert "breadth is not omniscience" in HOLO_CHAT_SYSTEM_PROMPT
+    assert "stay bounded" in HOLO_CHAT_SYSTEM_PROMPT
+
+
 def test_constitution_and_active_prompt_law_are_universal_not_randall_or_taylor_specific():
     gov_doctrine = open("docs/gov_chat_doctrine.md", encoding="utf-8").read()
     active_surfaces = {
+        "operating_objective": HOLOCHAT_OPERATING_OBJECTIVE,
         "constitution": HOLOCHAT_CONSTITUTIONAL_TONE_LAW,
         "worker_prompt": HOLO_CHAT_SYSTEM_PROMPT,
         "governor_prompt": GOVERNOR_SYSTEM_PROMPT,
@@ -161,13 +172,17 @@ def test_govturnplan_in_actual_worker_prompt_carries_constitution(monkeypatch):
     )
     engine = _engine(adapter, advisor)
 
-    engine.send_message(str(uuid4()), "Help me think this through.", capsule_id="cap-1")
+    result = engine.send_message(str(uuid4()), "Help me think this through.", capsule_id="cap-1")
 
     assert "GOVTURNPLAN CONTROL PACKET" in adapter.last_system_prompt
     assert "Do not use raw advisor output outside these typed fields" in adapter.last_system_prompt
     assert "CAPTAIN BRIEF - READ + DIRECTIVE" not in adapter.last_system_prompt
+    assert HOLOCHAT_OPERATING_OBJECTIVE in adapter.last_system_prompt
+    assert "serve the user's best interests" in adapter.last_system_prompt
     assert HOLOCHAT_CONSTITUTIONAL_TONE_LAW in adapter.last_system_prompt
     assert "Clarify the assumption" in adapter.last_system_prompt
+    persona_constraints = result["runtime"]["gov_turn_plan"]["persona_identity_constraints"]
+    assert any("serve the user's best interests" in item for item in persona_constraints)
 
 
 def test_hostile_visible_output_is_repaired_without_echoing_prosecution():
@@ -183,6 +198,37 @@ def test_hostile_visible_output_is_repaired_without_echoing_prosecution():
     assert "without making you feel prosecuted" in decision.text
 
 
+def test_visible_release_allows_benign_tone_repair_language():
+    text = (
+        "I hear that the earlier answer felt cold. I will not scold you; "
+        "I will diagnose the issue plainly and give you the next practical move."
+    )
+
+    decision = deterministic_visible_release(
+        "Holo keeps sounding colder and less intelligent.",
+        text,
+    )
+
+    assert decision.repaired is False
+    assert decision.release is True
+    assert decision.text == text
+    assert decision.reason == "visible_output_admitted"
+
+
+def test_send_metadata_reports_visible_release_decision(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingAdapter(response="I will not scold you. Here is the practical next move.")
+    engine = _engine(adapter, ConstitutionalAdvisor())
+
+    result = engine.send_message(str(uuid4()), "That felt cold.", capsule_id="cap-1")
+
+    assert result["runtime"]["visible_release"] == {
+        "release": True,
+        "repaired": False,
+        "reason": "visible_output_admitted",
+    }
+
+
 def test_streaming_buffers_until_constitutional_release_guard(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     adapter = CapturingAdapter(response="You need |to admit you ignored this.")
@@ -195,6 +241,31 @@ def test_streaming_buffers_until_constitutional_release_guard(monkeypatch):
     assert "to admit you ignored this." not in text_events
     assert len(text_events) == 1
     assert "without making you feel prosecuted" in text_events[0]
+    assert events[-1]["runtime"]["visible_release"]["repaired"] is True
+    assert events[-1]["done"] is True
+
+
+def test_streaming_allows_benign_tone_repair_language(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingAdapter(
+        response=(
+            "You said that felt |cold, so I will not scold you. "
+            "Here is the practical next move."
+        )
+    )
+    engine = _engine(adapter, ConstitutionalAdvisor())
+
+    events = list(engine.stream_message(str(uuid4()), "That answer felt cold."))
+    text_events = [event for event in events if isinstance(event, str)]
+
+    assert len(text_events) == 1
+    assert "cold, so I will not scold you" in text_events[0]
+    assert "Let me keep this warm and useful" not in text_events[0]
+    assert events[-1]["runtime"]["visible_release"] == {
+        "release": True,
+        "repaired": False,
+        "reason": "visible_output_admitted",
+    }
     assert events[-1]["done"] is True
 
 

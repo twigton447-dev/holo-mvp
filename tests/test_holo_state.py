@@ -61,12 +61,28 @@ def test_baton_pass_defaults_are_safe():
 
 
 def test_thread_health_from_existing_score_status():
-    health = ThreadHealth.from_score(18, status="ROTATION_RECOMMENDED", reasons=["long_thread"])
+    health = ThreadHealth.from_score(
+        18,
+        status="ROTATION_RECOMMENDED",
+        metrics={"turn_count": 28},
+        flags=["context_pressure_critical"],
+        reasons=["long_thread"],
+    )
 
     assert health.score == 18
     assert health.level == "RED"
     assert health.status == "ROTATION_RECOMMENDED"
+    assert health.metrics == {"turn_count": 28}
+    assert health.flags == ["context_pressure_critical"]
     assert health.reasons == ["long_thread"]
+
+
+def test_thread_health_yellow_infers_cleanup_recommended():
+    health = ThreadHealth.from_score(49, metrics={"turn_count": 9, "raw_history_chars": 12647})
+
+    assert health.level == "YELLOW"
+    assert health.status == "CLEANUP_RECOMMENDED"
+    assert health.metrics["turn_count"] == 9
 
 
 def test_holo_state_canonical_object_uses_doctrine_fields():

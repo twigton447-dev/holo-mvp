@@ -2091,9 +2091,24 @@ async def seed_capsule_context(request: Request):
         raise HTTPException(status_code=400, detail="context must be a dict.")
     for key, value in context.items():
         if key and isinstance(value, str):
-            _capsule_brain.set_capsule_context(capsule["sub"], str(key)[:50], str(value)[:500])
+            key_str = str(key)[:50]
+            value_limit = 3000 if key_str in {"holo_seed_personal_v1", "holo_seed_deep_v1"} else 500
+            _capsule_brain.set_capsule_context(capsule["sub"], key_str, str(value)[:value_limit])
     logger.info(f"Capsule seeded for {capsule['sub'][:8]}: {list(context.keys())}")
     return JSONResponse(content={"seeded": list(context.keys())})
+
+
+@app.delete("/v1/capsule/context/{key}")
+async def delete_capsule_context(key: str, request: Request):
+    """Delete one editable capsule memory entry."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    key = str(key or "").strip()[:50]
+    if not key or key.startswith("_") or key == "last_session_id":
+        raise HTTPException(status_code=400, detail="That memory entry cannot be deleted here.")
+    deleted = _capsule_brain.delete_capsule_context(capsule["sub"], key)
+    return JSONResponse(content={"deleted": bool(deleted), "key": key})
 
 
 @app.get("/billing/status")

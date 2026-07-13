@@ -1645,9 +1645,9 @@ You are not an assistant. You are not a chatbot. You are the most honest, percep
 
 You are warm but not sycophantic. Direct but never harsh. Curious but never intrusive. You do not flatter. You do not hedge to avoid discomfort. You do not add filler. You say what needs to be said and nothing more.
 
-You also happen to know everything. Medicine, law, finance, engineering, psychology, history, philosophy, biology, physics, architecture, nutrition, parenting, relationships, tax code, contract law, differential diagnosis, drug interactions, market structure, political theory — all of it, at depth. Not because you're performing expertise, but because you've absorbed the whole of human knowledge and can move fluidly across it. When someone mentions a symptom, you hear it the way a great physician would. When they describe a legal situation, you think the way a sharp attorney would. When they're making a financial decision, you see it the way someone who deeply understands money would.
+You draw on unusually broad knowledge. Medicine, law, finance, engineering, psychology, history, philosophy, biology, physics, architecture, nutrition, parenting, relationships, tax code, contract law, differential diagnosis, drug interactions, market structure, political theory — all of it can inform how you think. But breadth is not omniscience. In high-stakes domains, you stay bounded: you clarify what is known, what is uncertain, what questions matter, and where the user needs qualified professional judgment.
 
-But you never lead with what you know. You don't announce your expertise. You don't say "as a medical professional would note" or "from a legal standpoint." You just think clearly about what's actually happening and say it the way a brilliant, trusted friend would — someone who happened to go to every school and read every book, but who still talks like a person. The knowledge lives underneath. The person is what shows.
+You never lead with what you know. You don't announce expertise. You don't say "as a medical professional would note" or "from a legal standpoint." You think clearly about what's actually happening and say it the way a brilliant, trusted friend would — someone with range, humility, and enough discipline not to overclaim. The knowledge lives underneath. The person is what shows.
 
 You are also funny — not as a feature, but because you are sharp. Wit is what happens when intelligence moves fast and sees the absurdity in things clearly. You don't perform humor. You don't do bits. But when something is genuinely funny — when the irony is right there, when the situation has a comic structure that would be dishonest to ignore — you say it. A single dry observation at the right moment does more than a paragraph of earnest analysis. You know the difference between a moment that calls for depth and a moment that calls for a laugh, and you trust yourself to read it.
 
@@ -1974,6 +1974,20 @@ Write your targeting brief now. 4 sentences maximum. Be specific."""
 # Shared LLM call base for the Governor
 # ---------------------------------------------------------------------------
 
+_OPENAI_DEFAULT_TEMPERATURE_PREFIXES = ("gpt-5", "o1", "o3", "o4")
+
+
+def _openai_supports_custom_temperature(model_id: str) -> bool:
+    normalized = (model_id or "").strip().lower()
+    return not normalized.startswith(_OPENAI_DEFAULT_TEMPERATURE_PREFIXES)
+
+
+def _openai_temperature_kwargs(model_id: str, temperature: float) -> dict:
+    if _openai_supports_custom_temperature(model_id):
+        return {"temperature": temperature}
+    return {}
+
+
 class _FlightDeckBase:
     """Shared call infrastructure for the Governor."""
 
@@ -2002,11 +2016,11 @@ class _FlightDeckBase:
             response = self._client.chat.completions.create(
                 model                 = self.model_id,
                 max_completion_tokens = max_tokens,
-                temperature           = 0.1,
                 messages    = [
                     {"role": "system", "content": sys_prompt},
                     {"role": "user",   "content": prompt},
                 ],
+                **_openai_temperature_kwargs(self.model_id, 0.1),
             )
             return (
                 response.choices[0].message.content.strip(),
@@ -2211,6 +2225,8 @@ class GovernorAdapter(_FlightDeckBase):
         Used for session stickiness (chat: 3-5 turn hold, api: full session hold).
         No-op if provider_name is not in the pool.
         """
+        if self._fixed_governor:
+            provider_name = self._fixed_governor
         match = next((a for a in self._pool if a.provider == provider_name), None)
         if match:
             self.provider   = match.provider
@@ -3295,16 +3311,20 @@ class OpenAIAdapter(BaseAdapter):
         self._api_style = "openai"
         self._client    = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+    @staticmethod
+    def _supports_custom_temperature(model_id: str) -> bool:
+        return _openai_supports_custom_temperature(model_id)
+
     def call(self, system: str, user: str, temperature: float = 0.2) -> tuple[str, int, int]:
         response = self._client.chat.completions.create(
             model           = self.model_id,
-            temperature     = temperature,
             max_completion_tokens = 2700,
             response_format = {"type": "json_object"},
             messages        = [
                 {"role": "system", "content": system},
                 {"role": "user",   "content": user},
             ],
+            **_openai_temperature_kwargs(self.model_id, temperature),
         )
         text      = response.choices[0].message.content
         in_tok    = response.usage.prompt_tokens
@@ -3338,9 +3358,9 @@ class OpenAIAdapter(BaseAdapter):
             messages.append({"role": "user", "content": user_message})
         response = self._client.chat.completions.create(
             model                 = self.model_id,
-            temperature           = temperature,
             max_completion_tokens = 4096,
             messages              = messages,
+            **_openai_temperature_kwargs(self.model_id, temperature),
         )
         text    = response.choices[0].message.content
         in_tok  = response.usage.prompt_tokens
@@ -3370,9 +3390,10 @@ class OpenAIAdapter(BaseAdapter):
         else:
             messages.append({"role": "user", "content": user_message})
         stream = self._client.chat.completions.create(
-            model=self.model_id, temperature=temperature,
+            model=self.model_id,
             max_completion_tokens=4096, messages=messages, stream=True,
             stream_options={"include_usage": True},
+            **_openai_temperature_kwargs(self.model_id, temperature),
         )
         in_tok = out_tok = 0
         for chunk in stream:
@@ -3726,16 +3747,9 @@ def load_adapters(skip_providers=None, provider_allowlist=None) -> tuple[list[Ba
 # ---------------------------------------------------------------------------
 
 _FAST_MODEL_REGISTRY = [
-    # HoloChat defaults (1 per provider family). Override via env vars.
+    # Canonical HoloChat workers. Gov is fixed to OpenAI by chat_engine.
     ("openai",    "OPENAI_FAST_MODEL",    "gpt-5.5",                  "OPENAI_API_KEY"),
-    ("anthropic", "ANTHROPIC_FAST_MODEL", "claude-haiku-4-5-20251001", "ANTHROPIC_API_KEY"),
-    ("google",    "GOOGLE_FAST_MODEL",    "gemini-2.5-flash-lite",     "GOOGLE_API_KEY"),
-    # Backup 1 — independent DNA (xAI)
     ("xai",       "XAI_FAST_MODEL",       "grok-4.3",                 "XAI_API_KEY"),
-    # Backup 2 — independent DNA (Mistral)
-    ("mistral",   "MISTRAL_FAST_MODEL",   "mistral-small-latest",      "MISTRAL_API_KEY"),
-    # Backup 3 — independent DNA (MiniMax)
-    ("minimax",   "MINIMAX_FAST_MODEL",   "MiniMax-M2.5-highspeed",    "MINIMAX_API_KEY"),
 ]
 
 _FAST_BASE_URLS = {

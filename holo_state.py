@@ -61,6 +61,8 @@ class ThreadHealth(BaseModel):
     score: int = Field(default=100, ge=0, le=100)
     level: str = "GREEN"
     status: str = "HEALTHY"
+    metrics: dict[str, Any] = Field(default_factory=dict)
+    flags: list[str] = Field(default_factory=list)
     reasons: list[str] = Field(default_factory=list)
 
     @classmethod
@@ -69,6 +71,8 @@ class ThreadHealth(BaseModel):
         score: int,
         *,
         status: str | None = None,
+        metrics: dict[str, Any] | None = None,
+        flags: list[str] | None = None,
         reasons: list[str] | None = None,
     ) -> "ThreadHealth":
         if score >= 61:
@@ -84,6 +88,8 @@ class ThreadHealth(BaseModel):
             score=score,
             level=level,
             status=status or inferred_status,
+            metrics=dict(metrics or {}),
+            flags=list(flags or []),
             reasons=list(reasons or []),
         )
 
@@ -178,6 +184,9 @@ class HoloState(BaseModel):
         capsule_id: str | None = None,
         thread_health_score: int = 100,
         thread_status: str | None = None,
+        thread_health_metrics: dict[str, Any] | None = None,
+        thread_health_flags: list[str] | None = None,
+        thread_health_reasons: list[str] | None = None,
         required_tools: list[RequiredTools] | None = None,
         baton_pass: BatonPass | None = None,
         gov_arc_state: GovArcState | None = None,
@@ -198,6 +207,8 @@ class HoloState(BaseModel):
             thread_health=ThreadHealth.from_score(
                 thread_health_score,
                 status=thread_status,
-                reasons=["imported_from_existing_chat_thread_health"],
+                metrics=thread_health_metrics,
+                flags=thread_health_flags,
+                reasons=thread_health_reasons or ["imported_from_existing_chat_thread_health"],
             ),
         )

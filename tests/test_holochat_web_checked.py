@@ -480,6 +480,10 @@ def test_frontend_uses_editorial_reader_typography_without_heavy_default_bold():
     assert ".holo-body em { font-style: italic; color: #c9c2b6;" in html
     assert ".holo-body blockquote { border-left: 2px solid var(--accent);" in html
     assert "box-shadow: inset 10px 0 22px rgba(91,122,229,0.06);" in html
+    assert ".holo-body ul { list-style: none;" in html
+    assert ".holo-body ol { list-style: none; counter-reset: holo-list;" in html
+    assert ".holo-body ul li::before" in html
+    assert ".holo-body ol li::before" in html
     assert ".holo-body .bubble" in html
     assert "font-weight: 500; line-height: 1.82" not in html
 
@@ -505,7 +509,10 @@ def test_holochat_runtime_prompt_prefers_structured_human_answers():
     gov_doctrine = Path("docs/gov_chat_doctrine.md").read_text()
 
     assert "Sound human in the ordinary sense" in prompt
+    assert "shaped responses" in prompt
     assert "short **bold section headers**" in prompt
+    assert "at least one scan anchor" in prompt
+    assert "Use bullets generously when they create momentum" in prompt
     assert "Do not leave complex answers as one flat wall of prose" in prompt
     assert "Format guidance for this response: use short **bold headers**" in prompt
     assert "If a sentence could appear in a generic AI demo" in prompt

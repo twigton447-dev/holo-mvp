@@ -1345,6 +1345,7 @@ def test_prompt_assembly_loads_canonical_doctrine_docs():
     assert "Canonical HoloChat Doctrine" in HOLO_CHAT_SYSTEM_PROMPT
     assert "HoloChat is not omniscient." in HOLO_CHAT_SYSTEM_PROMPT
     assert "Use short bold section headers" in HOLO_CHAT_SYSTEM_PROMPT
+    assert "Give substantial answers at least one visual handle" in HOLO_CHAT_SYSTEM_PROMPT
     assert "Stay warm and human" in HOLO_CHAT_SYSTEM_PROMPT
     assert "I want you to do a deep calibration pass on me." in HOLO_CHAT_SYSTEM_PROMPT
     assert "inspiring, creative, pragmatic, and hopeful" in HOLO_CHAT_SYSTEM_PROMPT

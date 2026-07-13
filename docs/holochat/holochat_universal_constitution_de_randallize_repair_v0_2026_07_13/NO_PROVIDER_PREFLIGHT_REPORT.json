@@ -1,0 +1,33 @@
+{
+  "package_id": "HOLOCHAT_UNIVERSAL_CONSTITUTION_DE_RANDALLIZE_REPAIR_V0",
+  "preflight_status": "PASS",
+  "provider_calls_performed": 0,
+  "credential_reads_performed": 0,
+  "live_holochat_conversations_performed": false,
+  "deploy_performed": false,
+  "external_sends_performed": false,
+  "watcher_or_queue_actions_performed": false,
+  "holoverify_files_edited": false,
+  "active_surface_name_scan": {
+    "paths": [
+      "holochat_constitution.py",
+      "docs/gov_chat_doctrine.md",
+      "chat_engine.py",
+      "llm_adapters.py",
+      "docs/holo_chat_doctrine.md"
+    ],
+    "forbidden_names": ["Randall", "Taylor", "randall", "taylor"],
+    "matches": 0
+  },
+  "tests": [
+    {
+      "command": ".venv312/bin/python -m compileall -q chat_engine.py holochat_constitution.py holochat_context_governor.py llm_adapters.py tests/test_holochat_constitutional_tone_release_guard.py",
+      "result": "PASS"
+    },
+    {
+      "command": ".venv312/bin/pytest -q tests/test_holochat_constitutional_tone_release_guard.py tests/test_holochat_gov_kernel_authority_repair.py tests/test_holochat_runtime_routing.py tests/test_holochat_web_checked.py",
+      "result": "72 passed in 0.15s"
+    }
+  ],
+  "live_provider_deploy_authorized_now": false
+}

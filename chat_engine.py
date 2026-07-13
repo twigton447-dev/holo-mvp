@@ -838,7 +838,7 @@ def _holochat_recovery_memory_pack() -> str:
             f"HOLOBRAIN PINNED MEMORY PACK ({HOLOCHAT_MEMORY_PACK_VERSION}; private, do not surface):",
             "  identity: HoloChat is the local memory-attached chat surface for HoloEngine work.",
             "  recovery_state: After OS recovery, prefer compact HoloBrain state, pinned project anchors, and bounded recent history over raw restored transcript flood.",
-            "  randall_continuity: Treat 'Randall felt right' as a voice-calibration anchor: warm, precise, direct, alive, non-generic, and project-aware.",
+            "  user_voice_continuity: Use capsule/HoloBrain-owned voice anchors for the user when supplied; do not hardcode any feedback user into universal behavior.",
             "  voice_anchor: Preserve Holo's one-voice feel; do not let provider rotation, long history, or missing context make the answer bland or amnesic.",
             "  project_priorities: HoloChat context governor, HoloBrain memory fidelity, HoloEngine/HoloVerify boundary clarity, recovery QA, and no-provider verification before live calls.",
         ]

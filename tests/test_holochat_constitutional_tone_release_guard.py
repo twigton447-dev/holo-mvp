@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 import chat_engine
-from chat_engine import HoloChatEngine, _runtime_metadata
+from chat_engine import HoloChatEngine, _holochat_recovery_memory_pack, _runtime_metadata
 from holochat_constitution import HOLOCHAT_CONSTITUTIONAL_TONE_LAW
 from holochat_context_governor import deterministic_visible_release
 from llm_adapters import GOVERNOR_SYSTEM_PROMPT, HOLO_CHAT_SYSTEM_PROMPT
@@ -115,6 +115,22 @@ def test_worker_and_governor_prompts_contain_constitutional_tone_law():
     assert "at least one path should be a pressure path" not in GOVERNOR_SYSTEM_PROMPT
 
 
+def test_constitution_and_active_prompt_law_are_universal_not_randall_or_taylor_specific():
+    gov_doctrine = open("docs/gov_chat_doctrine.md", encoding="utf-8").read()
+    active_surfaces = {
+        "constitution": HOLOCHAT_CONSTITUTIONAL_TONE_LAW,
+        "worker_prompt": HOLO_CHAT_SYSTEM_PROMPT,
+        "governor_prompt": GOVERNOR_SYSTEM_PROMPT,
+        "gov_doctrine": gov_doctrine,
+        "built_in_recovery_pack": _holochat_recovery_memory_pack(),
+    }
+
+    for name, text in active_surfaces.items():
+        assert "Randall" not in text, name
+        assert "Taylor" not in text, name
+        assert "the user" in text or "the person" in text, name
+
+
 def test_captain_brief_in_actual_worker_prompt_carries_constitution(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     adapter = CapturingAdapter()
@@ -191,4 +207,4 @@ def test_capsule_memory_reaches_prompt_as_grounding_not_accusation(monkeypatch):
 
     assert "Randall asked Holo to preserve warmth" in adapter.last_system_prompt
     assert "HoloBrain memory grounds continuity" in adapter.last_system_prompt
-    assert "must never become accusatory theory" in adapter.last_system_prompt
+    assert "must never become accusatory theory about the user" in adapter.last_system_prompt

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" id="theme-color-meta" content="#f6f8fb" />
   <meta name="color-scheme" content="light dark" />
-  <meta name="description" content="Holo is a focused chat workspace with selected context and visible engine data." />
+  <meta name="description" content="Holo is a focused personal chat workspace with selected context." />
   <title>Holo</title>
   <link rel="manifest" href="/static/manifest.json" />
 
@@ -55,7 +55,11 @@
       --accent:   #5b7ae5;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; transition: background 0.2s, color 0.2s; }
+    :root {
+      --ui-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --reader-font: Georgia, 'Times New Roman', Times, serif;
+    }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: var(--ui-font); font-size: 16px; transition: background 0.2s, color 0.2s; }
     body { min-height: 100dvh; overflow: hidden; }
     #app { display: flex; flex-direction: column; height: 100dvh; min-height: 0; max-width: 800px; margin: 0 auto; padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); background: var(--bg); }
 
@@ -76,18 +80,18 @@
     .msg.holo.streaming { scroll-margin-top: 18px; }
     .holo-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); border: none; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 3px; color: #fff; }
     .holo-body { flex: 1; min-width: 0; }
-    .holo-body .bubble { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; font-weight: 500; line-height: 1.82; color: #efefef; letter-spacing: 0; }
-    body.light .holo-body .bubble { color: #1a1a1a; }
+    .holo-body .bubble { font-family: var(--reader-font); font-size: 19px; font-weight: 400; line-height: 1.78; color: #f0eee8; letter-spacing: 0; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    body.light .holo-body .bubble { color: #171717; }
 
     /* Markdown — quiet hierarchy for a conversational workspace */
-    .holo-body h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; margin: 6px 0 16px; color: var(--text); line-height: 1.2; letter-spacing: 0; }
-    .holo-body h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 19px; font-weight: 750; margin: 28px 0 10px; color: var(--text); line-height: 1.28; letter-spacing: 0; border-top: 1px solid var(--border); padding-top: 22px; }
+    .holo-body h1 { font-family: var(--reader-font); font-size: 27px; font-weight: 500; margin: 6px 0 16px; color: var(--text); line-height: 1.18; letter-spacing: 0; }
+    .holo-body h2 { font-family: var(--reader-font); font-size: 21px; font-weight: 500; margin: 30px 0 10px; color: var(--text); line-height: 1.28; letter-spacing: 0; border-top: 1px solid var(--border); padding-top: 22px; }
     .holo-body h2:first-child { border-top: none; padding-top: 0; margin-top: 4px; }
-    .holo-body h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 800; margin: 24px 0 9px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; }
-    .holo-body p  { margin: 0 0 17px; }
+    .holo-body h3 { font-family: var(--ui-font); font-size: 11px; font-weight: 650; margin: 24px 0 9px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.1em; }
+    .holo-body p  { margin: 0 0 18px; }
     .holo-body p:last-child { margin-bottom: 0; }
-    .holo-body strong { font-weight: 800; color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0; }
-    body.light .holo-body strong { color: #000000; }
+    .holo-body strong { font-weight: 600; color: #ffffff; font-family: var(--reader-font); letter-spacing: 0; }
+    body.light .holo-body strong { color: #050505; }
     .holo-body em { font-style: italic; color: var(--text5); }
     .holo-body ul, .holo-body ol { margin: 10px 0 22px 0; padding-left: 24px; }
     .holo-body li { margin-bottom: 10px; line-height: 1.75; }
@@ -106,7 +110,7 @@
     .code-wrap:hover .copy-btn { opacity: 1; }
     .copy-btn.copied { color: var(--green); border-color: var(--green); }
     .holo-body hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
-    .holo-body blockquote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--text2); margin: 16px 0 22px; font-style: italic; line-height: 1.85; }
+    .holo-body blockquote { border-left: 2px solid var(--accent); padding: 4px 0 4px 18px; color: var(--text); margin: 20px 0 26px; font-style: italic; line-height: 1.78; background: linear-gradient(90deg, rgba(91,122,229,0.08), transparent 58%); }
 
     /* Feedback row under each Holo response */
     .msg-actions { display: flex; gap: 2px; margin-top: 12px; }
@@ -116,10 +120,10 @@
     .trust-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; min-height: 18px; }
     .web-checked { color: var(--text3); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3; }
     .label { font-size: 11px; color: var(--text2); padding: 0 4px; }
-    .chips { display: flex; flex-direction: column; gap: 7px; margin-top: 18px; }
-    .chip { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border); background: none; color: var(--text2); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; font-weight: 500; cursor: pointer; text-align: left; transition: all 0.15s; width: 100%; }
-    .chip:hover { background: var(--bg2); border-color: var(--text3); color: var(--text); }
-    .chip-num { font-size: 10px; font-weight: 700; color: var(--text3); min-width: 16px; letter-spacing: 0.05em; }
+    .chips { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+    .chip { display: flex; align-items: flex-start; gap: 13px; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border); border-left-color: rgba(91,122,229,0.7); background: rgba(255,255,255,0.015); color: var(--text2); font-family: var(--ui-font); font-size: 13px; font-weight: 450; line-height: 1.45; cursor: pointer; text-align: left; transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s; width: 100%; }
+    .chip:hover { background: var(--bg2); border-color: var(--text3); border-left-color: var(--accent); color: var(--text); transform: translateX(2px); }
+    .chip-num { font-size: 10px; font-weight: 600; color: var(--accent); min-width: 16px; letter-spacing: 0.05em; padding-top: 2px; }
     .onboarding-card { border: 1px solid var(--border); background: var(--bg2); border-radius: 8px; padding: 18px; margin-top: 4px; }
     .onboarding-title { font-size: 18px; font-weight: 800; margin: 0 0 8px; color: var(--text); line-height: 1.25; }
     .onboarding-copy { color: var(--text2); font-size: 14px; line-height: 1.65; margin: 0 0 16px; }
@@ -255,11 +259,11 @@
     /* Header */
     #header { flex-shrink: 0; padding: calc(10px + env(safe-area-inset-top)) 20px 10px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--bg); position: relative; z-index: 40; }
     #header-brand { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
-    #header h1 { font-size: 15px; font-weight: 800; letter-spacing: 0; margin: 0; display: flex; align-items: baseline; gap: 6px; }
-    #brand-sub { display: none; font-size: 15px; font-weight: 400; color: var(--text2); opacity: 0.65; letter-spacing: 0; }
+    #header h1 { font-size: 15px; font-weight: 650; letter-spacing: 0; margin: 0; display: flex; align-items: baseline; gap: 6px; }
+    #brand-sub { display: inline; font-size: 14px; font-weight: 400; color: var(--text2); opacity: 0.78; letter-spacing: 0; }
     #brand-tagline { font-size: 10px; font-weight: 500; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.5; }
     #header-right { display: flex; align-items: center; gap: 8px; }
-    .header-btn { height: 34px; border: 1px solid var(--border); background: var(--bg2); color: var(--text4); border-radius: 999px; padding: 0 13px; font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex-shrink: 0; letter-spacing: 0; }
+    .header-btn { height: 34px; border: 1px solid var(--border); background: var(--bg2); color: var(--text4); border-radius: 999px; padding: 0 13px; font-size: 12px; font-weight: 550; font-family: inherit; cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex-shrink: 0; letter-spacing: 0; }
     .header-btn:hover { border-color: var(--text2); color: var(--text5); }
     .header-btn.active, #thread-toggle.open { border-color: var(--accent); color: var(--accent); background: rgba(91,122,229,0.08); }
     .header-icon-btn { width: 34px; padding: 0; }
@@ -354,8 +358,9 @@
 
     /* Empty state */
     #empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--text3); padding: 28px 24px 20px; text-align: center; overflow-y: auto; }
-    #empty h2 { font-size: 38px; font-weight: 800; color: var(--text); margin: 0; letter-spacing: 0; line-height: 1.12; }
+    #empty h2 { font-family: var(--reader-font); font-size: 38px; font-weight: 500; color: var(--text); margin: 0; letter-spacing: 0; line-height: 1.12; }
     #empty p { font-size: 16.5px; line-height: 1.7; max-width: 340px; margin: 0; color: var(--text2); font-weight: 400; }
+    #empty p:empty { display: none; }
     /* Active space accent in header */
     #space-label { display: none; }
 
@@ -689,7 +694,7 @@
 <div id="thread-backdrop" onclick="closeThreadPanel()"></div>
 <div id="thread-panel">
   <div id="thread-panel-header">
-    <span>Library</span>
+    <span>My Chats</span>
     <button id="thread-panel-close" onclick="closeThreadPanel()">×</button>
   </div>
   <div id="thread-panel-tabs">
@@ -707,10 +712,10 @@
   </div>
 </div>
 
-<!-- Memory panel — what Holo knows about you -->
+<!-- Memory panel — user-owned saved context -->
 <div id="memory-panel">
   <div id="memory-panel-header">
-    <h3>What Holo knows</h3>
+    <h3>My Context</h3>
     <button id="memory-panel-close" onclick="closeMemoryPanel()">×</button>
   </div>
   <div id="memory-list">
@@ -758,11 +763,11 @@
 <div id="app">
   <div id="header">
     <div id="header-brand">
-      <h1><span>HoloChat</span> <span id="brand-sub" aria-hidden="true">4DNA</span><span id="space-label"></span></h1>
+      <h1><span>HoloChat</span> <span id="brand-sub">2.1</span><span id="space-label"></span></h1>
     </div>
     <div id="header-right">
       <div id="incognito-badge">◉ Incognito</div>
-      <button id="thread-toggle" class="header-btn" onclick="toggleThreadPanel()" title="Library">Library</button>
+      <button id="thread-toggle" class="header-btn" onclick="toggleThreadPanel()" title="My Chats">My Chats</button>
       <button id="holobrain-toggle" class="dev-only header-btn header-label-btn" onclick="openHoloBrainPanel()" title="Open diagnostics">Diagnostics</button>
       <button id="incognito-btn" class="header-btn header-icon-btn" onclick="toggleIncognito()" title="Private thread" aria-label="Private thread">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-2.8 8.5-7 10-4.2-1.5-7-5.5-7-10V6l7-3z"/><path d="M9.5 12.5l1.6 1.6 3.4-3.7"/></svg>
@@ -827,9 +832,11 @@
   let   capsuleMode  = localStorage.getItem("holo_capsule_mode") || "personal";
   let   turnCount    = 0;
   let   incognitoMode = false;
+  let   _currentUserName = "";
   const FREE_TURN_LIMIT = 8;
-  const STREAM_PACE_MS = 26;
-  const STREAM_CHARS_PER_TICK = 3;
+  const STREAM_PACE_MS = 42;
+  const STREAM_MIN_CHARS_PER_TICK = 14;
+  const STREAM_MAX_CHARS_PER_TICK = 42;
   let   DEV_TOOLS_ENABLED = localStorage.getItem("holo_dev_tools") === "1";
 
   function setDevToolsVisibility(enabled) {
@@ -973,7 +980,7 @@
 	    const container = document.getElementById("messages");
     container.innerHTML = incognitoMode
       ? `<div id="empty"><h2>Incognito</h2><p>No memory, no context, no Captain brief. Pure baseline. Nothing from this thread touches your capsule.</p></div>`
-      : `<div id="empty"><h2>What's on your mind?</h2><p>Holo is here — truth-seeking, Stoic, and ready for whatever you bring.</p></div>`;
+      : `<div id="empty"><h2>${escHtml(currentWelcomeLine(_currentUserName || ""))}</h2></div>`;
   }
 
   // ---- Theme ---------------------------------------------------------------
@@ -1019,14 +1026,7 @@
 
   function currentWelcomeLine(userName = "") {
     const firstName = firstNameFrom(userName);
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) {
-      return firstName
-        ? `Hey ${firstName}, what’s the first thing on your mind today?`
-        : "Hey, what’s the first thing on your mind today?";
-    }
-    if (hour >= 12 && hour < 17) return "Quick check-in—what needs attention right now?";
-    return "Anything from today you want to capture or think through?";
+    return firstName ? `Hey, ${firstName}, what’s on your mind?` : "Hey, what’s on your mind?";
   }
 
   function renderDefaultWelcome(userName = "") {
@@ -1034,7 +1034,7 @@
     const sub = document.getElementById("greeting-sub");
     if (!greeting || !sub) return;
     greeting.textContent = currentWelcomeLine(userName);
-    sub.textContent = "Start light. Holo learns more only when you choose that.";
+    sub.textContent = "";
   }
 
   renderDefaultWelcome();
@@ -1344,6 +1344,7 @@
     _holoBrainLoaded = false;
 
     const name = data.name || data.email || "?";
+    _currentUserName = name;
     const avatarClick = `toggleAvatarMenu()`;
     if (data.avatar_url) {
       avatarEl.innerHTML = `<img class="avatar" src="${data.avatar_url}" title="Signed-in capsule" aria-label="Signed-in capsule" onclick="${avatarClick}" /><div id="memory-badge" style="display:none"></div>`;
@@ -1355,12 +1356,6 @@
     fetchCapsuleContext(name);
     restoreLastSession();
     loadSessionList();
-    if (window.matchMedia("(min-width: 701px)").matches) openThreadPanel();
-    // Surface panel: show on login after a short delay (lets context load first)
-    setTimeout(() => {
-      const knownCount = Object.keys(_memoryContext || {}).filter(k => !k.startsWith("_")).length;
-      if (knownCount > 0 && window.matchMedia("(min-width: 701px)").matches) openSurfacePanel();
-    }, 1200);
     resetInactivityTimer();
   }
 
@@ -1897,9 +1892,7 @@
 
   function resetInactivityTimer() {
     clearTimeout(_inactivityTimer);
-    _inactivityTimer = setTimeout(() => {
-      if (capsuleToken) openSurfacePanel();
-    }, INACTIVITY_MS);
+    _inactivityTimer = null;
   }
 
   async function openSurfacePanel() {
@@ -2267,17 +2260,7 @@
   function renderRecentThemes(userName = "") {
     const empty = document.getElementById("empty");
     if (!empty || document.querySelector("#messages .msg")) return;
-    const themes = recentThemeEntries();
-    if (themes.length === 0) {
-      renderDefaultWelcome(userName);
-      return;
-    }
-    empty.innerHTML = `
-      <h2>${escHtml(currentWelcomeLine(userName))}</h2>
-      <p>Pick up where you left off, or start somewhere new.</p>
-      <div class="recent-themes">
-        ${themes.map(([key, value]) => `<button class="recent-theme-btn" onclick="continueTheme(${jsArg(value)})">${escHtml(String(value).slice(0, 42))}</button>`).join("")}
-      </div>`;
+    renderDefaultWelcome(userName);
   }
 
   function continueTheme(theme) {
@@ -2576,8 +2559,23 @@
       while (waiters.length) waiters.shift()(visible);
     }
 
+    function nextStreamTake() {
+      if (pending.length <= STREAM_MAX_CHARS_PER_TICK) return pending.length;
+      const windowText = pending.slice(0, STREAM_MAX_CHARS_PER_TICK);
+      const punctuation = Math.max(
+        windowText.lastIndexOf(". "),
+        windowText.lastIndexOf("? "),
+        windowText.lastIndexOf("! "),
+        windowText.lastIndexOf("; ")
+      );
+      if (punctuation >= STREAM_MIN_CHARS_PER_TICK) return punctuation + 2;
+      const wordBreak = Math.max(windowText.lastIndexOf(" "), windowText.lastIndexOf("\n"));
+      if (wordBreak >= STREAM_MIN_CHARS_PER_TICK) return wordBreak + 1;
+      return STREAM_MAX_CHARS_PER_TICK;
+    }
+
     function step() {
-      const take = Math.min(STREAM_CHARS_PER_TICK, pending.length);
+      const take = Math.min(nextStreamTake(), pending.length);
       if (take > 0) {
         visible += pending.slice(0, take);
         pending = pending.slice(take);
@@ -2786,9 +2784,9 @@
 
   function normalizeConversationPaths(suggestions) {
     const fallback = [
-      "Go deeper on this",
-      "Turn this into a concrete plan",
-      "Explore a different angle"
+      "Name the real decision underneath this",
+      "Turn the strongest insight into one next move",
+      "Check the assumption this answer depends on"
     ];
     const seen = new Set();
     const paths = [];
@@ -2899,7 +2897,7 @@
     document.getElementById("messages").innerHTML =
       fromHandoff
         ? handoffWelcomeHtml(handoffTransition || {})
-        : `<div id="empty"><h2>What's on your mind?</h2><p>Holo is here — truth-seeking, Stoic, and ready for whatever you bring.</p></div>`;
+        : `<div id="empty"><h2>${escHtml(currentWelcomeLine(_currentUserName || ""))}</h2></div>`;
     if (!fromHandoff) {
       try { sessionStorage.removeItem(HANDOFF_TRANSITION_KEY); } catch {}
     }

@@ -281,11 +281,11 @@ def test_frontend_has_holobrain_button_and_render_path():
     html = Path("frontend/chat.html").read_text()
 
     assert 'id="holobrain-toggle"' in html
-    assert 'title="Open engine data"' in html
-    assert ">Engine data</button>" in html
+    assert 'title="Open diagnostics"' in html
+    assert ">Diagnostics</button>" in html
     assert 'id="holobrain-panel"' in html
     assert 'id="holobrain-resize-handle"' in html
-    assert 'title="Drag to resize engine data"' in html
+    assert 'title="Drag to resize diagnostics"' in html
     assert "initEnginePanelResize()" in html
     assert "setEnginePanelWidth(window.innerWidth - moveEvent.clientX)" in html
     assert "holo_engine_panel_width" in html
@@ -305,7 +305,7 @@ def test_frontend_has_holobrain_button_and_render_path():
     assert "startHoloBuildRun()" in html
     assert "pollHoloBuildRun" in html
     assert "HOLOBUILD_LIVE_RUNS=true" in html
-    assert "Refresh engine data" in html
+    assert "Refresh diagnostics" in html
     assert "Attached capsule" not in html
     assert "capsule.id_short" not in html
     assert "Start HoloBuild run" not in html

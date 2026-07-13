@@ -258,8 +258,11 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     html = Path("frontend/chat.html").read_text()
 
     assert "<span>HoloChat</span>" in html
-    assert '<span id="brand-sub" aria-hidden="true">4DNA</span>' in html
-    assert "#brand-sub { display: none;" in html
+    assert '<span id="brand-sub">2.1</span>' in html
+    assert "#brand-sub { display: inline;" in html
+    assert "<span>My Chats</span>" in html
+    assert 'title="My Chats">My Chats</button>' in html
+    assert "Library</button>" not in html
     assert "Memory-attached workspace" not in html
     assert "updateRuntimePanel(data)" in html
     assert 'id="runtime-toggle"' not in html
@@ -354,6 +357,21 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     assert ("provider request " + "body") not in html.lower()
 
 
+def test_frontend_start_state_is_minimal_and_name_aware():
+    html = Path("frontend/chat.html").read_text()
+
+    assert "Hey, ${firstName}, what’s on your mind?" in html
+    assert "Hey, what’s on your mind?" in html
+    assert 'id="greeting-sub"' in html
+    assert "sub.textContent = \"\";" in html
+    assert "Holo is here" not in html
+    assert "Pick up where you left off" not in html
+    assert "What Holo knows" not in html
+    assert "<h3>My Context</h3>" in html
+    assert 'if (window.matchMedia("(min-width: 701px)").matches) openThreadPanel();' not in html
+    assert "if (capsuleToken) openSurfacePanel();" not in html
+
+
 def test_frontend_thread_meter_uses_thread_health_score():
     html = Path("frontend/chat.html").read_text()
     chat_engine_py = Path("chat_engine.py").read_text()
@@ -439,13 +457,27 @@ def test_mobile_header_keeps_core_controls_available():
 def test_frontend_streaming_uses_paced_text_reveal():
     html = Path("frontend/chat.html").read_text()
 
-    assert "const STREAM_PACE_MS = 26;" in html
-    assert "const STREAM_CHARS_PER_TICK = 3;" in html
+    assert "const STREAM_PACE_MS = 42;" in html
+    assert "const STREAM_MIN_CHARS_PER_TICK = 14;" in html
+    assert "const STREAM_MAX_CHARS_PER_TICK = 42;" in html
+    assert "function nextStreamTake()" in html
+    assert "windowText.lastIndexOf(\". \")" in html
     assert "function createPacedStreamRenderer(bubbleEl)" in html
     assert "pacedStream = createPacedStreamRenderer(bubbleEl);" in html
     assert "pacedStream.push(evt.text);" in html
     assert "if (pacedStream) await pacedStream.drain();" in html
     assert "bubbleEl.innerHTML = renderMarkdown(accumulated);" not in html
+
+
+def test_frontend_uses_editorial_reader_typography_without_heavy_default_bold():
+    html = Path("frontend/chat.html").read_text()
+
+    assert "--reader-font: Georgia, 'Times New Roman', Times, serif;" in html
+    assert ".holo-body .bubble { font-family: var(--reader-font); font-size: 19px; font-weight: 400;" in html
+    assert ".holo-body strong { font-weight: 600;" in html
+    assert ".holo-body blockquote { border-left: 2px solid var(--accent);" in html
+    assert ".holo-body .bubble" in html
+    assert "font-weight: 500; line-height: 1.82" not in html
 
 
 def test_frontend_streaming_keeps_reader_anchored_at_message_top():
@@ -482,6 +514,10 @@ def test_holochat_runtime_prompt_prefers_structured_human_answers():
     assert "imaginative without becoming vague" in doctrine
     assert "Gov should preserve warm precision" in gov_doctrine
     assert "warm precision path" in gov_doctrine
+    assert "three most useful continuations" in prompt
+    assert "Holo can offer after this exact answer" in prompt
+    assert "Each path must contain a concrete noun or verb" in prompt
+    assert "no generic phrases like 'go deeper'" in prompt
 
 
 def test_frontend_google_auth_is_config_gated():
@@ -562,7 +598,7 @@ def test_frontend_assistant_messages_render_three_conversation_paths():
     assert "data.conversation_paths || suggestions" in html
     assert "function normalizeConversationPaths(suggestions)" in html
     assert "suggestions: suggestions.slice(0, 3)" in html
-    assert "Go deeper on this" in html
-    assert "Turn this into a concrete plan" in html
-    assert "Explore a different angle" in html
+    assert "Name the real decision underneath this" in html
+    assert "Turn the strongest insight into one next move" in html
+    assert "Check the assumption this answer depends on" in html
     assert "renderConversationPaths(suggestions)" in html

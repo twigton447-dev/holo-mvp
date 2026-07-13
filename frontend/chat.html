@@ -132,6 +132,11 @@
     .chip { display: flex; align-items: flex-start; gap: 13px; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border); border-left-color: rgba(91,122,229,0.7); background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01)); color: var(--text2); font-family: var(--ui-font); font-size: 13px; font-weight: 450; line-height: 1.45; cursor: pointer; text-align: left; transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s; width: 100%; box-shadow: 0 10px 24px rgba(0,0,0,0.08); }
     .chip:hover { background: var(--bg2); border-color: var(--text3); border-left-color: var(--accent); color: var(--text); transform: translateX(2px); box-shadow: 0 14px 30px rgba(0,0,0,0.13); }
     .chip-num { font-size: 10px; font-weight: 600; color: var(--accent); min-width: 16px; letter-spacing: 0.05em; padding-top: 2px; }
+    .inline-next-steps { margin: 26px 0 8px; display: flex; flex-direction: column; gap: 9px; }
+    .inline-next-title { font-family: var(--ui-font); font-size: 11px; font-weight: 650; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 2px; }
+    .inline-next-step { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; align-items: start; width: 100%; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--text); font-family: var(--reader-font); font-size: 0.98em; line-height: 1.45; text-align: left; padding: 9px 10px; cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.15s; }
+    .inline-next-step:hover { background: rgba(91,122,229,0.055); border-color: rgba(91,122,229,0.22); transform: translateX(2px); box-shadow: 0 12px 28px rgba(15,23,42,0.08); }
+    .inline-next-num { width: 24px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(91,122,229,0.38); color: var(--accent); font-family: var(--ui-font); font-size: 11px; font-weight: 650; background: rgba(91,122,229,0.07); box-shadow: 0 8px 18px rgba(91,122,229,0.12); }
     .onboarding-card { border: 1px solid var(--border); background: var(--bg2); border-radius: 8px; padding: 18px; margin-top: 4px; }
     .onboarding-title { font-size: 18px; font-weight: 800; margin: 0 0 8px; color: var(--text); line-height: 1.25; }
     .onboarding-copy { color: var(--text2); font-size: 14px; line-height: 1.65; margin: 0 0 16px; }
@@ -2770,7 +2775,8 @@
     const battery      = batteryMatch ? batteryMatch[0] : null;
 
     // Extract Next-step suggestions section
-    const suggestMatch = text.match(/Next-step suggestions[:\s\n]+([\s\S]*?)(?:\n\nThread battery:|$)/i);
+    const suggestionBlockPattern = /\n*Next-step suggestions[:\s\n]+([\s\S]*?)(?=\n\nThread (?:battery|power):|$)/i;
+    const suggestMatch = text.match(suggestionBlockPattern);
     const suggestions  = [];
     if (suggestMatch) {
       const lines = suggestMatch[1].split("\n");
@@ -2782,7 +2788,7 @@
 
     // Remove battery + suggestions block from main text
     let mainText = text
-      .replace(/\n*Next-step suggestions[:\s\n]+([\s\S]*?)(?:\n\nThread power:|$)/i, "")
+      .replace(suggestionBlockPattern, "")
       .replace(/\n*Thread power:[^\n]+/, "")
       .replace(/\s*\[(GREEN|YELLOW|RED)\]\s*[█░]+/g, "")
       .trim();
@@ -3172,9 +3178,32 @@
     const lines = s.split("\n");
     const out = [];
     let inList = false, listTag = "";
+    let inInlineNextSteps = false, inlineNextStepCount = 0;
 
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i];
+      const nextStepTitle = /^Next-step suggestions:?\s*$/i.test(line.trim());
+
+      if (nextStepTitle) {
+        if (inList) { out.push(`</${listTag}>`); inList = false; }
+        if (inInlineNextSteps) out.push("</div>");
+        out.push(`<div class="inline-next-steps" aria-label="Next-step suggestions"><div class="inline-next-title">Next-step suggestions</div>`);
+        inInlineNextSteps = true;
+        inlineNextStepCount = 0;
+        continue;
+      }
+
+      if (inInlineNextSteps) {
+        const nextItem = line.match(/^\s*\d+[.)]\s+(.+)/);
+        if (nextItem) {
+          inlineNextStepCount += 1;
+          out.push(`<button class="inline-next-step" onclick="useChip(this)"><span class="inline-next-num">${inlineNextStepCount}</span><span>${inlineMarkdown(nextItem[1].trim())}</span></button>`);
+          continue;
+        }
+        if (line.trim() === "") continue;
+        out.push("</div>");
+        inInlineNextSteps = false;
+      }
 
       // Headings
       if (/^### (.+)/.test(line)) { if (inList) { out.push(`</${listTag}>`); inList = false; } out.push(`<h3>${inlineMarkdown(line.slice(4))}</h3>`); continue; }
@@ -3209,6 +3238,7 @@
       if (line.trim() === "") { out.push(""); } else { out.push(`<p>${inlineMarkdown(line)}</p>`); }
     }
     if (inList) out.push(`</${listTag}>`);
+    if (inInlineNextSteps) out.push("</div>");
 
     let result = out.join("\n");
     // Restore code blocks

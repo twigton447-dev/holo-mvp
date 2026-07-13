@@ -110,10 +110,10 @@ def test_streaming_done_metadata_includes_searched_without_raw_results(monkeypat
     assert any(isinstance(event, dict) and event.get("searching") for event in events)
     assert done["searched"] is True
     assert done["search_query"] == "weather in Seattle"
-    assert done["runtime"]["governor_trace"]["web_search"]["source"] == "governor"
+    assert done["runtime"]["governor_trace"]["web_search"]["source"] == "deterministic_governor"
     assert done["runtime"]["governor_trace"]["web_search"]["status"] == "checked"
     assert done["runtime"]["governor_trace"]["web_search"]["result_count"] == 1
-    assert done["runtime"]["gov_arc_state"]["web_decision"] == "checked via governor"
+    assert done["runtime"]["gov_arc_state"]["web_decision"] == "checked via deterministic_governor"
     assert done["usage"] == done["runtime"]["usage"]
     assert done["usage"]["input_token_estimate"] == done["context_budget"]["total_token_estimate"]
     assert done["usage"]["input_token_source"] == "context_budget_estimate"
@@ -175,7 +175,7 @@ def test_streaming_skips_failed_mini_before_output(monkeypatch):
     events = list(engine.stream_message(str(uuid4()), "Should skip outage?"))
     done = next(event for event in events if isinstance(event, dict) and event.get("done"))
 
-    assert "checked " in events
+    assert "checked answer" in events
     assert done["_provider"] == "openai"
     failover = done["runtime"]["failover"]
     assert failover["attempted"] is True
@@ -216,7 +216,7 @@ def test_non_stream_metadata_includes_searched(monkeypatch):
     assert result["searched"] is True
     assert result["search_query"] == "weather in Seattle"
     assert result["runtime"]["governor_trace"]["web_search"]["attempted"] is True
-    assert result["runtime"]["governor_trace"]["web_search"]["source"] == "governor"
+    assert result["runtime"]["governor_trace"]["web_search"]["source"] == "deterministic_governor"
     assert "compact search result" not in str({k: v for k, v in result.items() if k != "response"})
 
 
@@ -453,8 +453,8 @@ def test_holochat_runtime_prompt_prefers_structured_human_answers():
     assert "I want you to do a deep calibration pass on me." in doctrine
     assert "inspiring, creative, pragmatic, and hopeful" in doctrine
     assert "imaginative without becoming vague" in doctrine
-    assert "Gov should push harder than a normal assistant." in gov_doctrine
-    assert "pressure path" in gov_doctrine
+    assert "Gov should preserve warm precision" in gov_doctrine
+    assert "warm precision path" in gov_doctrine
 
 
 def test_frontend_google_auth_is_config_gated():

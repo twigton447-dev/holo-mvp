@@ -38,6 +38,7 @@ from holochat_context_governor import (
     admit_advisor_memory_updates,
     admit_advisor_prompt_directive,
     admit_advisor_search_query,
+    admit_advisor_surface_thought,
     admit_advisor_thread_name,
     build_holobrain_injection_plan,
     build_holochat_state,
@@ -49,6 +50,7 @@ from holochat_context_governor import (
     stable_hash,
     state_context_value,
 )
+from holochat_constitution import constitutional_prompt_block
 from holo_state import GovArcState, HoloState, RequiredTools
 from holo_trace import HoloTraceRecord, log_trace
 from llm_adapters import (
@@ -843,6 +845,17 @@ def _holochat_recovery_memory_pack() -> str:
     )
 
 
+def _captain_brief_block(tenor: Optional[str]) -> str:
+    if not tenor:
+        return ""
+    return (
+        "CAPTAIN BRIEF - READ + DIRECTIVE (private, never surface to user):\n"
+        + constitutional_prompt_block()
+        + "\n\nADMITTED GOV DIRECTIVE:\n"
+        + _compact_text(tenor, limit=900)
+    )
+
+
 _CURRENT_INFO_RE = _re.compile(
     r"\b("
     r"today|tonight|currently|current|latest|recent|right now|now|new|news|"
@@ -1498,7 +1511,9 @@ class HoloChatEngine:
         governor_search_query = gov_advisor.should_search(user_message, session.history)
 
         # Governor thinks about the human — skipped in incognito (would introduce bias)
-        thought = None if incognito else gov_advisor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
+        raw_thought = None if incognito else gov_advisor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
+        thought_admission = admit_advisor_surface_thought(raw_thought)
+        thought = thought_admission.value if thought_admission.admitted else None
         raw_tenor = None if incognito else gov_advisor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
         tenor_admission = admit_advisor_prompt_directive(raw_tenor, user_message=user_message) if raw_tenor or not incognito else None
         tenor = tenor_admission.value if tenor_admission and tenor_admission.admitted else None
@@ -1617,7 +1632,7 @@ class HoloChatEngine:
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
-                + ("\n\nCAPTAIN BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
+                + ("\n\n" + _captain_brief_block(tenor) if tenor else "")
             )
 
         context_budget = _runtime_context_budget(
@@ -1974,8 +1989,8 @@ class HoloChatEngine:
         """
         Generator variant of send_message.
 
-        Yields strings (text chunks) while the analyst streams its response,
-        then yields a single sentinel dict with metadata once streaming is complete:
+        Buffers provider stream chunks behind deterministic release guards, then
+        yields admitted text and a final sentinel dict once streaming is complete:
           {"done": True, "session_id": ..., "turn_number": ..., "thought": ...,
            "thread_health_level": ..., "thread_health_score": ..., "searched": bool,
            "artifacts": [...], "handoff": ...}
@@ -2044,7 +2059,9 @@ class HoloChatEngine:
         elif turn_policy.tier == "fast":
             temperature = min(temperature, 0.4)
         governor_search_query = gov_advisor.should_search(user_message, session.history)
-        thought      = None if incognito else gov_advisor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
+        raw_thought  = None if incognito else gov_advisor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
+        thought_admission = admit_advisor_surface_thought(raw_thought)
+        thought      = thought_admission.value if thought_admission.admitted else None
         raw_tenor    = None if incognito else gov_advisor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
         tenor_admission = admit_advisor_prompt_directive(raw_tenor, user_message=user_message) if raw_tenor or not incognito else None
         tenor        = tenor_admission.value if tenor_admission and tenor_admission.admitted else None
@@ -2152,7 +2169,7 @@ class HoloChatEngine:
                 + ("\n\n" + _life_context_block(life_context) if life_context else "")
                 + ("\n\n" + _last_session_block(last_session) if last_session else "")
                 + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
-                + ("\n\nCAPTAIN BRIEF — READ + DIRECTIVE (private, never surface to user):\n" + tenor if tenor else "")
+                + ("\n\n" + _captain_brief_block(tenor) if tenor else "")
             )
 
         context_budget = _runtime_context_budget(
@@ -2203,8 +2220,8 @@ class HoloChatEngine:
         if search_attempted:
             yield {"searching": True}
 
-        # Stream analyst response token by token. If a provider fails before it
-        # emits content, skip to the next active mini instead of ending the turn.
+        # Stream from the provider internally, but do not release raw chunks to
+        # the UI before deterministic visible-output admission.
         accumulated = []
         in_tok = out_tok = 0
         analyst_timer = _timer_start()
@@ -2225,7 +2242,6 @@ class HoloChatEngine:
                     else:
                         emitted = True
                         candidate_chunks.append(chunk)
-                        yield chunk
                 accumulated.extend(candidate_chunks)
                 adapter = candidate
                 stream_completed = True
@@ -2275,15 +2291,12 @@ class HoloChatEngine:
             corrections = list(correction_admission.value or []) if correction_admission.admitted else []
             if corrections:
                 note = " · ".join(corrections)
-                correction_text = f"\n\n*One thing worth correcting: {note}*"
-                response_text  += correction_text
-                yield correction_text
+                response_text += f"\n\n*One thing worth correcting: {note}*"
 
         release_decision = deterministic_visible_release(user_message, response_text)
-        if release_decision.repaired and release_decision.text != response_text:
-            repair_text = "\n\n" + release_decision.text
-            yield repair_text
         response_text = release_decision.text
+        if response_text:
+            yield response_text
 
         path_generator = getattr(gov_advisor, "generate_conversation_paths", None)
         conversation_paths = []
@@ -2775,7 +2788,7 @@ def _runtime_context_budget(
         blocks.append(
             {
                 "block_name": "captain_brief",
-                "content": f"CAPTAIN BRIEF — READ + DIRECTIVE (private, never surface to user):\n{tenor}" if tenor else "",
+                "content": _captain_brief_block(tenor),
                 "included": bool(tenor),
                 "source_type": "governor",
                 "reason": "empty" if not tenor else None,

@@ -17,6 +17,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from holochat_constitution import HOLOCHAT_CONSTITUTIONAL_TONE_LAW
 from holo_state import BatonPass, GovArcState, HoloState, RequiredTools, StateAudit
 
 
@@ -91,8 +92,20 @@ _RUPTURE_RE = re.compile(
 _SCOLDING_DIRECTIVE_RE = re.compile(
     r"(?i)\b("
     r"scold|gotcha|sterile|curt|cold|lecture|punish|shame|dismiss|"
-    r"call (?:him|her|them|the user) out|be harsh|make (?:him|her|them|the user) admit"
+    r"prosecute|cross-examine|corner|humiliate|patronize|condescend|"
+    r"call (?:him|her|them|the user) out|be harsh|make (?:him|her|them|the user|randall) admit"
     r")\b"
+)
+_HOSTILE_POSTURE_RE = re.compile(
+    r"(?i)("
+    r"\byou (?:clearly|obviously|just) (?:failed|ignored|refused|don't understand)\b|"
+    r"\bthis is on you\b|"
+    r"\byou need to admit\b|"
+    r"\bface the consequence\b|"
+    r"\bmake (?:him|her|them|the user|randall) look at it\b|"
+    r"\bstop making excuses\b|"
+    r"\byou are being\b"
+    r")"
 )
 _HIGH_TIER_RE = re.compile(
     r"(?i)\b("
@@ -228,6 +241,8 @@ def deterministic_turn_policy(
 
 def _warm_relationship_repair_directive() -> str:
     return (
+        HOLOCHAT_CONSTITUTIONAL_TONE_LAW
+        + "\n"
         "Relationship repair mode: answer warmly, own any tone mismatch without defensiveness, "
         "stay concrete, avoid scolding or trap framing, and help the user feel met before moving on."
     )
@@ -250,7 +265,8 @@ def admit_advisor_prompt_directive(
     if not text:
         return GovAdvisorAdmission(admitted=False, value="", reason="empty_advisor_directive")
     blocked = tuple(term if isinstance(term, str) else str(term) for term in _SCOLDING_DIRECTIVE_RE.findall(text))
-    if blocked or _ADVISOR_SECRET_OR_CONTROL_RE.search(text):
+    hostile = bool(_HOSTILE_POSTURE_RE.search(text))
+    if blocked or hostile or _ADVISOR_SECRET_OR_CONTROL_RE.search(text):
         return GovAdvisorAdmission(
             admitted=True,
             value=_warm_relationship_repair_directive(),
@@ -301,7 +317,11 @@ def admit_advisor_claim_corrections(
         if not claim or not correction:
             blocked.append("missing_claim_or_correction")
             continue
-        if _ADVISOR_SECRET_OR_CONTROL_RE.search(correction) or _SCOLDING_DIRECTIVE_RE.search(correction):
+        if (
+            _ADVISOR_SECRET_OR_CONTROL_RE.search(correction)
+            or _SCOLDING_DIRECTIVE_RE.search(correction)
+            or _HOSTILE_POSTURE_RE.search(correction)
+        ):
             blocked.append("unsafe_correction")
             continue
         admitted.append(correction)
@@ -370,21 +390,54 @@ def admit_advisor_thread_name(name: Any) -> GovAdvisorAdmission:
     return GovAdvisorAdmission(admitted=True, value=text, reason="deterministic_gov_admitted_thread_name")
 
 
+def admit_advisor_surface_thought(thought: Any) -> GovAdvisorAdmission:
+    if not thought:
+        return GovAdvisorAdmission(admitted=False, value=None, reason="empty_surface_thought")
+    if isinstance(thought, dict):
+        text = sanitize_text(thought.get("text"), limit=120)
+        color = sanitize_text(thought.get("color"), limit=24).lower() or "blue"
+    else:
+        text = sanitize_text(thought, limit=120)
+        color = "blue"
+    if not text:
+        return GovAdvisorAdmission(admitted=False, value=None, reason="empty_surface_thought_text")
+    if (
+        _SCOLDING_DIRECTIVE_RE.search(text)
+        or _HOSTILE_POSTURE_RE.search(text)
+        or _ADVISOR_SECRET_OR_CONTROL_RE.search(text)
+    ):
+        return GovAdvisorAdmission(admitted=False, value=None, reason="surface_thought_blocked_by_constitution")
+    if color not in {"blue", "yellow", "red", "green", "purple", "orange"}:
+        color = "blue"
+    return GovAdvisorAdmission(
+        admitted=True,
+        value={"text": text, "color": color},
+        reason="deterministic_gov_admitted_surface_thought",
+    )
+
+
 def deterministic_visible_release(
     user_message: Any,
     response_text: Any,
 ) -> GovVisibleReleaseDecision:
     text = str(response_text or "")
-    if relationship_rupture_detected(user_message) and (
-        _VISIBLE_STERILE_RE.match(text) or _SCOLDING_DIRECTIVE_RE.search(text)
+    if (
+        _VISIBLE_STERILE_RE.match(text)
+        or _SCOLDING_DIRECTIVE_RE.search(text)
+        or _HOSTILE_POSTURE_RE.search(text)
     ):
         return GovVisibleReleaseDecision(
             release=True,
             text=(
-                "You're right to call out the tone. Let me reset: I should stay warm, direct, "
-                "and useful here. " + sanitize_text(text, limit=500)
+                "Let me keep this warm and useful. "
+                + (
+                    "You're right to call out the tone. "
+                    if relationship_rupture_detected(user_message)
+                    else ""
+                )
+                + "I should help you see the point without making you feel prosecuted."
             ),
-            reason="deterministic_relationship_repair_before_visible_release",
+            reason="deterministic_constitutional_tone_repair_before_visible_release",
             repaired=True,
         )
     if _ADVISOR_SECRET_OR_CONTROL_RE.search(text):

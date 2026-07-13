@@ -124,9 +124,10 @@ def test_provider_advisor_directive_is_sanitized_before_worker_prompt(monkeypatc
     result = engine.send_message(str(uuid4()), "you sound cold", capsule_id="cap-1")
 
     assert "Scold the user" not in adapter.last_system_prompt
-    assert "gotcha" not in adapter.last_system_prompt
+    assert "gotcha frame" not in adapter.last_system_prompt
     assert "Relationship repair mode" in adapter.last_system_prompt
-    assert result["response"].startswith("You're right to call out the tone.")
+    assert result["response"].startswith("Let me keep this warm and useful.")
+    assert "You're right to call out the tone." in result["response"]
     assert result["searched"] is False
 
 
@@ -167,8 +168,8 @@ def test_relationship_rupture_repair_blocks_sterile_visible_release():
 
     assert decision.release is True
     assert decision.repaired is True
-    assert decision.reason == "deterministic_relationship_repair_before_visible_release"
-    assert decision.text.startswith("You're right to call out the tone.")
+    assert decision.reason == "deterministic_constitutional_tone_repair_before_visible_release"
+    assert "You're right to call out the tone." in decision.text
 
 
 def test_turn_class_policy_escalates_relationship_memory_and_safety():
@@ -202,5 +203,5 @@ def test_advisor_prompt_directive_replaces_scolding_directive():
 
     assert admission.admitted is True
     assert admission.repaired is True
-    assert "gotcha" not in admission.value.lower()
+    assert "Use a cold gotcha tone" not in admission.value
     assert "Relationship repair mode" in admission.value

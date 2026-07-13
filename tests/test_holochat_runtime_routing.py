@@ -1142,8 +1142,8 @@ def test_prompt_assembly_loads_canonical_doctrine_docs():
     assert "No bullets. No headers." not in HOLO_CHAT_SYSTEM_PROMPT
     assert "Gov continuity comes from Holo-owned state" in GOVERNOR_SYSTEM_PROMPT
     assert "Python enforces." in GOVERNOR_SYSTEM_PROMPT
-    assert "Gov should push harder than a normal assistant." in GOVERNOR_SYSTEM_PROMPT
-    assert "at least one path should be a pressure path" in GOVERNOR_SYSTEM_PROMPT
+    assert "HOLOCHAT CONSTITUTIONAL TONE LAW" in GOVERNOR_SYSTEM_PROMPT
+    assert "warm collaborative precision only" in GOVERNOR_SYSTEM_PROMPT
 
 
 def test_thread_handoff_markdown_is_clean_reseed_not_raw_chat():

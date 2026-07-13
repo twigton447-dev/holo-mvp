@@ -510,10 +510,14 @@ def test_holochat_runtime_prompt_prefers_structured_human_answers():
     gov_doctrine = Path("docs/gov_chat_doctrine.md").read_text()
 
     assert "Sound human in the ordinary sense" in prompt
-    assert "shaped responses" in prompt
-    assert "short **bold section headers**" in prompt
-    assert "at least one scan anchor" in prompt
-    assert "Use bullets generously when they create momentum" in prompt
+    assert "conversational presence first" in prompt
+    assert "voice must never become a memo, report, performance, or UI script" in prompt
+    assert "short **bold section header**" in prompt
+    assert "create a scan anchor only where it helps" in prompt
+    assert "Use bullets when they create momentum" in prompt
+    assert "choose the person over the format" in prompt
+    assert 'Do not append a literal "Next-step suggestions" menu' in prompt
+    assert "runtime/Governor layer owns clickable continuation paths" in prompt
     assert "Do not leave complex answers as one flat wall of prose" in prompt
     assert "Format guidance for this response: use short **bold headers**" in prompt
     assert "If a sentence could appear in a generic AI demo" in prompt

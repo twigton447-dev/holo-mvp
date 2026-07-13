@@ -20,7 +20,7 @@
   <meta name="application-name" content="Holo" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -73,23 +73,24 @@
 
     /* Holo message — icon + full-width content */
     .msg.holo { display: flex; flex-direction: row; align-items: flex-start; gap: 16px; }
+    .msg.holo.streaming { scroll-margin-top: 18px; }
     .holo-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); border: none; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 3px; color: #fff; }
     .holo-body { flex: 1; min-width: 0; }
-    .holo-body .bubble { font-family: 'Lora', Georgia, serif; font-size: 16.5px; font-weight: 400; line-height: 1.95; color: #efefef; letter-spacing: 0.01em; }
+    .holo-body .bubble { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; font-weight: 500; line-height: 1.82; color: #efefef; letter-spacing: 0; }
     body.light .holo-body .bubble { color: #1a1a1a; }
 
-    /* Markdown — dramatic size jumps so hierarchy is unmissable */
-    .holo-body h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 30px; font-weight: 800; margin: 8px 0 20px; color: var(--text); line-height: 1.12; letter-spacing: 0; }
-    .holo-body h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 700; margin: 36px 0 12px; color: var(--text); line-height: 1.2; letter-spacing: 0; border-top: 1px solid var(--border); padding-top: 26px; }
+    /* Markdown — quiet hierarchy for a conversational workspace */
+    .holo-body h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; margin: 6px 0 16px; color: var(--text); line-height: 1.2; letter-spacing: 0; }
+    .holo-body h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 19px; font-weight: 750; margin: 28px 0 10px; color: var(--text); line-height: 1.28; letter-spacing: 0; border-top: 1px solid var(--border); padding-top: 22px; }
     .holo-body h2:first-child { border-top: none; padding-top: 0; margin-top: 4px; }
-    .holo-body h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; margin: 26px 0 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.14em; }
-    .holo-body p  { margin: 0 0 22px; }
+    .holo-body h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 800; margin: 24px 0 9px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; }
+    .holo-body p  { margin: 0 0 17px; }
     .holo-body p:last-child { margin-bottom: 0; }
     .holo-body strong { font-weight: 800; color: #ffffff; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0; }
     body.light .holo-body strong { color: #000000; }
     .holo-body em { font-style: italic; color: var(--text5); }
     .holo-body ul, .holo-body ol { margin: 10px 0 22px 0; padding-left: 24px; }
-    .holo-body li { margin-bottom: 12px; line-height: 1.85; }
+    .holo-body li { margin-bottom: 10px; line-height: 1.75; }
     .holo-body code { background: var(--bg2); border: 1px solid var(--border); padding: 2px 7px; border-radius: 5px; font-size: 13px; font-family: 'SF Mono','Fira Code','Fira Mono',monospace; }
     .holo-body pre { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; overflow-x: auto; margin: 12px 0 22px; }
     .holo-body pre code { background: none; border: none; padding: 0; font-size: 13px; }
@@ -119,6 +120,34 @@
     .chip { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border); background: none; color: var(--text2); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; font-weight: 500; cursor: pointer; text-align: left; transition: all 0.15s; width: 100%; }
     .chip:hover { background: var(--bg2); border-color: var(--text3); color: var(--text); }
     .chip-num { font-size: 10px; font-weight: 700; color: var(--text3); min-width: 16px; letter-spacing: 0.05em; }
+    .onboarding-card { border: 1px solid var(--border); background: var(--bg2); border-radius: 8px; padding: 18px; margin-top: 4px; }
+    .onboarding-title { font-size: 18px; font-weight: 800; margin: 0 0 8px; color: var(--text); line-height: 1.25; }
+    .onboarding-copy { color: var(--text2); font-size: 14px; line-height: 1.65; margin: 0 0 16px; }
+    .depth-choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+    .depth-choice-btn { border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; padding: 13px; text-align: left; cursor: pointer; font-family: inherit; transition: border-color 0.15s, background 0.15s, transform 0.15s; min-height: 128px; }
+    .depth-choice-btn:hover { border-color: var(--accent); background: rgba(91,122,229,0.07); transform: translateY(-1px); }
+    .depth-choice-btn strong { display: block; font-size: 14px; margin-bottom: 7px; color: var(--text); }
+    .depth-choice-btn span { display: block; font-size: 12.5px; color: var(--text2); line-height: 1.5; }
+    .seed-panel { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+    .seed-note { color: var(--text3); font-size: 12.5px; line-height: 1.6; }
+    .seed-question { border: 1px solid var(--border); background: var(--bg); border-radius: 8px; padding: 12px; }
+    .seed-question label { display: block; color: var(--text); font-size: 13px; font-weight: 700; line-height: 1.45; margin-bottom: 8px; }
+    .seed-question textarea { width: 100%; min-height: 74px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 10px; font-size: 13px; font-family: inherit; line-height: 1.55; resize: vertical; outline: none; }
+    .seed-question textarea:focus { border-color: var(--text3); }
+    .seed-actions { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+    .seed-actions button, .recent-theme-btn { border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; }
+    .seed-actions button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .seed-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .category-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 10px 0 4px; }
+    .category-check { display: flex; gap: 8px; align-items: flex-start; border: 1px solid var(--border); background: var(--bg); border-radius: 8px; padding: 9px 10px; font-size: 12.5px; line-height: 1.45; color: var(--text2); }
+    .category-check input { margin-top: 2px; accent-color: var(--accent); }
+    .consent-check { display: flex; gap: 9px; align-items: flex-start; color: var(--text2); font-size: 12.5px; line-height: 1.55; }
+    .consent-check input { margin-top: 3px; accent-color: var(--accent); }
+    .recent-themes { display: flex; flex-wrap: wrap; gap: 9px; justify-content: center; margin-top: 14px; }
+    .recent-theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .memory-actions { display: flex; gap: 6px; margin-top: 8px; }
+    .memory-actions button { border: 1px solid var(--border); background: var(--bg); color: var(--text2); border-radius: 7px; padding: 4px 8px; font-size: 11px; font-weight: 700; font-family: inherit; cursor: pointer; }
+    .memory-actions button:hover { color: var(--text); border-color: var(--text3); }
 
     /* Typing indicator */
     @keyframes holoPulse { 0%,100%{opacity:0.3;transform:scale(0.85)} 50%{opacity:1;transform:scale(1.05)} }
@@ -132,6 +161,9 @@
     #thread-meter-label { min-width: 28px; text-align: right; }
     #thread-meter.low #thread-meter-fill { background: #d97706; }
     #thread-meter.critical #thread-meter-fill { background: #dc2626; }
+    .dev-only { display: none !important; }
+    body.dev-tools .dev-only { display: inline-flex !important; }
+    body.dev-tools #thread-meter.dev-only { display: inline-flex !important; }
 
     /* Input bar */
     #input-bar { flex-shrink: 0; padding: 10px 20px 24px; border-top: 1px solid var(--border2); background: var(--bg); }
@@ -224,14 +256,17 @@
     #header { flex-shrink: 0; padding: calc(10px + env(safe-area-inset-top)) 20px 10px; border-bottom: 1px solid var(--border2); display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--bg); position: relative; z-index: 40; }
     #header-brand { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
     #header h1 { font-size: 15px; font-weight: 800; letter-spacing: 0; margin: 0; display: flex; align-items: baseline; gap: 6px; }
-    #brand-sub { font-size: 15px; font-weight: 400; color: var(--text2); opacity: 0.65; letter-spacing: 0; }
+    #brand-sub { display: none; font-size: 15px; font-weight: 400; color: var(--text2); opacity: 0.65; letter-spacing: 0; }
     #brand-tagline { font-size: 10px; font-weight: 500; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.5; }
     #header-right { display: flex; align-items: center; gap: 8px; }
-    #new-thread { background: none; border: 1px solid var(--border); color: var(--text4); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.15s; }
-    #new-thread:hover { border-color: var(--text2); color: var(--text5); }
+    .header-btn { height: 34px; border: 1px solid var(--border); background: var(--bg2); color: var(--text4); border-radius: 999px; padding: 0 13px; font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex-shrink: 0; letter-spacing: 0; }
+    .header-btn:hover { border-color: var(--text2); color: var(--text5); }
+    .header-btn.active, #thread-toggle.open { border-color: var(--accent); color: var(--accent); background: rgba(91,122,229,0.08); }
+    .header-icon-btn { width: 34px; padding: 0; }
+    .header-btn svg { width: 16px; height: 16px; display: block; stroke: currentColor; }
 
     /* Theme toggle */
-    #theme-toggle { background: none; border: 1px solid var(--border); color: var(--text2); border-radius: 8px; padding: 5px 10px; font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+    #theme-toggle { font-size: 13px; }
     #theme-toggle:hover { border-color: var(--text2); color: var(--text5); }
 
     /* Mode toggle */
@@ -266,7 +301,7 @@
     #seed-btn { margin-top: 6px; width: 100%; background: var(--accent); border: none; color: #fff; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
 
     /* HoloBrain panel */
-    #runtime-toggle, #holobrain-toggle { display: none; background: var(--bg2); border: 1px solid var(--border); color: var(--text4); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+    #runtime-toggle, #holobrain-toggle { display: none; }
     #runtime-toggle:hover, #holobrain-toggle:hover { border-color: var(--text2); color: var(--text5); }
     #runtime-panel { position: fixed; top: 0; right: 0; height: 100vh; width: min(420px, 100vw); background: var(--bg); border-left: 1px solid var(--border); z-index: 91; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.24s ease; }
     #runtime-panel.open { transform: translateX(0); }
@@ -425,16 +460,15 @@
     #surface-loading { display: flex; align-items: center; justify-content: center; flex: 1; color: var(--text3); font-size: 13px; }
     @media (max-width: 700px) { #surface-panel { width: 100%; } }
     /* Thread toggle in header */
-    #thread-toggle { background: none; border: 1px solid var(--border); color: var(--text3); border-radius: 8px; padding: 5px 12px; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; display: block; transition: all 0.15s; flex-shrink: 0; letter-spacing: 0.04em; }
+    #thread-toggle { display: inline-flex; }
     #thread-toggle:hover { border-color: var(--text2); color: var(--text5); }
-    #thread-toggle.open { border-color: var(--accent); color: var(--accent); }
 
     /* Incognito mode */
     #incognito-badge { display: none; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--text3); border: 1px solid var(--border); border-radius: 20px; padding: 3px 9px; letter-spacing: 0.04em; }
     #incognito-badge.visible { display: flex; }
     body.incognito #incognito-badge { color: #a78bfa; border-color: #a78bfa44; background: #a78bfa11; }
     body.incognito #header { border-bottom-color: #a78bfa33; }
-    #incognito-btn { background: none; border: 1px solid var(--border); color: var(--text3); border-radius: 8px; padding: 5px 10px; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; letter-spacing: 0.04em; }
+    #incognito-btn { color: var(--text3); }
     #incognito-btn:hover { border-color: #a78bfa; color: #a78bfa; }
     #incognito-btn.active { border-color: #a78bfa; color: #a78bfa; background: #a78bfa11; }
     #mobile-action-bar { display: none; }
@@ -453,6 +487,8 @@
       .holo-body h1 { font-size: 24px; }
       .holo-body h2 { font-size: 20px; }
       .msg.user .bubble { max-width: 90%; }
+      .depth-choice-grid, .category-grid { grid-template-columns: 1fr; }
+      .onboarding-card { padding: 15px; }
       #memory-panel { width: 100%; }
       #runtime-panel, #holobrain-panel { width: 100%; }
       #holobrain-resize-handle { display: none; }
@@ -485,7 +521,7 @@
         flex-shrink: 0;
       }
       #thread-toggle::before { content: "‹"; font-size: 25px; font-weight: 400; transform: translateY(-1px); }
-      #new-thread::before { content: "✎"; font-size: 18px; font-weight: 700; transform: translate(1px, -1px); }
+      #new-thread svg { width: 15px; height: 15px; }
       #holobrain-toggle, #incognito-btn, #theme-toggle { display: none !important; }
       #signin-btn {
         height: 34px;
@@ -507,6 +543,8 @@
         transform: translateX(1px);
       }
       #avatar-menu .mobile-only { display: block; }
+      #avatar-menu .dev-only.mobile-only { display: none !important; }
+      body.dev-tools #avatar-menu .dev-only.mobile-only { display: block !important; }
       #avatar-menu {
         position: fixed;
         top: calc(env(safe-area-inset-top) + 52px);
@@ -684,15 +722,15 @@
   </div>
 </div>
 
-<!-- Engine data dashboard — runtime plus authenticated saved-memory status -->
+<!-- Local diagnostics dashboard — runtime plus authenticated saved-memory status -->
 <div id="holobrain-panel">
-  <div id="holobrain-resize-handle" role="separator" aria-orientation="vertical" title="Drag to resize engine data"></div>
+  <div id="holobrain-resize-handle" role="separator" aria-orientation="vertical" title="Drag to resize diagnostics"></div>
   <div id="holobrain-panel-header">
-    <h3>Engine data</h3>
+    <h3>Diagnostics</h3>
     <button id="holobrain-panel-close" onclick="closeHoloBrainPanel()">×</button>
   </div>
   <div id="holobrain-body">
-    <div class="brain-muted">Sign in to view engine data.</div>
+    <div class="brain-muted">Sign in to view diagnostics.</div>
   </div>
 </div>
 
@@ -720,15 +758,19 @@
 <div id="app">
   <div id="header">
     <div id="header-brand">
-      <h1><span>HoloChat</span> <span id="brand-sub">4DNA</span><span id="space-label"></span></h1>
+      <h1><span>HoloChat</span> <span id="brand-sub" aria-hidden="true">4DNA</span><span id="space-label"></span></h1>
     </div>
     <div id="header-right">
       <div id="incognito-badge">◉ Incognito</div>
-      <button id="thread-toggle" onclick="toggleThreadPanel()" title="See my threads">See my threads</button>
-      <button id="holobrain-toggle" onclick="openHoloBrainPanel()" title="Open engine data">Engine data</button>
-      <button id="incognito-btn" onclick="toggleIncognito()" title="Start incognito thread">Start incognito thread</button>
-      <button id="new-thread" onclick="newThread()">Start new thread</button>
-      <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀</button>
+      <button id="thread-toggle" class="header-btn" onclick="toggleThreadPanel()" title="Library">Library</button>
+      <button id="holobrain-toggle" class="dev-only header-btn header-label-btn" onclick="openHoloBrainPanel()" title="Open diagnostics">Diagnostics</button>
+      <button id="incognito-btn" class="header-btn header-icon-btn" onclick="toggleIncognito()" title="Private thread" aria-label="Private thread">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-2.8 8.5-7 10-4.2-1.5-7-5.5-7-10V6l7-3z"/><path d="M9.5 12.5l1.6 1.6 3.4-3.7"/></svg>
+      </button>
+      <button id="new-thread" class="header-btn header-icon-btn" onclick="newThread()" title="New thread" aria-label="New thread">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      </button>
+      <button id="theme-toggle" class="header-btn header-icon-btn" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">☀</button>
       <button id="signin-btn" onclick="document.getElementById('signin-overlay').classList.remove('hidden')" style="background:var(--accent);border:none;color:#fff;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;">Sign in</button>
       <button id="signout-btn" onclick="signOut()" style="display:none;background:none;border:1px solid var(--border);color:var(--text3);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;">Log out</button>
       <div id="user-avatar" style="display:none"></div>
@@ -737,8 +779,7 @@
   <div id="mobile-action-bar" aria-label="Mobile chat controls">
     <button onclick="toggleThreadPanel()">Threads</button>
     <button onclick="newThread()">New</button>
-    <button onclick="openHoloBrainPanel()">Engine</button>
-    <button onclick="toggleIncognito()">Incognito</button>
+    <button onclick="toggleIncognito()">Private</button>
   </div>
 
   <div id="messages">
@@ -753,8 +794,7 @@
     <div id="mobile-composer-controls" aria-label="Mobile composer controls">
       <button onclick="toggleThreadPanel()">Threads</button>
       <button onclick="newThread()">New</button>
-      <button onclick="openHoloBrainPanel()">Engine</button>
-      <button onclick="toggleIncognito()">Incognito</button>
+      <button onclick="toggleIncognito()">Private</button>
     </div>
     <input type="file" id="file-input" multiple onchange="handleFiles(this)" />
     <div id="input-wrap">
@@ -763,7 +803,7 @@
       </button>
       <textarea id="input" placeholder="Chat with Holo…" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
       <div id="input-actions">
-        <div id="thread-meter" title="Thread health 100%" aria-label="Thread health 100%">
+        <div id="thread-meter" class="dev-only" title="Thread health 100%" aria-label="Thread health 100%">
           <span id="thread-meter-shell"><span id="thread-meter-fill"></span></span>
           <span id="thread-meter-label">100%</span>
         </div>
@@ -790,6 +830,25 @@
   const FREE_TURN_LIMIT = 8;
   const STREAM_PACE_MS = 26;
   const STREAM_CHARS_PER_TICK = 3;
+  let   DEV_TOOLS_ENABLED = localStorage.getItem("holo_dev_tools") === "1";
+
+  function setDevToolsVisibility(enabled) {
+    DEV_TOOLS_ENABLED = Boolean(enabled);
+    document.body.classList.toggle("dev-tools", DEV_TOOLS_ENABLED);
+    const brainBtn = document.getElementById("holobrain-toggle");
+    if (brainBtn) brainBtn.style.display = DEV_TOOLS_ENABLED ? "inline-flex" : "none";
+    if (!DEV_TOOLS_ENABLED) closeHoloBrainPanel();
+  }
+
+  window.enableHoloDevTools = function() {
+    localStorage.setItem("holo_dev_tools", "1");
+    setDevToolsVisibility(true);
+  };
+  window.disableHoloDevTools = function() {
+    localStorage.removeItem("holo_dev_tools");
+    setDevToolsVisibility(false);
+  };
+  setDevToolsVisibility(DEV_TOOLS_ENABLED);
 
   // ---- Attachments ---------------------------------------------------------
 
@@ -949,18 +1008,36 @@
   // ---- Brand sub-word — always shows "Chat" in lighter weight
   // (space-label will show active space name when a space is picked)
 
-  // ---- Rotating greeting ---------------------------------------------------
-  const GREETINGS = [
-    { h: "Welcome to Holo.",           sub: "A focused workspace with selected context." },
-    { h: "Good to have you here.",     sub: "What's on your mind?" },
-    { h: "Everything in one place.",   sub: "Holo is ready." },
-    { h: "Your world, all in one.",    sub: "Start anywhere." },
-    { h: "Holo is here.",             sub: "Same voice. Every context." },
-    { h: "Context, kept useful.",      sub: "What do you want to work on?" },
-  ];
-  const _g = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
-  document.getElementById("greeting").textContent     = _g.h;
-  document.getElementById("greeting-sub").textContent = _g.sub;
+  // ---- Welcome surface -----------------------------------------------------
+  const DEPTH_CHOICE_KEY = "holo_depth_choice_v1";
+  const DEPTH_FIRST_SEEN_KEY = "holo_depth_first_seen_v1";
+  const DEPTH_PROMPT_SHOWN_KEY = "holo_depth_prompt_shown_v1";
+
+  function firstNameFrom(value) {
+    return (value || "").split(/[\s@]/).filter(Boolean)[0] || "";
+  }
+
+  function currentWelcomeLine(userName = "") {
+    const firstName = firstNameFrom(userName);
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      return firstName
+        ? `Hey ${firstName}, what’s the first thing on your mind today?`
+        : "Hey, what’s the first thing on your mind today?";
+    }
+    if (hour >= 12 && hour < 17) return "Quick check-in—what needs attention right now?";
+    return "Anything from today you want to capture or think through?";
+  }
+
+  function renderDefaultWelcome(userName = "") {
+    const greeting = document.getElementById("greeting");
+    const sub = document.getElementById("greeting-sub");
+    if (!greeting || !sub) return;
+    greeting.textContent = currentWelcomeLine(userName);
+    sub.textContent = "Start light. Holo learns more only when you choose that.";
+  }
+
+  renderDefaultWelcome();
 
 
   // ---- Google Sign-In init --------------------------------------------------
@@ -1263,7 +1340,7 @@
     if (avatarEl)   avatarEl.style.display   = "";
     if (signinBtn)  signinBtn.style.display  = "none";
     if (signoutBtn) signoutBtn.style.display = "none"; // avatar menu handles sign-out
-    if (brainBtn)   brainBtn.style.display   = "block";
+    if (brainBtn)   brainBtn.style.display   = DEV_TOOLS_ENABLED ? "inline-flex" : "none";
     _holoBrainLoaded = false;
 
     const name = data.name || data.email || "?";
@@ -1300,7 +1377,7 @@
       // Restore session state
       sessionId = data.session_id;
       document.getElementById("empty")?.remove();
-      document.getElementById("holo-onboarding")?.remove();
+      document.getElementById("holo-depth-choice")?.remove();
 
       const container = document.getElementById("messages");
       data.history.forEach(msg => {
@@ -1331,14 +1408,8 @@
       _memoryContext = context || {};
       updateMemoryBadge();
       renderMemoryList();
-
-      // Onboarding: if Holo knows nothing real yet, inject a welcome message
-      // Filter internal keys (prefixed _) — they're system data, not user knowledge
-      const knownCount = Object.keys(_memoryContext).filter(k => !k.startsWith("_")).length;
-      if (knownCount === 0) {
-        const firstName = (userName || "").split(/[\s@]/)[0] || "hey";
-        injectOnboarding(firstName);
-      }
+      renderRecentThemes(userName);
+      maybePromptDepthChoiceOnLaunch();
     } catch (e) {}
   }
 
@@ -1365,19 +1436,46 @@
 
   function renderMemoryList() {
     const list = document.getElementById("memory-list");
-    const entries = Object.entries(_memoryContext);
+    const entries = userFacingMemoryEntries();
     if (entries.length === 0) {
       list.innerHTML = `<div id="memory-empty">Holo is still getting to know you.<br>Just keep talking — it builds over time.</div>`;
       return;
     }
     list.innerHTML = entries.map(([k, v]) => `
       <div class="memory-item">
-        <div class="memory-key">${escHtml(k.replace(/_/g, " "))}</div>
+        <div class="memory-key">${escHtml(memoryKeyLabel(k))}</div>
         <div class="memory-val">${escHtml(v)}</div>
+        <div class="memory-actions">
+          <button onclick="editMemoryEntry(${jsArg(k)})">Edit</button>
+          <button onclick="deleteMemoryEntry(${jsArg(k)})">Delete</button>
+        </div>
       </div>`).join("");
   }
 
-  // ── Engine data dashboard ───────────────────────────────────────────────────
+  async function editMemoryEntry(key) {
+    if (!capsuleToken || !key) return;
+    const current = _memoryContext[key] || "";
+    const next = prompt("Edit this memory entry.", current);
+    if (next === null) return;
+    await saveCapsuleContext({ [key]: next.trim() });
+    renderMemoryList();
+  }
+
+  async function deleteMemoryEntry(key) {
+    if (!capsuleToken || !key) return;
+    if (!confirm("Delete this memory entry from your capsule?")) return;
+    const res = await fetch(`/v1/capsule/context/${encodeURIComponent(key)}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (res.ok) {
+      delete _memoryContext[key];
+      if (key === "holo_depth_preference") localStorage.removeItem(DEPTH_CHOICE_KEY);
+      renderMemoryList();
+    }
+  }
+
+  // ── Local diagnostics dashboard ──────────────────────────────────────────────
 
   let _holoBrainLoaded = false;
   let _latestRuntimeData = null;
@@ -1388,6 +1486,7 @@
   const ENGINE_PANEL_MAX_WIDTH = 920;
 
   function openHoloBrainPanel() {
+    if (!DEV_TOOLS_ENABLED) return;
     const panel = document.getElementById("holobrain-panel");
     panel.classList.add("open");
     if (!_holoBrainLoaded) loadHoloBrain();
@@ -1439,15 +1538,15 @@
   async function loadHoloBrain() {
     const body = document.getElementById("holobrain-body");
     if (!capsuleToken) {
-      body.innerHTML = `<div class="brain-muted">Sign in to view engine data.</div>`;
+      body.innerHTML = `<div class="brain-muted">Sign in to view diagnostics.</div>`;
       return;
     }
-    body.innerHTML = `<div class="brain-muted">Loading engine data...</div>`;
+    body.innerHTML = `<div class="brain-muted">Loading diagnostics...</div>`;
     try {
       const res = await fetch("/v1/holo-brain", {
         headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
       });
-      if (!res.ok) throw new Error("Engine data unavailable.");
+      if (!res.ok) throw new Error("Diagnostics unavailable.");
       const data = await res.json();
       try {
         const buildRes = await fetch("/v1/holo-build", {
@@ -1458,7 +1557,7 @@
       renderHoloBrain(data);
       _holoBrainLoaded = true;
     } catch {
-      body.innerHTML = `<div class="brain-muted">Engine data is unavailable right now.</div>`;
+      body.innerHTML = `<div class="brain-muted">Diagnostics are unavailable right now.</div>`;
     }
   }
 
@@ -1744,7 +1843,7 @@
       ${brainSection("Recent messages", `${messages.shown || 0} shown`, messageRows)}
       ${brainSection("Consolidations", `${consolidations.shown || 0} shown`, consolidationRows)}
       ${brainSection("Artifacts", `${artifacts.shown || 0} shown`, artifactRows)}
-      <button id="seed-btn" onclick="refreshHoloBrain()">Refresh engine data</button>`;
+      <button id="seed-btn" onclick="refreshHoloBrain()">Refresh diagnostics</button>`;
   }
 
   // ── Avatar menu ───────────────────────────────────────────────────────────────
@@ -1755,11 +1854,15 @@
     const menu = document.createElement("div");
     menu.id = "avatar-menu";
     menu.setAttribute("role", "menu");
+    const diagnosticsItem = DEV_TOOLS_ENABLED
+      ? `<button class="mobile-only dev-only" onclick="closeAvatarMenu();openHoloBrainPanel()">Diagnostics</button>`
+      : "";
     menu.innerHTML = `
-      <button class="mobile-only" onclick="closeAvatarMenu();openMemoryPanel()">Memory</button>
-      <button class="mobile-only" onclick="closeAvatarMenu();openHoloBrainPanel()">Engine data</button>
+      <button onclick="closeAvatarMenu();openMemoryPanel()">Memory</button>
+      <button onclick="closeAvatarMenu();injectDepthChoice(true)">Depth</button>
+      ${diagnosticsItem}
       <button class="mobile-only" onclick="closeAvatarMenu();toggleTheme()">Switch theme</button>
-      <button class="mobile-only" onclick="closeAvatarMenu();toggleIncognito()">Start incognito thread</button>
+      <button class="mobile-only" onclick="closeAvatarMenu();toggleIncognito()">Private thread</button>
       <button class="menu-danger" onclick="signOut()">Sign out</button>`;
     document.getElementById("user-avatar").appendChild(menu);
     // Close on outside click
@@ -1773,6 +1876,9 @@
   function signOut() {
     localStorage.removeItem("holo_capsule_token");
     localStorage.removeItem("holo_capsule_mode");
+    localStorage.removeItem(DEPTH_CHOICE_KEY);
+    localStorage.removeItem(DEPTH_FIRST_SEEN_KEY);
+    localStorage.removeItem(DEPTH_PROMPT_SHOWN_KEY);
     capsuleToken = null;
     location.reload(); // simplest — clears all state cleanly
   }
@@ -1896,91 +2002,289 @@
     scrollToBottom();
   }
 
-  const _BIO_PROMPT = `Based on what you can infer from our conversations, write a detailed and nuanced operating profile that I can use to seed a personal AI memory system.
+  const PERSONAL_SEED_QUESTIONS = [
+    "What are you working on right now that Holo should understand?",
+    "What priorities or deadlines need attention soon?",
+    "How do you like help delivered: direct, exploratory, checklist, coaching, or something else?",
+    "What should Holo avoid doing when it helps you?",
+  ];
 
-Aim for about 1,000 words. Be specific, candid, and practical. Avoid generic praise.
+  const DEEP_CATEGORY_QUESTIONS = {
+    thinking: {
+      label: "How you think and decide",
+      questions: [
+        "When a decision is hard, what usually helps you see clearly?",
+        "What kinds of explanations or questions make your thinking sharper?",
+      ],
+    },
+    pressure: {
+      label: "How you handle pressure",
+      questions: [
+        "What does pressure tend to do to your judgment or energy?",
+        "What kind of support is useful when things feel urgent, messy, or emotionally loaded?",
+      ],
+    },
+    values: {
+      label: "What you care about most",
+      questions: [
+        "What principles should Holo protect when helping you make choices?",
+        "What would feel like bad help, even if it looked productive?",
+      ],
+    },
+    work: {
+      label: "Projects, priorities, and working style",
+      questions: [
+        "What are the active projects or roles Holo should keep in view?",
+        "What working style helps you actually move: structure, challenge, synthesis, momentum, or something else?",
+      ],
+    },
+    help: {
+      label: "What kind of help moves you",
+      questions: [
+        "When Holo is at its best for you, what does it do?",
+        "Where should Holo be proactive, and where should it stay lighter?",
+      ],
+    },
+  };
 
-Cover:
-
-* how I think, decide, and solve problems
-* my communication style and preferred tone
-* my working style, creative style, and collaboration style
-* my strengths, patterns, and recurring blind spots
-* what motivates me and what tends to slow me down
-* current projects, priorities, and long-running goals
-* how I like an AI assistant to help me
-* what an AI assistant should avoid doing with me
-* any durable context that would help a new assistant work with me better
-
-Use clear headings. Ground the profile in evidence from our actual interactions when possible. Do not include passwords, account numbers, private addresses, medical details, financial secrets, legal secrets, or anything I would not want saved in a memory system.`;
-
-  function copyBioPrompt() {
-    navigator.clipboard.writeText(_BIO_PROMPT).then(() => {
-      const btn = document.getElementById("copy-bio-btn");
-      if (btn) { btn.textContent = "Copied ✓"; setTimeout(() => { btn.textContent = "Copy prompt"; }, 2000); }
-    });
+  function depthChoice() {
+    return (_memoryContext && _memoryContext.holo_depth_preference) || localStorage.getItem(DEPTH_CHOICE_KEY) || "";
   }
 
-  async function seedBio() {
-    const ta = document.getElementById("bio-paste-area");
-    if (!ta) return;
-    const text = ta.value.trim();
-    if (!text || !capsuleToken) return;
-    const btn = document.getElementById("seed-bio-btn");
-    btn.disabled = true;
-    btn.textContent = "Saving…";
-    try {
-      await fetch("/v1/capsule/context", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` },
-        body:    JSON.stringify({ about_me: text }),
-      });
-      document.getElementById("holo-onboarding")?.remove();
-      document.getElementById("empty")?.remove();
-      refreshMemoryContext();
-      // Send a special onboarding prompt — Holo sees the bio in context and gives a proper intro
-      const onboardingPrompt = `Here is my memory seed profile:\n\n${text}\n\nDo not give a generic introduction. Read this profile carefully and open your response with a specific observation, question, or reflection pulled directly from what I shared. Reference something real: a project I mentioned, a tension I described, a goal that caught your attention. Make it clear you read it. One sharp, specific opening. Then in two or three short lines, tell me how you can help and invite me to start.`;
-      document.getElementById("input").value = onboardingPrompt;
-      sendMessage();
-    } catch { btn.disabled = false; btn.textContent = "Seed to Holo"; }
+  function publicMemoryEntries() {
+    return Object.entries(_memoryContext || {}).filter(([key]) => !key.startsWith("_") && key !== "last_session_id");
   }
 
-  function injectOnboarding(firstName) {
-    // Only inject once per session
-    if (document.getElementById("holo-onboarding")) return;
+  function userFacingMemoryEntries() {
+    return publicMemoryEntries().filter(([key]) => key !== "holo_depth_consent_v1");
+  }
+
+  function recentThemeEntries() {
+    return publicMemoryEntries()
+      .filter(([key]) => !key.startsWith("holo_depth") && key !== "holo_seed_personal_v1" && key !== "holo_seed_deep_v1")
+      .slice(0, 3);
+  }
+
+  function memoryKeyLabel(key) {
+    return String(key).replace(/^holo_seed_personal_v1$/, "personal calibration")
+      .replace(/^holo_seed_deep_v1$/, "deep calibration")
+      .replace(/^holo_depth_preference$/, "depth preference")
+      .replace(/_/g, " ");
+  }
+
+  function jsArg(value) {
+    return escHtml(JSON.stringify(String(value)));
+  }
+
+  function depthCopyCard() {
+    return `
+      <div class="onboarding-card">
+        <p class="onboarding-title">How deep should Holo know you?</p>
+        <p class="onboarding-copy">Holo can stay light and learn as we talk, or it can ask a focused set of questions now so future answers feel more like talking to someone who already gets your context.</p>
+        <div class="depth-choice-grid">
+          <button class="depth-choice-btn" onclick="chooseDepth('surface')">
+            <strong>Surface</strong>
+            <span>No extra questions. Holo remembers only what comes up naturally.</span>
+          </button>
+          <button class="depth-choice-btn" onclick="chooseDepth('personal')">
+            <strong>Personal</strong>
+            <span>A short set of questions about your current projects, priorities, and working style. Stored only in your capsule. You can edit or delete anything later.</span>
+          </button>
+          <button class="depth-choice-btn" onclick="showDeepConsent()">
+            <strong>Deep</strong>
+            <span>The full calibration. Covers how you think, decide, handle pressure, what you care about most, and what kind of help actually moves you. Same rules: you control it, you can downgrade anytime.</span>
+          </button>
+        </div>
+        <p class="seed-note" style="margin-top:14px;">By choosing Personal or Deep you are confirming you understand what will be asked and stored. You can change this later from Depth in your account menu.</p>
+      </div>`;
+  }
+
+  function injectDepthChoice(force = false) {
+    if (!capsuleToken || incognitoMode) return;
+    if (!force && depthChoice()) return;
+    if (document.getElementById("holo-depth-choice")) return;
     document.getElementById("empty")?.remove();
-
     const container = document.getElementById("messages");
     const msg = document.createElement("div");
     msg.className = "msg holo";
-    msg.id = "holo-onboarding";
-    msg.innerHTML = `
-      <div class="holo-icon">✦</div>
-      <div class="holo-body">
-        <div class="bubble">
+    msg.id = "holo-depth-choice";
+    msg.innerHTML = `<div class="holo-icon">✦</div><div class="holo-body"><div class="bubble">${depthCopyCard()}</div></div>`;
+    container.appendChild(msg);
+    scrollMessageTopIntoReadingPosition(msg, "smooth");
+  }
 
-          <p style="font-size:17px;font-weight:700;margin:0 0 10px;">Create a memory seed profile</p>
-          <p style="margin-bottom:6px;">Ask your favorite chatbot to create a memory seed profile for HoloChat.</p>
-          <p style="margin-bottom:6px;">Copy this prompt into the chatbot that knows you best, then paste the result here.</p>
-          <p style="margin-bottom:16px;color:var(--text3);font-size:12.5px;">You can edit or remove anything before saving. Do not include secrets or highly sensitive information.</p>
+  function maybePromptDepthChoice() {
+    if (!capsuleToken || incognitoMode || depthChoice()) return;
+    if (localStorage.getItem(DEPTH_PROMPT_SHOWN_KEY) === "1") return;
+    localStorage.setItem(DEPTH_PROMPT_SHOWN_KEY, "1");
+    setTimeout(() => injectDepthChoice(false), 800);
+  }
 
-          <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin:0 0 8px;">Prompt to copy</p>
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:0 0 10px;font-family:'SF Mono','Fira Code',monospace;font-size:12.5px;line-height:1.7;color:var(--text2);">${escHtml(_BIO_PROMPT)}</div>
-          <button id="copy-bio-btn" onclick="copyBioPrompt()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:16px;">Copy prompt</button>
+  function maybePromptDepthChoiceOnLaunch() {
+    if (!capsuleToken || incognitoMode || depthChoice()) return;
+    const firstSeen = localStorage.getItem(DEPTH_FIRST_SEEN_KEY);
+    if (!firstSeen) {
+      localStorage.setItem(DEPTH_FIRST_SEEN_KEY, String(Date.now()));
+      return;
+    }
+    maybePromptDepthChoice();
+  }
 
-          <p style="margin-bottom:8px;">Then paste the profile below. Edit anything you do not want saved.</p>
-          <p style="margin-bottom:10px;color:var(--text2);font-size:13px;">Paste your memory seed profile:</p>
-          <textarea id="bio-paste-area" rows="6" placeholder="Paste your memory seed profile here. You can edit it before saving." style="width:100%;background:var(--input-bg);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;line-height:1.65;resize:vertical;outline:none;"></textarea>
-          <div style="display:flex;gap:10px;margin-top:10px;align-items:center;">
-            <button id="seed-bio-btn" onclick="seedBio()" style="background:var(--accent);border:none;color:#fff;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;">Seed to Holo</button>
-            <button onclick="document.getElementById('holo-onboarding').remove();document.getElementById('empty')?.remove();" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;">Skip, I'll just start chatting</button>
-          </div>
+  async function saveCapsuleContext(context) {
+    if (!capsuleToken) return false;
+    const res = await fetch("/v1/capsule/context", {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ context }),
+    });
+    if (!res.ok) return false;
+    await refreshMemoryContext();
+    return true;
+  }
 
+  async function chooseDepth(level) {
+    if (level === "deep") {
+      showDeepConsent();
+      return;
+    }
+    if (level === "personal") {
+      localStorage.setItem(DEPTH_CHOICE_KEY, "personal");
+      renderSeedingQuestions("personal", ["projects", "priorities", "working_style"]);
+      return;
+    }
+    localStorage.setItem(DEPTH_CHOICE_KEY, "surface");
+    await saveCapsuleContext({
+      holo_depth_preference: "surface",
+      holo_depth_consent_v1: "Surface selected. No extra questions; Holo learns only through normal conversation.",
+    });
+    closeDepthPrompt();
+    appendHoloNotice("Surface is set. I’ll keep it light and learn only through normal conversation.");
+  }
+
+  function showDeepConsent() {
+    const bubble = document.querySelector("#holo-depth-choice .bubble");
+    if (!bubble) return;
+    const categories = Object.entries(DEEP_CATEGORY_QUESTIONS).map(([key, item]) => `
+      <label class="category-check">
+        <input type="checkbox" name="deep-category" value="${escHtml(key)}" checked onchange="updateDeepBeginState()" />
+        <span>${escHtml(item.label)}</span>
+      </label>`).join("");
+    bubble.innerHTML = `
+      <div class="onboarding-card">
+        <p class="onboarding-title">Deep calibration</p>
+        <p class="onboarding-copy">Deep can ask about how you think, decide, handle pressure, what you care about most, and what kind of help actually moves you. It will not ask for passwords, financial account numbers, medical records, or anything reasonably private without a second confirmation.</p>
+        <p class="seed-note">Choose the categories Holo is allowed to ask inside.</p>
+        <div class="category-grid">${categories}</div>
+        <label class="consent-check">
+          <input id="deep-consent-check" type="checkbox" onchange="updateDeepBeginState()" />
+          <span>I understand these answers will be written to my capsule as editable memory. I can skip any question, stop, delete saved memory, or downgrade later.</span>
+        </label>
+        <div class="seed-actions">
+          <button id="deep-begin-btn" class="primary" onclick="beginDeepCalibration()" disabled>Begin Deep</button>
+          <button onclick="injectDepthChoice(true)">Back</button>
         </div>
       </div>`;
-    container.appendChild(msg);
-    msg.scrollIntoView({ block: "start" });
-    setTimeout(() => { msg.scrollIntoView({ block: "start" }); }, 300);
+  }
+
+  function selectedDeepCategories() {
+    return Array.from(document.querySelectorAll('input[name="deep-category"]:checked')).map(el => el.value);
+  }
+
+  function updateDeepBeginState() {
+    const btn = document.getElementById("deep-begin-btn");
+    if (!btn) return;
+    btn.disabled = !document.getElementById("deep-consent-check")?.checked || selectedDeepCategories().length === 0;
+  }
+
+  function beginDeepCalibration() {
+    const categories = selectedDeepCategories();
+    if (!document.getElementById("deep-consent-check")?.checked || categories.length === 0) return;
+    localStorage.setItem(DEPTH_CHOICE_KEY, "deep");
+    renderSeedingQuestions("deep", categories);
+  }
+
+  function renderSeedingQuestions(level, categories) {
+    const bubble = document.querySelector("#holo-depth-choice .bubble");
+    if (!bubble) return;
+    const isDeep = level === "deep";
+    const questions = isDeep
+      ? categories.flatMap(key => (DEEP_CATEGORY_QUESTIONS[key]?.questions || []).map(question => ({ category: DEEP_CATEGORY_QUESTIONS[key].label, question })))
+      : PERSONAL_SEED_QUESTIONS.map(question => ({ category: "Personal", question }));
+    const questionHtml = questions.map((item, index) => `
+      <div class="seed-question">
+        <label for="seed-q-${index}">${isDeep ? `<span style="color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;">${escHtml(item.category)}</span><br>` : ""}${escHtml(item.question)}</label>
+        <textarea id="seed-q-${index}" data-question="${escHtml(item.question)}" placeholder="Optional. Skip anything you do not want stored."></textarea>
+      </div>`).join("");
+    bubble.innerHTML = `
+      <div class="onboarding-card">
+        <p class="onboarding-title">${isDeep ? "Deep calibration" : "Personal setup"}</p>
+        <p class="seed-note">Skip any question. Do not include passwords, financial account numbers, medical records, private addresses, or anything you do not want saved in HoloBrain.</p>
+        <div class="seed-panel">${questionHtml}</div>
+        <p class="seed-note">If anything here feels like too much, just say so and we’ll stop or go lighter.</p>
+        <div class="seed-actions">
+          <button class="primary" onclick="saveDepthSeed('${level}', ${jsArg(categories.join(", "))})">Save what I answered</button>
+          <button onclick="closeDepthPrompt()">Skip for now</button>
+          <button onclick="chooseDepth('surface')">Go Surface</button>
+        </div>
+      </div>`;
+  }
+
+  async function saveDepthSeed(level, categoryCsv) {
+    const answers = Array.from(document.querySelectorAll("#holo-depth-choice textarea")).map((ta, index) => {
+      const answer = ta.value.trim();
+      if (!answer) return "";
+      return `${index + 1}. ${ta.dataset.question}\n${answer}`;
+    }).filter(Boolean).join("\n\n");
+    const seedKey = level === "deep" ? "holo_seed_deep_v1" : "holo_seed_personal_v1";
+    const consent = level === "deep"
+      ? `Deep selected. Allowed categories: ${categoryCsv}. User saw consent paragraph, can skip questions, delete memory, and downgrade later.`
+      : "Personal selected. Short scoped setup for current projects, priorities, and working style. User can edit/delete later.";
+    const context = {
+      holo_depth_preference: level,
+      holo_depth_consent_v1: consent,
+      [seedKey]: answers || `${level} selected; user skipped setup answers for now.`,
+    };
+    localStorage.setItem(DEPTH_CHOICE_KEY, level);
+    await saveCapsuleContext(context);
+    closeDepthPrompt();
+    appendHoloNotice(level === "deep"
+      ? "Deep is set. I’ll use that context carefully, and you can edit, delete, or downgrade it later."
+      : "Personal is set. I’ll keep the setup scoped to your projects, priorities, and working style.");
+  }
+
+  function closeDepthPrompt() {
+    document.getElementById("holo-depth-choice")?.remove();
+  }
+
+  function appendHoloNotice(text) {
+    const msg = document.createElement("div");
+    msg.className = "msg holo";
+    msg.innerHTML = `<div class="holo-icon">✦</div><div class="holo-body"><div class="bubble">${escHtml(text)}</div></div>`;
+    document.getElementById("messages").appendChild(msg);
+    scrollMessageTopIntoReadingPosition(msg, "smooth");
+  }
+
+  function renderRecentThemes(userName = "") {
+    const empty = document.getElementById("empty");
+    if (!empty || document.querySelector("#messages .msg")) return;
+    const themes = recentThemeEntries();
+    if (themes.length === 0) {
+      renderDefaultWelcome(userName);
+      return;
+    }
+    empty.innerHTML = `
+      <h2>${escHtml(currentWelcomeLine(userName))}</h2>
+      <p>Pick up where you left off, or start somewhere new.</p>
+      <div class="recent-themes">
+        ${themes.map(([key, value]) => `<button class="recent-theme-btn" onclick="continueTheme(${jsArg(value)})">${escHtml(String(value).slice(0, 42))}</button>`).join("")}
+      </div>`;
+  }
+
+  function continueTheme(theme) {
+    const input = document.getElementById("input");
+    input.value = `Let’s continue with ${theme}.`;
+    autoResize(input);
+    input.focus();
   }
 
   function switchMode(mode) {
@@ -2105,7 +2409,6 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
         let   accumulated = "";
         let   pacedStream = null;
         let   doneData = null;
-        let   streamFailed = false;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -2128,28 +2431,22 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
                 bubbleEl = holoEl.querySelector(".bubble");
                 pacedStream = createPacedStreamRenderer(bubbleEl);
                 document.getElementById("messages").appendChild(holoEl);
-                holoEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                scrollMessageTopIntoReadingPosition(holoEl, "smooth");
               }
               accumulated += evt.text;
               pacedStream.push(evt.text);
             } else if (evt.type === "done") {
               doneData = evt;
             } else if (evt.type === "error") {
-              streamFailed = true;
-              streamOk = false;
-              if (holoEl && holoEl.parentNode) holoEl.remove();
-              if (typingEl.parentNode && typingEl.querySelector) {
-                typingEl.querySelector(".bubble").textContent = "Thinking…";
-              }
-              try { await reader.cancel(); } catch {}
-              break;
+              stopAmbientBubbles();
+              typingEl.remove();
+              appendError(evt.detail || "Something went wrong. Please try again.");
             }
           }
-          if (streamFailed) break;
         }
 
         // Handle stream that ended with no tokens and no done event
-        if (!streamFailed && !holoEl && !doneData) {
+        if (!holoEl && !doneData) {
           stopAmbientBubbles();
           if (typingEl.parentNode) typingEl.remove();
           appendError("Connection interrupted. Please try again.");
@@ -2170,6 +2467,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
             setTimeout(() => loadSessionList(), 12000);
           }
           turnCount++;
+          maybePromptDepthChoice();
           if (turnCount === FREE_TURN_LIMIT && !capsuleToken) {
             document.getElementById("free-limit-banner").classList.remove("hidden");
           }
@@ -2224,6 +2522,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
           setTimeout(() => loadSessionList(), 12000);
         }
         turnCount++;
+        maybePromptDepthChoice();
         if (turnCount === FREE_TURN_LIMIT && !capsuleToken) {
           document.getElementById("free-limit-banner").classList.remove("hidden");
         }
@@ -2258,7 +2557,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
 
   function createStreamingBubble() {
     const msg = document.createElement("div");
-    msg.className = "msg holo";
+    msg.className = "msg holo streaming";
     msg.innerHTML = `<div class="holo-icon">✦</div><div class="holo-body"><div class="bubble"></div></div>`;
     return msg;
   }
@@ -2271,7 +2570,6 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
 
     function render() {
       bubbleEl.innerHTML = renderMarkdown(visible);
-      scrollToBottom();
     }
 
     function resolveWaiters() {
@@ -2317,6 +2615,8 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     const chipsHtml = renderConversationPaths(data.conversation_paths || suggestions);
     const webCheckedHtml = renderWebCheckedIndicator(data);
     const body = msgEl.querySelector(".holo-body");
+    const anchorTop = msgEl.getBoundingClientRect().top;
+    msgEl.classList.remove("streaming");
     body.innerHTML = `
       <div class="bubble" id="${responseId}">${renderMarkdown(mainText)}</div>
       ${chipsHtml}
@@ -2333,7 +2633,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
         </button>
       </div>`;
     updateRuntimePanel(data);
-    msgEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    preserveMessageTopAfterRender(msgEl, anchorTop);
   }
 
   function appendMessage(role, text, imageUrls) {
@@ -2395,8 +2695,8 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       });
     }
 
-    // Scroll the top of Holo's response into view — not the bottom
-    msg.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Scroll the top of Holo's response into view — not the bottom.
+    scrollMessageTopIntoReadingPosition(msg, "smooth");
   }
 
   function copyTextFallback(text) {
@@ -2611,6 +2911,22 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     container.scrollTop = container.scrollHeight;
   }
 
+  function scrollMessageTopIntoReadingPosition(msgEl, behavior = "auto") {
+    const container = document.getElementById("messages");
+    if (!container || !msgEl) return;
+    const targetTop = Math.max(0, msgEl.offsetTop - 18);
+    container.scrollTo({ top: targetTop, behavior });
+  }
+
+  function preserveMessageTopAfterRender(msgEl, previousTop) {
+    const container = document.getElementById("messages");
+    if (!container || !msgEl || !Number.isFinite(previousTop)) return;
+    requestAnimationFrame(() => {
+      const nextTop = msgEl.getBoundingClientRect().top;
+      container.scrollTop += nextTop - previousTop;
+    });
+  }
+
   function escHtml(s) {
     return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
@@ -2659,7 +2975,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     const model = runtime.selected_model || selected.model || "";
     const activePoolCount = runtime.active_pool_count || (runtime.active_pool || []).length || 0;
     const runtimeProfile = runtime.runtime_profile || "";
-    const poolLabel = runtimeProfile === "mini_only" || runtimeProfile === "balanced" ? "mini models" : "models";
+    const poolLabel = "models";
     const modeLabel = runtime.serial_call === true && runtime.parallel_fanout !== true
       ? "serial, one analyst per turn"
       : "parallel or unavailable";
@@ -2672,21 +2988,12 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       ? "capped memory slice"
       : (runtime.context_delivery_mode || "unknown");
     const fullMemory = runtime.analyst_receives_full_memory === false ? "no" : "unknown";
-    const memoryStore = runtime.durable_memory_store ? "attached" : "unknown";
-    const memoryDelivery = runtime.memory_delivery_mode === "rolling_summary_selected_context"
-      ? "rolling summary + selected context"
-      : (runtime.memory_delivery_mode || "unknown");
+    const memoryStore = runtime.lossless_memory_store ? "attached" : "unknown";
     const stateMode = runtime.structured_state_object_mode || "off";
     const govArcMode = runtime.gov_arc_state_mode || "off";
     const batonMode = runtime.baton_pass_mode || "off";
     const holo4dnaMode = runtime.holo4dna_mode || "off";
-    const rollingSummaryMode = runtime.rolling_summary_mode === "active_prompt_sliding_window"
-      ? "active sliding summary"
-      : (runtime.rolling_summary_mode || "unknown");
-    const continuityLedgerMode = runtime.continuity_ledger_mode === "active_prompt_structured_private"
-      ? "active private ledger"
-      : (runtime.continuity_ledger_mode || "unknown");
-    const autoReseed = runtime.autoreseed_enabled === true ? "background compacting" : "off/not configured";
+    const autoReseed = runtime.autoreseed_enabled === true ? "automatic" : "off/not configured";
     const usage = runtime.usage || data.usage || {};
     const fmtTokens = value => {
       const n = Number(value);
@@ -2701,29 +3008,11 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       : (usage.cost_source === "unknown_pricing" ? "unknown pricing" : (usage.cost_source || "unknown"));
 
     const rows = [];
-    const release = runtime.release || data.release || {};
-    if (Object.keys(release).length) {
-      rows.push(["Live version", release.app_version || "unknown"]);
-      rows.push(["Architecture version", release.architecture_version || "unknown"]);
-      if (release.build_label) rows.push(["Build label", release.build_label]);
-      if (release.git_commit_short) rows.push(["Build commit", release.git_commit_short]);
-      if (release.git_branch) rows.push(["Build branch", release.git_branch]);
-      if (release.deploy_service) rows.push(["Deploy service", release.deploy_service]);
-      if (release.deploy_environment) rows.push(["Deploy environment", release.deploy_environment]);
-    }
-    const allCylinders = runtime.holochat_all_cylinders || data.holochat_all_cylinders || {};
-    if (Object.keys(allCylinders).length) {
-      rows.push(["HC all cylinders", allCylinders.all_cylinders === true ? "yes" : (allCylinders.status || "unknown")]);
-      rows.push(["HC base runtime", allCylinders.base_runtime_ready === true ? "ready" : "attention"]);
-      rows.push(["Hard-chat shadow", allCylinders.hard_chat_shadow_ready === true ? "ready" : "off"]);
-      const attention = allCylinders.attention_items || [];
-      if (attention.length) rows.push(["HC attention", attention.join(", ")]);
-    }
     rows.push(["Runtime", runtimeProfile || "unknown"]);
     if (provider || model) rows.push(["This turn", `${provider}${model ? ":" + model : ""}`]);
     rows.push(["Mode", modeLabel]);
     const selectionLabel = runtime.selection_mode === "round_robin"
-      ? (runtimeProfile === "mini_only" || runtimeProfile === "balanced" ? "rotating mini pool" : "rotating frontier pool")
+      ? "rotating worker pool"
       : (runtime.selection_mode || "unknown");
     rows.push(["Selection", selectionLabel]);
     if (activePoolCount) rows.push(["Active pool", `${activePoolCount} ${poolLabel}`]);
@@ -2737,61 +3026,11 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
     rows.push(["Context delivery", contextDelivery]);
     rows.push(["Full memory to analyst", fullMemory]);
     rows.push(["Memory store", memoryStore]);
-    rows.push(["Memory delivery", memoryDelivery]);
-    if (runtime.adapter_history_messages !== undefined) {
-      rows.push(["History sent", `${fmtTokens(runtime.adapter_history_messages)} / ${fmtTokens(runtime.adapter_history_total_messages)} messages`]);
-      rows.push(["History omitted", `${fmtTokens(runtime.adapter_history_omitted_messages)} messages`]);
-      rows.push(["History chars", `${fmtTokens(runtime.adapter_history_chars)} / ${fmtTokens(runtime.adapter_history_char_cap)}`]);
-    }
-    if (runtime.context_budget_hard_limit_tokens !== undefined) {
-      rows.push(["Context hard cap", `${fmtTokens(runtime.context_budget_hard_limit_tokens)} tokens`]);
-    }
-    rows.push(["Rolling summary", rollingSummaryMode]);
-    rows.push(["Continuity ledger", continuityLedgerMode]);
     rows.push(["State object", stateMode]);
     rows.push(["Gov Arc State", govArcMode]);
     rows.push(["Baton Pass", batonMode]);
     rows.push(["Holo4DNA", holo4dnaMode]);
-    const governedShadow = runtime.governed_shadow || {};
-    if (Object.keys(governedShadow).length) {
-      rows.push(["Governed shadow", governedShadow.status || "unknown"]);
-      rows.push(["Governed shadow trigger", governedShadow.trigger_reason || "unknown"]);
-      rows.push(["Governed shadow calls", `${fmtTokens(governedShadow.call_count)} / ${fmtTokens(governedShadow.expected_call_count)}`]);
-      const selector = governedShadow.final_selector || {};
-      if (selector.selection_reason) rows.push(["Governed final selector", selector.selection_reason]);
-      const shadowTokens = governedShadow.token_totals || {};
-      if (shadowTokens.total !== undefined) {
-        rows.push(["Governed shadow tokens", fmtTokens(shadowTokens.total)]);
-        rows.push(["Governed Gov share", shadowTokens.gov_share === null || shadowTokens.gov_share === undefined ? "unknown" : `${(Number(shadowTokens.gov_share) * 100).toFixed(1)}%`]);
-      }
-      if (governedShadow.invalidation_reason) rows.push(["Governed shadow invalid", governedShadow.invalidation_reason]);
-    }
-    const voiceDiag = runtime.holo_voice_diagnostics || {};
-    if (Object.keys(voiceDiag).length) {
-      const flags = voiceDiag.risk_flags || [];
-      rows.push(["Holo voice check", voiceDiag.status || "unknown"]);
-      rows.push(["Holo voice flags", flags.length ? flags.join(", ") : "none"]);
-      rows.push(["Capsule attached", voiceDiag.capsule_attached === true ? "yes" : "no"]);
-      rows.push(["Capsule context", `${fmtTokens(voiceDiag.capsule_context_count)} items`]);
-      rows.push(["Selected Gov context", `${fmtTokens(voiceDiag.selected_gov_context_count)} items`]);
-      rows.push(["Life context", `${fmtTokens(voiceDiag.life_context_count)} items`]);
-      rows.push(["Rolling summary present", voiceDiag.rolling_summary_present === true ? "yes" : "no"]);
-      rows.push(["Gov brief present", voiceDiag.captain_brief_present === true ? "yes" : "no"]);
-      const blocks = voiceDiag.block_presence || {};
-      rows.push(["Holo state in prompt", blocks.holo_state_object === true ? "yes" : "no"]);
-      rows.push(["Runtime identity in prompt", blocks.runtime_identity === true ? "yes" : "no"]);
-      rows.push(["Voice selected model", `${(voiceDiag.selected_analyst || {}).provider || "unknown"}:${(voiceDiag.selected_analyst || {}).model || "unknown"}`]);
-    }
     rows.push(["AutoReseed", autoReseed]);
-    if (runtime.auto_compact_enabled === true) {
-      rows.push(["Auto compact count", fmtTokens(runtime.auto_compact_count)]);
-      rows.push(["Auto compact interval", `${fmtTokens(runtime.auto_compact_interval_turns)} turns`]);
-      rows.push(["Last compact turn", runtime.last_auto_compact_turn ? fmtTokens(runtime.last_auto_compact_turn) : "none"]);
-      rows.push(["Reseed artifacts", fmtTokens(runtime.reseed_artifact_count)]);
-      rows.push(["Last reseed turn", runtime.last_reseed_turn ? fmtTokens(runtime.last_reseed_turn) : "none"]);
-      rows.push(["Visible handoff after", `${fmtTokens(runtime.visible_handoff_min_turns)} turns`]);
-      rows.push(["Visible handoff shown", runtime.visible_handoff_suggested === true ? "yes" : "no"]);
-    }
     const failover = runtime.failover || {};
     if (Object.keys(failover).length) {
       const skipped = Number(failover.count || 0);
@@ -3339,7 +3578,7 @@ Use clear headings. Ground the profile in evidence from our actual interactions 
       turnCount = Math.floor(history.length / 2);
 
       document.getElementById("empty")?.remove();
-      document.getElementById("holo-onboarding")?.remove();
+      document.getElementById("holo-depth-choice")?.remove();
       const container = document.getElementById("messages");
       container.innerHTML = "";
 

@@ -8,12 +8,39 @@ from llm_adapters import (
     SEVERITY_RANK,
     SEVERITY_VALUES,
     TurnResult,
+    GovernorAdapter,
     get_role_for_turn,
     build_system_prompt,
     build_user_message,
     _parse_json_response,
     _flags_summary,
 )
+
+
+# ---------------------------------------------------------------------------
+# GovernorAdapter side utilities
+# ---------------------------------------------------------------------------
+
+class TestGovernorAdapterSideUtilities:
+
+    def test_name_session_uses_reasoning_safe_token_budget_and_clamps_title(self):
+        class FakeGovernor(GovernorAdapter):
+            def __init__(self):
+                self.calls = []
+
+            def _call(self, prompt: str, max_tokens: int = 300, system: str = None) -> str:
+                self.calls.append({"prompt": prompt, "max_tokens": max_tokens, "system": system})
+                return "this title is intentionally longer than sixty characters so it clamps cleanly"
+
+        gov = FakeGovernor()
+        title = gov.name_session([
+            {"role": "user", "content": "I want to test HoloChat runtime continuity."},
+            {"role": "assistant", "content": "Let's inspect the architecture calmly."},
+        ])
+
+        assert gov.calls[0]["max_tokens"] >= 80
+        assert "Return ONLY 2-4 words" in gov.calls[0]["system"]
+        assert len(title) <= 60
 
 
 # ---------------------------------------------------------------------------
@@ -234,7 +261,7 @@ class TestParseJsonResponse:
         assert isinstance(parsed["reasoning_summary"], str)
 
     def test_raises_on_no_json_object(self):
-        with pytest.raises(ValueError, match="No JSON object"):
+        with pytest.raises(ValueError, match="No closing JSON brace"):
             _parse_json_response("not json at all", "test")
 
     def test_raises_on_malformed_json(self):

@@ -2856,7 +2856,7 @@ class GovernorAdapter(_FlightDeckBase):
         try:
             result = self._call(
                 f"Title this conversation:\n{msgs}",
-                max_tokens=20,
+                max_tokens=80,
                 system=system,
             )
             return result.strip()[:60]

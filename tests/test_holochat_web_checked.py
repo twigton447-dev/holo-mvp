@@ -484,6 +484,7 @@ def test_frontend_uses_editorial_reader_typography_without_heavy_default_bold():
     assert ".holo-body ol { list-style: none; counter-reset: holo-list;" in html
     assert ".holo-body ul li::before" in html
     assert ".holo-body ol li::before" in html
+    assert ".inline-next-step:hover" in html
     assert ".holo-body .bubble" in html
     assert "font-weight: 500; line-height: 1.82" not in html
 
@@ -609,6 +610,11 @@ def test_frontend_assistant_messages_render_three_conversation_paths():
     assert "data.conversation_paths || suggestions" in html
     assert "function normalizeConversationPaths(suggestions)" in html
     assert "suggestions: suggestions.slice(0, 3)" in html
+    assert "const suggestionBlockPattern" in html
+    assert "Thread (?:battery|power)" in html
+    assert 'class="inline-next-step" onclick="useChip(this)"' in html
+    assert 'aria-label="Next-step suggestions"' in html
+    assert "inline-next-num" in html
     assert "Name the real decision underneath this" in html
     assert "Turn the strongest insight into one next move" in html
     assert "Check the assumption this answer depends on" in html

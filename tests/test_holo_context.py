@@ -44,7 +44,7 @@ def test_context_packet_includes_required_holostate_fields():
         route_decision=_RouteFactory.make(),
     )
 
-    assert "HOLOSTATE holochat_state_v0.1" in packet.system_prompt
+    assert "HOLOSTATE holochat_state_v1.0" in packet.system_prompt
     assert state.state_id in packet.system_prompt
     assert '"session_id":"session-1"' in packet.system_prompt
     assert "HOLOCOUNCIL ROUTE" in packet.system_prompt

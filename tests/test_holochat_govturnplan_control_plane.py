@@ -7,6 +7,7 @@ from holochat_context_governor import (
     deterministic_turn_policy,
     render_gov_turn_plan_for_worker,
 )
+from holochat_evidence import build_web_evidence_bundle, render_web_evidence
 
 
 class CapturingAdapter:
@@ -412,7 +413,17 @@ def test_unsafe_advisor_directive_is_repaired_inside_govturnplan(monkeypatch):
 
 def test_search_and_tool_authorization_are_plan_bound(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    monkeypatch.setattr(chat_engine.web_search, "search", lambda query: "current-result")
+    def fake_run(query):
+        bundle = build_web_evidence_bundle(
+            query,
+            [{"url": "https://example.test/current", "title": "Current", "content": "current-result"}],
+            provider="test-search",
+        )
+        return chat_engine.web_search.SearchRun(
+            query=query, provider="test-search", outcome="checked", latency_ms=0,
+            evidence_bundle=bundle,
+        )
+    monkeypatch.setattr(chat_engine.web_search, "run_search", fake_run)
     adapter = CapturingAdapter()
     advisor = PlanningAdvisor(search_query="current HoloChat news")
     engine = _engine(adapter, advisor)
@@ -427,6 +438,134 @@ def test_search_and_tool_authorization_are_plan_bound(monkeypatch):
     assert "current-result" not in adapter.last_system_prompt
 
 
+def test_hologov_handoff_records_selected_episodes_evidence_and_worker_receipt(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    bundle = build_web_evidence_bundle(
+        "current continuity research",
+        [{
+            "title": "Continuity research",
+            "url": "https://example.org/continuity",
+            "content": "Structured continuity improves inspectability.",
+        }],
+        provider="fake-search",
+        retrieved_at="2026-07-14T12:00:00+00:00",
+    )
+
+    def fake_run_search(query):
+        return chat_engine.web_search.SearchRun(
+            query=query,
+            provider="fake-search",
+            outcome="checked",
+            latency_ms=1,
+            evidence_bundle=bundle,
+        )
+
+    monkeypatch.setattr(chat_engine.web_search, "run_search", fake_run_search)
+    adapter = CapturingAdapter(response="The evidence supports an inspectable continuity packet [S1].")
+    advisor = DeepPlanningAdvisor()
+    advisor.search_query = "current continuity research"
+    brain = CapturingBrain()
+    brain.retrieve_relevant_episodes = lambda capsule_id, query, **kwargs: [{
+        "episode_id": "episode-origin",
+        "source_type": "holobrain_session",
+        "source_id": "session-origin",
+        "summary": "The original architecture decision made ordered history primary evidence.",
+        "token_estimate": 18,
+        "selection_reason": "query_overlap",
+        "provenance": {"table": "holo_session_consolidations"},
+    }]
+    engine = _engine(adapter, advisor, brain=brain)
+    session_id = str(uuid4())
+
+    try:
+        result = engine.send_message(
+            session_id,
+            "Check current continuity research and preserve our original architecture decision.",
+            capsule_id="cap-1",
+        )
+        session = chat_engine._sessions[session_id]
+    finally:
+        chat_engine._sessions.pop(session_id, None)
+
+    plan = result["runtime"]["gov_turn_plan"]
+    packet = plan["narrative_packet"]
+    receipt = packet["worker_context_receipt"]
+    assert advisor.last_synthesis_kwargs["retrieved_episodes"][0]["episode_id"] == "episode-origin"
+    assert advisor.last_synthesis_kwargs["web_evidence"]["sources"][0]["source_id"] == "S1"
+    assert "episode:episode-origin" in plan["selected_context_ids"]
+    assert "evidence:S1" in plan["selected_context_ids"]
+    assert plan["tool_authorization"]["holobrain_episode_retrieval"] == {
+        "authorized": True,
+        "authority": "deterministic_hologov_preworker_context_operation",
+        "capsule_scoped": True,
+    }
+    assert receipt["selected_episode_ids"] == ["episode-origin"]
+    assert receipt["evidence_source_ids"] == ["S1"]
+    delivered_receipt = result["context_budget"]["worker_context_receipt"]
+    assert delivered_receipt["receipt_hash"] != receipt["receipt_hash"]
+    assert delivered_receipt["system_prompt_hash"]
+    assert delivered_receipt["user_prompt_hash"]
+    assert delivered_receipt["history_payload_hash"]
+    assert delivered_receipt["provider_reported_input_tokens"] == 3
+    assert result["runtime"]["context_telemetry"]["worker_context_receipt"]["receipt_hash"] == delivered_receipt["receipt_hash"]
+    assert result["web_sources"][0]["url"] == "https://example.org/continuity"
+    assert "[S1]" in adapter.last_user_message
+    assert session.holochat_state.episode_registry[0]["episode_id"] == "episode-origin"
+    assert session.holochat_state.evidence_ledger[0]["source_id"] == "S1"
+    assert session.holochat_state.worker_context_receipt["receipt_hash"] == delivered_receipt["receipt_hash"]
+
+
+def test_streaming_handoff_uses_same_episode_evidence_and_citation_audit(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    bundle = build_web_evidence_bundle(
+        "current continuity research",
+        [{"title": "Continuity source", "url": "https://example.org/source", "content": "Evidence."}],
+        provider="fake-search",
+        retrieved_at="2026-07-14T12:00:00+00:00",
+    )
+
+    def fake_run_search(query):
+        return chat_engine.web_search.SearchRun(
+            query=query,
+            provider="fake-search",
+            outcome="checked",
+            latency_ms=1,
+            evidence_bundle=bundle,
+        )
+
+    monkeypatch.setattr(chat_engine.web_search, "run_search", fake_run_search)
+    adapter = CapturingAdapter(response="The continuity evidence is available [S1].")
+    advisor = DeepPlanningAdvisor()
+    advisor.search_query = "current continuity research"
+    brain = CapturingBrain()
+    brain.retrieve_relevant_episodes = lambda capsule_id, query, **kwargs: [{
+        "episode_id": "episode-stream",
+        "source_type": "holobrain_session",
+        "source_id": "session-stream",
+        "summary": "A prior turn established the continuity constraint.",
+        "token_estimate": 12,
+    }]
+    engine = _engine(adapter, advisor, brain=brain)
+    session_id = str(uuid4())
+
+    try:
+        chunks = list(engine.stream_message(
+            session_id,
+            "Search for current continuity research and preserve the earlier constraint.",
+            capsule_id="cap-1",
+        ))
+    finally:
+        chat_engine._sessions.pop(session_id, None)
+
+    done = next(item for item in chunks if isinstance(item, dict) and item.get("done"))
+    receipt = done["runtime"]["gov_turn_plan"]["narrative_packet"]["worker_context_receipt"]
+    assert receipt["selected_episode_ids"] == ["episode-stream"]
+    assert receipt["evidence_source_ids"] == ["S1"]
+    assert done["web_citations"]["status"] == "valid"
+    assert done["runtime"]["web_citations"]["passed"] is True
+    assert "[S1]" in adapter.last_user_message
+
+
 def test_deep_hologov_reads_ordered_history_before_worker_and_persists_summary(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     events = []
@@ -434,7 +573,7 @@ def test_deep_hologov_reads_ordered_history_before_worker_and_persists_summary(m
     advisor = DeepPlanningAdvisor(events=events)
     engine = _engine(adapter, advisor)
     session_id = str(uuid4())
-    session = chat_engine.ChatSession(session_id=session_id)
+    session = chat_engine.ChatSession(session_id=session_id, owner_capsule_id="cap-1")
     for index in range(6):
         session.history.extend(
             [
@@ -780,7 +919,7 @@ def test_streaming_uses_same_deep_hologov_packet_and_ordered_history(monkeypatch
     advisor = DeepPlanningAdvisor(events=events)
     engine = _engine(adapter, advisor)
     session_id = str(uuid4())
-    session = chat_engine.ChatSession(session_id=session_id)
+    session = chat_engine.ChatSession(session_id=session_id, owner_capsule_id="cap-1")
     session.history = [
         {"role": "user", "content": "The conversation started here."},
         {"role": "assistant", "content": "The first answer established the center."},
@@ -887,7 +1026,7 @@ def test_wandering_thread_resurfaces_old_lane_and_prior_worker_gain(monkeypatch)
     advisor = DeepPlanningAdvisor(events=events, proposal=proposal)
     engine = _engine(adapter, advisor)
     session_id = str(uuid4())
-    session = chat_engine.ChatSession(session_id=session_id)
+    session = chat_engine.ChatSession(session_id=session_id, owner_capsule_id="cap-1")
     session.history = [
         {"role": "user" if index % 2 == 0 else "assistant", "content": f"routine detour message {index}"}
         for index in range(20)

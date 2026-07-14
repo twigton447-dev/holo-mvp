@@ -277,7 +277,7 @@ def test_surface_thought_metadata_is_admitted_before_ui_exposure(monkeypatch):
     )
     engine = _engine(adapter, advisor)
     session_id = str(uuid4())
-    session = engine.get_or_create_session(session_id)
+    session = engine.get_or_create_session(session_id, capsule_id="cap-2")
     session.history = [
         {"role": "user", "content": "first"},
         {"role": "assistant", "content": "second"},

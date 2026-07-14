@@ -28,6 +28,11 @@ REQUIRED_STATE_FIELDS = (
     "CRITICAL_CONSTRAINTS",
     "ROLLING_SUMMARY",
     "SETTLED_DECISIONS",
+    "USER_PORTRAIT",
+    "TOPIC_REGISTRY",
+    "EPISODE_REGISTRY",
+    "EVIDENCE_LEDGER",
+    "WORKER_CONTEXT_RECEIPT",
     "ARTIFACTS_REGISTRY",
     "REQUIRED_TOOLS",
     "BATON_PASS",
@@ -344,9 +349,21 @@ def validate_gov_turn_plan(plan: GovTurnPlan) -> dict[str, Any]:
         failures.append("missing_narrative_packet")
     else:
         required_packet_keys = {
+            "gov_role",
+            "worker_context_contract",
+            "holobrain_scope",
             "topic_registry",
             "active_threads",
+            "parked_threads",
+            "resolved_threads",
+            "resurfaced_threads",
             "worker_contributions",
+            "chronological_ledger",
+            "rolling_summary",
+            "settled_decisions",
+            "episode_registry",
+            "evidence_ledger",
+            "worker_context_receipt",
             "context_manifest",
             "worker_assignment",
             "user_portrait",
@@ -477,6 +494,12 @@ def build_gov_turn_plan(
             "resurfaced_threads": [],
             "topic_events": [],
             "worker_contributions": [],
+            "chronological_ledger": [],
+            "rolling_summary": "",
+            "settled_decisions": [],
+            "episode_registry": [],
+            "evidence_ledger": [],
+            "worker_context_receipt": {},
             "user_portrait": [],
             "current_state_of_affairs": "",
             "narrative_arc": "",
@@ -576,6 +599,10 @@ def build_gov_turn_plan(
 
 def render_gov_turn_plan_for_worker(plan: GovTurnPlan) -> str:
     payload = plan.model_dump()
+    worker_packet = dict(payload["narrative_packet"])
+    # The receipt measures the delivered prompt and therefore cannot be part of
+    # the prompt it hashes. Keep it private in operator/state telemetry.
+    worker_packet.pop("worker_context_receipt", None)
     public_packet = {
         "turn_id": payload["turn_id"],
         "route": payload["route"],
@@ -590,7 +617,7 @@ def render_gov_turn_plan_for_worker(plan: GovTurnPlan) -> str:
         "fallback_eligibility": payload["fallback_eligibility"],
         "release_constraints": payload["release_constraints"],
         "worker_prompt_baton": payload["worker_prompt_baton"],
-        "narrative_packet": payload["narrative_packet"],
+        "narrative_packet": worker_packet,
         "kernel_validation_result": payload["kernel_validation_result"],
         "telemetry": {"govturnplan_hash": payload["telemetry"].get("govturnplan_hash")},
     }
@@ -1390,6 +1417,11 @@ def build_holochat_state(
             response_summary=response_text,
         )
     audit_note = "auto_compact_triggered" if auto_compact else "rolling_update"
+    control_ledger = dict(
+        hologov_control_ledger
+        if hologov_control_ledger is not None
+        else (previous_state.hologov_control_ledger if previous_state else {})
+    )
     state = HoloState(
         session_id=session_id,
         capsule_id=capsule_id,
@@ -1398,12 +1430,22 @@ def build_holochat_state(
         latest_input_summary=latest,
         critical_constraints=constraints,
         rolling_summary=rolling,
-        hologov_control_ledger=dict(
-            hologov_control_ledger
-            if hologov_control_ledger is not None
-            else (previous_state.hologov_control_ledger if previous_state else {})
-        ),
+        hologov_control_ledger=control_ledger,
         settled_decisions=settled,
+        user_portrait=list(control_ledger.get("user_portrait") or [])[:24],
+        topic_registry=[
+            dict(item) for item in (control_ledger.get("topic_registry") or [])
+            if isinstance(item, dict)
+        ][:64],
+        episode_registry=[
+            dict(item) for item in (control_ledger.get("episode_registry") or [])
+            if isinstance(item, dict)
+        ][:24],
+        evidence_ledger=[
+            dict(item) for item in (control_ledger.get("evidence_ledger") or [])
+            if isinstance(item, dict)
+        ][:48],
+        worker_context_receipt=dict(control_ledger.get("worker_context_receipt") or {}),
         artifact_registry=registry,
         required_tools=tools,
         baton_pass=baton,
@@ -1468,6 +1510,11 @@ def _durable_state_signature(
         "user_goal": state.user_goal,
         "critical_constraints": state.critical_constraints,
         "settled_decisions": state.settled_decisions,
+        "user_portrait": state.user_portrait,
+        "topic_registry": state.topic_registry,
+        "episode_registry": state.episode_registry,
+        "evidence_ledger": state.evidence_ledger,
+        "worker_context_receipt": state.worker_context_receipt,
         "artifact_registry": state.artifact_registry,
         "required_tools": [
             tool.value if isinstance(tool, RequiredTools) else str(tool)
@@ -1496,6 +1543,11 @@ def has_meaningful_holobrain_delta(
             candidate_state.user_goal
             or candidate_state.critical_constraints
             or candidate_state.settled_decisions
+            or candidate_state.user_portrait
+            or candidate_state.topic_registry
+            or candidate_state.episode_registry
+            or candidate_state.evidence_ledger
+            or candidate_state.worker_context_receipt
             or candidate_state.artifact_registry
             or candidate_state.rolling_summary
             or candidate_state.baton_pass.current_task
@@ -1534,6 +1586,34 @@ def generate_auto_reseed_payload(state: HoloState, *, max_chars: int | None = No
     lines.extend(f"    - {sanitize_text(item, limit=220)}" for item in settled[:8])
     if not settled:
         lines.append("    - None captured.")
+    lines.append("  user_portrait:")
+    portrait = canonical.get("USER_PORTRAIT") or []
+    lines.extend(f"    - {sanitize_text(item, limit=220)}" for item in portrait[:6])
+    if not portrait:
+        lines.append("    - None captured.")
+    episodes = canonical.get("EPISODE_REGISTRY") or []
+    lines.append("  selected_episode_ids:")
+    lines.extend(
+        f"    - {sanitize_text(item.get('episode_id'), limit=100)}"
+        for item in episodes[:8]
+        if isinstance(item, dict) and item.get("episode_id")
+    )
+    if not episodes:
+        lines.append("    - None captured.")
+    evidence = canonical.get("EVIDENCE_LEDGER") or []
+    lines.append("  admitted_evidence_sources:")
+    lines.extend(
+        f"    - {sanitize_text(item.get('source_id'), limit=40)} | {sanitize_text(item.get('domain'), limit=120)}"
+        for item in evidence[:8]
+        if isinstance(item, dict) and item.get("source_id")
+    )
+    if not evidence:
+        lines.append("    - None captured.")
+    receipt = canonical.get("WORKER_CONTEXT_RECEIPT") or {}
+    if receipt:
+        lines.append(
+            f"  worker_context_receipt: {sanitize_text(receipt.get('receipt_hash'), limit=96)}"
+        )
     lines.append("  active_artifacts:")
     for artifact in artifacts[:8]:
         label = artifact.get("artifact_id") or artifact.get("path") or artifact.get("hash")

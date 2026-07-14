@@ -201,6 +201,14 @@ class DurableStateBrain(FakeBrain):
         self.persisted_context[key] = value
 
 
+class RestoredDurableStateBrain(DurableStateBrain):
+    def load_chat_history(self, session_id):
+        return [
+            {"role": "user", "content": "Earlier restored question."},
+            {"role": "assistant", "content": "Earlier restored answer."},
+        ]
+
+
 class SecretStateBrain(DurableStateBrain):
     def __init__(self):
         super().__init__()
@@ -398,6 +406,33 @@ def test_holochat_model_provider_allowlist_can_be_overridden_only_when_explicit(
     )
 
     assert [adapter.provider for adapter in active] == ["xai", "openai"]
+
+
+def test_experiment_models_require_both_explicit_gates(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_EXPERIMENT_MODE", "1")
+    monkeypatch.delenv("HOLOCHAT_ALLOW_NONCANONICAL_POLICY", raising=False)
+
+    _, active, _ = _select_runtime_pools(
+        fast_loader=lambda provider_allowlist=None: [
+            FakeAdapter("openai", "gpt-5.4-mini"),
+            FakeAdapter("xai", "grok-4.5"),
+        ],
+        frontier_loader=lambda: pytest.fail("frontier loader should not run"),
+    )
+    assert [adapter.model_id for adapter in active] == ["gpt-5.5", "grok-4.3"]
+
+    monkeypatch.setenv("HOLOCHAT_ALLOW_NONCANONICAL_POLICY", "1")
+    _, experiment_active, _ = _select_runtime_pools(
+        fast_loader=lambda provider_allowlist=None: [
+            FakeAdapter("openai", "gpt-5.4-mini"),
+            FakeAdapter("xai", "grok-4.5"),
+        ],
+        frontier_loader=lambda: pytest.fail("frontier loader should not run"),
+    )
+    assert [adapter.model_id for adapter in experiment_active] == [
+        "gpt-5.4-mini",
+        "grok-4.5",
+    ]
 
 
 def test_holochat_stale_env_is_normalized_to_canonical_worker_policy(monkeypatch):
@@ -1043,6 +1078,30 @@ def test_durable_state_auto_reseed_reaches_first_turn_prompt(monkeypatch):
     assert result["context_budget"]["holobrain_injection"]["mode"] == HoloBrainInjectionMode.FULL_RESEED.value
 
 
+def test_restored_history_does_not_block_persisted_canonical_state_restore(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingAdapter("openai", "gpt-5.5")
+    brain = RestoredDurableStateBrain()
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = brain
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+    session_id = str(uuid4())
+
+    try:
+        result = engine.send_message(session_id, "Continue after restart.", capsule_id="capsule-1")
+        session = chat_engine._sessions[session_id]
+    finally:
+        chat_engine._sessions.pop(session_id, None)
+
+    assert session.turn_count == 2
+    assert "recover HoloChat auto-reseed" in adapter.last_system_prompt
+    assert result["runtime"]["state_object_present"] is True
+
+
 def test_holobrain_baton_only_on_normal_turn_reaches_prompt(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     adapter = CapturingAdapter("openai", "gpt-5.5")
@@ -1088,7 +1147,7 @@ def test_holobrain_rolling_summary_reaches_worker_when_history_is_bounded(monkey
     engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
     engine._holo_router = None
     session_id = str(uuid4())
-    session = ChatSession(session_id=session_id)
+    session = ChatSession(session_id=session_id, owner_capsule_id="capsule-1")
     state = None
     for idx in range(6):
         user = f"Mira pressure turn {idx}: preserve the warm truthful center and privacy boundary."
@@ -1622,9 +1681,17 @@ def test_currentness_query_forces_web_search_without_gov_gate(monkeypatch):
 
     def fake_search(query):
         captured["query"] = query
-        return "Source: https://example.test\nTitle: Current result\nshort"
+        bundle = chat_engine.web_search.build_web_evidence_bundle(
+            query,
+            [{"url": "https://example.test/current", "title": "Current result", "content": "short current status"}],
+            provider="test-search",
+        )
+        return chat_engine.web_search.SearchRun(
+            query=query, provider="test-search", outcome="checked", latency_ms=0,
+            evidence_bundle=bundle,
+        )
 
-    monkeypatch.setattr(chat_engine.web_search, "search", fake_search)
+    monkeypatch.setattr(chat_engine.web_search, "run_search", fake_search)
     engine = HoloChatEngine.__new__(HoloChatEngine)
     engine._adapters = _mini_pool()
     engine._bench = []
@@ -1934,3 +2001,17 @@ def test_usage_metadata_falls_back_to_estimates_when_provider_usage_unavailable(
     assert ("actual " + "billed cost") not in runtime_text
     assert ("raw " + "prompt") not in runtime_text
     assert ("raw " + "memory") not in runtime_text
+
+
+def test_canonical_worker_cost_estimates_use_versioned_official_pricing():
+    openai_cost, openai_source = chat_engine._estimate_turn_cost_usd(
+        "openai", "gpt-5.5", 1_000_000, 1_000_000
+    )
+    xai_cost, xai_source = chat_engine._estimate_turn_cost_usd(
+        "xai", "grok-4.3", 1_000_000, 1_000_000
+    )
+
+    assert openai_cost == 35.0
+    assert xai_cost == 3.75
+    assert openai_source == xai_source == "static_pricing_estimate"
+    assert chat_engine._STATIC_CHAT_PRICING_VERSION == "official_public_pricing_2026-07-14"

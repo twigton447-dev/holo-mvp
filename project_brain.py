@@ -387,6 +387,8 @@ import os
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 
+from holochat_evidence import rank_episode_candidates
+
 logger = logging.getLogger("holo.brain")
 
 VENDOR_EVAL_LIMIT  = 5   # recent evaluations to surface per vendor
@@ -1008,41 +1010,51 @@ class ProjectBrain:
         except Exception as e:
             logger.warning(f"HoloBrain.set_capsule_mode failed: {e}")
 
-    def get_capsule_context(self, capsule_id: str) -> dict:
-        """Return all context key/value pairs for a capsule."""
+    @staticmethod
+    def _scope_filter(query, capsule_id: str, scope_id: Optional[str] = None):
+        return query.eq("scope_id", scope_id) if scope_id else query.eq("capsule_id", capsule_id)
+
+    @staticmethod
+    def _scope_values(capsule_id: str, scope_id: Optional[str] = None) -> dict:
+        values = {"capsule_id": capsule_id}
+        if scope_id:
+            values["scope_id"] = scope_id
+        return values
+
+    def get_capsule_context(self, capsule_id: str, *, scope_id: Optional[str] = None) -> dict:
+        """Return context admitted to one personal or enterprise scope."""
         if not self._client:
             return {}
         try:
-            resp = (
-                self._client.table("holo_capsule_context")
-                .select("key, value")
-                .eq("capsule_id", capsule_id)
-                .execute()
-            )
+            query = self._client.table("holo_capsule_context").select("key, value")
+            resp = self._scope_filter(query, capsule_id, scope_id).execute()
             return {r["key"]: r["value"] for r in (resp.data or [])}
         except Exception:
             return {}
 
-    def set_capsule_context(self, capsule_id: str, key: str, value: str):
-        """Upsert a context entry for a capsule."""
+    def set_capsule_context(self, capsule_id: str, key: str, value: str, *, scope_id: Optional[str] = None):
+        """Upsert a context entry inside exactly one scope."""
         if not self._client:
             return
         try:
-            self._client.table("holo_capsule_context").upsert({
-                "capsule_id": capsule_id,
+            record = {
+                **self._scope_values(capsule_id, scope_id),
                 "key":        key,
                 "value":      value,
                 "updated_at": datetime.now(timezone.utc).isoformat(),
-            }, on_conflict="capsule_id,key").execute()
+            }
+            conflict = "scope_id,key" if scope_id else "capsule_id,key"
+            self._client.table("holo_capsule_context").upsert(record, on_conflict=conflict).execute()
         except Exception as e:
             logger.warning(f"HoloBrain.set_capsule_context failed: {e}")
 
-    def delete_capsule_context(self, capsule_id: str, key: str) -> bool:
-        """Delete one context entry from a capsule."""
+    def delete_capsule_context(self, capsule_id: str, key: str, *, scope_id: Optional[str] = None) -> bool:
+        """Delete one context entry from an authorized scope."""
         if not self._client:
             return False
         try:
-            self._client.table("holo_capsule_context").delete().eq("capsule_id", capsule_id).eq("key", key).execute()
+            query = self._client.table("holo_capsule_context").delete()
+            self._scope_filter(query, capsule_id, scope_id).eq("key", key).execute()
             return True
         except Exception as e:
             logger.warning(f"HoloBrain.delete_capsule_context failed: {e}")
@@ -1051,6 +1063,36 @@ class ProjectBrain:
     # -------------------------------------------------------------------------
     # Chat storage
     # -------------------------------------------------------------------------
+
+    def get_chat_session(self, session_id: str) -> Optional[dict]:
+        """Return durable chat-session metadata without loading any message history."""
+        if not self._client or not session_id:
+            return None
+        try:
+            rows = (
+                self._client.table("holo_chat_sessions")
+                .select("session_id, capsule_id, scope_id")
+                .eq("session_id", session_id)
+                .limit(1)
+                .execute()
+            ).data or []
+            return rows[0] if rows else None
+        except Exception as exc:
+            logger.warning("HoloBrain.get_chat_session failed: %s", exc)
+            raise
+
+    def session_belongs_to_capsule(self, capsule_id: str, session_id: str) -> bool:
+        """Return whether a durable chat session is owned by exactly one capsule."""
+        if not capsule_id:
+            return False
+        session = self.get_chat_session(session_id)
+        return bool(session and session.get("capsule_id") == capsule_id)
+
+    def session_belongs_to_scope(self, scope_id: str, session_id: str) -> bool:
+        if not scope_id:
+            return False
+        session = self.get_chat_session(session_id)
+        return bool(session and session.get("scope_id") == scope_id)
 
     def save_chat_turn(
         self,
@@ -1061,14 +1103,22 @@ class ProjectBrain:
         provider: str,
         temperature: float,
         capsule_id: str = None,
+        scope_id: str = None,
     ):
         """
         Persist one chat turn (user message + Holo response) to Supabase.
         Upserts the session row and inserts two message rows.
         """
-        if not self._client:
+        if not self._client or not capsule_id:
             return
         try:
+            existing_session = self.get_chat_session(session_id)
+            if existing_session:
+                expected = existing_session.get("scope_id") if scope_id else existing_session.get("capsule_id")
+                actual = scope_id or capsule_id
+                if expected != actual:
+                    logger.warning("Refused chat persistence for session with a different scope owner.")
+                    return
             now = datetime.now(timezone.utc).isoformat()
 
             # Upsert session row — include capsule_id so threads are user-owned
@@ -1079,6 +1129,8 @@ class ProjectBrain:
             }
             if capsule_id:
                 session_row["capsule_id"] = capsule_id
+            if scope_id:
+                session_row["scope_id"] = scope_id
             self._client.table("holo_chat_sessions").upsert(
                 session_row, on_conflict="session_id"
             ).execute()
@@ -1087,6 +1139,7 @@ class ProjectBrain:
             self._client.table("holo_chat_messages").insert([
                 {
                     "session_id":  session_id,
+                    **({"scope_id": scope_id} if scope_id else {}),
                     "role":        "user",
                     "content":     user_message,
                     "turn_number": turn_number,
@@ -1094,6 +1147,7 @@ class ProjectBrain:
                 },
                 {
                     "session_id":  session_id,
+                    **({"scope_id": scope_id} if scope_id else {}),
                     "role":        "assistant",
                     "content":     holo_response,
                     "provider":    provider,
@@ -1107,7 +1161,7 @@ class ProjectBrain:
         except Exception as e:
             logger.warning(f"HoloBrain.save_chat_turn failed: {e}")
 
-    def load_chat_history(self, session_id: str) -> Optional[List[Dict[str, Any]]]:
+    def load_chat_history(self, session_id: str, *, scope_id: Optional[str] = None) -> Optional[List[Dict[str, Any]]]:
         """
         Load full message history for a session from Supabase.
         Returns list of {"role": ..., "content": ...} dicts, or None if not found.
@@ -1116,14 +1170,10 @@ class ProjectBrain:
             return None
         for attempt in range(2):
             try:
-                resp = (
-                    self._client
-                    .table("holo_chat_messages")
-                    .select("role, content")
-                    .eq("session_id", session_id)
-                    .order("created_at", desc=False)
-                    .execute()
-                )
+                query = self._client.table("holo_chat_messages").select("role, content").eq("session_id", session_id)
+                if scope_id:
+                    query = query.eq("scope_id", scope_id)
+                resp = query.order("created_at", desc=False).execute()
                 rows = resp.data or []
                 if not rows:
                     return None
@@ -1134,7 +1184,7 @@ class ProjectBrain:
                     self._reconnect()
         return None
 
-    def delete_session(self, capsule_id: str, session_id: str) -> bool:
+    def delete_session(self, capsule_id: str, session_id: str, *, scope_id: Optional[str] = None) -> bool:
         """
         Permanently delete a chat session and all its messages.
         Verifies the session belongs to the given capsule before deleting.
@@ -1143,27 +1193,24 @@ class ProjectBrain:
         if not self._client or not capsule_id or not session_id:
             return False
         try:
-            # Verify ownership: session must belong to this capsule OR have no capsule_id (legacy session)
-            check = (
-                self._client.table("holo_chat_sessions")
-                .select("session_id")
-                .eq("session_id", session_id)
-                .or_(f"capsule_id.eq.{capsule_id},capsule_id.is.null")
-                .limit(1)
-                .execute()
-            ).data or []
-            if not check:
+            owned = self.session_belongs_to_scope(scope_id, session_id) if scope_id else self.session_belongs_to_capsule(capsule_id, session_id)
+            if not owned:
                 return False
             # Delete messages first, then session
-            self._client.table("holo_chat_messages").delete().eq("session_id", session_id).execute()
-            self._client.table("holo_chat_sessions").delete().eq("session_id", session_id).execute()
+            messages = self._client.table("holo_chat_messages").delete().eq("session_id", session_id)
+            sessions = self._client.table("holo_chat_sessions").delete().eq("session_id", session_id)
+            if scope_id:
+                messages = messages.eq("scope_id", scope_id)
+                sessions = sessions.eq("scope_id", scope_id)
+            messages.execute()
+            sessions.execute()
             logger.info(f"HoloBrain: deleted session {session_id} for capsule {capsule_id}.")
             return True
         except Exception as e:
             logger.warning(f"HoloBrain.delete_session failed: {e}")
             return False
 
-    def list_sessions(self, capsule_id: str, limit: int = 40) -> list:
+    def list_sessions(self, capsule_id: str, limit: int = 40, *, scope_id: Optional[str] = None) -> list:
         """
         Return all chat sessions for a capsule, newest first.
         Each entry includes session_id, created_at, last_active, turn_count,
@@ -1172,10 +1219,11 @@ class ProjectBrain:
         if not self._client or not capsule_id:
             return []
         try:
+            query = self._client.table("holo_chat_sessions").select(
+                "session_id, created_at, last_active, turn_count, title"
+            )
             rows = (
-                self._client.table("holo_chat_sessions")
-                .select("session_id, created_at, last_active, turn_count, title")
-                .eq("capsule_id", capsule_id)
+                self._scope_filter(query, capsule_id, scope_id)
                 .gt("turn_count", 0)
                 .order("last_active", desc=True)
                 .limit(limit)
@@ -1212,13 +1260,13 @@ class ProjectBrain:
             logger.warning(f"HoloBrain.list_sessions failed: {e}")
             return []
 
-    def save_consolidation(self, capsule_id: str, session_id: str, session_note: dict) -> None:
+    def save_consolidation(self, capsule_id: str, session_id: str, session_note: dict, *, scope_id: Optional[str] = None) -> None:
         """Persist the Captain's session-end note to holo_session_consolidations."""
         if not self._client or not session_note:
             return
         try:
             self._client.table("holo_session_consolidations").insert({
-                "capsule_id":   capsule_id,
+                **self._scope_values(capsule_id, scope_id),
                 "session_id":   session_id,
                 "what_changed": session_note.get("what_changed", ""),
                 "what_surfaced": session_note.get("what_surfaced", ""),
@@ -1230,7 +1278,60 @@ class ProjectBrain:
         except Exception as e:
             logger.warning(f"HoloBrain.save_consolidation failed: {e}")
 
-    def upsert_life_context(self, capsule_id: str, entries: list) -> None:
+    def persist_memory_checkpoint(
+        self,
+        *,
+        capsule_id: str,
+        scope_id: str,
+        session_id: str,
+        payload: dict[str, Any],
+    ) -> Optional[str]:
+        """Atomically persist an idempotent Memory Steward checkpoint via RPC."""
+        if not self._client or not capsule_id or not scope_id or not payload:
+            return None
+        try:
+            response = self._client.rpc("holo_commit_memory_checkpoint", {
+                "p_capsule_id": capsule_id,
+                "p_scope_id": scope_id,
+                "p_session_id": session_id,
+                "p_checkpoint": payload,
+            }).execute()
+            data = getattr(response, "data", None)
+            if isinstance(data, list) and data:
+                data = data[0]
+            if isinstance(data, dict):
+                return str(data.get("checkpoint_id") or data.get("persistence_id") or "") or None
+            return str(data) if data else None
+        except Exception as exc:
+            logger.warning("HoloBrain.persist_memory_checkpoint failed: %s", exc)
+            return None
+
+    def load_latest_memory_checkpoint(
+        self,
+        *,
+        session_id: str,
+        scope_id: str,
+    ) -> Optional[dict[str, Any]]:
+        """Load only the last acknowledged checkpoint for restart recovery."""
+        if not self._client or not session_id or not scope_id:
+            return None
+        try:
+            response = (
+                self._client.table("holo_memory_checkpoints")
+                .select("checkpoint_id,end_sequence,transcript_hash,persisted_at")
+                .eq("session_id", session_id)
+                .eq("scope_id", scope_id)
+                .order("end_sequence", desc=True)
+                .limit(1)
+                .execute()
+            )
+            data = getattr(response, "data", None) or []
+            return dict(data[0]) if data else None
+        except Exception as exc:
+            logger.warning("HoloBrain.load_latest_memory_checkpoint failed: %s", exc)
+            return None
+
+    def upsert_life_context(self, capsule_id: str, entries: list, *, scope_id: Optional[str] = None) -> None:
         """
         Write the Captain's distilled life_context entries for a capsule.
         If an entry supersedes an existing key, soft-prune the old one first.
@@ -1246,14 +1347,15 @@ class ProjectBrain:
                 # Soft-prune any entry this supersedes
                 supersedes = entry.get("supersedes")
                 if supersedes:
-                    self._client.table("holo_life_context").update({
+                    query = self._client.table("holo_life_context").update({
                         "pruned_at":    now,
                         "prune_reason": f"Superseded by '{key}' after session consolidation.",
-                    }).eq("capsule_id", capsule_id).eq("key", supersedes).is_("pruned_at", "null").execute()
+                    })
+                    self._scope_filter(query, capsule_id, scope_id).eq("key", supersedes).is_("pruned_at", "null").execute()
 
                 # Upsert the new insight
                 self._client.table("holo_life_context").upsert({
-                    "capsule_id":         capsule_id,
+                    **self._scope_values(capsule_id, scope_id),
                     "category":           entry.get("category", "patterns"),
                     "key":                key,
                     "value":              entry.get("value", "")[:500],
@@ -1261,14 +1363,14 @@ class ProjectBrain:
                     "last_reinforced":    now,
                     "reinforcement_count": 1,
                     "updated_at":         now,
-                }, on_conflict="capsule_id,key").execute()
+                }, on_conflict="scope_id,key" if scope_id else "capsule_id,key").execute()
 
             except Exception as e:
                 logger.warning(f"HoloBrain.upsert_life_context failed for key '{key}': {e}")
 
         logger.info(f"HoloBrain: {len(entries)} life_context entries upserted for {capsule_id[:8]}.")
 
-    def load_life_context(self, capsule_id: str) -> list:
+    def load_life_context(self, capsule_id: str, *, scope_id: Optional[str] = None) -> list:
         """
         Load the active (non-pruned) life_context entries for a capsule.
         Returns list of {category, key, value, confidence} dicts, ordered by confidence desc.
@@ -1276,10 +1378,9 @@ class ProjectBrain:
         if not self._client:
             return []
         try:
+            query = self._client.table("holo_life_context").select("category, key, value, confidence")
             resp = (
-                self._client.table("holo_life_context")
-                .select("category, key, value, confidence")
-                .eq("capsule_id", capsule_id)
+                self._scope_filter(query, capsule_id, scope_id)
                 .is_("pruned_at", "null")
                 .order("confidence", desc=True)
                 .execute()
@@ -1289,7 +1390,9 @@ class ProjectBrain:
             logger.warning(f"HoloBrain.load_life_context failed: {e}")
             return []
 
-    def get_prior_unconsolidated_session(self, capsule_id: str, current_session_id: str) -> Optional[str]:
+    def get_prior_unconsolidated_session(
+        self, capsule_id: str, current_session_id: str, *, scope_id: Optional[str] = None
+    ) -> Optional[str]:
         """
         Find the most recent session for this capsule that was never consolidated.
 
@@ -1303,10 +1406,9 @@ class ProjectBrain:
             return None
         try:
             # Get recent sessions for this capsule (excluding current)
+            sessions_query = self._client.table("holo_chat_sessions").select("session_id, last_active")
             sessions_resp = (
-                self._client.table("holo_chat_sessions")
-                .select("session_id, last_active")
-                .eq("capsule_id", capsule_id)
+                self._scope_filter(sessions_query, capsule_id, scope_id)
                 .neq("session_id", current_session_id)
                 .order("last_active", desc=True)
                 .limit(5)
@@ -1319,10 +1421,9 @@ class ProjectBrain:
             # Check which of these have a consolidation record
             for s in sessions:
                 sid = s["session_id"]
+                check_query = self._client.table("holo_session_consolidations").select("session_id")
                 check = (
-                    self._client.table("holo_session_consolidations")
-                    .select("session_id")
-                    .eq("capsule_id", capsule_id)
+                    self._scope_filter(check_query, capsule_id, scope_id)
                     .eq("session_id", sid)
                     .limit(1)
                     .execute()
@@ -1336,15 +1437,16 @@ class ProjectBrain:
             logger.warning(f"HoloBrain.get_prior_unconsolidated_session failed: {e}")
             return None
 
-    def load_last_consolidation(self, capsule_id: str) -> Optional[dict]:
+    def load_last_consolidation(self, capsule_id: str, *, scope_id: Optional[str] = None) -> Optional[dict]:
         """Load the most recent session consolidation note for a capsule."""
         if not self._client:
             return None
         try:
+            query = self._client.table("holo_session_consolidations").select(
+                "what_changed, what_surfaced, open_threads, captain_note, created_at"
+            )
             resp = (
-                self._client.table("holo_session_consolidations")
-                .select("what_changed, what_surfaced, open_threads, captain_note, created_at")
-                .eq("capsule_id", capsule_id)
+                self._scope_filter(query, capsule_id, scope_id)
                 .order("created_at", desc=True)
                 .limit(1)
                 .execute()
@@ -1354,7 +1456,70 @@ class ProjectBrain:
             logger.warning(f"HoloBrain.load_last_consolidation failed: {e}")
             return None
 
-    def append_session_history(self, capsule_id: str, session_id: str, first_message: str) -> None:
+    def retrieve_relevant_episodes(
+        self,
+        capsule_id: str,
+        query: str,
+        *,
+        limit: int = 6,
+        candidate_limit: int = 40,
+        token_budget: int = 1800,
+        scope_id: Optional[str] = None,
+    ) -> list[dict[str, Any]]:
+        """Rank recent session consolidations as bounded episodic context."""
+        if not self._client or not capsule_id:
+            return []
+        try:
+            query = self._client.table("holo_session_consolidations").select(
+                "session_id, what_changed, what_surfaced, open_threads, captain_note, created_at"
+            )
+            response = (
+                self._scope_filter(query, capsule_id, scope_id)
+                .order("created_at", desc=True)
+                .limit(max(1, min(int(candidate_limit), 100)))
+                .execute()
+            )
+            candidates = []
+            for row in (getattr(response, "data", None) or []):
+                open_threads = row.get("open_threads") or []
+                if not isinstance(open_threads, list):
+                    open_threads = [open_threads]
+                summary = " | ".join(
+                    str(value).strip()
+                    for value in (
+                        row.get("what_changed"),
+                        row.get("what_surfaced"),
+                        "; ".join(str(item) for item in open_threads if item),
+                        row.get("captain_note"),
+                    )
+                    if str(value or "").strip()
+                )
+                if not summary:
+                    continue
+                session_id = str(row.get("session_id") or "unknown")
+                candidates.append({
+                    "episode_id": f"holobrain-session-{session_id}",
+                    "source_type": "holobrain_session",
+                    "source_id": session_id,
+                    "summary": summary,
+                    "occurred_at": row.get("created_at"),
+                    "provenance": {
+                        "table": "holo_session_consolidations",
+                        "capsule_scoped": not bool(scope_id),
+                        **({"scope_id": scope_id} if scope_id else {}),
+                    },
+                })
+            return rank_episode_candidates(
+                candidates,
+                query,
+                limit=max(0, int(limit)),
+                token_budget=max(0, int(token_budget)),
+            )
+        except Exception as exc:
+            logger.warning("HoloBrain.retrieve_relevant_episodes failed: %s", exc)
+            return []
+
+    def append_session_history(self, capsule_id: str, session_id: str, first_message: str, *, scope_id: Optional[str] = None) -> None:
         """
         Append this session to the capsule's session history list.
         Stored as JSON in holo_capsule_context under key '_session_history'.
@@ -1365,10 +1530,9 @@ class ProjectBrain:
         if not self._client:
             return
         try:
+            query = self._client.table("holo_capsule_context").select("value")
             resp = (
-                self._client.table("holo_capsule_context")
-                .select("value")
-                .eq("capsule_id", capsule_id)
+                self._scope_filter(query, capsule_id, scope_id)
                 .eq("key", "_session_history")
                 .maybe_single()
                 .execute()
@@ -1394,16 +1558,16 @@ class ProjectBrain:
                 existing = existing[-50:]
 
             self._client.table("holo_capsule_context").upsert({
-                "capsule_id": capsule_id,
+                **self._scope_values(capsule_id, scope_id),
                 "key":        "_session_history",
                 "value":      json.dumps(existing),
                 "updated_at": now,
-            }, on_conflict="capsule_id,key").execute()
+            }, on_conflict="scope_id,key" if scope_id else "capsule_id,key").execute()
 
         except Exception as e:
             logger.warning(f"HoloBrain.append_session_history failed: {e}")
 
-    def generate_portrait_md(self, capsule_id: str) -> str:
+    def generate_portrait_md(self, capsule_id: str, *, scope_id: Optional[str] = None) -> str:
         """
         Generate an evolving markdown portrait of a capsule from all available
         persistent data: life_context, recent session consolidations, capsule
@@ -1418,7 +1582,7 @@ class ProjectBrain:
         now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         # ---- Life context (the permanent portrait) --------------------------
-        life = self.load_life_context(capsule_id)
+        life = self.load_life_context(capsule_id, scope_id=scope_id)
         categories: Dict[str, list] = {}
         for entry in life:
             cat = entry.get("category", "patterns")
@@ -1461,10 +1625,11 @@ class ProjectBrain:
         consolidation_section = ""
         if self._client:
             try:
+                query = self._client.table("holo_session_consolidations").select(
+                    "created_at, what_changed, what_surfaced, open_threads, captain_note"
+                )
                 resp = (
-                    self._client.table("holo_session_consolidations")
-                    .select("created_at, what_changed, what_surfaced, open_threads, captain_note")
-                    .eq("capsule_id", capsule_id)
+                    self._scope_filter(query, capsule_id, scope_id)
                     .order("created_at", desc=True)
                     .limit(10)
                     .execute()
@@ -1494,7 +1659,7 @@ class ProjectBrain:
 
         # ---- Capsule context (live key/value state) -------------------------
         context_section = ""
-        capsule_ctx = self.get_capsule_context(capsule_id)
+        capsule_ctx = self.get_capsule_context(capsule_id, scope_id=scope_id)
         if capsule_ctx:
             ctx_items = [
                 f"- **{k}**: {v}"
@@ -1522,14 +1687,13 @@ class ProjectBrain:
 
         return "\n\n".join(parts)
 
-    def update_session_name(self, capsule_id: str, session_id: str, name: str) -> None:
+    def update_session_name(self, capsule_id: str, session_id: str, name: str, *, scope_id: Optional[str] = None) -> None:
         """Write the Captain-generated title directly to holo_chat_sessions."""
         if not self._client or not name:
             return
         try:
-            self._client.table("holo_chat_sessions").update({
-                "title": name,
-            }).eq("session_id", session_id).execute()
+            query = self._client.table("holo_chat_sessions").update({"title": name}).eq("session_id", session_id)
+            self._scope_filter(query, capsule_id, scope_id).execute()
             logger.info(f"HoloBrain: session {session_id[:8]} named '{name}'.")
         except Exception as e:
             logger.warning(f"HoloBrain.update_session_name failed: {e}")
@@ -1546,13 +1710,14 @@ class ProjectBrain:
         title: str,
         content: str,
         artifact_type: str = "html",
+        scope_id: Optional[str] = None,
     ) -> Optional[str]:
         """Save a generated artifact to holo_artifacts. Returns artifact_id or None."""
         if not self._client or not content:
             return None
         try:
             resp = self._client.table("holo_artifacts").insert({
-                "capsule_id":    capsule_id,
+                **self._scope_values(capsule_id, scope_id),
                 "session_id":    session_id,
                 "turn_number":   turn_number,
                 "title":         title,
@@ -1566,15 +1731,16 @@ class ProjectBrain:
             logger.warning(f"HoloBrain.save_artifact failed: {e}")
             return None
 
-    def list_artifacts(self, capsule_id: str, limit: int = 50) -> list:
+    def list_artifacts(self, capsule_id: str, limit: int = 50, *, scope_id: Optional[str] = None) -> list:
         """Return all artifacts for a capsule, newest first. No content — metadata only."""
         if not self._client or not capsule_id:
             return []
         try:
+            query = self._client.table("holo_artifacts").select(
+                "artifact_id, title, artifact_type, session_id, turn_number, created_at"
+            )
             rows = (
-                self._client.table("holo_artifacts")
-                .select("artifact_id, title, artifact_type, session_id, turn_number, created_at")
-                .eq("capsule_id", capsule_id)
+                self._scope_filter(query, capsule_id, scope_id)
                 .order("created_at", desc=True)
                 .limit(limit)
                 .execute()
@@ -1584,16 +1750,14 @@ class ProjectBrain:
             logger.warning(f"HoloBrain.list_artifacts failed: {e}")
             return []
 
-    def get_artifact(self, capsule_id: str, artifact_id: str) -> Optional[dict]:
+    def get_artifact(self, capsule_id: str, artifact_id: str, *, scope_id: Optional[str] = None) -> Optional[dict]:
         """Retrieve a single artifact by ID, verifying capsule ownership."""
         if not self._client:
             return None
         try:
+            query = self._client.table("holo_artifacts").select("*").eq("artifact_id", artifact_id)
             resp = (
-                self._client.table("holo_artifacts")
-                .select("*")
-                .eq("artifact_id", artifact_id)
-                .eq("capsule_id", capsule_id)
+                self._scope_filter(query, capsule_id, scope_id)
                 .maybe_single()
                 .execute()
             )

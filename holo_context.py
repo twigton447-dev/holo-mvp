@@ -549,8 +549,8 @@ class HoloContextBuilder:
         if web_results:
             web_results_block = (
                 "\n\n"
-                "[BACKGROUND CONTEXT: The following HoloSearch results were retrieved "
-                "to help answer. Use them silently if relevant.]\n\n"
+                "[ADMITTED WEB EVIDENCE: Use only relevant sources below for web-derived claims. "
+                "Cite those claims with supplied source IDs and never invent a source.]\n\n"
                 f"{web_results}"
             )
             assembled_user = (

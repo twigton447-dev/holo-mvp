@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import asyncio
 import logging
 import os
 import threading
@@ -68,7 +69,8 @@ if not os.path.exists(os.path.join(os.path.dirname(__file__), "context_governor.
     )
 
 from context_governor import ContextGovernor
-from chat_engine import HoloChatEngine, _safe_handoff_transition
+from chat_engine import HoloChatEngine, SessionOwnershipError, _safe_handoff_transition
+from holochat_scope_store import HoloChatScopeStore, ScopeResolutionError
 from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain
 from db import Database
 from billing import create_checkout_session, create_customer_portal_session, construct_webhook_event, PLANS
@@ -129,8 +131,27 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         raise RuntimeError(f"Chat Engine failed to initialize: {e}")
 
+    async def _memory_idle_sweeper() -> None:
+        interval = max(30, int(os.getenv("HOLOCHAT_MEMORY_IDLE_SWEEP_SECONDS", "60")))
+        idle_seconds = max(60, int(os.getenv("HOLOCHAT_MEMORY_IDLE_SECONDS", "900")))
+        while True:
+            await asyncio.sleep(interval)
+            try:
+                if _chat_engine is not None:
+                    _chat_engine.checkpoint_idle_sessions(idle_seconds=idle_seconds)
+            except Exception as exc:
+                logger.warning("HoloChat memory idle sweep failed: %s", exc)
+
+    idle_task = asyncio.create_task(_memory_idle_sweeper())
     logger.info("Holo API server ready.")
-    yield
+    try:
+        yield
+    finally:
+        idle_task.cancel()
+        try:
+            await idle_task
+        except asyncio.CancelledError:
+            pass
     logger.info("Holo API shutting down.")
 
 
@@ -183,6 +204,21 @@ def _track_usage(api_key: str, endpoint: str, status_code: int,
         pass
 
 
+def _private_runtime_metadata_enabled() -> bool:
+    """Private control telemetry is local/operator-only and off by default."""
+    return os.getenv("HOLOCHAT_EXPOSE_PRIVATE_RUNTIME", "0").strip().lower() in {
+        "1", "true", "yes", "on",
+    }
+
+
+def _public_stream_metadata(chunk: dict[str, Any]) -> dict[str, Any]:
+    payload = {key: value for key, value in chunk.items() if key != "done" and not key.startswith("_")}
+    if not _private_runtime_metadata_enabled():
+        for key in ("context_budget", "runtime", "holo4dna", "usage"):
+            payload.pop(key, None)
+    return payload
+
+
 def _verify_key(request: Request) -> str:
     """
     API key validation. Checks per-user keys in Supabase first, then falls
@@ -221,6 +257,103 @@ def _verify_key(request: Request) -> str:
             return provided
 
     raise HTTPException(status_code=401, detail="Invalid API key.")
+
+
+def _chat_capsule_id(request: Request, api_key: str) -> Optional[str]:
+    """Resolve the capsule that may access durable chat state for this request."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    token_capsule_id = capsule.get("sub") if capsule else None
+
+    key_capsule_id = None
+    lookup_key_capsule = getattr(_db, "get_capsule_id_for_key", None) if _db else None
+    if callable(lookup_key_capsule):
+        try:
+            key_capsule_id = lookup_key_capsule(api_key)
+        except Exception as exc:
+            logger.warning("Unable to resolve API-key capsule binding: %s", exc)
+
+    if token_capsule_id and key_capsule_id and token_capsule_id != key_capsule_id:
+        raise HTTPException(status_code=403, detail="JWT and API key belong to different capsules.")
+    return token_capsule_id or key_capsule_id
+
+
+def _hybrid_scopes_enabled() -> bool:
+    return str(os.getenv("HOLOCHAT_HYBRID_SCOPES_ENABLED", "")).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _requested_scope_id(request: Request, body: Optional[dict[str, Any]] = None) -> Optional[str]:
+    header_scope = str(request.headers.get("X-Holo-Scope-Id") or "").strip() or None
+    body_scope = str((body or {}).get("scope_id") or "").strip() or None
+    if header_scope and body_scope and header_scope != body_scope:
+        raise HTTPException(status_code=400, detail="Conflicting scope selection.")
+    return header_scope or body_scope
+
+
+def _resolve_active_scope(
+    request: Request,
+    capsule_id: Optional[str],
+    body: Optional[dict[str, Any]] = None,
+) -> Optional[str]:
+    """Resolve a client-requested scope from server-owned identity/membership data."""
+    requested_scope = _requested_scope_id(request, body)
+    if not _hybrid_scopes_enabled():
+        if requested_scope:
+            raise HTTPException(status_code=409, detail="Hybrid scopes are not enabled.")
+        return None
+    if not capsule_id:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    client = getattr(_capsule_brain, "_client", None)
+    if client is None:
+        raise HTTPException(status_code=503, detail="Scope authorization is unavailable.")
+    try:
+        return HoloChatScopeStore(client).resolve(capsule_id, requested_scope).scope_id
+    except ScopeResolutionError:
+        raise HTTPException(status_code=404, detail="Scope not found.")
+
+
+def _require_session_ownership(
+    session_id: str,
+    capsule_id: Optional[str],
+    *,
+    allow_new_session: bool = False,
+    scope_id: Optional[str] = None,
+) -> None:
+    """Reject durable chat access unless an existing session has the exact owner."""
+    session = _capsule_brain.get_chat_session(session_id)
+    if session is None and allow_new_session:
+        return
+    durable_owner = session.get("scope_id") if session and scope_id else session.get("capsule_id") if session else None
+    if not session or not capsule_id or durable_owner != (scope_id or capsule_id):
+        raise HTTPException(status_code=404, detail="Session not found.")
+
+
+def _reject_durable_incognito_session(session_id: str) -> None:
+    """Incognito threads never restore durable history, regardless of its owner."""
+    if _capsule_brain.get_chat_session(session_id) is not None:
+        raise HTTPException(status_code=404, detail="Session not found.")
+
+
+def _get_owned_engine_session(session_id: str, capsule_id: Optional[str], scope_id: Optional[str] = None):
+    """Restore an owned non-incognito session without exposing owner details."""
+    try:
+        kwargs = {"capsule_id": capsule_id, "incognito": False}
+        if scope_id:
+            kwargs["scope_id"] = scope_id
+        return _chat_engine.get_or_create_session(session_id, **kwargs)
+    except SessionOwnershipError:
+        raise HTTPException(status_code=404, detail="Session not found.")
+
+
+def _get_incognito_engine_session(session_id: str):
+    """Create or resume only an isolated in-memory incognito session."""
+    try:
+        return _chat_engine.get_or_create_session(
+            session_id,
+            capsule_id=None,
+            incognito=True,
+        )
+    except SessionOwnershipError:
+        raise HTTPException(status_code=404, detail="Session not found.")
 
 
 # ---------------------------------------------------------------------------
@@ -838,19 +971,27 @@ async def chat(
     handoff_transition = None if incognito else _safe_handoff_transition(body.get("handoff_transition"))
 
     # Attach capsule identity if a capsule token is provided
-    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    capsule_id = _chat_capsule_id(request, _key)
+    scope_id = None if incognito else _resolve_active_scope(request, capsule_id, body)
     # Incognito: treat as anonymous regardless of sign-in state
-    capsule_id = (capsule["sub"] if capsule else None) if not incognito else None
+    if session_id:
+        if incognito:
+            _reject_durable_incognito_session(session_id)
+        else:
+            _require_session_ownership(session_id, capsule_id, allow_new_session=True, scope_id=scope_id)
+    capsule_id = capsule_id if not incognito else None
 
     t0 = time.time()
     try:
-        result = _chat_engine.send_message(session_id, message, capsule_id=capsule_id,
+        result = _chat_engine.send_message(session_id, message, capsule_id=capsule_id, scope_id=scope_id,
                                            images=images, incognito=incognito,
                                            handoff_transition=handoff_transition)
+    except SessionOwnershipError:
+        raise HTTPException(status_code=404, detail="Session not found.")
     except Exception as e:
         logger.error(f"Chat engine error: {type(e).__name__}: {e}", exc_info=True)
         _track_usage(_key, "/v1/chat", 500)
-        raise HTTPException(status_code=500, detail=f"[DEBUG] {type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail="HoloChat could not complete this turn.")
 
     elapsed = int((time.time() - t0) * 1000)
     tokens  = result.get("tokens", {})
@@ -878,14 +1019,19 @@ async def chat(
         response_content["search_query"] = result.get("search_query")
     if result.get("web_status") is not None:
         response_content["web_status"] = result.get("web_status")
-    if result.get("context_budget") is not None:
-        response_content["context_budget"] = result.get("context_budget")
-    if result.get("usage") is not None:
-        response_content["usage"] = result.get("usage")
-    if result.get("runtime") is not None:
-        response_content["runtime"] = result.get("runtime")
-    if result.get("holo4dna") is not None:
-        response_content["holo4dna"] = result.get("holo4dna")
+    if result.get("web_sources"):
+        response_content["web_sources"] = result.get("web_sources")
+    if result.get("web_citations") is not None:
+        response_content["web_citations"] = result.get("web_citations")
+    if _private_runtime_metadata_enabled():
+        if result.get("context_budget") is not None:
+            response_content["context_budget"] = result.get("context_budget")
+        if result.get("usage") is not None:
+            response_content["usage"] = result.get("usage")
+        if result.get("runtime") is not None:
+            response_content["runtime"] = result.get("runtime")
+        if result.get("holo4dna") is not None:
+            response_content["holo4dna"] = result.get("holo4dna")
     return JSONResponse(content=response_content)
 
 
@@ -920,26 +1066,57 @@ async def chat_stream(
     images     = body.get("images") or None
     incognito  = bool(body.get("incognito", False))
     handoff_transition = None if incognito else _safe_handoff_transition(body.get("handoff_transition"))
-    capsule    = get_capsule_from_request(request.headers.get("Authorization"))
-    capsule_id = (capsule["sub"] if capsule else None) if not incognito else None
+    capsule_id = _chat_capsule_id(request, _key)
+    scope_id = None if incognito else _resolve_active_scope(request, capsule_id, body)
+    if session_id:
+        if incognito:
+            _reject_durable_incognito_session(session_id)
+        else:
+            _require_session_ownership(session_id, capsule_id, allow_new_session=True, scope_id=scope_id)
+    capsule_id = capsule_id if not incognito else None
+
+    if session_id:
+        if incognito:
+            _get_incognito_engine_session(session_id)
+        else:
+            _get_owned_engine_session(session_id, capsule_id, scope_id)
 
     def _sse(event: dict) -> str:
         return f"data: {json.dumps(event)}\n\n"
 
     def _generate():
+        started_at = time.time()
+        usage_tracked = False
         try:
             for chunk in _chat_engine.stream_message(
-                session_id, message, capsule_id=capsule_id, images=images,
+                session_id, message, capsule_id=capsule_id, scope_id=scope_id, images=images,
                 incognito=incognito, handoff_transition=handoff_transition
             ):
                 if isinstance(chunk, dict) and chunk.get("done"):
-                    yield _sse({"type": "done", **{k: v for k, v in chunk.items() if k != "done"}})
+                    tokens = chunk.get("tokens") or {}
+                    _track_usage(
+                        _key,
+                        "/v1/chat/stream",
+                        200,
+                        input_tokens=tokens.get("input", 0),
+                        output_tokens=tokens.get("output", 0),
+                        latency_ms=int((time.time() - started_at) * 1000),
+                    )
+                    usage_tracked = True
+                    yield _sse({"type": "done", **_public_stream_metadata(chunk)})
                 elif isinstance(chunk, dict) and chunk.get("searching"):
                     yield _sse({"type": "searching"})
                 else:
                     yield _sse({"type": "token", "text": chunk})
         except Exception as e:
             logger.error(f"Stream error: {type(e).__name__}: {e}", exc_info=True)
+            if not usage_tracked:
+                _track_usage(
+                    _key,
+                    "/v1/chat/stream",
+                    500,
+                    latency_ms=int((time.time() - started_at) * 1000),
+                )
             yield _sse({"type": "error", "detail": "Stream interrupted. Please try again."})
 
     return StreamingResponse(
@@ -972,15 +1149,17 @@ async def get_portrait(request: Request, format: str = "json"):
         raise HTTPException(status_code=503, detail="Database unavailable.")
 
     capsule_id = capsule["sub"]
+    scope_id = _resolve_active_scope(request, capsule_id)
+    scope_kwargs = {"scope_id": scope_id} if scope_id else {}
 
     if format == "md":
-        md = _capsule_brain.generate_portrait_md(capsule_id)
+        md = _capsule_brain.generate_portrait_md(capsule_id, **scope_kwargs)
         return JSONResponse(content={"portrait_md": md, "capsule_id": capsule_id})
 
     # JSON format — structured data
-    life_context   = _capsule_brain.load_life_context(capsule_id)
-    last_note      = _capsule_brain.load_last_consolidation(capsule_id)
-    capsule_ctx    = _capsule_brain.get_capsule_context(capsule_id)
+    life_context   = _capsule_brain.load_life_context(capsule_id, **scope_kwargs)
+    last_note      = _capsule_brain.load_last_consolidation(capsule_id, **scope_kwargs)
+    capsule_ctx    = _capsule_brain.get_capsule_context(capsule_id, **scope_kwargs)
 
     return JSONResponse(content={
         "capsule_id":     capsule_id,
@@ -999,16 +1178,18 @@ async def get_last_session(request: Request):
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
     if not capsule:
         raise HTTPException(status_code=401, detail="Sign in required.")
-    ctx = _capsule_brain.get_capsule_context(capsule["sub"])
+    scope_id = _resolve_active_scope(request, capsule["sub"])
+    ctx = _capsule_brain.get_capsule_context(capsule["sub"], **({"scope_id": scope_id} if scope_id else {}))
     session_id = ctx.get("last_session_id")
     if not session_id:
         return JSONResponse(content={"session_id": None, "history": []})
+    _require_session_ownership(session_id, capsule["sub"], scope_id=scope_id)
     # Restore into engine memory (loads from Supabase if not already in memory)
     if _chat_engine:
-        session = _chat_engine.get_or_create_session(session_id)
+        session = _get_owned_engine_session(session_id, capsule["sub"], scope_id)
         history = session.history
     else:
-        history = _capsule_brain.load_chat_history(session_id) or []
+        history = _capsule_brain.load_chat_history(session_id, **({"scope_id": scope_id} if scope_id else {})) or []
     return JSONResponse(content={"session_id": session_id, "history": history})
 
 
@@ -1022,7 +1203,8 @@ async def list_sessions(request: Request):
     if not capsule:
         raise HTTPException(status_code=401, detail="Sign in required.")
     # Direct table query — requires capsule_id column on holo_chat_sessions
-    sessions = _capsule_brain.list_sessions(capsule["sub"])
+    scope_id = _resolve_active_scope(request, capsule["sub"])
+    sessions = _capsule_brain.list_sessions(capsule["sub"], **({"scope_id": scope_id} if scope_id else {}))
     # Map to the shape the frontend expects: {id, at, preview, title}
     mapped = [
         {
@@ -1042,7 +1224,8 @@ async def list_artifacts(request: Request):
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
     if not capsule:
         raise HTTPException(status_code=401, detail="Sign in required.")
-    artifacts = _capsule_brain.list_artifacts(capsule["sub"])
+    scope_id = _resolve_active_scope(request, capsule["sub"])
+    artifacts = _capsule_brain.list_artifacts(capsule["sub"], **({"scope_id": scope_id} if scope_id else {}))
     return JSONResponse(content={"artifacts": artifacts})
 
 
@@ -1052,7 +1235,8 @@ async def get_artifact(artifact_id: str, request: Request):
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
     if not capsule:
         raise HTTPException(status_code=401, detail="Sign in required.")
-    artifact = _capsule_brain.get_artifact(capsule["sub"], artifact_id)
+    scope_id = _resolve_active_scope(request, capsule["sub"])
+    artifact = _capsule_brain.get_artifact(capsule["sub"], artifact_id, **({"scope_id": scope_id} if scope_id else {}))
     if not artifact:
         raise HTTPException(status_code=404, detail="Artifact not found.")
     return JSONResponse(content=artifact)
@@ -1475,92 +1659,97 @@ def _redact_context_entries(context: dict[str, Any]) -> list[dict[str, Any]]:
     return entries
 
 
-def _safe_count_capsule_rows(brain, table_name: str, capsule_id: str) -> Optional[int]:
+def _safe_count_capsule_rows(
+    brain, table_name: str, capsule_id: str, scope_id: Optional[str] = None
+) -> Optional[int]:
     client = getattr(brain, "_client", None)
     if client is None:
         return None
     try:
-        resp = (
-            client.table(table_name)
-            .select("capsule_id", count="exact")
-            .eq("capsule_id", capsule_id)
-            .execute()
-        )
+        query = client.table(table_name).select("scope_id" if scope_id else "capsule_id", count="exact")
+        query = query.eq("scope_id", scope_id) if scope_id else query.eq("capsule_id", capsule_id)
+        resp = query.execute()
         return resp.count
     except Exception:
         return None
 
 
-def _safe_count_session_messages(brain, session_ids: list[str]) -> Optional[int]:
+def _safe_count_session_messages(
+    brain, session_ids: list[str], scope_id: Optional[str] = None
+) -> Optional[int]:
     client = getattr(brain, "_client", None)
     if client is None or not session_ids:
         return 0
     try:
-        resp = (
-            client.table("holo_chat_messages")
-            .select("session_id", count="exact")
-            .in_("session_id", session_ids[:200])
-            .execute()
-        )
+        query = client.table("holo_chat_messages").select("session_id", count="exact")
+        query = query.in_("session_id", session_ids[:200])
+        if scope_id:
+            query = query.eq("scope_id", scope_id)
+        resp = query.execute()
         return resp.count
     except Exception:
         return None
 
 
-def _safe_recent_messages(brain, session_ids: list[str], limit: int) -> list[dict[str, Any]]:
+def _safe_recent_messages(
+    brain, session_ids: list[str], limit: int, scope_id: Optional[str] = None
+) -> list[dict[str, Any]]:
     client = getattr(brain, "_client", None)
     if client is None or not session_ids:
         return []
     try:
-        return (
-            client.table("holo_chat_messages")
-            .select("session_id, role, content, created_at, turn_number")
-            .in_("session_id", session_ids[:50])
-            .order("created_at", desc=True)
-            .limit(limit)
-            .execute()
-        ).data or []
+        query = client.table("holo_chat_messages").select(
+            "session_id, role, content, created_at, turn_number"
+        ).in_("session_id", session_ids[:50])
+        if scope_id:
+            query = query.eq("scope_id", scope_id)
+        return query.order("created_at", desc=True).limit(limit).execute().data or []
     except Exception:
         return []
 
 
-def _safe_recent_consolidations(brain, capsule_id: str, limit: int) -> list[dict[str, Any]]:
+def _safe_recent_consolidations(
+    brain, capsule_id: str, limit: int, scope_id: Optional[str] = None
+) -> list[dict[str, Any]]:
     client = getattr(brain, "_client", None)
     if client is None:
-        last = brain.load_last_consolidation(capsule_id)
+        last = brain.load_last_consolidation(
+            capsule_id, **({"scope_id": scope_id} if scope_id else {})
+        )
         return [last] if last else []
     try:
-        return (
-            client.table("holo_session_consolidations")
-            .select("session_id, created_at, what_changed, what_surfaced, open_threads, captain_note")
-            .eq("capsule_id", capsule_id)
-            .order("created_at", desc=True)
-            .limit(limit)
-            .execute()
-        ).data or []
+        query = client.table("holo_session_consolidations").select(
+            "session_id, created_at, what_changed, what_surfaced, open_threads, captain_note"
+        )
+        query = query.eq("scope_id", scope_id) if scope_id else query.eq("capsule_id", capsule_id)
+        return query.order("created_at", desc=True).limit(limit).execute().data or []
     except Exception:
-        last = brain.load_last_consolidation(capsule_id)
+        last = brain.load_last_consolidation(
+            capsule_id, **({"scope_id": scope_id} if scope_id else {})
+        )
         return [last] if last else []
 
 
 def _build_holo_brain_payload(
     capsule: dict[str, Any],
     brain,
+    scope_id: Optional[str] = None,
     session_limit: int = 25,
     message_limit: int = 80,
     consolidation_limit: int = 25,
     artifact_limit: int = 50,
 ) -> dict[str, Any]:
     capsule_id = capsule["sub"]
+    scope_kwargs = {"scope_id": scope_id} if scope_id else {}
     capsule_row = brain.get_capsule(capsule_id) or {}
-    context = brain.get_capsule_context(capsule_id) or {}
+    context = brain.get_capsule_context(capsule_id, **scope_kwargs) or {}
     context_entries = _redact_context_entries(context)
-    life_context = brain.load_life_context(capsule_id) or []
-    sessions = brain.list_sessions(capsule_id, limit=session_limit) or []
+    life_context = brain.load_life_context(capsule_id, **scope_kwargs) or []
+    sessions = brain.list_sessions(capsule_id, limit=session_limit, **scope_kwargs) or []
     session_ids = [s.get("session_id") for s in sessions if s.get("session_id")]
-    recent_messages = _safe_recent_messages(brain, session_ids, message_limit)
-    consolidations = _safe_recent_consolidations(brain, capsule_id, consolidation_limit)
-    artifacts = brain.list_artifacts(capsule_id, limit=artifact_limit) or []
+    recent_messages = _safe_recent_messages(brain, session_ids, message_limit, scope_id)
+    consolidations = _safe_recent_consolidations(brain, capsule_id, consolidation_limit, scope_id)
+    artifacts = brain.list_artifacts(capsule_id, limit=artifact_limit, **scope_kwargs) or []
 
     session_items = []
     for session in sessions:
@@ -1588,7 +1777,7 @@ def _build_holo_brain_payload(
         })
 
     email = capsule_row.get("email") or capsule.get("email", "")
-    message_count = _safe_count_session_messages(brain, session_ids)
+    message_count = _safe_count_session_messages(brain, session_ids, scope_id)
     return {
         "capsule": {
             "id": capsule_id,
@@ -1602,16 +1791,16 @@ def _build_holo_brain_payload(
             "identity_type": "capsule_token",
         },
         "capsule_context": {
-            "count": _safe_count_capsule_rows(brain, "holo_capsule_context", capsule_id) or len(context_entries),
+            "count": _safe_count_capsule_rows(brain, "holo_capsule_context", capsule_id, scope_id) or len(context_entries),
             "redacted_count": sum(1 for item in context_entries if item["redacted"]),
             "entries": context_entries,
         },
         "life_context": {
-            "count": _safe_count_capsule_rows(brain, "holo_life_context", capsule_id) or len(life_context),
+            "count": _safe_count_capsule_rows(brain, "holo_life_context", capsule_id, scope_id) or len(life_context),
             "entries": life_context,
         },
         "sessions": {
-            "count": _safe_count_capsule_rows(brain, "holo_chat_sessions", capsule_id) or len(session_items),
+            "count": _safe_count_capsule_rows(brain, "holo_chat_sessions", capsule_id, scope_id) or len(session_items),
             "shown": len(session_items),
             "items": session_items,
         },
@@ -1621,12 +1810,12 @@ def _build_holo_brain_payload(
             "by_session": grouped_messages,
         },
         "consolidations": {
-            "count": _safe_count_capsule_rows(brain, "holo_session_consolidations", capsule_id) or len(consolidations),
+            "count": _safe_count_capsule_rows(brain, "holo_session_consolidations", capsule_id, scope_id) or len(consolidations),
             "shown": len(consolidations),
             "items": consolidations,
         },
         "artifacts": {
-            "count": _safe_count_capsule_rows(brain, "holo_artifacts", capsule_id) or len(artifacts),
+            "count": _safe_count_capsule_rows(brain, "holo_artifacts", capsule_id, scope_id) or len(artifacts),
             "shown": len(artifacts),
             "items": artifacts,
         },
@@ -1645,7 +1834,8 @@ async def holo_brain_dashboard(request: Request):
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
     if not capsule:
         raise HTTPException(status_code=401, detail="Sign in required.")
-    return JSONResponse(content=_build_holo_brain_payload(capsule, _capsule_brain))
+    scope_id = _resolve_active_scope(request, capsule["sub"])
+    return JSONResponse(content=_build_holo_brain_payload(capsule, _capsule_brain, scope_id))
 
 
 @app.get("/v1/holo-build")
@@ -1724,40 +1914,47 @@ async def capsule_surface(
     if not capsule:
         raise HTTPException(status_code=401, detail="Sign in required.")
     capsule_id = capsule["sub"]
+    scope_id = _resolve_active_scope(request, capsule_id)
+    scope_kwargs = {"scope_id": scope_id} if scope_id else {}
 
     # Return cached result if fresh (< 30 min)
-    cached = _surface_cache.get(capsule_id)
+    cache_key = f"{capsule_id}:{scope_id or 'personal'}"
+    cached = _surface_cache.get(cache_key)
     if cached and (time.time() - cached["ts"]) < 1800:
         return JSONResponse(content=cached["data"])
 
     if _chat_engine is None:
         raise HTTPException(status_code=503, detail="Chat engine not initialized.")
 
-    context = _capsule_brain.get_capsule_context(capsule_id) or {}
-    sessions = _capsule_brain.list_sessions(capsule_id)
+    context = _capsule_brain.get_capsule_context(capsule_id, **scope_kwargs) or {}
+    sessions = _capsule_brain.list_sessions(capsule_id, **scope_kwargs)
     result = _chat_engine._captain.generate_surface(context, sessions)
     if not result:
         return JSONResponse(content={"topics": [], "todos": []})
 
-    _surface_cache[capsule_id] = {"data": result, "ts": time.time()}
+    _surface_cache[cache_key] = {"data": result, "ts": time.time()}
     return JSONResponse(content=result)
 
 
 @app.get("/v1/chat/{session_id}/summary")
 async def thread_summary(
     session_id: str,
+    request: Request,
     _key: str = Depends(_verify_key),
 ):
     """Return a Governor-written summary of the thread for sidebar hover preview."""
+    capsule_id = _chat_capsule_id(request, _key)
+    scope_id = _resolve_active_scope(request, capsule_id)
+    _require_session_ownership(session_id, capsule_id, scope_id=scope_id)
     if session_id in _summary_cache:
         return JSONResponse(content={"summary": _summary_cache[session_id]})
     if _chat_engine is None:
         raise HTTPException(status_code=503, detail="Chat engine not initialized.")
     # Try in-memory session first, fall back to DB
-    session = _chat_engine.get_or_create_session(session_id)
+    session = _get_owned_engine_session(session_id, capsule_id, scope_id)
     history = session.history
     if not history:
-        history = _capsule_brain.load_chat_history(session_id) or []
+        history = _capsule_brain.load_chat_history(session_id, **({"scope_id": scope_id} if scope_id else {})) or []
     if not history:
         raise HTTPException(status_code=404, detail="Session not found.")
     summary = _chat_engine._captain.summarize_thread(history)
@@ -1769,28 +1966,70 @@ async def thread_summary(
 @app.get("/v1/chat/{session_id}/history")
 async def chat_history(
     session_id: str,
+    request: Request,
     _key: str = Depends(_verify_key),
 ):
     """Return the full message history for a session."""
+    capsule_id = _chat_capsule_id(request, _key)
+    scope_id = _resolve_active_scope(request, capsule_id)
+    _require_session_ownership(session_id, capsule_id, scope_id=scope_id)
     if _chat_engine is None:
         raise HTTPException(status_code=503, detail="Chat engine not initialized.")
     # Try in-memory first, then fall back to Supabase via session restore
-    session = _chat_engine.get_or_create_session(session_id)
+    session = _get_owned_engine_session(session_id, capsule_id, scope_id)
     history = session.history
     if not history:
         raise HTTPException(status_code=404, detail="Session not found.")
     return JSONResponse(content={"session_id": session_id, "history": history})
 
 
+@app.post("/v1/chat/{session_id}/memory-checkpoint")
+async def checkpoint_chat_memory(session_id: str, request: Request):
+    """Persist a thread-open/fork lifecycle boundary without invoking a model."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    lifecycle = str(body.get("lifecycle") or "thread_fork").strip().lower()
+    if lifecycle not in {"thread_open", "thread_fork"}:
+        raise HTTPException(status_code=400, detail="Unsupported checkpoint lifecycle.")
+    capsule_id = capsule["sub"]
+    scope_id = _resolve_active_scope(request, capsule_id, body)
+    _require_session_ownership(session_id, capsule_id, scope_id=scope_id)
+    if _chat_engine is None:
+        raise HTTPException(status_code=503, detail="Chat engine not initialized.")
+    try:
+        result = _chat_engine.checkpoint_memory_lifecycle(
+            session_id,
+            lifecycle,
+            capsule_id=capsule_id,
+            scope_id=scope_id,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    status_code = 409 if result.get("status") == "blocked_unresolved_urgent_memory" else 200
+    return JSONResponse(content=result, status_code=status_code)
+
+
 @app.delete("/v1/chat/{session_id}")
 async def clear_chat(
     session_id: str,
+    request: Request,
     _key: str = Depends(_verify_key),
 ):
     """Clear a chat session and start fresh."""
+    capsule_id = _chat_capsule_id(request, _key)
+    scope_id = _resolve_active_scope(request, capsule_id)
+    _require_session_ownership(session_id, capsule_id, scope_id=scope_id)
     if _chat_engine is None:
         raise HTTPException(status_code=503, detail="Chat engine not initialized.")
-    cleared = _chat_engine.clear_session(session_id)
+    try:
+        cleared = _chat_engine.clear_session(session_id, capsule_id=capsule_id, scope_id=scope_id)
+    except SessionOwnershipError:
+        raise HTTPException(status_code=404, detail="Session not found.")
     return JSONResponse(content={"cleared": cleared, "session_id": session_id})
 
 
@@ -1801,13 +2040,15 @@ async def delete_session(
     _key: str = Depends(_verify_key),
 ):
     """Permanently delete a session and all its messages. User must own the session."""
-    capsule = get_capsule_from_request(request.headers.get("Authorization"))
-    if not capsule:
-        raise HTTPException(status_code=401, detail="Authentication required.")
-    capsule_id = capsule["sub"]
+    capsule_id = _chat_capsule_id(request, _key)
+    scope_id = _resolve_active_scope(request, capsule_id)
+    _require_session_ownership(session_id, capsule_id, scope_id=scope_id)
     if _chat_engine:
-        _chat_engine.clear_session(session_id)
-    deleted = _capsule_brain.delete_session(capsule_id, session_id)
+        try:
+            _chat_engine.clear_session(session_id, capsule_id=capsule_id, scope_id=scope_id)
+        except SessionOwnershipError:
+            raise HTTPException(status_code=404, detail="Session not found.")
+    deleted = _capsule_brain.delete_session(capsule_id, session_id, **({"scope_id": scope_id} if scope_id else {}))
     if not deleted:
         raise HTTPException(status_code=404, detail="Session not found or access denied.")
     return JSONResponse(content={"deleted": True, "session_id": session_id})

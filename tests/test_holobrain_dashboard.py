@@ -58,6 +58,136 @@ class FakeBrain:
         return [{"artifact_id": "artifact-1", "title": "Plan", "artifact_type": "html"}]
 
 
+class ScopedFakeBrain(FakeBrain):
+    def __init__(self):
+        self.scope_calls = []
+
+    def _record(self, name, scope_id):
+        self.scope_calls.append((name, scope_id))
+
+    def get_capsule_context(self, capsule_id, *, scope_id=None):
+        self._record("context", scope_id)
+        return super().get_capsule_context(capsule_id)
+
+    def load_life_context(self, capsule_id, *, scope_id=None):
+        self._record("life", scope_id)
+        return super().load_life_context(capsule_id)
+
+    def list_sessions(self, capsule_id, limit=40, *, scope_id=None):
+        self._record("sessions", scope_id)
+        return super().list_sessions(capsule_id, limit)
+
+    def load_last_consolidation(self, capsule_id, *, scope_id=None):
+        self._record("consolidation", scope_id)
+        return super().load_last_consolidation(capsule_id)
+
+    def list_artifacts(self, capsule_id, limit=50, *, scope_id=None):
+        self._record("artifacts", scope_id)
+        return super().list_artifacts(capsule_id, limit)
+
+
+class _PrivateMetadataChatEngine:
+    def _result(self):
+        return {
+            "session_id": "session-1",
+            "response": "Public answer.",
+            "turn_number": 1,
+            "thread_health_score": 100,
+            "thread_health_level": "GREEN",
+            "elapsed_ms": 4,
+            "tokens": {"input": 10, "output": 2},
+            "runtime": {"gov_turn_plan": {"narrative_packet": {"private": "memory"}}},
+            "context_budget": {"worker_context_receipt": {"receipt_hash": "private"}},
+            "usage": {"estimated_cost_usd": 1.0},
+            "holo4dna": {"trace": "private"},
+            "web_sources": [],
+            "web_citations": {"status": "no_evidence", "passed": True},
+        }
+
+    def send_message(self, *args, **kwargs):
+        return self._result()
+
+    def stream_message(self, *args, **kwargs):
+        yield "Public answer."
+        yield {"done": True, **self._result()}
+
+
+def test_public_stream_metadata_hides_private_hologov_state_by_default(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_EXPOSE_PRIVATE_RUNTIME", raising=False)
+    payload = main._public_stream_metadata({
+        "done": True,
+        "session_id": "session-1",
+        "runtime": {"gov_turn_plan": {"narrative_packet": {"private": "memory"}}},
+        "context_budget": {"worker_context_receipt": {"receipt_hash": "secret-hash"}},
+        "usage": {"estimated_cost_usd": 1.0},
+        "holo4dna": {"trace": "private"},
+        "_provider": "openai",
+        "web_sources": [{"source_id": "S1", "url": "https://example.com"}],
+    })
+
+    assert payload == {
+        "session_id": "session-1",
+        "web_sources": [{"source_id": "S1", "url": "https://example.com"}],
+    }
+
+
+def test_private_runtime_metadata_requires_explicit_operator_flag(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_EXPOSE_PRIVATE_RUNTIME", "1")
+    payload = main._public_stream_metadata({
+        "done": True,
+        "runtime": {"gov_turn_plan": {"turn_id": "turn-1"}},
+        "context_budget": {"worker_context_receipt": {"receipt_hash": "hash"}},
+    })
+
+    assert payload["runtime"]["gov_turn_plan"]["turn_id"] == "turn-1"
+    assert payload["context_budget"]["worker_context_receipt"]["receipt_hash"] == "hash"
+
+
+def test_chat_api_does_not_return_private_runtime_by_default(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_EXPOSE_PRIVATE_RUNTIME", raising=False)
+    monkeypatch.setenv("HOLO_API_KEY", "test-api-key")
+    monkeypatch.setattr(main, "_chat_engine", _PrivateMetadataChatEngine())
+    client = TestClient(main.app)
+
+    response = client.post(
+        "/v1/chat",
+        headers={"x-api-key": "test-api-key"},
+        json={"message": "Hello"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["response"] == "Public answer."
+    assert "runtime" not in body
+    assert "context_budget" not in body
+    assert "usage" not in body
+    assert "holo4dna" not in body
+
+
+def test_stream_api_filters_private_runtime_and_tracks_usage(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_EXPOSE_PRIVATE_RUNTIME", raising=False)
+    monkeypatch.setenv("HOLO_API_KEY", "test-api-key")
+    monkeypatch.setattr(main, "_chat_engine", _PrivateMetadataChatEngine())
+    tracked = []
+    monkeypatch.setattr(main, "_track_usage", lambda *args, **kwargs: tracked.append((args, kwargs)))
+    client = TestClient(main.app)
+
+    response = client.post(
+        "/v1/chat/stream",
+        headers={"x-api-key": "test-api-key"},
+        json={"message": "Hello"},
+    )
+
+    assert response.status_code == 200
+    assert '"type": "done"' in response.text
+    assert '"runtime"' not in response.text
+    assert '"context_budget"' not in response.text
+    assert len(tracked) == 1
+    assert tracked[0][0][1:3] == ("/v1/chat/stream", 200)
+    assert tracked[0][1]["input_tokens"] == 10
+    assert tracked[0][1]["output_tokens"] == 2
+
+
 def test_holobrain_endpoint_requires_auth(monkeypatch):
     monkeypatch.setattr(main, "get_capsule_from_request", lambda header: None)
     client = TestClient(main.app)
@@ -90,6 +220,18 @@ def test_holobrain_endpoint_uses_token_capsule_and_redacts_sensitive_context(mon
     assert payload["artifacts"]["count"] == 1
     assert "do-not-return-this" not in str(payload)
     assert "do-not-return-either" not in str(payload)
+
+
+def test_holobrain_payload_keeps_all_memory_reads_in_resolved_scope():
+    brain = ScopedFakeBrain()
+    main._build_holo_brain_payload(
+        {"sub": "canonical-capsule", "email": "alias@example.com", "mode": "personal"},
+        brain,
+        scope_id="enterprise-scope",
+    )
+
+    assert brain.scope_calls
+    assert {scope_id for _, scope_id in brain.scope_calls} == {"enterprise-scope"}
 
 
 def test_holobuild_endpoint_requires_auth(monkeypatch):

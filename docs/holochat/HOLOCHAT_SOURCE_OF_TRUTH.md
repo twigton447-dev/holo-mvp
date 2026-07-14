@@ -4,7 +4,9 @@ Status: canonical product and architecture doctrine for HoloChat.
 
 Owner: HoloOps / HoloArchitecture / HoloChat QA.
 
-Last updated: 2026-07-13.
+Last updated: 2026-07-14.
+
+Current release label: HoloChat 3.1.
 
 This document defines what HoloChat is, how it should work, and which runtime role is responsible for what. Product behavior, prompts, HoloGov packets, HoloBrain memory policy, tests, and future implementation work should align to this document unless HoloOps explicitly supersedes it.
 
@@ -24,6 +26,8 @@ HoloChat operates on two context planes that must never be confused:
 2. **HoloGov control ledger.** A compact, typed map of active, parked, resurfaced, resolved, and superseded lanes; prior worker contributions; settled decisions; contradictions; open questions; provenance; context gaps; and the next worker assignment. It steers the record. It does not replace it.
 
 HoloBrain is a third, secondary source: durable cross-thread memory and user-owned context. It can enrich the live conversation, but it must not displace the evolving thread or cause HoloChat to overfit old beliefs about the user.
+
+Relevant older material enters a turn as a bounded **episode registry**. Every selected episode must carry a stable ID, source type, source ID, summary, relevance signal, token estimate, selection reason, and provenance. Retrieval rank is a navigation aid, not truth authority.
 
 ## Topic Lane Lifecycle
 
@@ -234,6 +238,8 @@ The rolling summary should preserve:
 - recent source IDs or artifact references when relevant
 - what the next worker must not lose
 
+Every worker call must also produce a private `WorkerContextReceipt`. The receipt records raw, selected, and omitted history counts; selected history hashes; selected episode IDs and token estimates; admitted evidence source IDs; Gov packet token estimate; total estimated worker input; and a stable receipt hash. It is operator telemetry, never normal user-facing content.
+
 When raw history is bounded, the summary and lane ledger become more important, but selection must still preserve origins, relevant older evidence, and recent turns. Thread length should not determine HoloChat intelligence. HoloGov's navigation and the worker's access to recursive evidence should.
 
 ## Current Provider Policy
@@ -305,13 +311,16 @@ The user should feel protected, understood, and sharpened.
 
 HoloGov authorizes tools. Workers do not independently decide to use tools.
 
-Web search should eventually be part of HoloChat because lack of current information weakens the product. But web must follow the same law:
+Web search is part of HoloChat because lack of current information weakens the product. It must follow the same law:
 
 - HoloGov decides whether search is needed.
 - Kernel executes or blocks.
-- Search results become evidence.
+- Search results become a typed evidence bundle with a query hash, provider, retrieval time, stable bundle hash, and bounded source records.
 - HoloGov admits relevant findings into the packet.
-- Worker cites or uses them only as authorized.
+- Each admitted source receives a turn-scoped source ID such as `[S1]`, plus URL, domain, title, bounded snippet, retrieval time, and content hash.
+- Worker cites web-derived claims with admitted source IDs and never invents IDs.
+- The deterministic citation audit reports valid, missing, or invented source IDs for normal and streaming turns.
+- Search snippets remain untrusted evidence and never become instructions or Gov authority.
 
 No external action should bypass HoloGov and kernel authorization.
 
@@ -331,6 +340,10 @@ Required no-provider tests:
 - Provider renaming cannot duplicate a returning lane or erase its origin.
 - Prior worker contributions are preserved, challenged, superseded, or advanced explicitly.
 - Rolling summary appears when history is bounded.
+- Relevant older episodes outrank recent irrelevant material and preserve provenance.
+- WorkerContextReceipt matches the history, episodes, evidence, and Gov packet actually handed to the worker.
+- Web evidence rejects unsafe URLs, uses stable source IDs and hashes, and reports missing or invented citations.
+- Streaming and non-streaming turns expose the same context receipt and citation audit.
 - HoloBrain memory is grounding, not accusation.
 - No scolding/gotcha/cold/sterile release.
 - Streaming does not leak unadmitted output.
@@ -390,13 +403,58 @@ Compare the three transcripts on origin recall, resurfaced-lane recovery, prior-
 
 ## Implementation Priorities
 
+### Context And Evidence Harness V1
+
+The local V1 implementation establishes:
+
+- HoloState schema `holochat_state_v1.0` with user portrait, topic registry, episode registry, evidence ledger, and worker context receipt.
+- capsule-scoped episode retrieval from prior HoloBrain session consolidations, merged with current-thread episodes and ranked under a token budget.
+- one admitted evidence ledger shared by HoloGov and the visible worker.
+- source IDs and safe source links for the user-facing web-check surface without exposing private engine data.
+- citation audit and context receipts for both normal and buffered streaming turns.
+- private HoloGov plans, HoloBrain projections, context receipts, and cost telemetry withheld from normal API/SSE clients unless an explicit local operator flag is enabled.
+- backward loading of legacy `holochat_state_v0.1` records with empty V1 registries.
+
+V1 does not make retrieved memory or search text authoritative. HoloGov curates it, the deterministic kernel records admission and citation integrity, and the visible worker remains responsible for synthesis.
+
+### Harness V2 Program
+
+The active V2 program is defined in `docs/holochat/HOLOCHAT_HARNESS_V2_ROADMAP.md` and `docs/holochat/HOLOCHAT_EXPERIMENTS.md`.
+
+- Web retrieval crosses a provider-neutral structured boundary with explicit outcomes; Tavily is the first adapter, not a permanent architectural dependency.
+- Source bibliographies are disclosure only. They do not satisfy inline citation or claim-support admission.
+- Economy, balanced, and frontier test lanes are explicit experiment policies and never silently change production routing.
+- Portable identity is separated from data authority. Personal and enterprise records remain in immutable scopes, with deny-by-default cross-scope access and audited derivative transfers.
+- Session ownership must be proven before any durable or in-memory history is restored.
+
+### Continuous Memory Steward
+
+HoloChat has two different memory rhythms and they must never be collapsed into one:
+
+- Per-turn HoloGov state keeps the current conversation coherent for the next worker.
+- Durable Memory Steward checkpoints consolidate only the new transcript delta into HoloBrain.
+
+A checkpoint is required after 6–8 user turns, 10k–15k new input tokens, a meaningful topic transition, a correction, revocation, commitment, major decision, thread open/fork with unconsolidated history, idle with a delta, or immediately before autocompact. Every checkpoint carries a transcript watermark and hash, exact provenance, typed proposals, and deterministic admit/reject/quarantine decisions.
+
+The persistence law is strict:
+
+1. HoloGov may propose memory; it cannot silently write it.
+2. HoloBrain commits the checkpoint, admitted entries, supersessions, revocations, and quarantined candidates atomically under one immutable scope.
+3. The watermark advances only after a successful persistence acknowledgement.
+4. A failed or unresolved urgent checkpoint remains pending and blocks autocompact.
+5. Retries use the same idempotency key and may not duplicate memory.
+6. Corrections supersede named prior memory; forget requests create durable tombstones.
+7. Restart recovery restores the acknowledged watermark and the ordered transcript before processing another turn.
+
+Rolling state, durable consolidation, the user portrait, and the raw transcript are separate records with separate jobs. The rolling state is not durable truth; a summary is not a substitute for the ordered transcript; and a portrait may not overwrite event history.
+
 Near-term priorities:
 
 1. Make HoloGov naming consistent in prompts, docs, telemetry, and packets.
 2. Complete the typed control ledger described above.
 3. Keep rolling summary iterative while preserving substantial ordered history for workers.
 4. Add HoloBrain memory lifecycle metadata.
-5. Add Memory Steward passes for consolidation, pruning, archiving, contradiction, and forgetting.
+5. Extend the checkpointed Memory Steward with reviewed pruning and archival policy; consolidation, contradiction handling, supersession, forgetting, and restart recovery are implemented behind a feature flag.
 6. Add token telemetry for HoloGov and worker packets separately.
 7. Build dashboard views for internal testing only; do not expose engine internals to normal users.
 8. Run repeated Mira track tests and compare drift over time.

@@ -1251,6 +1251,7 @@ def main() -> int:
     parser.add_argument("--disable-gov-control", action="store_true", help="Control run: keep ordered worker history but disable the pre-worker HoloGov control compilation.")
     parser.add_argument("--disable-deep-gov", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--legacy-clipped-history", action="store_true", help="Control run: restore the old 8-message/8,000-character history limits.")
+    parser.add_argument("--disable-selective-context", action="store_true", help="Experiment condition C: retain bounded history and HoloGov control while disabling episode retrieval and state reseed.")
     parser.add_argument("--gov-output-tokens", type=int, default=None, help="Override the HoloGov control-packet output budget (800-12000; default 8000).")
     parser.add_argument("--turn-delay-sec", type=float, default=0.0, help="Pause this many seconds between turns.")
     parser.add_argument("--no-minimax", action="store_true", help="Deprecated; MiniMax is already excluded.")
@@ -1259,7 +1260,19 @@ def main() -> int:
         action="store_true",
         help="Do not override sourced model/runtime env values with the intended HC smoke policy.",
     )
+    parser.add_argument(
+        "--experiment-mode",
+        action="store_true",
+        help="Require an explicitly gated, noncanonical HoloChat experiment policy.",
+    )
     args = parser.parse_args()
+    if args.experiment_mode:
+        if os.getenv("HOLOCHAT_EXPERIMENT_MODE") != "1" or os.getenv("HOLOCHAT_ALLOW_NONCANONICAL_POLICY") != "1":
+            raise SystemExit("Experiment mode requires explicit noncanonical-policy environment gates.")
+        if not args.respect_env:
+            raise SystemExit("Experiment mode requires --respect-env.")
+        if os.getenv("HOLOCHAT_GOV_MODEL") != os.getenv("OPENAI_FAST_MODEL"):
+            raise SystemExit("Experiment mode requires HOLOCHAT_GOV_MODEL to match OPENAI_FAST_MODEL.")
     _apply_synthetic_persona_defaults(args)
 
     _set_policy_defaults(respect_env=args.respect_env)
@@ -1270,6 +1283,8 @@ def main() -> int:
         os.environ["HOLOCHAT_ADAPTER_HISTORY_MESSAGES"] = "8"
         os.environ["HOLOCHAT_ADAPTER_HISTORY_CHARS"] = "8000"
         os.environ["HOLOCHAT_ADAPTER_HISTORY_MESSAGE_CHARS"] = "1800"
+    if args.disable_selective_context:
+        os.environ["HOLOCHAT_EXPERIMENT_CONTEXT_MODE"] = "control_packet_only"
     if args.gov_output_tokens is not None:
         if not 800 <= args.gov_output_tokens <= 12000:
             raise SystemExit("--gov-output-tokens must be between 800 and 12000")

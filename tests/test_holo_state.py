@@ -15,12 +15,25 @@ def test_holo_state_serializes_and_deserializes_cleanly():
 
     restored = HoloState.model_validate_json(state.model_dump_json())
 
-    assert restored.schema_version == "holochat_state_v0.1"
+    assert restored.schema_version == "holochat_state_v1.0"
     assert restored.session_id == "session-1"
     assert restored.capsule_id == "capsule-1"
     assert restored.turn_number == 3
     assert restored.thread_health.level == "GREEN"
     assert restored.gov_arc_state.current_topic == "Decide what to do next."
+
+
+def test_holo_state_v1_loads_legacy_schema_without_dropping_state():
+    restored = HoloState.model_validate({
+        "schema_version": "holochat_state_v0.1",
+        "session_id": "legacy-session",
+        "rolling_summary": "A legacy canonical summary.",
+    })
+
+    assert restored.schema_version == "holochat_state_v0.1"
+    assert restored.rolling_summary == "A legacy canonical summary."
+    assert restored.episode_registry == []
+    assert restored.evidence_ledger == []
 
 
 def test_gov_arc_state_is_owned_structured_state():

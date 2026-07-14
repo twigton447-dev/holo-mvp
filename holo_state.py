@@ -1,6 +1,6 @@
 """Canonical HoloChat 4DNA state objects.
 
-This module is intentionally runtime-isolated. It defines the v0.1 HoloState
+This module is intentionally runtime-isolated. It defines the v1.0 HoloState
 shape without taking ownership of chat execution, memory persistence, or model
 calls. Existing storage remains physically backed by project_brain.py for now;
 new architecture code should refer to that surface as HoloBrain.
@@ -16,7 +16,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field, field_validator
 
 
-SCHEMA_VERSION = "holochat_state_v0.1"
+SCHEMA_VERSION = "holochat_state_v1.0"
 
 
 class RequiredTools(str, Enum):
@@ -143,6 +143,11 @@ class HoloState(BaseModel):
     rolling_summary: str | None = None
     hologov_control_ledger: dict[str, Any] = Field(default_factory=dict)
     settled_decisions: list[str] = Field(default_factory=list)
+    user_portrait: list[str] = Field(default_factory=list)
+    topic_registry: list[dict[str, Any]] = Field(default_factory=list)
+    episode_registry: list[dict[str, Any]] = Field(default_factory=list)
+    evidence_ledger: list[dict[str, Any]] = Field(default_factory=list)
+    worker_context_receipt: dict[str, Any] = Field(default_factory=dict)
     artifact_registry: list[dict[str, Any]] = Field(default_factory=list)
     required_tools: list[RequiredTools] = Field(default_factory=lambda: [RequiredTools.NONE])
     baton_pass: BatonPass = Field(default_factory=BatonPass)
@@ -161,6 +166,11 @@ class HoloState(BaseModel):
             "ROLLING_SUMMARY": self.rolling_summary,
             "HOLOGOV_CONTROL_LEDGER": self.hologov_control_ledger,
             "SETTLED_DECISIONS": self.settled_decisions,
+            "USER_PORTRAIT": self.user_portrait,
+            "TOPIC_REGISTRY": self.topic_registry,
+            "EPISODE_REGISTRY": self.episode_registry,
+            "EVIDENCE_LEDGER": self.evidence_ledger,
+            "WORKER_CONTEXT_RECEIPT": self.worker_context_receipt,
             "ARTIFACTS_REGISTRY": self.artifact_registry,
             "REQUIRED_TOOLS": [tool.value if isinstance(tool, RequiredTools) else str(tool) for tool in self.required_tools],
             "BATON_PASS": self.baton_pass.model_dump(mode="json"),

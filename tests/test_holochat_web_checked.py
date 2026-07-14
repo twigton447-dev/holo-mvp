@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 from uuid import uuid4
 
 import chat_engine
+import web_search
 from chat_engine import HoloChatEngine
 from holo_context import HoloContextBuilder
 from holo_router import HoloRouter
@@ -87,6 +89,43 @@ class FakeBrain:
         pass
 
 
+class StaticSearchAdapter:
+    provider = "native-test"
+
+    def __init__(self, results):
+        self.results = results
+        self.calls = []
+
+    def is_configured(self):
+        return True
+
+    def search(self, query, *, max_results):
+        self.calls.append((query, max_results))
+        return self.results
+
+
+def _patch_structured_search(monkeypatch, text):
+    def fake_run(query):
+        if text is None:
+            bundle = web_search.build_web_evidence_bundle(
+                query, [], provider="test-search", status="no_results", error_category="no_results"
+            )
+            return web_search.SearchRun(
+                query=query, provider="test-search", outcome="no_results",
+                latency_ms=0, error_category="no_results", evidence_bundle=bundle,
+            )
+        bundle = web_search.build_web_evidence_bundle(
+            query,
+            [{"url": "https://example.test/source", "title": "Test source", "content": text}],
+            provider="test-search",
+        )
+        return web_search.SearchRun(
+            query=query, provider="test-search", outcome="checked", latency_ms=0,
+            evidence_bundle=bundle,
+        )
+    monkeypatch.setattr(chat_engine.web_search, "run_search", fake_run)
+
+
 def _engine():
     adapters = [FakeAdapter()]
     engine = HoloChatEngine.__new__(HoloChatEngine)
@@ -101,7 +140,7 @@ def _engine():
 
 def test_streaming_done_metadata_includes_searched_without_raw_results(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    monkeypatch.setattr(chat_engine.web_search, "search", lambda query: "compact search result")
+    _patch_structured_search(monkeypatch, "compact search result")
     engine = _engine()
 
     events = list(engine.stream_message(str(uuid4()), "Should search?"))
@@ -146,7 +185,7 @@ def test_streaming_done_metadata_includes_searched_without_raw_results(monkeypat
 
 def test_streaming_done_metadata_marks_web_unavailable_when_search_fails(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    monkeypatch.setattr(chat_engine.web_search, "search", lambda query: None)
+    _patch_structured_search(monkeypatch, None)
     engine = _engine()
 
     events = list(engine.stream_message(str(uuid4()), "Should search?"))
@@ -155,17 +194,14 @@ def test_streaming_done_metadata_marks_web_unavailable_when_search_fails(monkeyp
     assert any(isinstance(event, dict) and event.get("searching") for event in events)
     assert done["searched"] is False
     assert done["search_query"] is None
-    assert done["web_status"] == "unavailable"
-    assert done["runtime"]["governor_trace"]["web_search"]["status"] == "unavailable"
-    assert done["runtime"]["governor_trace"]["web_search"]["unavailable_reason"] in {
-        "missing_config",
-        "no_results_or_search_failed",
-    }
+    assert done["web_status"] == "no_results"
+    assert done["runtime"]["governor_trace"]["web_search"]["status"] == "no_results"
+    assert done["runtime"]["governor_trace"]["web_search"]["unavailable_reason"] == "no_results"
 
 
 def test_streaming_skips_failed_mini_before_output(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    monkeypatch.setattr(chat_engine.web_search, "search", lambda query: None)
+    _patch_structured_search(monkeypatch, None)
     engine = _engine()
     engine._adapters = [
         FailingStreamAdapter("google", "gemini-2.5-flash-lite"),
@@ -194,7 +230,7 @@ def test_streaming_skips_failed_mini_before_output(monkeypatch):
 
 def test_streaming_done_metadata_includes_shadow_holo4dna_when_enabled(monkeypatch):
     monkeypatch.setenv("HOLOCHAT_4DNA_SHADOW", "1")
-    monkeypatch.setattr(chat_engine.web_search, "search", lambda query: "compact search result")
+    _patch_structured_search(monkeypatch, "compact search result")
     engine = _engine()
 
     events = list(engine.stream_message(str(uuid4()), "Should search with shadow?"))
@@ -208,7 +244,7 @@ def test_streaming_done_metadata_includes_shadow_holo4dna_when_enabled(monkeypat
 
 def test_non_stream_metadata_includes_searched(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    monkeypatch.setattr(chat_engine.web_search, "search", lambda query: "compact search result")
+    _patch_structured_search(monkeypatch, "compact search result")
     engine = _engine()
 
     result = engine.send_message(str(uuid4()), "Should search?")
@@ -222,15 +258,227 @@ def test_non_stream_metadata_includes_searched(monkeypatch):
 
 def test_non_stream_metadata_marks_web_unavailable_when_search_fails(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
-    monkeypatch.setattr(chat_engine.web_search, "search", lambda query: None)
+    _patch_structured_search(monkeypatch, None)
     engine = _engine()
 
     result = engine.send_message(str(uuid4()), "Should search?")
 
     assert result["searched"] is False
     assert result["search_query"] is None
-    assert result["web_status"] == "unavailable"
-    assert result["runtime"]["governor_trace"]["web_search"]["status"] == "unavailable"
+    assert result["web_status"] == "no_results"
+    assert result["runtime"]["governor_trace"]["web_search"]["status"] == "no_results"
+
+
+def test_provider_neutral_run_uses_injected_adapter_and_structured_metadata():
+    adapter = StaticSearchAdapter([
+        web_search.SearchResult(
+            url="https://example.com/current?utm_source=test",
+            title="Current source",
+            snippet="A current fact.",
+            score=0.9,
+        )
+    ])
+
+    run = web_search.run_search("current facts", adapter=adapter)
+
+    assert adapter.calls == [("current facts", 5)]
+    assert run.provider == "native-test"
+    assert run.outcome == "checked"
+    assert run.status == "checked"
+    assert run.latency_ms >= 0
+    assert run.error_category is None
+    assert run.result_count == 1
+    assert run.evidence_bundle["sources"][0]["canonical_url"] == "https://example.com/current"
+    assert "[S1]" in run.rendered_text
+
+
+def test_no_provider_configuration_returns_missing_config_without_provider_call(monkeypatch):
+    monkeypatch.delenv("TAVILY_API_KEY", raising=False)
+
+    def provider_call(*args, **kwargs):
+        raise AssertionError("provider should not be called without configuration")
+
+    monkeypatch.setattr(web_search.TavilySearchAdapter, "search", provider_call)
+
+    run = web_search.run_search("current facts")
+
+    assert run.provider == "tavily"
+    assert run.outcome == "missing_config"
+    assert run.error_category == "missing_config"
+    assert run.result_count == 0
+    assert run.evidence_bundle["status"] == "missing_config"
+    assert web_search.search("current facts") is None
+
+
+def test_search_outcomes_distinguish_empty_provider_error_and_rejected_results():
+    empty = web_search.run_search("current facts", adapter=StaticSearchAdapter([]))
+    assert empty.outcome == "no_results"
+    assert empty.error_category == "no_results"
+
+    rejected = web_search.run_search(
+        "current facts",
+        adapter=StaticSearchAdapter([web_search.SearchResult(url="javascript:alert(1)")]),
+    )
+    assert rejected.outcome == "all_rejected"
+    assert rejected.error_category == "all_rejected"
+    assert rejected.evidence_bundle["rejection_reasons"] == ["unsupported_url"]
+
+    class BrokenSearchAdapter(StaticSearchAdapter):
+        provider = "broken-test"
+
+        def search(self, query, *, max_results):
+            raise RuntimeError("unavailable")
+
+    failed = web_search.run_search("current facts", adapter=BrokenSearchAdapter([]))
+    assert failed.outcome == "provider_error"
+    assert failed.error_category == "provider_error"
+    assert failed.error_type == "RuntimeError"
+
+
+class FakeResponsesClient:
+    def __init__(self, response):
+        self.response = response
+        self.calls = []
+        self.responses = self
+
+    def create(self, **kwargs):
+        self.calls.append(kwargs)
+        return self.response
+
+
+def test_openai_and_xai_hosted_search_normalize_sources_without_live_calls():
+    response = {
+        "output": [
+            {
+                "type": "web_search_call",
+                "action": {"sources": [
+                    {"url": "https://example.com/a", "title": "A", "snippet": "alpha"},
+                    {"url": "https://example.com/b", "title": "B", "snippet": "beta"},
+                ]},
+            },
+            {
+                "type": "message",
+                "content": [{"annotations": [
+                    {"type": "url_citation", "url": "https://example.com/a", "title": "A duplicate"},
+                    {"type": "url_citation", "url": "https://example.com/b", "title": "B"},
+                ]}],
+            },
+        ],
+    }
+    openai_client = FakeResponsesClient(response)
+    xai_client = FakeResponsesClient(response)
+
+    openai_run = web_search.run_search(
+        "current facts",
+        adapter=web_search.OpenAIWebSearchAdapter(client=openai_client, model="openai-test"),
+    )
+    xai_run = web_search.run_search(
+        "current facts",
+        adapter=web_search.XAIWebSearchAdapter(client=xai_client, model="xai-test"),
+    )
+
+    assert openai_run.outcome == "checked"
+    assert [source["url"] for source in openai_run.evidence_bundle["sources"]] == [
+        "https://example.com/a", "https://example.com/b",
+    ]
+    assert openai_client.calls[0]["tools"] == [{"type": "web_search"}]
+    assert openai_client.calls[0]["include"] == ["web_search_call.action.sources"]
+    assert xai_run.provider == "xai_web_search"
+    assert xai_client.calls[0]["model"] == "xai-test"
+
+
+def test_gemini_grounding_and_custom_function_search_share_the_evidence_contract():
+    class FakeModels:
+        def __init__(self):
+            self.calls = []
+
+        def generate_content(self, **kwargs):
+            self.calls.append(kwargs)
+            return SimpleNamespace(candidates=[SimpleNamespace(
+                grounding_metadata=SimpleNamespace(grounding_chunks=[
+                    SimpleNamespace(web=SimpleNamespace(uri="https://example.org/g", title="Grounded")),
+                ], grounding_supports=[
+                    SimpleNamespace(
+                        grounding_chunk_indices=[0],
+                        segment=SimpleNamespace(text="Grounded supporting passage."),
+                    ),
+                ])
+            )])
+
+    models = FakeModels()
+    gemini = web_search.GeminiGroundingAdapter(
+        client=SimpleNamespace(models=models), model="gemini-test"
+    )
+    gemini_run = web_search.run_search("ground this", adapter=gemini)
+    custom_run = web_search.run_search(
+        "deepseek tool query",
+        adapter=web_search.CustomFunctionSearchAdapter(
+            lambda query, limit: [{"url": "https://example.net/d", "title": query, "content": "Custom retrieved evidence."}],
+            provider="deepseek_custom_search",
+        ),
+    )
+
+    assert gemini_run.evidence_bundle["sources"][0]["url"] == "https://example.org/g"
+    assert models.calls[0]["config"] == {"tools": [{"google_search": {}}]}
+    assert custom_run.provider == "deepseek_custom_search"
+    assert custom_run.outcome == "checked"
+
+
+def test_search_provider_factory_is_explicit_and_rejects_unknown_values(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_SEARCH_PROVIDER", "openai")
+    assert isinstance(web_search.build_search_adapter(), web_search.OpenAIWebSearchAdapter)
+
+    monkeypatch.setenv("HOLOCHAT_SEARCH_PROVIDER", "unsupported")
+    try:
+        web_search.build_search_adapter()
+    except ValueError as exc:
+        assert "Unsupported HoloChat search provider" in str(exc)
+    else:
+        raise AssertionError("unknown providers must fail closed")
+
+
+def test_malformed_hosted_payload_is_provider_error_not_false_no_results():
+    malformed = FakeResponsesClient({"output": {"unexpected": "mapping"}})
+    run = web_search.run_search(
+        "current facts",
+        adapter=web_search.OpenAIWebSearchAdapter(client=malformed, model="test"),
+    )
+
+    assert run.outcome == "provider_error"
+    assert run.error_type == "SearchPayloadError"
+
+
+def test_gemini_bare_url_without_grounded_passage_is_rejected():
+    response = SimpleNamespace(candidates=[SimpleNamespace(
+        grounding_metadata=SimpleNamespace(
+            grounding_chunks=[SimpleNamespace(web=SimpleNamespace(
+                uri="https://example.org/bare", title="Bare URL",
+            ))],
+            grounding_supports=[],
+        )
+    )])
+    adapter = web_search.GeminiGroundingAdapter(
+        client=SimpleNamespace(models=SimpleNamespace(
+            generate_content=lambda **kwargs: response
+        )),
+        model="gemini-test",
+    )
+
+    run = web_search.run_search("ground this", adapter=adapter)
+    assert run.outcome == "all_rejected"
+    assert run.evidence_bundle["rejection_reasons"] == ["missing_evidence_text"]
+
+
+def test_unknown_configured_provider_returns_explicit_outcome(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_SEARCH_PROVIDER", "unknown-provider")
+    run = web_search.run_search("current facts")
+    assert run.outcome == "unsupported_provider"
+    assert run.error_category == "unsupported_provider"
+
+
+def test_deepseek_selection_uses_holochat_custom_retrieval_backend(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_SEARCH_PROVIDER", "deepseek")
+    assert isinstance(web_search.build_search_adapter(), web_search.TavilySearchAdapter)
 
 
 def test_frontend_has_web_checked_render_path():
@@ -258,7 +506,7 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     html = Path("frontend/chat.html").read_text()
 
     assert "<span>HoloChat</span>" in html
-    assert '<span id="brand-sub">3.0</span>' in html
+    assert '<span id="brand-sub">3.1</span>' in html
     assert "#brand-sub { display: inline;" in html
     assert "<span>My Chats</span>" in html
     assert 'title="My Chats">My Chats</button>' in html

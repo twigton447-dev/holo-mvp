@@ -54,6 +54,30 @@ from holochat_context_governor import (
     state_context_value,
 )
 from holochat_constitution import constitutional_prompt_block
+from holochat_evidence import (
+    admit_web_citations,
+    build_worker_context_receipt,
+    merge_episode_context,
+    render_web_evidence,
+)
+from holochat_memory_steward import (
+    CheckpointPolicy,
+    EventKind as MemoryEventKind,
+    LifecycleEvent as MemoryLifecycleEvent,
+    LifecycleKind as MemoryLifecycleKind,
+    MemoryProposal,
+    MemoryStewardState,
+    PersistenceAcknowledgement,
+    ProposalKind as MemoryProposalKind,
+    Provenance as MemoryProvenance,
+    TurnInput as MemoryTurnInput,
+    acknowledge_checkpoint,
+    apply_exchange,
+    apply_lifecycle_event,
+    checkpoint_payload,
+    initial_state as initial_memory_steward_state,
+    restore_state as restore_memory_steward_state,
+)
 from holo_state import GovArcState, HoloState, RequiredTools
 from holo_trace import HoloTraceRecord, log_trace
 from llm_adapters import (
@@ -70,15 +94,25 @@ logger = logging.getLogger("holo.chat")
 # In-memory session store.
 # Replace with Redis for multi-instance or persistent deployments.
 _sessions: Dict[str, "ChatSession"] = {}
+_memory_steward_lock = threading.RLock()
 
 
 # ---------------------------------------------------------------------------
 # Session model
 # ---------------------------------------------------------------------------
 
+class SessionOwnershipError(Exception):
+    """Raised when a caller attempts to use a chat session it does not own."""
+
+
 @dataclass
 class ChatSession:
     session_id: str
+    # Set only when the session is created. It is the in-process companion to
+    # the durable holo_chat_sessions.capsule_id ownership binding.
+    owner_capsule_id: Optional[str] = None
+    owner_scope_id: Optional[str] = None
+    incognito: bool = False
     history: List[Dict[str, str]] = field(default_factory=list)
     rotation_index: int = 0      # round-robin analyst cursor
     turn_count: int = 0
@@ -101,6 +135,19 @@ class ChatSession:
     autocompact_attempted: bool = False
     auto_reseed_applied: bool = False
     auto_reseed_hash: Optional[str] = None
+    retrieved_episodes: list[dict[str, Any]] = field(default_factory=list)
+    web_evidence_bundle: dict[str, Any] = field(default_factory=dict)
+    episode_retrieval_trace: dict[str, Any] = field(default_factory=dict)
+    worker_context_receipt: dict[str, Any] = field(default_factory=dict)
+    memory_steward_state: Optional[MemoryStewardState] = None
+    memory_steward_trace: dict[str, Any] = field(default_factory=dict)
+    memory_steward_open_checked: bool = False
+    memory_steward_persistence_blocked: bool = False
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name in {"owner_capsule_id", "owner_scope_id", "incognito"} and name in self.__dict__:
+            raise AttributeError(f"{name} is immutable after session creation")
+        super().__setattr__(name, value)
 
     @property
     def thread_health_score(self) -> int:
@@ -262,9 +309,15 @@ _BALANCED_GOV_ESCALATION_TERMS = (
     "challenge",
 )
 
-# Local, non-authoritative pricing estimates. Only include model prices when we
-# are comfortable showing a rough estimate; otherwise the UI reports unknown.
-_STATIC_CHAT_PRICING_USD_PER_M_TOKEN: dict[tuple[str, str], tuple[float, float]] = {}
+# Local, non-authoritative pricing estimates. Values are standard input/output
+# USD per 1M tokens from official provider pricing pages on the version date.
+# They are estimates only; cached, long-context, priority, tool, and regional
+# charges may differ from this simple turn estimate.
+_STATIC_CHAT_PRICING_VERSION = "official_public_pricing_2026-07-14"
+_STATIC_CHAT_PRICING_USD_PER_M_TOKEN: dict[tuple[str, str], tuple[float, float]] = {
+    ("openai", "gpt-5.5"): (5.00, 30.00),
+    ("xai", "grok-4.3"): (1.25, 2.50),
+}
 
 THREAD_HANDOFF_MESSAGE = "This thread is getting long. Start a fresh thread to keep Holo sharp."
 
@@ -275,6 +328,11 @@ def _truthy_env(name: str) -> bool:
 
 def _holochat_allow_noncanonical_policy() -> bool:
     return _truthy_env("HOLOCHAT_ALLOW_NONCANONICAL_POLICY")
+
+
+def _holochat_experiment_mode() -> bool:
+    """Permit explicit runner-selected models without weakening production law."""
+    return _truthy_env("HOLOCHAT_EXPERIMENT_MODE") and _holochat_allow_noncanonical_policy()
 
 
 def _single_hologov_call_enabled(runtime_profile: str) -> bool:
@@ -329,6 +387,9 @@ def _call_pool_loader(loader: Any, provider_allowlist: tuple[str, ...]) -> Any:
 
 
 def _normalize_holochat_model_policy(adapters: list[Any]) -> list[Any]:
+    if _holochat_experiment_mode():
+        logger.warning("HoloChat experiment mode active; using explicit runner model IDs.")
+        return adapters
     for adapter in adapters:
         provider = str(getattr(adapter, "provider", "") or "").strip().lower()
         canonical_model = CANONICAL_HOLOCHAT_MODEL_BY_PROVIDER.get(provider)
@@ -737,6 +798,12 @@ def _claim_autocompact_for_context_window(
         )
     if not compact_ready:
         return False
+    if (
+        _memory_steward_enabled()
+        and session.memory_steward_state is not None
+        and session.memory_steward_state.pending_checkpoint is not None
+    ):
+        return False
     if session.autocompact_attempted:
         return False
     session.autocompact_attempted = True
@@ -1133,8 +1200,23 @@ def _resolve_search_query(user_message: str, governor_query: Optional[str]) -> t
 def _web_result_count(results: Optional[str]) -> int:
     if not results:
         return 0
-    count = len(_re.findall(r"(?m)^Source:\s+", results))
+    count = len(_re.findall(r"(?m)^\[S\d+\]\s+", results))
+    if not count:
+        count = len(_re.findall(r"(?m)^Source:\s+", results))
     return count or 1
+
+
+def _public_web_sources(bundle: Optional[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Expose citation links, never retrieved passages or provider payloads."""
+    return [
+        {
+            key: source.get(key)
+            for key in ("source_id", "title", "url", "domain", "published_at")
+            if source.get(key) is not None
+        }
+        for source in (bundle or {}).get("sources") or []
+        if isinstance(source, dict)
+    ]
 
 
 def _web_trace(
@@ -1142,39 +1224,80 @@ def _web_trace(
     *,
     source: str,
     results: Optional[str],
+    run: Optional[web_search.SearchRun] = None,
 ) -> dict[str, Any]:
     attempted = bool(query)
-    result_count = _web_result_count(results)
-    configured = bool(os.getenv("TAVILY_API_KEY"))
     if not attempted:
         status = "off"
         unavailable_reason = None
-    elif results:
-        status = "checked"
-        unavailable_reason = None
-    elif not configured:
-        status = "unavailable"
-        unavailable_reason = "missing_config"
     else:
-        status = "unavailable"
-        unavailable_reason = "no_results_or_search_failed"
-    return {
+        status = run.outcome if run is not None else "no_results"
+        unavailable_reason = None if status == "checked" else status
+    trace = {
         "decision": "search_requested" if attempted else "not_needed",
         "source": source,
         "attempted": attempted,
-        "provider": "tavily",
+        "provider": run.provider if run is not None else "tavily",
         "status": status,
-        "result_count": result_count,
+        "outcome": status,
+        "result_count": run.result_count if run is not None else _web_result_count(results),
         "unavailable_reason": unavailable_reason,
     }
+    if run is not None:
+        trace.update(run.metadata())
+    return trace
 
 
 def _run_web_search_for_turn(user_message: str, governor_query: Optional[str]) -> tuple[Optional[str], Optional[str], dict[str, Any]]:
     search_query, source, decision = _resolve_search_query(user_message, governor_query)
-    results = web_search.search(search_query) if search_query else None
-    trace = _web_trace(search_query, source=source, results=results)
+    run: Optional[web_search.SearchRun] = None
+    if search_query:
+        run = web_search.run_search(search_query)
+    results = run.rendered_text or None if run is not None else None
+    trace = _web_trace(search_query, source=source, results=results, run=run)
+    evidence_bundle = run.evidence_bundle if run is not None else None
+    trace["evidence_bundle"] = evidence_bundle or {}
+    trace["evidence_source_ids"] = [
+        str(item.get("source_id"))
+        for item in (evidence_bundle or {}).get("sources") or []
+        if item.get("source_id")
+    ]
+    trace["evidence_bundle_hash"] = (evidence_bundle or {}).get("bundle_hash")
     trace["decision"] = decision
     return search_query, results, trace
+
+
+def _retrieve_episode_context(
+    brain: Any,
+    *,
+    capsule_id: Optional[str],
+    history: list[dict[str, Any]],
+    user_message: str,
+    incognito: bool,
+    scope_id: Optional[str] = None,
+) -> list[dict[str, Any]]:
+    if incognito or os.getenv("HOLOCHAT_EXPERIMENT_CONTEXT_MODE") == "control_packet_only":
+        return []
+    persisted: list[dict[str, Any]] = []
+    getter = getattr(brain, "retrieve_relevant_episodes", None)
+    if capsule_id and callable(getter):
+        try:
+            persisted = list(getter(
+                capsule_id,
+                user_message,
+                limit=6,
+                token_budget=1600,
+                **({"scope_id": scope_id} if scope_id else {}),
+            ) or [])
+        except Exception as exc:
+            logger.warning("HoloBrain episode retrieval failed: %s", exc)
+    return merge_episode_context(
+        history=history,
+        persisted=persisted,
+        query=user_message,
+        limit=8,
+        token_budget=2200,
+    )
 
 
 def _gov_arc_state_block(arc_state: GovArcState) -> str:
@@ -1305,6 +1428,7 @@ def _save_thread_handoff_artifact(
     capsule_id: Optional[str],
     session: "ChatSession",
     consolidation: dict[str, Any],
+    scope_id: Optional[str] = None,
 ) -> Optional[str]:
     if not capsule_id or session.handoff_artifact_saved:
         return None
@@ -1320,6 +1444,7 @@ def _save_thread_handoff_artifact(
         title="Thread handoff reseed",
         content=markdown,
         artifact_type="thread_handoff_md",
+        **({"scope_id": scope_id} if scope_id else {}),
     )
     if artifact_id:
         session.handoff_artifact_saved = True
@@ -1394,8 +1519,17 @@ def _turn_usage_metadata(
         input_estimate,
         output_estimate,
     )
+    provider_input = _safe_positive_int(provider_input_tokens)
+    context_input = _context_budget_input_estimate(context_budget)
     return {
         "input_token_estimate": input_estimate,
+        "context_budget_input_token_estimate": context_input,
+        "provider_reported_input_tokens": provider_input or None,
+        "input_token_reconciliation_delta": (
+            provider_input - context_input
+            if provider_input and context_input
+            else None
+        ),
         "output_token_estimate": output_estimate,
         "total_token_estimate": total_estimate,
         "input_token_source": input_source,
@@ -1404,6 +1538,7 @@ def _turn_usage_metadata(
         "estimated_cost_usd": estimated_cost,
         "cost_source": cost_source,
         "cost_is_estimate": True,
+        "pricing_version": _STATIC_CHAT_PRICING_VERSION,
         "pricing_note": "Exact provider billing may differ.",
     }
 
@@ -1428,6 +1563,7 @@ def _turn_runtime_metadata(
     holobrain_state_persisted: bool = False,
     gov_turn_plan: Optional[GovTurnPlan] = None,
     visible_release_decision: Optional[Any] = None,
+    web_citation_audit: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     metadata = dict(runtime_info or {})
     selected = _adapter_identity_dict(analyst_adapter)
@@ -1480,6 +1616,7 @@ def _turn_runtime_metadata(
             "memory_context": context_budget.get("memory_context", {}),
             "holobrain_injection": context_budget.get("holobrain_injection", {}),
             "hologov_packet": context_budget.get("hologov_packet", {}),
+            "worker_context_receipt": context_budget.get("worker_context_receipt", {}),
             "thread_health": context_budget.get("thread_health", {}),
         }
     if usage is not None:
@@ -1498,6 +1635,8 @@ def _turn_runtime_metadata(
             "repaired": bool(getattr(visible_release_decision, "repaired", False)),
             "reason": getattr(visible_release_decision, "reason", None),
         }
+    if web_citation_audit is not None:
+        metadata["web_citations"] = dict(web_citation_audit)
     if frontier_assist is not None:
         metadata["frontier_assist"] = frontier_assist
     if timing_breakdown is not None:
@@ -1669,20 +1808,91 @@ class HoloChatEngine:
     def _gov_advisor_adapter(self):
         return getattr(self, "_gov_advisor", None) or getattr(self, "_governor", None)
 
-    def get_or_create_session(self, session_id: Optional[str] = None) -> ChatSession:
+    @staticmethod
+    def _assert_session_owner(
+        session: ChatSession,
+        capsule_id: Optional[str],
+        incognito: bool,
+        scope_id: Optional[str] = None,
+    ) -> None:
+        if (
+            session.incognito != incognito
+            or session.owner_capsule_id != capsule_id
+            or session.owner_scope_id != scope_id
+        ):
+            raise SessionOwnershipError("Chat session ownership mismatch")
+
+    def get_or_create_session(
+        self,
+        session_id: Optional[str] = None,
+        *,
+        capsule_id: Optional[str] = None,
+        incognito: bool = False,
+        scope_id: Optional[str] = None,
+    ) -> ChatSession:
         if session_id and session_id in _sessions:
-            return _sessions[session_id]
+            session = _sessions[session_id]
+            self._assert_session_owner(session, capsule_id, incognito, scope_id)
+            return session
         new_id  = session_id or str(uuid.uuid4())
-        session = ChatSession(session_id=new_id)
+        session = ChatSession(
+            session_id=new_id,
+            owner_capsule_id=capsule_id,
+            owner_scope_id=scope_id,
+            incognito=incognito,
+        )
 
         # Restore history from Supabase if the session_id is known but not in memory
         # (e.g. after a server restart)
         if session_id:
-            prior = self._brain.load_chat_history(session_id)
+            get_stored_session = getattr(self._brain, "get_chat_session", None)
+            stored_session = get_stored_session(session_id) if callable(get_stored_session) else None
+            if incognito and stored_session is not None:
+                raise SessionOwnershipError("Incognito session conflicts with durable session")
+
+        if session_id and not incognito:
+            if stored_session:
+                durable_owner = stored_session.get("scope_id") if scope_id else stored_session.get("capsule_id")
+                if durable_owner != (scope_id or capsule_id):
+                    raise SessionOwnershipError("Durable chat session ownership mismatch")
+                prior = self._brain.load_chat_history(session_id, **({"scope_id": scope_id} if scope_id else {}))
+            elif not callable(getattr(self._brain, "get_chat_session", None)):
+                # Backward-compatible no-provider test doubles predate durable
+                # session metadata. Production ProjectBrain always has this API.
+                prior = self._brain.load_chat_history(session_id)
+            else:
+                prior = None
             if prior:
                 session.history      = prior
                 session.turn_count   = sum(1 for m in prior if m["role"] == "user")
                 session.rotation_index = session.turn_count % len(_rotation_analyst_adapters(self._adapters))
+                if _memory_steward_enabled() and scope_id:
+                    load_checkpoint = getattr(self._brain, "load_latest_memory_checkpoint", None)
+                    checkpoint = load_checkpoint(
+                        session_id=session_id,
+                        scope_id=scope_id,
+                    ) if callable(load_checkpoint) else None
+                    restored_turns = tuple(
+                        MemoryTurnInput(
+                            message_id=f"{session_id}:restored:{index}",
+                            role=message["role"],
+                            text=message["content"],
+                            input_tokens=estimate_context_tokens(message["content"]),
+                        )
+                        for index, message in enumerate(prior, start=1)
+                        if message.get("role") in {"user", "assistant", "system"}
+                    )
+                    watermark_sequence = min(
+                        int((checkpoint or {}).get("end_sequence") or 0),
+                        len(restored_turns),
+                    )
+                    session.memory_steward_state = restore_memory_steward_state(
+                        session_id,
+                        "hologov-canonical",
+                        restored_turns,
+                        watermark_sequence=watermark_sequence,
+                        watermark_hash=str((checkpoint or {}).get("transcript_hash") or ""),
+                    )
                 logger.info(f"Restored session {session_id[:8]} from brain ({session.turn_count} turns).")
 
         _sessions[new_id] = session
@@ -1691,6 +1901,7 @@ class HoloChatEngine:
 
     def send_message(self, session_id: str, user_message: str,
                      capsule_id: Optional[str] = None,
+                     scope_id: Optional[str] = None,
                      images: Optional[List[Dict[str, Any]]] = None,
                      incognito: bool = False,
                      handoff_transition: Optional[dict[str, Any]] = None) -> Dict[str, Any]:
@@ -1701,7 +1912,12 @@ class HoloChatEngine:
         incognito=True: blind mode — no capsule context, no Governor memory, no life portrait
         injected. Base system prompt only. Used for unbiased evaluation runs.
         """
-        session             = self.get_or_create_session(session_id)
+        session             = self.get_or_create_session(
+            session_id,
+            capsule_id=capsule_id,
+            incognito=incognito,
+            scope_id=scope_id,
+        )
         session.last_active = time.time()
         turn_started_at = _timer_start()
         timings: dict[str, int] = {}
@@ -1713,13 +1929,33 @@ class HoloChatEngine:
             life_context    = []
             last_session    = None
         else:
-            raw_capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
+            raw_capsule_context = self._brain.get_capsule_context(
+                capsule_id, **({"scope_id": scope_id} if scope_id else {})
+            ) if capsule_id else {}
             capsule_context = _capsule_context_for_depth_preference(raw_capsule_context)
-            life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
-            last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
+            life_context    = self._brain.load_life_context(
+                capsule_id, **({"scope_id": scope_id} if scope_id else {})
+            ) if capsule_id else []
+            last_session    = self._brain.load_last_consolidation(
+                capsule_id, **({"scope_id": scope_id} if scope_id else {})
+            ) if capsule_id and session.turn_count == 0 else None
             durable_state   = load_state_from_capsule_context(raw_capsule_context)
-            if durable_state and session.turn_count == 0:
+            if durable_state and session.holochat_state is None:
                 session.holochat_state = durable_state
+        session.worker_context_receipt = {}
+        session.episode_retrieval_trace = {
+            "authorized": bool(capsule_id and not incognito),
+            "authority": "deterministic_hologov_preworker_context_operation",
+            "capsule_scoped": bool(capsule_id and not incognito),
+        }
+        session.retrieved_episodes = _retrieve_episode_context(
+            self._brain,
+            capsule_id=capsule_id,
+            history=session.history,
+            user_message=user_message,
+            incognito=incognito,
+            scope_id=scope_id,
+        )
         fresh_thread = session.turn_count == 0
         _add_timing(timings, "memory_context_ms", memory_timer)
 
@@ -1810,6 +2046,7 @@ class HoloChatEngine:
 
         web_timer = _timer_start()
         search_query, search_results, web_trace = _run_web_search_for_turn(user_message, governor_search_query)
+        session.web_evidence_bundle = dict(web_trace.pop("evidence_bundle", {}) or {})
         _add_timing(timings, "web_search_ms", web_timer)
         search_attempted = bool(search_query)
         search_succeeded = bool(search_results)
@@ -1855,9 +2092,9 @@ class HoloChatEngine:
         if search_results:
             enriched_message = (
                 f"{user_message}\n\n"
-                f"[BACKGROUND CONTEXT: The following search results were retrieved to help you answer. "
-                f"Use them silently — do not mention, quote, or reference that a search was performed. "
-                f"If the results are irrelevant to the question, ignore them entirely.]\n\n"
+                f"[ADMITTED WEB EVIDENCE: Use only relevant sources below for web-derived claims. "
+                f"Cite those claims inline with the supplied [S#] identifiers and never invent a source. "
+                f"If the evidence is insufficient or irrelevant, say so plainly.]\n\n"
                 f"{search_results}"
             )
             logger.info(f"  Search query: '{search_query}'")
@@ -1890,7 +2127,11 @@ class HoloChatEngine:
             holobrain_injection_plan=holobrain_injection_plan,
             gov_turn_plan_block="",
         )
-        if not incognito and session.holochat_state:
+        if (
+            not incognito
+            and session.holochat_state
+            and os.getenv("HOLOCHAT_EXPERIMENT_CONTEXT_MODE") != "control_packet_only"
+        ):
             holobrain_injection_plan = build_holobrain_injection_plan(
                 session.holochat_state,
                 thread_status=session.thread_status,
@@ -1987,6 +2228,13 @@ class HoloChatEngine:
                     raise RuntimeError(f"GovTurnPlan validation failed: {failures}")
                 candidate_plan_block = render_gov_turn_plan_for_worker(candidate_plan)
                 candidate_system_prompt = base_system_prompt + "\n\n" + candidate_plan_block
+                _record_worker_context_delivery(
+                    session=session,
+                    plan=candidate_plan,
+                    system_prompt=candidate_system_prompt,
+                    history=adapter_history,
+                    user_prompt=enriched_message,
+                )
                 candidate_context_budget = _runtime_context_budget(
                     session=session,
                     adapter_history=adapter_history,
@@ -2064,6 +2312,13 @@ class HoloChatEngine:
                     raise RuntimeError(f"GovTurnPlan validation failed: {failures}")
                 fallback_plan_block = render_gov_turn_plan_for_worker(fallback_plan)
                 fallback_system_prompt = base_system_prompt + "\n\n" + fallback_plan_block
+                _record_worker_context_delivery(
+                    session=session,
+                    plan=fallback_plan,
+                    system_prompt=fallback_system_prompt,
+                    history=adapter_history,
+                    user_prompt=enriched_message,
+                )
                 fallback_context_budget = _runtime_context_budget(
                     session=session,
                     adapter_history=adapter_history,
@@ -2094,6 +2349,12 @@ class HoloChatEngine:
                 failover_attempts.append(_safe_adapter_error(fallback, exc))
                 raise
         elapsed_ms = _elapsed_timer_ms(analyst_timer)
+        if session.worker_context_receipt:
+            session.worker_context_receipt = {
+                **session.worker_context_receipt,
+                "provider_reported_input_tokens": _safe_positive_int(in_tok),
+            }
+            context_budget["worker_context_receipt"] = dict(session.worker_context_receipt)
         _add_timing(timings, "analyst_ms", analyst_timer)
         failover = _analyst_failover_metadata(
             initial_adapter=initial_adapter,
@@ -2130,6 +2391,10 @@ class HoloChatEngine:
 
         release_decision = deterministic_visible_release(user_message, response_text)
         response_text = release_decision.text
+        response_text, web_citation_audit = admit_web_citations(
+            response_text,
+            session.web_evidence_bundle,
+        )
 
         conversation_paths = []
         if not single_hologov_call:
@@ -2150,17 +2415,30 @@ class HoloChatEngine:
         artifacts_saved = []
         if capsule_id and not incognito:
             artifacts_saved = _extract_and_save_artifacts(
-                self._brain, response_text, capsule_id, session.session_id, session.turn_count
+                self._brain, response_text, capsule_id, session.session_id, session.turn_count,
+                scope_id=scope_id,
             )
 
         # Commit both turns to history
         session.history.append({"role": "user",      "content": user_message})
         session.history.append({"role": "assistant",  "content": response_text})
 
+        memory_steward_trace = _advance_memory_steward(
+            session=session,
+            brain=self._brain,
+            capsule_id=capsule_id,
+            scope_id=scope_id,
+            user_message=user_message,
+            response_text=response_text,
+            gov_turn_plan=gov_turn_plan,
+            context_budget=context_budget,
+        )
+        context_budget["memory_steward"] = memory_steward_trace
+
         # Link session to capsule on first turn — skipped in incognito
         if capsule_id and session.turn_count == 1 and not incognito:
-            self._brain.set_capsule_context(capsule_id, "last_session_id", session.session_id)
-            self._brain.append_session_history(capsule_id, session.session_id, user_message)
+            self._brain.set_capsule_context(capsule_id, "last_session_id", session.session_id, **({"scope_id": scope_id} if scope_id else {}))
+            self._brain.append_session_history(capsule_id, session.session_id, user_message, **({"scope_id": scope_id} if scope_id else {}))
 
         # Governor learns — extract any new facts about the user and persist them
         # Skipped in incognito: blind sessions must not pollute the capsule portrait
@@ -2179,7 +2457,7 @@ class HoloChatEngine:
                 memory_admission = admit_advisor_memory_updates(proposed_updates)
                 updates = dict(memory_admission.value or {}) if memory_admission.admitted else {}
             for key, value in updates.items():
-                self._brain.set_capsule_context(capsule_id, key, value)
+                self._brain.set_capsule_context(capsule_id, key, value, **({"scope_id": scope_id} if scope_id else {}))
             memory_writes_count = len(updates)
             _add_timing(timings, "governor_post_ms", gov_post_timer)
             if updates:
@@ -2201,15 +2479,17 @@ class HoloChatEngine:
                     result = dict(consolidation_admission.value or {}) if consolidation_admission.admitted else {}
                     if result.get("session_note"):
                         self._brain.save_consolidation(
-                            capsule_id, session.session_id, result["session_note"]
+                            capsule_id, session.session_id, result["session_note"],
+                            **({"scope_id": scope_id} if scope_id else {}),
                         )
                     if result.get("life_context"):
-                        self._brain.upsert_life_context(capsule_id, result["life_context"])
+                        self._brain.upsert_life_context(capsule_id, result["life_context"], **({"scope_id": scope_id} if scope_id else {}))
                     _save_thread_handoff_artifact(
                         self._brain,
                         capsule_id=capsule_id,
                         session=session,
                         consolidation=result,
+                        scope_id=scope_id,
                     )
                     logger.info(
                         f"Consolidation complete for {capsule_id[:8]}: "
@@ -2231,16 +2511,17 @@ class HoloChatEngine:
                 )
                 name_admission = admit_advisor_thread_name(proposed_name)
                 if name_admission.admitted and name_admission.value:
-                    self._brain.update_session_name(capsule_id, session.session_id, name_admission.value)
+                    self._brain.update_session_name(capsule_id, session.session_id, name_admission.value, **({"scope_id": scope_id} if scope_id else {}))
             else:
                 _hist = list(session.history)
                 _sid  = session.session_id
                 _cid  = capsule_id
+                _scope_id = scope_id
                 def _name_thread():
                     try:
                         name_admission = admit_advisor_thread_name(gov_advisor.name_session(_hist))
                         if name_admission.admitted and name_admission.value:
-                            self._brain.update_session_name(_cid, _sid, name_admission.value)
+                            self._brain.update_session_name(_cid, _sid, name_admission.value, **({"scope_id": _scope_id} if _scope_id else {}))
                     except Exception as e:
                         logger.warning(f"Thread naming failed: {e}")
                 threading.Thread(target=_name_thread, daemon=True).start()
@@ -2255,6 +2536,7 @@ class HoloChatEngine:
             provider      = adapter.provider,
             temperature   = temperature,
             capsule_id    = capsule_id,
+            scope_id      = scope_id,
         )
         _add_timing(timings, "persistence_ms", persistence_timer)
 
@@ -2306,6 +2588,7 @@ class HoloChatEngine:
                 response_text=response_text,
                 worker_identity=_adapter_identity_dict(adapter),
                 turn_number=session.turn_count,
+                worker_context_receipt=session.worker_context_receipt,
             ),
         )
         session.holochat_state = next_holobrain_state
@@ -2364,6 +2647,7 @@ class HoloChatEngine:
             holobrain_state_persisted=holobrain_state_persisted,
             gov_turn_plan=gov_turn_plan,
             visible_release_decision=release_decision,
+            web_citation_audit=web_citation_audit,
         )
 
         return {
@@ -2381,6 +2665,8 @@ class HoloChatEngine:
             "searched":            search_succeeded,
             "search_query":        search_query if search_succeeded else None,
             "web_status":          web_status,
+            "web_sources":         _public_web_sources(session.web_evidence_bundle),
+            "web_citations":       web_citation_audit,
             "_provider":           adapter.provider,
             "_governor":           session.governor_provider,
             "_governor_turns_held": session.turn_count - session.governor_locked_since,
@@ -2394,6 +2680,7 @@ class HoloChatEngine:
 
     def stream_message(self, session_id: str, user_message: str,
                        capsule_id: Optional[str] = None,
+                       scope_id: Optional[str] = None,
                        images: Optional[List[Dict[str, Any]]] = None,
                        incognito: bool = False,
                        handoff_transition: Optional[dict[str, Any]] = None):
@@ -2411,7 +2698,12 @@ class HoloChatEngine:
         consolidation, thread naming, Supabase persist) runs in a background thread
         after the stream completes so the caller never blocks on it.
         """
-        session             = self.get_or_create_session(session_id)
+        session             = self.get_or_create_session(
+            session_id,
+            capsule_id=capsule_id,
+            incognito=incognito,
+            scope_id=scope_id,
+        )
         session.last_active = time.time()
         turn_started_at = _timer_start()
         timings: dict[str, int] = {}
@@ -2422,13 +2714,27 @@ class HoloChatEngine:
             life_context    = []
             last_session    = None
         else:
-            raw_capsule_context = self._brain.get_capsule_context(capsule_id) if capsule_id else {}
+            raw_capsule_context = self._brain.get_capsule_context(capsule_id, **({"scope_id": scope_id} if scope_id else {})) if capsule_id else {}
             capsule_context = _capsule_context_for_depth_preference(raw_capsule_context)
-            life_context    = self._brain.load_life_context(capsule_id) if capsule_id else []
-            last_session    = self._brain.load_last_consolidation(capsule_id) if capsule_id and session.turn_count == 0 else None
+            life_context    = self._brain.load_life_context(capsule_id, **({"scope_id": scope_id} if scope_id else {})) if capsule_id else []
+            last_session    = self._brain.load_last_consolidation(capsule_id, **({"scope_id": scope_id} if scope_id else {})) if capsule_id and session.turn_count == 0 else None
             durable_state   = load_state_from_capsule_context(raw_capsule_context)
-            if durable_state and session.turn_count == 0:
+            if durable_state and session.holochat_state is None:
                 session.holochat_state = durable_state
+        session.worker_context_receipt = {}
+        session.episode_retrieval_trace = {
+            "authorized": bool(capsule_id and not incognito),
+            "authority": "deterministic_hologov_preworker_context_operation",
+            "capsule_scoped": bool(capsule_id and not incognito),
+        }
+        session.retrieved_episodes = _retrieve_episode_context(
+            self._brain,
+            capsule_id=capsule_id,
+            history=session.history,
+            user_message=user_message,
+            incognito=incognito,
+            scope_id=scope_id,
+        )
         fresh_thread = session.turn_count == 0
         _add_timing(timings, "memory_context_ms", memory_timer)
 
@@ -2507,6 +2813,7 @@ class HoloChatEngine:
 
         web_timer = _timer_start()
         search_query, search_results, web_trace = _run_web_search_for_turn(user_message, governor_search_query)
+        session.web_evidence_bundle = dict(web_trace.pop("evidence_bundle", {}) or {})
         _add_timing(timings, "web_search_ms", web_timer)
         search_attempted = bool(search_query)
         searched = bool(search_results)
@@ -2550,9 +2857,9 @@ class HoloChatEngine:
         if search_results:
             enriched_message = (
                 f"{user_message}\n\n"
-                f"[BACKGROUND CONTEXT: The following search results were retrieved to help you answer. "
-                f"Use them silently — do not mention, quote, or reference that a search was performed. "
-                f"If the results are irrelevant to the question, ignore them entirely.]\n\n"
+                f"[ADMITTED WEB EVIDENCE: Use only relevant sources below for web-derived claims. "
+                f"Cite those claims inline with the supplied [S#] identifiers and never invent a source. "
+                f"If the evidence is insufficient or irrelevant, say so plainly.]\n\n"
                 f"{search_results}"
             )
 
@@ -2578,7 +2885,11 @@ class HoloChatEngine:
             holobrain_injection_plan=holobrain_injection_plan,
             gov_turn_plan_block="",
         )
-        if not incognito and session.holochat_state:
+        if (
+            not incognito
+            and session.holochat_state
+            and os.getenv("HOLOCHAT_EXPERIMENT_CONTEXT_MODE") != "control_packet_only"
+        ):
             holobrain_injection_plan = build_holobrain_injection_plan(
                 session.holochat_state,
                 thread_status=session.thread_status,
@@ -2681,6 +2992,13 @@ class HoloChatEngine:
                     raise RuntimeError(f"GovTurnPlan validation failed: {failures}")
                 candidate_plan_block = render_gov_turn_plan_for_worker(candidate_plan)
                 candidate_system_prompt = base_system_prompt + "\n\n" + candidate_plan_block
+                _record_worker_context_delivery(
+                    session=session,
+                    plan=candidate_plan,
+                    system_prompt=candidate_system_prompt,
+                    history=adapter_history,
+                    user_prompt=enriched_message,
+                )
                 candidate_context_budget = _runtime_context_budget(
                     session=session,
                     adapter_history=adapter_history,
@@ -2733,6 +3051,12 @@ class HoloChatEngine:
 
         response_text = "".join(accumulated)
         elapsed_ms = _elapsed_timer_ms(analyst_timer)
+        if session.worker_context_receipt:
+            session.worker_context_receipt = {
+                **session.worker_context_receipt,
+                "provider_reported_input_tokens": _safe_positive_int(in_tok),
+            }
+            context_budget["worker_context_receipt"] = dict(session.worker_context_receipt)
         _add_timing(timings, "analyst_ms", analyst_timer)
         failover = _analyst_failover_metadata(
             initial_adapter=initial_adapter,
@@ -2766,6 +3090,10 @@ class HoloChatEngine:
 
         release_decision = deterministic_visible_release(user_message, response_text)
         response_text = release_decision.text
+        response_text, web_citation_audit = admit_web_citations(
+            response_text,
+            session.web_evidence_bundle,
+        )
         if response_text:
             yield response_text
 
@@ -2788,17 +3116,30 @@ class HoloChatEngine:
         session.history.append({"role": "user",      "content": user_message})
         session.history.append({"role": "assistant",  "content": response_text})
 
+        memory_steward_trace = _advance_memory_steward(
+            session=session,
+            brain=self._brain,
+            capsule_id=capsule_id,
+            scope_id=scope_id,
+            user_message=user_message,
+            response_text=response_text,
+            gov_turn_plan=gov_turn_plan,
+            context_budget=context_budget,
+        )
+        context_budget["memory_steward"] = memory_steward_trace
+
         # Extract artifacts
         artifacts_saved = []
         if capsule_id and not incognito:
             artifacts_saved = _extract_and_save_artifacts(
-                self._brain, response_text, capsule_id, session.session_id, session.turn_count
+                self._brain, response_text, capsule_id, session.session_id, session.turn_count,
+                scope_id=scope_id,
             )
 
         # Link session on first turn
         if capsule_id and session.turn_count == 1 and not incognito:
-            self._brain.set_capsule_context(capsule_id, "last_session_id", session.session_id)
-            self._brain.append_session_history(capsule_id, session.session_id, user_message)
+            self._brain.set_capsule_context(capsule_id, "last_session_id", session.session_id, **({"scope_id": scope_id} if scope_id else {}))
+            self._brain.append_session_history(capsule_id, session.session_id, user_message, **({"scope_id": scope_id} if scope_id else {}))
 
         admitted_memory_updates = (
             _memory_updates_from_hologov_plan(gov_turn_plan, user_message=user_message)
@@ -2818,7 +3159,7 @@ class HoloChatEngine:
                         memory_admission = admit_advisor_memory_updates(proposed_updates)
                         updates = dict(memory_admission.value or {}) if memory_admission.admitted else {}
                     for key, value in updates.items():
-                        self._brain.set_capsule_context(capsule_id, key, value)
+                        self._brain.set_capsule_context(capsule_id, key, value, **({"scope_id": scope_id} if scope_id else {}))
                     if _claim_autocompact_for_context_window(
                         session,
                         capsule_id=capsule_id,
@@ -2829,14 +3170,15 @@ class HoloChatEngine:
                         consolidation_admission = admit_advisor_consolidation(proposed_result)
                         result = dict(consolidation_admission.value or {}) if consolidation_admission.admitted else {}
                         if result.get("session_note"):
-                            self._brain.save_consolidation(capsule_id, session.session_id, result["session_note"])
+                            self._brain.save_consolidation(capsule_id, session.session_id, result["session_note"], **({"scope_id": scope_id} if scope_id else {}))
                         if result.get("life_context"):
-                            self._brain.upsert_life_context(capsule_id, result["life_context"])
+                            self._brain.upsert_life_context(capsule_id, result["life_context"], **({"scope_id": scope_id} if scope_id else {}))
                         _save_thread_handoff_artifact(
                             self._brain,
                             capsule_id=capsule_id,
                             session=session,
                             consolidation=result,
+                            scope_id=scope_id,
                         )
                     if session.turn_count == 2:
                         if single_hologov_call:
@@ -2851,7 +3193,7 @@ class HoloChatEngine:
                             proposed_name = gov_advisor.name_session(list(session.history))
                         name_admission = admit_advisor_thread_name(proposed_name)
                         if name_admission.admitted and name_admission.value:
-                            self._brain.update_session_name(capsule_id, session.session_id, name_admission.value)
+                            self._brain.update_session_name(capsule_id, session.session_id, name_admission.value, **({"scope_id": scope_id} if scope_id else {}))
                 self._brain.save_chat_turn(
                     session_id    = session.session_id,
                     turn_number   = session.turn_count,
@@ -2860,6 +3202,7 @@ class HoloChatEngine:
                     provider      = adapter.provider,
                     temperature   = temperature,
                     capsule_id    = capsule_id,
+                    scope_id      = scope_id,
                 )
             except Exception as e:
                 logger.warning(f"Post-stream background task failed: {e}")
@@ -2913,6 +3256,7 @@ class HoloChatEngine:
                 response_text=response_text,
                 worker_identity=_adapter_identity_dict(adapter),
                 turn_number=session.turn_count,
+                worker_context_receipt=session.worker_context_receipt,
             ),
         )
         session.holochat_state = next_holobrain_state
@@ -2971,6 +3315,7 @@ class HoloChatEngine:
             holobrain_state_persisted=holobrain_state_persisted,
             gov_turn_plan=gov_turn_plan,
             visible_release_decision=release_decision,
+            web_citation_audit=web_citation_audit,
         )
 
         yield {
@@ -2986,6 +3331,8 @@ class HoloChatEngine:
             "searched":            searched,
             "search_query":        search_query if searched else None,
             "web_status":          web_status,
+            "web_sources":         _public_web_sources(session.web_evidence_bundle),
+            "web_citations":       web_citation_audit,
             "context_budget":      context_budget,
             "artifacts":           artifacts_saved,
             "handoff":             handoff,
@@ -2998,15 +3345,94 @@ class HoloChatEngine:
             **({"holo4dna": holo4dna_shadow.metadata} if holo4dna_shadow else {}),
         }
 
-    def get_history(self, session_id: str) -> Optional[List[Dict[str, str]]]:
+    def get_history(
+        self,
+        session_id: str,
+        *,
+        capsule_id: Optional[str] = None,
+        incognito: bool = False,
+        scope_id: Optional[str] = None,
+    ) -> Optional[List[Dict[str, str]]]:
         session = _sessions.get(session_id)
+        if session:
+            self._assert_session_owner(session, capsule_id, incognito, scope_id)
         return session.history if session else None
 
-    def clear_session(self, session_id: str) -> bool:
+    def clear_session(
+        self,
+        session_id: str,
+        *,
+        capsule_id: Optional[str] = None,
+        incognito: bool = False,
+        scope_id: Optional[str] = None,
+    ) -> bool:
         if session_id in _sessions:
+            self._assert_session_owner(_sessions[session_id], capsule_id, incognito, scope_id)
             del _sessions[session_id]
             return True
         return False
+
+    def checkpoint_memory_lifecycle(
+        self,
+        session_id: str,
+        lifecycle: str,
+        *,
+        capsule_id: Optional[str],
+        scope_id: Optional[str],
+    ) -> dict[str, Any]:
+        """Persist an explicit thread lifecycle boundary without a provider call."""
+        if not _memory_steward_enabled() or not capsule_id or not scope_id:
+            return {"enabled": False, "status": "disabled_or_unscoped"}
+        session = self.get_or_create_session(
+            session_id,
+            capsule_id=capsule_id,
+            scope_id=scope_id,
+        )
+        lifecycle_kind = {
+            "thread_open": MemoryLifecycleKind.THREAD_OPEN,
+            "thread_fork": MemoryLifecycleKind.THREAD_FORK,
+            "idle": MemoryLifecycleKind.IDLE,
+            "before_autocompact": MemoryLifecycleKind.BEFORE_AUTOCOMPACT,
+        }.get(str(lifecycle or "").strip().lower())
+        if lifecycle_kind is None:
+            raise ValueError("Unsupported memory lifecycle event")
+        return _checkpoint_memory_lifecycle(
+            session=session,
+            brain=self._brain,
+            capsule_id=capsule_id,
+            scope_id=scope_id,
+            lifecycle_kind=lifecycle_kind,
+        )
+
+    def checkpoint_idle_sessions(
+        self,
+        *,
+        idle_seconds: float,
+        now: Optional[float] = None,
+    ) -> list[dict[str, Any]]:
+        """Checkpoint in-memory signed-in sessions after an idle boundary."""
+        if not _memory_steward_enabled():
+            return []
+        cutoff_now = float(now if now is not None else time.time())
+        results: list[dict[str, Any]] = []
+        for session in list(_sessions.values()):
+            if (
+                session.incognito
+                or not session.owner_capsule_id
+                or not session.owner_scope_id
+                or cutoff_now - session.last_active < max(1.0, float(idle_seconds))
+            ):
+                continue
+            result = _checkpoint_memory_lifecycle(
+                session=session,
+                brain=self._brain,
+                capsule_id=session.owner_capsule_id,
+                scope_id=session.owner_scope_id,
+                lifecycle_kind=MemoryLifecycleKind.IDLE,
+            )
+            if result.get("status") not in {"no_delta", "disabled_or_unscoped"}:
+                results.append({"session_id": session.session_id, **result})
+        return results
 
 
 # ---------------------------------------------------------------------------
@@ -3049,6 +3475,8 @@ def _govturnplan_context_selection(
     holochat_state_block: Optional[str],
     holobrain_injection_plan: HoloBrainInjectionPlan,
     search_results: Optional[str],
+    retrieved_episodes: Optional[list[dict[str, Any]]] = None,
+    evidence_bundle: Optional[dict[str, Any]] = None,
 ) -> tuple[list[str], list[str], dict[str, str], list[dict[str, Any]], list[dict[str, Any]]]:
     selected = ["runtime_identity", "thread_health", "gov_arc_state", "user_message"]
     dropped: list[str] = []
@@ -3073,6 +3501,14 @@ def _govturnplan_context_selection(
     mark_context("latest_consolidation", bool(last_session), reason="empty", memory=True)
     mark_context("capsule_context", bool(capsule_context), reason="empty", memory=True)
     mark_context("thread_handoff_seed", bool(handoff_transition), reason="empty", memory=False)
+    for episode in retrieved_episodes or []:
+        episode_id = str(episode.get("episode_id") or "").strip()
+        if episode_id:
+            mark_context(f"episode:{episode_id}", True, reason="not_selected", memory=True)
+    for source in (evidence_bundle or {}).get("sources") or []:
+        source_id = str(source.get("source_id") or "").strip()
+        if source_id:
+            selected.append(f"evidence:{source_id}")
     if search_results:
         selected.append("web_results")
     else:
@@ -3399,6 +3835,11 @@ def _hologov_state_payload(state: Optional[HoloState]) -> dict[str, Any]:
         "hologov_control_ledger": dict(data.get("hologov_control_ledger") or {}),
         "gov_arc_state": dict(data.get("gov_arc_state") or {}),
         "thread_health": dict(data.get("thread_health") or {}),
+        "user_portrait": list(data.get("user_portrait") or []),
+        "topic_registry": list(data.get("topic_registry") or []),
+        "episode_registry": list(data.get("episode_registry") or []),
+        "evidence_ledger": list(data.get("evidence_ledger") or []),
+        "worker_context_receipt": dict(data.get("worker_context_receipt") or {}),
     }
 
 
@@ -3724,6 +4165,7 @@ def _hologov_control_ledger_from_plan(
     response_text: str = "",
     worker_identity: Optional[dict[str, Any]] = None,
     turn_number: int = 0,
+    worker_context_receipt: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """Persist admitted control state plus the completed visible turn."""
     if plan is None:
@@ -3743,11 +4185,18 @@ def _hologov_control_ledger_from_plan(
         "unresolved_questions",
         "contradictions",
         "key_anchors",
+        "user_portrait",
+        "episode_registry",
+        "evidence_ledger",
+        "evidence_bundle_hash",
+        "worker_context_receipt",
         "context_manifest",
         "worker_assignment",
         "rolling_summary",
     )
     ledger = {field: packet.get(field) for field in fields if packet.get(field) not in (None, "", [], {})}
+    if worker_context_receipt:
+        ledger["worker_context_receipt"] = dict(worker_context_receipt)
 
     def append_unique(items: list[Any], value: Any, *, limit: int) -> list[Any]:
         merged = list(items or [])
@@ -3821,6 +4270,292 @@ def _memory_updates_from_hologov_plan(
         candidates[key] = value
     admission = admit_advisor_memory_updates(candidates)
     return dict(admission.value or {}) if admission.admitted else {}
+
+
+_MEMORY_FORGET_RE = _re.compile(r"(?i)\b(?:forget|delete|remove|revoke|do not remember|don't remember)\b")
+_MEMORY_CORRECTION_RE = _re.compile(r"(?i)\b(?:correction|actually|that(?:'s| is) wrong|no longer true)\b")
+_MEMORY_COMMITMENT_RE = _re.compile(r"(?i)\b(?:i commit|i will|we commit|promise to)\b")
+_MEMORY_DECISION_RE = _re.compile(r"(?i)\b(?:i decided|we decided|the decision is|final decision)\b")
+
+
+def _memory_event_kind(user_message: str) -> MemoryEventKind:
+    if _MEMORY_FORGET_RE.search(user_message or ""):
+        return MemoryEventKind.FORGET_REQUEST
+    if _MEMORY_CORRECTION_RE.search(user_message or ""):
+        return MemoryEventKind.CORRECTION
+    if _MEMORY_COMMITMENT_RE.search(user_message or ""):
+        return MemoryEventKind.COMMITMENT
+    if _MEMORY_DECISION_RE.search(user_message or ""):
+        return MemoryEventKind.MAJOR_DECISION
+    return MemoryEventKind.NORMAL
+
+
+def _memory_steward_proposals(
+    plan: Optional[GovTurnPlan],
+    *,
+    user_message: str,
+    message_id: str,
+    user_sequence: int,
+) -> tuple[MemoryProposal, ...]:
+    provenance = MemoryProvenance(
+        message_ids=(message_id,),
+        sequence_numbers=(user_sequence,),
+        source="user",
+        excerpt_hash=stable_hash(user_message),
+    )
+    proposals: list[MemoryProposal] = []
+    updates = _memory_updates_from_hologov_plan(plan, user_message=user_message)
+    for key, value in updates.items():
+        proposals.append(MemoryProposal(
+            proposal_id=f"memory:{stable_hash({'key': key, 'value': value})[:24]}",
+            kind=MemoryProposalKind.FACT,
+            subject=key,
+            value=value,
+            provenance=provenance,
+            confidence=0.95,
+        ))
+
+    raw = (plan.narrative_packet or {}).get("memory_admission_proposals") if plan else []
+    for record in raw if isinstance(raw, list) else []:
+        if not isinstance(record, dict):
+            continue
+        operation = str(record.get("operation") or "").lower()
+        evidence = _compact_text(record.get("evidence"), limit=240)
+        target = _compact_text(record.get("target_memory_id") or record.get("target_key"), limit=160)
+        if not evidence or evidence.casefold() not in user_message.casefold() or not target:
+            continue
+        if operation in {"correct", "correction", "supersede", "replace"}:
+            value = _compact_text(record.get("value"), limit=500)
+            key = _compact_text(record.get("key") or target, limit=120)
+            if not value:
+                continue
+            proposals.append(MemoryProposal(
+                proposal_id=f"supersession:{stable_hash({'target': target, 'value': value, 'evidence': evidence})[:24]}",
+                kind=MemoryProposalKind.SUPERSESSION,
+                subject=key,
+                value=value if value.startswith("[FACT]") else f"[FACT] {value}",
+                provenance=provenance,
+                confidence=1.0,
+                target_memory_id=target,
+            ))
+            continue
+        if operation not in {"forget", "revoke", "delete"}:
+            continue
+        proposals.append(MemoryProposal(
+            proposal_id=f"revocation:{stable_hash({'target': target, 'evidence': evidence})[:24]}",
+            kind=MemoryProposalKind.REVOCATION,
+            subject=_compact_text(record.get("key") or target, limit=120),
+            value="user_requested_deletion",
+            provenance=provenance,
+            confidence=1.0,
+            target_memory_id=target,
+        ))
+    return tuple(proposals)
+
+
+def _memory_steward_enabled() -> bool:
+    return _truthy_env("HOLOCHAT_MEMORY_STEWARD_ENABLED")
+
+
+def _checkpoint_memory_lifecycle(
+    *,
+    session: ChatSession,
+    brain: Any,
+    capsule_id: str,
+    scope_id: str,
+    lifecycle_kind: MemoryLifecycleKind,
+) -> dict[str, Any]:
+    with _memory_steward_lock:
+        state = session.memory_steward_state
+        if state is None:
+            return {"enabled": True, "status": "no_delta", "lifecycle": lifecycle_kind.value}
+        transition = apply_lifecycle_event(
+            state,
+            MemoryLifecycleEvent(lifecycle_kind),
+        )
+        state = transition.state
+        checkpoint = state.pending_checkpoint
+        if checkpoint is None:
+            session.memory_steward_state = state
+            return {"enabled": True, "status": "no_delta", "lifecycle": lifecycle_kind.value}
+        if session.memory_steward_persistence_blocked:
+            session.memory_steward_state = state
+            return {
+                "enabled": True,
+                "status": "blocked_unresolved_urgent_memory",
+                "lifecycle": lifecycle_kind.value,
+                "checkpoint_id": checkpoint.checkpoint_id,
+            }
+        persister = getattr(brain, "persist_memory_checkpoint", None)
+        persistence_id = persister(
+            capsule_id=capsule_id,
+            scope_id=scope_id,
+            session_id=session.session_id,
+            payload=checkpoint_payload(checkpoint),
+        ) if callable(persister) else None
+        if persistence_id:
+            state = acknowledge_checkpoint(
+                state,
+                PersistenceAcknowledgement(
+                    checkpoint.checkpoint_id,
+                    checkpoint.idempotency_key,
+                    str(persistence_id),
+                    True,
+                ),
+            ).state
+        session.memory_steward_state = state
+        return {
+            "enabled": True,
+            "status": "persisted" if persistence_id else "persistence_failed",
+            "lifecycle": lifecycle_kind.value,
+            "checkpoint_id": checkpoint.checkpoint_id,
+            "watermark_sequence": state.durable.watermark.sequence,
+            "pending_checkpoint": state.pending_checkpoint is not None,
+        }
+
+
+def _advance_memory_steward(
+    *,
+    session: ChatSession,
+    brain: Any,
+    capsule_id: Optional[str],
+    scope_id: Optional[str],
+    user_message: str,
+    response_text: str,
+    gov_turn_plan: Optional[GovTurnPlan],
+    context_budget: dict[str, Any],
+) -> dict[str, Any]:
+    if not _memory_steward_enabled() or not capsule_id or not scope_id:
+        return {"enabled": False, "reason": "disabled_or_unscoped"}
+    state = session.memory_steward_state or initial_memory_steward_state(
+        session.session_id, "hologov-canonical"
+    )
+    lifecycle_triggers: tuple[Any, ...] = ()
+    if not session.memory_steward_open_checked:
+        opened = apply_lifecycle_event(
+            state,
+            MemoryLifecycleEvent(MemoryLifecycleKind.THREAD_OPEN),
+        )
+        state = opened.state
+        lifecycle_triggers = opened.triggers
+        session.memory_steward_open_checked = True
+    user_sequence = len(state.rolling.transcript) + 1
+    user_message_id = f"{session.session_id}:user:{session.turn_count}"
+    event_kind = _memory_event_kind(user_message)
+    proposals = _memory_steward_proposals(
+        gov_turn_plan,
+        user_message=user_message,
+        message_id=user_message_id,
+        user_sequence=user_sequence,
+    )
+    topic_events = list(((gov_turn_plan.narrative_packet or {}).get("topic_events") or []) if gov_turn_plan else [])
+    active_threads = list(((gov_turn_plan.narrative_packet or {}).get("active_threads") or []) if gov_turn_plan else [])
+    topic = _compact_text(active_threads[0].get("subject"), limit=120) if active_threads and isinstance(active_threads[0], dict) else None
+    transition = apply_exchange(
+        state,
+        MemoryTurnInput(
+            message_id=user_message_id,
+            role="user",
+            text=user_message,
+            input_tokens=estimate_context_tokens(user_message),
+            topic=topic,
+            topic_transition=bool(topic_events),
+            event_kind=event_kind,
+            proposals=proposals,
+        ),
+        MemoryTurnInput(
+            message_id=f"{session.session_id}:assistant:{session.turn_count}",
+            role="assistant",
+            text=response_text,
+            input_tokens=estimate_context_tokens(response_text),
+            topic=topic,
+        ),
+        CheckpointPolicy(),
+    )
+    state = transition.state
+    auto_compact_requested = should_auto_compact(
+        context_budget=context_budget,
+        thread_health_level=session.thread_health_level,
+        thread_health_score=session.thread_health_score,
+    )
+    if auto_compact_requested:
+        lifecycle = apply_lifecycle_event(
+            state,
+            MemoryLifecycleEvent(MemoryLifecycleKind.BEFORE_AUTOCOMPACT),
+        )
+        state = lifecycle.state
+        transition = lifecycle if lifecycle.checkpoint else transition
+
+    checkpoint = state.pending_checkpoint
+    persistence_id = None
+    unresolved_urgent = (
+        event_kind is MemoryEventKind.FORGET_REQUEST
+        and not any(proposal.kind is MemoryProposalKind.REVOCATION for proposal in proposals)
+    ) or (
+        event_kind is MemoryEventKind.CORRECTION
+        and not any(
+            proposal.kind in {MemoryProposalKind.FACT, MemoryProposalKind.SUPERSESSION}
+            for proposal in proposals
+        )
+    )
+    if unresolved_urgent:
+        session.memory_steward_persistence_blocked = True
+    elif session.memory_steward_persistence_blocked:
+        has_explicit_resolution = event_kind in {
+            MemoryEventKind.FORGET_REQUEST,
+            MemoryEventKind.CORRECTION,
+        } and any(
+            proposal.kind in {
+                MemoryProposalKind.REVOCATION,
+                MemoryProposalKind.FACT,
+                MemoryProposalKind.SUPERSESSION,
+            }
+            for proposal in proposals
+        )
+        session.memory_steward_persistence_blocked = not has_explicit_resolution
+    persister = getattr(brain, "persist_memory_checkpoint", None)
+    if (
+        checkpoint
+        and callable(persister)
+        and not unresolved_urgent
+        and not session.memory_steward_persistence_blocked
+    ):
+        persistence_id = persister(
+            capsule_id=capsule_id,
+            scope_id=scope_id,
+            session_id=session.session_id,
+            payload=checkpoint_payload(checkpoint),
+        )
+        if persistence_id:
+            state = acknowledge_checkpoint(
+                state,
+                PersistenceAcknowledgement(
+                    checkpoint.checkpoint_id,
+                    checkpoint.idempotency_key,
+                    str(persistence_id),
+                    True,
+                ),
+            ).state
+            session.memory_steward_persistence_blocked = False
+    session.memory_steward_state = state
+    trace = {
+        "enabled": True,
+        "event_kind": event_kind.value,
+        "triggers": [
+            trigger.value
+            for trigger in dict.fromkeys((*lifecycle_triggers, *transition.triggers))
+        ],
+        "checkpoint_id": checkpoint.checkpoint_id if checkpoint else None,
+        "idempotency_key": checkpoint.idempotency_key if checkpoint else None,
+        "persistence_acknowledged": bool(persistence_id),
+        "watermark_sequence": state.durable.watermark.sequence,
+        "pending_checkpoint": state.pending_checkpoint is not None,
+        "autocompact_permitted": not auto_compact_requested or state.pending_checkpoint is None,
+        "unresolved_urgent_memory_target": unresolved_urgent,
+        "persistence_blocked": session.memory_steward_persistence_blocked,
+    }
+    session.memory_steward_trace = trace
+    return trace
 
 
 def _admit_hologov_narrative_proposal(
@@ -4209,6 +4944,17 @@ def _gov_narrative_packet(
     omitted = _safe_positive_int(history_meta.get("omitted_history_messages"))
     state = session.holochat_state
     arc = session.gov_arc_state
+    episodes = [dict(item) for item in (session.retrieved_episodes or []) if isinstance(item, dict)][:8]
+    evidence_bundle = dict(session.web_evidence_bundle or {})
+    evidence_sources = [
+        {
+            key: item.get(key)
+            for key in ("source_id", "source_key", "title", "url", "domain", "published_at", "content_hash")
+            if item.get(key) is not None
+        }
+        for item in evidence_bundle.get("sources") or []
+        if isinstance(item, dict)
+    ][:12]
     previous_control = dict(getattr(state, "hologov_control_ledger", {}) or {})
     topic_state = _reconcile_topic_registry(
         baseline=previous_control,
@@ -4229,7 +4975,9 @@ def _gov_narrative_packet(
     if capsule_context or life_context:
         preserve.append("Use scoped HoloBrain context as secondary grounding for explicit preferences and durable boundaries.")
     if search_results:
-        preserve.append("Use admitted search results silently where relevant; do not perform source theater.")
+        preserve.append("Ground web-derived claims in the admitted evidence ledger and cite only supplied [S#] source IDs.")
+    if episodes:
+        preserve.append("Use selected episodes as provenance-bearing context; do not treat retrieval rank as truth or expose private retrieval mechanics.")
     reject = [
         "Reject scolding, gotcha framing, shame, sterile disclaimers, and bureaucratic distance.",
         "Reject false memory, hidden-profile theatrics, and claims of knowing private context beyond admitted memory.",
@@ -4280,6 +5028,9 @@ def _gov_narrative_packet(
         "resurfaced_threads": topic_state["resurfaced_threads"],
         "topic_events": topic_state["topic_events"],
         "worker_contributions": previous_control.get("worker_contributions") or [],
+        "episode_registry": episodes,
+        "evidence_ledger": evidence_sources,
+        "evidence_bundle_hash": evidence_bundle.get("bundle_hash"),
         "memory_admission_proposals": [],
         "user_portrait": (_capsule_portrait_lines(capsule_context) + _life_context_portrait_lines(life_context))[:12],
         "current_state_of_affairs": _compact_text(user_message, limit=360),
@@ -4301,11 +5052,16 @@ def _gov_narrative_packet(
             "raw_history_messages": history_meta.get("raw_history_messages"),
             "selected_history_messages": history_meta.get("bounded_history_messages"),
             "omitted_history_messages": omitted,
+            "selected_episode_ids": [item.get("episode_id") for item in episodes if item.get("episode_id")],
+            "episode_retrieval": dict(session.episode_retrieval_trace or {}),
+            "evidence_source_ids": [item.get("source_id") for item in evidence_sources if item.get("source_id")],
+            "episode_token_estimate": sum(int(item.get("token_estimate") or 0) for item in episodes),
+            "evidence_token_estimate": estimate_context_tokens(render_web_evidence(evidence_bundle)),
             "selection_rationale": "Full ordered history while it fits; otherwise preserve origins, relevant older evidence, explicit decisions/corrections, and recent turns.",
         },
         "worker_assignment": {
             "objective": _compact_text(user_message, limit=700),
-            "inspect": ["ordered conversation", "prior worker contributions", "settled decisions", "open questions"],
+            "inspect": ["ordered conversation", "selected episodes", "admitted evidence sources", "prior worker contributions", "settled decisions", "open questions"],
             "build_on": ["standing prior insights and evidence"],
             "challenge": ["unsupported or superseded claims"],
             "avoid": ["generic restart", "repeating settled ground", "inventing missing context"],
@@ -4357,6 +5113,8 @@ def _build_worker_gov_turn_plan(
         holochat_state_block=holochat_state_block,
         holobrain_injection_plan=holobrain_injection_plan,
         search_results=search_results,
+        retrieved_episodes=list(session.retrieved_episodes or []),
+        evidence_bundle=dict(session.web_evidence_bundle or {}),
     )
     contradiction_repairs: list[dict[str, Any]] = []
     if tenor_admission is not None and getattr(tenor_admission, "repaired", False):
@@ -4417,22 +5175,31 @@ def _build_worker_gov_turn_plan(
             failed_call_telemetry = dict(control_compilation_cache.get("failed_call_telemetry") or {})
         else:
             try:
-                synthesis = synthesize(
-                    ordered_history=provider_history,
-                    current_user_message=user_message,
-                    previous_state=_hologov_state_payload(session.holochat_state),
-                    capsule_context=capsule_context,
-                    life_context=life_context,
-                    latest_consolidation=last_session,
-                    worker_identity=current_worker,
-                    turn_policy={
+                synthesis_kwargs = {
+                    "ordered_history": provider_history,
+                    "current_user_message": user_message,
+                    "previous_state": _hologov_state_payload(session.holochat_state),
+                    "capsule_context": capsule_context,
+                    "life_context": life_context,
+                    "latest_consolidation": last_session,
+                    "worker_identity": current_worker,
+                    "turn_policy": {
                         "tier": getattr(turn_policy, "tier", "standard"),
                         "reasons": list(getattr(turn_policy, "reasons", ()) or ()),
                         "fallback_allowed": bool(getattr(turn_policy, "fallback_allowed", False)),
                     },
-                    history_metadata=history_metadata,
-                    turn_number=session.turn_count,
-                )
+                    "history_metadata": history_metadata,
+                    "turn_number": session.turn_count,
+                    "retrieved_episodes": list(session.retrieved_episodes or []),
+                    "web_evidence": dict(session.web_evidence_bundle or {}),
+                }
+                parameters = inspect.signature(synthesize).parameters
+                if not any(param.kind == inspect.Parameter.VAR_KEYWORD for param in parameters.values()):
+                    synthesis_kwargs = {
+                        key: value for key, value in synthesis_kwargs.items()
+                        if key in parameters
+                    }
+                synthesis = synthesize(**synthesis_kwargs)
                 if control_compilation_cache is not None:
                     control_compilation_cache.update({
                         "attempted": True,
@@ -4505,6 +5272,21 @@ def _build_worker_gov_turn_plan(
             "status": "degraded",
             "reason": control_compilation_telemetry.get("reason") or "control_compilation_unavailable",
         }
+    worker_history = _bounded_adapter_history(session.history, query_text=user_message)
+    worker_history_metadata = _provider_history_metadata(
+        worker_history,
+        total_history_messages=len(session.history),
+        raw_history=session.history,
+    )
+    context_receipt = build_worker_context_receipt(
+        history_metadata=worker_history_metadata,
+        selected_history=worker_history,
+        episodes=list(session.retrieved_episodes or []),
+        evidence_bundle=dict(session.web_evidence_bundle or {}),
+        gov_packet=narrative_packet,
+    )
+    narrative_packet["worker_context_receipt"] = context_receipt
+    narrative_packet.setdefault("context_manifest", {})["worker_context_receipt_hash"] = context_receipt["receipt_hash"]
     deep_directive = _compact_text(narrative_packet.get("next_worker_directive"), limit=5000)
     if deep_directive and deep_directive not in baton:
         baton = baton + "\n\nHOLOGOV CONTROL ASSIGNMENT:\n" + deep_directive
@@ -4530,6 +5312,7 @@ def _build_worker_gov_turn_plan(
             "web_search": bool(search_query or search_results),
             "authorized_tools": [tool.value for tool in _required_tools_for_turn(search_query, search_results)],
             "authorization_source": "deterministic_gov_kernel",
+            "holobrain_episode_retrieval": dict(session.episode_retrieval_trace or {}),
         },
         search_authorization={
             "authorized": bool(search_query),
@@ -4537,6 +5320,8 @@ def _build_worker_gov_turn_plan(
             "results_present": bool(search_results),
             "decision": web_trace.get("status"),
             "source": web_trace.get("source"),
+            "evidence_source_ids": list(web_trace.get("evidence_source_ids") or []),
+            "evidence_bundle_hash": web_trace.get("evidence_bundle_hash"),
         },
         voice_tone_constraints=[
             "No scolding, shame, gotcha, cold, curt, sterile, hostile, or prosecutorial posture.",
@@ -4575,6 +5360,33 @@ def _build_worker_gov_turn_plan(
             "hologov_control_compilation": control_compilation_telemetry,
         },
     )
+
+
+def _record_worker_context_delivery(
+    *,
+    session: ChatSession,
+    plan: GovTurnPlan,
+    system_prompt: str,
+    history: list[dict[str, str]],
+    user_prompt: str,
+) -> dict[str, Any]:
+    packet = dict(plan.narrative_packet or {})
+    packet.pop("worker_context_receipt", None)
+    receipt = build_worker_context_receipt(
+        history_metadata=_provider_history_metadata(
+            history,
+            total_history_messages=len(session.history),
+            raw_history=session.history,
+        ),
+        selected_history=history,
+        episodes=list(session.retrieved_episodes or []),
+        evidence_bundle=dict(session.web_evidence_bundle or {}),
+        gov_packet=packet,
+        actual_system_prompt=system_prompt,
+        actual_user_prompt=user_prompt,
+    )
+    session.worker_context_receipt = receipt
+    return receipt
 
 
 def _adapter_provider_name(adapter: Any) -> str:
@@ -4692,6 +5504,17 @@ def _govturnplan_budget_profile(
         "resurfaced_thread_count": len(narrative_packet.get("resurfaced_threads") or []),
         "topic_event_count": len(narrative_packet.get("topic_events") or []),
         "worker_contribution_count": len(narrative_packet.get("worker_contributions") or []),
+        "selected_episode_count": len(narrative_packet.get("episode_registry") or []),
+        "selected_episode_token_estimate": sum(
+            _safe_positive_int(item.get("token_estimate"))
+            for item in (narrative_packet.get("episode_registry") or [])
+            if isinstance(item, dict)
+        ),
+        "evidence_source_count": len(narrative_packet.get("evidence_ledger") or []),
+        "evidence_token_estimate": _safe_positive_int(
+            (narrative_packet.get("context_manifest") or {}).get("evidence_token_estimate")
+        ),
+        "worker_context_receipt": dict(narrative_packet.get("worker_context_receipt") or {}),
         "contradiction_count": len(narrative_packet.get("contradictions") or []),
         "context_selection_mode": (narrative_packet.get("context_manifest") or {}).get("selection_mode"),
         "rolling_summary_token_estimate": estimate_context_tokens(narrative_packet.get("rolling_summary") or ""),
@@ -4923,9 +5746,9 @@ def _runtime_context_budget(
             "block_name": "web_results",
             "content": (
                 "\n\n"
-                "[BACKGROUND CONTEXT: The following search results were retrieved to help you answer. "
-                "Use them silently — do not mention, quote, or reference that a search was performed. "
-                "If the results are irrelevant to the question, ignore them entirely.]\n\n"
+                "[ADMITTED WEB EVIDENCE: Use only relevant sources below for web-derived claims. "
+                "Cite those claims inline with the supplied [S#] identifiers and never invent a source. "
+                "If the evidence is insufficient or irrelevant, say so plainly.]\n\n"
                 f"{search_results}"
             ) if search_results else "",
             "included": bool(search_results),
@@ -4980,6 +5803,14 @@ def _runtime_context_budget(
         "token_estimate": plan.token_estimate,
     }
     ledger["hologov_packet"] = _govturnplan_budget_profile(gov_turn_plan, gov_turn_plan_block)
+    ledger["worker_context_receipt"] = dict(
+        session.worker_context_receipt
+        or (
+            ((gov_turn_plan.narrative_packet or {}).get("worker_context_receipt") or {})
+            if gov_turn_plan is not None
+            else {}
+        )
+    )
     ledger["history_context"] = provider_history_meta
     narrative_packet = (gov_turn_plan.narrative_packet or {}) if gov_turn_plan is not None else {}
     holobrain_projection = narrative_packet.get("holobrain_projection") or {}
@@ -5241,7 +6072,8 @@ def _capsule_context_for_depth_preference(context: dict) -> dict:
 
 
 def _extract_and_save_artifacts(
-    brain, response_text: str, capsule_id: str, session_id: str, turn_number: int
+    brain, response_text: str, capsule_id: str, session_id: str, turn_number: int,
+    *, scope_id: Optional[str] = None,
 ) -> list:
     """
     Scan response_text for ```html artifacts, save each to holo_artifacts.
@@ -5254,7 +6086,10 @@ def _extract_and_save_artifacts(
             continue
         title_match = _re.search(r'<title>([^<]*)</title>', content, _re.IGNORECASE)
         title = title_match.group(1).strip() if title_match else "Artifact"
-        aid = brain.save_artifact(capsule_id, session_id, turn_number, title, content)
+        aid = brain.save_artifact(
+            capsule_id, session_id, turn_number, title, content,
+            **({"scope_id": scope_id} if scope_id else {}),
+        )
         if aid:
             saved.append({
                 "artifact_id": aid,

@@ -6,7 +6,7 @@ one typed contract to enforce before enterprise scope switching is enabled.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import Enum
 from typing import Iterable, Optional
 
@@ -43,6 +43,27 @@ class AccessContext:
                 raise ValueError("enterprise access requires tenant_id and membership_id")
         elif self.tenant_id or self.membership_id:
             raise ValueError("personal access cannot carry enterprise membership authority")
+        if self.authz_version < 1:
+            raise ValueError("authz_version must be positive")
+
+    def for_session(self, session_id: Optional[str]) -> "AccessContext":
+        """Bind immutable request authority to one chat session."""
+        normalized = str(session_id or "").strip() or None
+        return replace(self, session_id=normalized)
+
+    def operator_metadata(self) -> dict[str, object]:
+        """Return private, structured authorization telemetry for operators."""
+        return {
+            "principal_id": self.principal_id,
+            "scope_id": self.scope_id,
+            "scope_kind": self.scope_kind.value,
+            "tenant_id": self.tenant_id,
+            "workspace_id": self.workspace_id,
+            "membership_id": self.membership_id,
+            "roles": list(self.roles),
+            "authz_version": self.authz_version,
+            "session_id": self.session_id,
+        }
 
 
 @dataclass(frozen=True)

@@ -1254,6 +1254,11 @@ def main() -> int:
     parser.add_argument("--disable-selective-context", action="store_true", help="Experiment condition C: retain bounded history and HoloGov control while disabling episode retrieval and state reseed.")
     parser.add_argument("--gov-output-tokens", type=int, default=None, help="Override the HoloGov control-packet output budget (800-12000; default 8000).")
     parser.add_argument("--turn-delay-sec", type=float, default=0.0, help="Pause this many seconds between turns.")
+    parser.add_argument(
+        "--fail-fast-health",
+        action="store_true",
+        help="Stop after the first HoloGov control fallback or worker-provider failover.",
+    )
     parser.add_argument("--no-minimax", action="store_true", help="Deprecated; MiniMax is already excluded.")
     parser.add_argument(
         "--respect-env",
@@ -1358,6 +1363,7 @@ def main() -> int:
         govtrace_file.write(f"- exact_private_input_included: {bool(args.trace_private_gov)}\n")
     summaries = []
     responses = []
+    health_fail_fast_triggered = None
     try:
         previous_response = ""
         for idx in range(1, total_turns + 1):
@@ -1425,6 +1431,25 @@ def main() -> int:
             if trace_file:
                 trace_file.write(json.dumps({"event": "turn", "summary": summary}, sort_keys=True) + "\n")
                 trace_file.flush()
+            if args.fail_fast_health:
+                control = (
+                    ((summary.get("memory_and_holobrain") or {}).get("hologov_packet") or {})
+                    .get("control_compilation") or {}
+                )
+                failover = summary.get("failover") or {}
+                if control.get("mode") != "hologov_control_compilation_v3" or failover.get("attempted"):
+                    health_fail_fast_triggered = {
+                        "turn": idx,
+                        "control_mode": control.get("mode"),
+                        "control_error_type": control.get("error_type"),
+                        "worker_failover_attempted": bool(failover.get("attempted")),
+                    }
+                    print(
+                        "SMOKE_STEP fail_fast_health "
+                        + json.dumps(health_fail_fast_triggered, sort_keys=True),
+                        flush=True,
+                    )
+                    break
             if args.turn_delay_sec > 0 and idx < len(messages):
                 time.sleep(args.turn_delay_sec)
 
@@ -1463,6 +1488,7 @@ def main() -> int:
             "transcript_md": str(Path(args.transcript_md).expanduser()) if args.transcript_md else None,
             "govtrace_md": str(Path(args.govtrace_md).expanduser()) if args.govtrace_md else None,
             "trace_private_gov": bool(args.trace_private_gov),
+            "health_fail_fast_triggered": health_fail_fast_triggered,
             "turns": summaries,
         }
         print(json.dumps(payload, indent=2, sort_keys=True))

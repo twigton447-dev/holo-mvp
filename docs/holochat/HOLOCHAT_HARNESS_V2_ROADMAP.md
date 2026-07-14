@@ -11,13 +11,15 @@ The product is strongest for long-running personal reasoning, project continuity
 
 ## Provider Web Search Study
 
-Official provider documentation reviewed on 2026-07-14:
+Official provider documentation snapshot reviewed on 2026-07-14:
 
-- OpenAI Responses API: hosted `web_search`, inline URL citations, complete source lists, domain filters, configurable search context, live/cached access control, and longer research token budgets.
-- Google Gemini: hosted `google_search` grounding, automatic query generation, URL citation annotations, and combined built-in/custom tools.
-- xAI: hosted `web_search`, citations, domain allow/exclude filters, image search, and Responses API compatibility.
-- DeepSeek: tool calling is documented, but no hosted web-search tool is documented. HoloChat should supply its own search function for DeepSeek workers.
-- Tavily: remains a useful provider-neutral retrieval backend and fallback, but must sit behind the same typed search contract as provider-native search.
+- [OpenAI Responses API web search](https://platform.openai.com/docs/guides/tools-web-search): hosted `web_search`, inline URL citations, complete source lists, domain filters, configurable search context, live/cached access control, and longer research token budgets.
+- [Google Gemini grounding with Google Search](https://ai.google.dev/gemini-api/docs/google-search): hosted `google_search` grounding, automatic query generation, URL citation annotations, and combined built-in/custom tools.
+- [xAI web search](https://docs.x.ai/docs/guides/tools/search-tools): hosted `web_search`, citations, domain allow/exclude filters, image search, and Responses API compatibility.
+- [DeepSeek tool calls](https://api-docs.deepseek.com/guides/function_calling): tool calling is documented, but no hosted web-search tool is documented. HoloChat supplies a HoloGov-selected custom search function for DeepSeek workers.
+- [Tavily Search API](https://docs.tavily.com/documentation/api-reference/endpoint/search): provider-neutral retrieval backend and fallback behind the same typed search contract as provider-native search.
+
+These links and capability statements are versioned by the snapshot date above. Re-review the official sources before changing provider request shapes or enabling a new capability.
 
 HoloChat must not copy a consumer chatbot's private search implementation. It can use the public provider APIs and reproduce the durable pattern: search planning, retrieval, source normalization, evidence selection, synthesis, citations, and release admission.
 
@@ -27,7 +29,7 @@ The canonical flow is:
 
 `User turn -> HoloGov SearchPlan -> SearchAdapter -> RetrievalBundle -> EvidenceSelection -> Worker -> CitationAdmission -> Visible release`
 
-HoloGov owns whether search is needed, the source policy, allowed domains, risk class, budget, and selected evidence. Search providers retrieve evidence; they do not become Gov authority.
+HoloGov owns whether search is needed, the ordered query list, allowed and excluded domains, risk class, result and tool budgets, live-versus-cached preference, and selected evidence. Search providers retrieve evidence; they do not become Gov authority. Unsupported preferences remain visible as provider limitations and are still enforced after retrieval where possible.
 
 Required adapter interface:
 
@@ -37,7 +39,7 @@ Required adapter interface:
 - `GeminiGroundingAdapter`
 - `CustomFunctionSearchAdapter` for DeepSeek and other providers
 
-Every adapter returns the same typed outcome: provider, status, queries, candidates, canonical URLs, source keys, passages, citations, latency, tool-call count, and error category. Retrieved text is always untrusted data.
+Every adapter returns the same typed outcome: provider, status, policy, queries, candidates, canonical URLs, source keys, passages, citations, latency, tool-call count, provider limitations, and error category. Existing adapters that only accept `search(query, max_results=...)` remain compatible while policy-aware adapters accept the typed `SearchPolicy`. Retrieved text is always untrusted data.
 
 ## Model Experiment Program
 

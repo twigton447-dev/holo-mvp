@@ -5,7 +5,7 @@ from uuid import uuid4
 
 import chat_engine
 import web_search
-from chat_engine import HoloChatEngine
+from chat_engine import HoloChatEngine, _deterministic_search_query
 from holo_context import HoloContextBuilder
 from holo_router import HoloRouter
 
@@ -102,6 +102,24 @@ class StaticSearchAdapter:
     def search(self, query, *, max_results):
         self.calls.append((query, max_results))
         return self.results
+
+
+def test_deterministic_search_requires_explicit_intent_or_volatile_fact_category():
+    assert _deterministic_search_query(
+        "Now use everything you know and tell me who I really am."
+    ) is None
+    assert _deterministic_search_query(
+        "That felt blunt. I want the truth right now, but keep it humane."
+    ) is None
+    assert _deterministic_search_query(
+        "A new worker arrived; preserve the conversation context."
+    ) is None
+    assert _deterministic_search_query(
+        "What is the weather in Seattle right now?"
+    ) == "What is the weather in Seattle right now?"
+    assert _deterministic_search_query(
+        "Search the web for official sources about this API."
+    ) == "Search the web for official sources about this API."
 
 
 def _patch_structured_search(monkeypatch, text):
@@ -292,6 +310,106 @@ def test_provider_neutral_run_uses_injected_adapter_and_structured_metadata():
     assert "[S1]" in run.rendered_text
 
 
+def test_hologov_search_policy_controls_queries_budgets_domains_and_telemetry():
+    class PolicyAwareAdapter:
+        provider = "policy-test"
+        limitations = ("cached_only_not_supported",)
+
+        def __init__(self):
+            self.calls = []
+
+        def is_configured(self):
+            return True
+
+        def search(self, query, *, max_results, policy):
+            self.calls.append((query, max_results, policy.risk_class))
+            domain = "allowed.example" if query == "first query" else "excluded.example"
+            return [web_search.SearchResult(
+                url=f"https://{domain}/{query.replace(' ', '-')}",
+                title=query,
+                snippet=f"Evidence for {query}",
+            )]
+
+    adapter = PolicyAwareAdapter()
+    policy = web_search.SearchPolicy(
+        queries=("first query", "second query", "third query"),
+        allowed_domains=("allowed.example", "excluded.example"),
+        excluded_domains=("excluded.example",),
+        risk_class="high",
+        result_budget=3,
+        tool_budget=2,
+        live_vs_cached="prefer_cached",
+    )
+
+    run = web_search.run_search("fallback query", adapter=adapter, policy=policy)
+
+    assert adapter.calls == [
+        ("first query", 3, "high"),
+        ("second query", 2, "high"),
+    ]
+    assert [result.url for result in run.results] == [
+        "https://allowed.example/first-query"
+    ]
+    assert run.tool_call_count == 2
+    assert run.provider_limitations == ["cached_only_not_supported"]
+    assert run.queries == ["first query", "second query", "third query"]
+    assert run.allowed_domains == ["allowed.example", "excluded.example"]
+    assert run.excluded_domains == ["excluded.example"]
+    assert run.risk_class == "high"
+    assert run.result_budget == 3
+    assert run.tool_budget == 2
+    assert run.live_vs_cached == "prefer_cached"
+    assert run.metadata()["queries"] == ["first query", "second query", "third query"]
+    assert run.metadata()["search_policy"] == {
+        "queries": ["first query", "second query", "third query"],
+        "allowed_domains": ["allowed.example", "excluded.example"],
+        "excluded_domains": ["excluded.example"],
+        "risk_class": "high",
+        "result_budget": 3,
+        "tool_budget": 2,
+        "live_vs_cached": "prefer_cached",
+    }
+
+
+def test_hologov_zero_budgets_prevent_fake_provider_calls():
+    class NoCallAdapter(StaticSearchAdapter):
+        def search(self, query, *, max_results):
+            raise AssertionError("zero Gov budget must prevent provider calls")
+
+    run = web_search.run_search(
+        "do not retrieve",
+        adapter=NoCallAdapter([]),
+        policy=web_search.SearchPolicy(result_budget=0, tool_budget=0),
+    )
+
+    assert run.outcome == "no_results"
+    assert run.result_budget == 0
+    assert run.tool_call_count == 0
+
+
+def test_openai_search_forwards_supported_policy_without_live_call():
+    client = FakeResponsesClient({"output": []})
+    policy = web_search.SearchPolicy(
+        allowed_domains=("docs.example",),
+        excluded_domains=("blocked.example",),
+        live_vs_cached="cached_only",
+    )
+
+    run = web_search.run_search(
+        "official docs",
+        adapter=web_search.OpenAIWebSearchAdapter(client=client, model="test"),
+        policy=policy,
+    )
+
+    assert client.calls[0]["tools"] == [{
+        "type": "web_search",
+        "filters": {"allowed_domains": ["docs.example"]},
+        "external_web_access": False,
+    }]
+    assert run.tool_call_count == 1
+    assert run.provider_limitations == ["excluded_domains_not_supported"]
+
+
 def test_no_provider_configuration_returns_missing_config_without_provider_call(monkeypatch):
     monkeypatch.delenv("TAVILY_API_KEY", raising=False)
 
@@ -478,7 +596,18 @@ def test_unknown_configured_provider_returns_explicit_outcome(monkeypatch):
 
 def test_deepseek_selection_uses_holochat_custom_retrieval_backend(monkeypatch):
     monkeypatch.setenv("HOLOCHAT_SEARCH_PROVIDER", "deepseek")
-    assert isinstance(web_search.build_search_adapter(), web_search.TavilySearchAdapter)
+    adapter = web_search.build_search_adapter()
+    assert isinstance(adapter, web_search.CustomFunctionSearchAdapter)
+    assert adapter.provider == "deepseek_custom_search"
+    assert adapter.is_configured() is False
+
+    run = web_search.run_search("current facts", adapter=adapter)
+    assert run.outcome == "missing_config"
+    assert run.tool_call_count == 0
+    assert run.provider_limitations == [
+        "hosted_web_search_not_available",
+        "custom_retrieval_function_required",
+    ]
 
 
 def test_frontend_has_web_checked_render_path():

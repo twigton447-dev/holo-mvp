@@ -8,10 +8,12 @@ older callers; it does not retain per-request state.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import inspect
 import logging
 import os
 from time import perf_counter
 from typing import Any, Callable, Mapping, Protocol, Sequence
+from urllib.parse import urlsplit
 
 from holochat_evidence import build_web_evidence_bundle, render_web_evidence
 
@@ -56,15 +58,58 @@ class SearchResult:
         return record
 
 
+@dataclass(frozen=True)
+class SearchPolicy:
+    """HoloGov-owned retrieval policy, independent of provider capabilities."""
+
+    queries: tuple[str, ...] = ()
+    allowed_domains: tuple[str, ...] = ()
+    excluded_domains: tuple[str, ...] = ()
+    risk_class: str = "standard"
+    result_budget: int = 5
+    tool_budget: int = 1
+    live_vs_cached: str = "provider_default"
+
+    def normalized(self, primary_query: str, default_result_budget: int) -> "SearchPolicy":
+        result_budget = default_result_budget if self.result_budget is None else self.result_budget
+        queries = tuple(dict.fromkeys(
+            query for item in (self.queries or (primary_query,))
+            if (query := str(item or "").strip())
+        ))
+        return SearchPolicy(
+            queries=queries,
+            allowed_domains=_normalize_domains(self.allowed_domains),
+            excluded_domains=_normalize_domains(self.excluded_domains),
+            risk_class=str(self.risk_class or "standard").strip() or "standard",
+            result_budget=max(0, int(result_budget)),
+            tool_budget=max(0, int(self.tool_budget)),
+            live_vs_cached=str(self.live_vs_cached or "provider_default").strip() or "provider_default",
+        )
+
+    def metadata(self) -> dict[str, Any]:
+        return {
+            "queries": list(self.queries),
+            "allowed_domains": list(self.allowed_domains),
+            "excluded_domains": list(self.excluded_domains),
+            "risk_class": self.risk_class,
+            "result_budget": self.result_budget,
+            "tool_budget": self.tool_budget,
+            "live_vs_cached": self.live_vs_cached,
+        }
+
+
 class SearchAdapter(Protocol):
-    """Adapter seam for Tavily and future native provider search APIs."""
+    """Provider transport; HoloGov retains policy and budget authority."""
 
     provider: str
+    limitations: Sequence[str]
 
     def is_configured(self) -> bool:
         ...
 
-    def search(self, query: str, *, max_results: int) -> Sequence[SearchResult]:
+    def search(
+        self, query: str, *, max_results: int, policy: SearchPolicy
+    ) -> Sequence[SearchResult]:
         ...
 
 
@@ -72,18 +117,23 @@ class TavilySearchAdapter:
     """The current default adapter; kept behind the provider-neutral seam."""
 
     provider = "tavily"
+    limitations = ("live_vs_cached_preference_not_supported",)
 
     def is_configured(self) -> bool:
         return bool(os.getenv("TAVILY_API_KEY"))
 
-    def search(self, query: str, *, max_results: int) -> Sequence[SearchResult]:
+    def search(
+        self, query: str, *, max_results: int, policy: SearchPolicy | None = None
+    ) -> Sequence[SearchResult]:
         # The key is accessed only when this adapter is actually invoked.
         from tavily import TavilyClient
 
-        response = TavilyClient(api_key=os.getenv("TAVILY_API_KEY")).search(
-            query=query,
-            max_results=max_results,
-        )
+        request: dict[str, Any] = {"query": query, "max_results": max_results}
+        if policy and policy.allowed_domains:
+            request["include_domains"] = list(policy.allowed_domains)
+        if policy and policy.excluded_domains:
+            request["exclude_domains"] = list(policy.excluded_domains)
+        response = TavilyClient(api_key=os.getenv("TAVILY_API_KEY")).search(**request)
         results: list[SearchResult] = []
         for item in response.get("results", []) or []:
             if not isinstance(item, dict):
@@ -109,6 +159,30 @@ def _field(value: Any, name: str, default: Any = None) -> Any:
     if isinstance(value, Mapping):
         return value.get(name, default)
     return getattr(value, name, default)
+
+
+def _normalize_domains(domains: Sequence[str]) -> tuple[str, ...]:
+    normalized: list[str] = []
+    for domain in domains or ():
+        value = str(domain or "").strip().lower().lstrip(".")
+        if "://" in value:
+            value = (urlsplit(value).hostname or "").lower()
+        if value and value not in normalized:
+            normalized.append(value)
+    return tuple(normalized)
+
+
+def _domain_matches(hostname: str, domain: str) -> bool:
+    return hostname == domain or hostname.endswith(f".{domain}")
+
+
+def _policy_allows_result(result: SearchResult, policy: SearchPolicy) -> bool:
+    hostname = (urlsplit(str(result.url or "")).hostname or "").lower()
+    if policy.allowed_domains and not any(
+        _domain_matches(hostname, domain) for domain in policy.allowed_domains
+    ):
+        return False
+    return not any(_domain_matches(hostname, domain) for domain in policy.excluded_domains)
 
 
 def _items(value: Any, path: str) -> list[Any]:
@@ -159,6 +233,7 @@ class OpenAIWebSearchAdapter:
     """OpenAI hosted web search through the Responses API."""
 
     provider = "openai_web_search"
+    limitations = ("excluded_domains_not_supported",)
 
     def __init__(self, *, client: Any = None, api_key: str | None = None, model: str | None = None):
         self._client = client
@@ -174,11 +249,20 @@ class OpenAIWebSearchAdapter:
             self._client = OpenAI(api_key=self._api_key or os.getenv("OPENAI_API_KEY"))
         return self._client
 
-    def search(self, query: str, *, max_results: int) -> Sequence[SearchResult]:
+    def search(
+        self, query: str, *, max_results: int, policy: SearchPolicy | None = None
+    ) -> Sequence[SearchResult]:
+        tool: dict[str, Any] = {"type": "web_search"}
+        if policy and policy.allowed_domains:
+            tool["filters"] = {"allowed_domains": list(policy.allowed_domains)}
+        if policy and policy.live_vs_cached in {"live_only", "prefer_live"}:
+            tool["external_web_access"] = True
+        elif policy and policy.live_vs_cached in {"cached_only", "prefer_cached"}:
+            tool["external_web_access"] = False
         response = self._get_client().responses.create(
             model=self._model,
             input=query,
-            tools=[{"type": "web_search"}],
+            tools=[tool],
             include=["web_search_call.action.sources"],
         )
         return _openai_response_sources(response)[:max_results]
@@ -188,6 +272,23 @@ class XAIWebSearchAdapter(OpenAIWebSearchAdapter):
     """xAI hosted web search through its Responses-compatible endpoint."""
 
     provider = "xai_web_search"
+    limitations = ("live_vs_cached_preference_not_supported",)
+
+    def search(
+        self, query: str, *, max_results: int, policy: SearchPolicy | None = None
+    ) -> Sequence[SearchResult]:
+        tool: dict[str, Any] = {"type": "web_search"}
+        if policy and policy.allowed_domains:
+            tool["allowed_domains"] = list(policy.allowed_domains)
+        if policy and policy.excluded_domains:
+            tool["excluded_domains"] = list(policy.excluded_domains)
+        response = self._get_client().responses.create(
+            model=self._model,
+            input=query,
+            tools=[tool],
+            include=["web_search_call.action.sources"],
+        )
+        return _openai_response_sources(response)[:max_results]
 
     def __init__(self, *, client: Any = None, api_key: str | None = None, model: str | None = None):
         super().__init__(client=client, api_key=api_key, model=model or os.getenv("XAI_SEARCH_MODEL", "grok-4.3"))
@@ -209,6 +310,11 @@ class GeminiGroundingAdapter:
     """Gemini Google Search grounding normalized to HoloChat evidence."""
 
     provider = "gemini_google_search"
+    limitations = (
+        "domain_filters_not_supported",
+        "live_vs_cached_preference_not_supported",
+        "result_budget_applied_after_grounding",
+    )
 
     def __init__(self, *, client: Any = None, api_key: str | None = None, model: str | None = None):
         self._client = client
@@ -228,7 +334,9 @@ class GeminiGroundingAdapter:
             )
         return self._client
 
-    def search(self, query: str, *, max_results: int) -> Sequence[SearchResult]:
+    def search(
+        self, query: str, *, max_results: int, policy: SearchPolicy | None = None
+    ) -> Sequence[SearchResult]:
         response = self._get_client().models.generate_content(
             model=self._model,
             contents=query,
@@ -259,18 +367,28 @@ class CustomFunctionSearchAdapter:
 
     def __init__(
         self,
-        search_function: Callable[[str, int], Sequence[SearchResult | dict[str, Any]]],
+        search_function: Callable[..., Sequence[SearchResult | dict[str, Any]]] | None = None,
         *,
         provider: str = "custom_function_search",
+        limitations: Sequence[str] = ("capabilities_declared_by_search_function",),
     ):
         self._search_function = search_function
         self.provider = provider
+        self.limitations = tuple(limitations)
 
     def is_configured(self) -> bool:
         return callable(self._search_function)
 
-    def search(self, query: str, *, max_results: int) -> Sequence[SearchResult]:
-        return _normalize_results(self._search_function(query, max_results))[:max_results]
+    def search(
+        self, query: str, *, max_results: int, policy: SearchPolicy | None = None
+    ) -> Sequence[SearchResult]:
+        if self._search_function is None:
+            return []
+        if policy is not None and _supports_keyword(self._search_function, "policy"):
+            raw_results = self._search_function(query, max_results, policy=policy)
+        else:
+            raw_results = self._search_function(query, max_results)
+        return _normalize_results(raw_results)[:max_results]
 
 
 def build_search_adapter(provider: str | None = None) -> SearchAdapter:
@@ -285,7 +403,13 @@ def build_search_adapter(provider: str | None = None) -> SearchAdapter:
         # DeepSeek exposes tool calling rather than hosted search. HoloChat
         # executes its provider-neutral retrieval function and gives the
         # normalized evidence back to the DeepSeek worker.
-        "deepseek": TavilySearchAdapter,
+        "deepseek": lambda: CustomFunctionSearchAdapter(
+            provider="deepseek_custom_search",
+            limitations=(
+                "hosted_web_search_not_available",
+                "custom_retrieval_function_required",
+            ),
+        ),
     }
     try:
         return factories[selected]()
@@ -307,11 +431,45 @@ class SearchRun:
     evidence_bundle: dict[str, Any] = field(default_factory=dict)
     text_override: str | None = None
     compatibility_mode: bool = False
+    policy: SearchPolicy = field(default_factory=SearchPolicy)
+    tool_call_count: int = 0
+    provider_limitations: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        self.policy = self.policy.normalized(self.query, self.policy.result_budget)
 
     @property
     def status(self) -> str:
         """Backward-friendly synonym for the explicit search outcome."""
         return self.outcome
+
+    @property
+    def queries(self) -> list[str]:
+        return list(self.policy.queries)
+
+    @property
+    def allowed_domains(self) -> list[str]:
+        return list(self.policy.allowed_domains)
+
+    @property
+    def excluded_domains(self) -> list[str]:
+        return list(self.policy.excluded_domains)
+
+    @property
+    def risk_class(self) -> str:
+        return self.policy.risk_class
+
+    @property
+    def result_budget(self) -> int:
+        return self.policy.result_budget
+
+    @property
+    def tool_budget(self) -> int:
+        return self.policy.tool_budget
+
+    @property
+    def live_vs_cached(self) -> str:
+        return self.policy.live_vs_cached
 
     @property
     def rendered_text(self) -> str:
@@ -333,6 +491,10 @@ class SearchRun:
             "result_count": self.result_count,
             "raw_result_count": len(self.results),
             "compatibility_mode": self.compatibility_mode,
+            "queries": self.queries,
+            "search_policy": self.policy.metadata(),
+            "tool_call_count": self.tool_call_count,
+            "provider_limitations": list(self.provider_limitations),
         }
 
     @classmethod
@@ -382,17 +544,39 @@ def _normalize_results(items: Sequence[SearchResult | dict[str, Any]]) -> list[S
     return normalized
 
 
+def _supports_keyword(callable_value: Callable[..., Any], keyword: str) -> bool:
+    try:
+        parameters = inspect.signature(callable_value).parameters.values()
+    except (TypeError, ValueError):
+        return False
+    return any(
+        parameter.kind == inspect.Parameter.VAR_KEYWORD or parameter.name == keyword
+        for parameter in parameters
+    )
+
+
+def _provider_limitations(adapter: Any) -> list[str]:
+    declared = getattr(adapter, "limitations", None)
+    if declared is None:
+        return ["adapter_did_not_declare_provider_limitations"]
+    return [str(item) for item in declared]
+
+
 def run_search(
     query: str,
     max_results: int = 5,
     *,
     adapter: SearchAdapter | None = None,
+    policy: SearchPolicy | None = None,
 ) -> SearchRun:
     """Run a search through an injectable adapter and return structured data."""
     try:
         selected_adapter = adapter or build_search_adapter()
     except ValueError:
         normalized_query = str(query or "").strip()
+        normalized_policy = (policy or SearchPolicy(result_budget=max(1, int(max_results)))).normalized(
+            normalized_query, max_results
+        )
         provider = str(os.getenv("HOLOCHAT_SEARCH_PROVIDER", "unknown") or "unknown")
         bundle = build_web_evidence_bundle(
             normalized_query, [], provider=provider, status="unsupported_provider",
@@ -405,12 +589,18 @@ def run_search(
             latency_ms=0,
             error_category="unsupported_provider",
             evidence_bundle=bundle,
+            policy=normalized_policy,
+            provider_limitations=["provider_not_recognized"],
         )
     provider = str(getattr(selected_adapter, "provider", "unknown") or "unknown")
     normalized_query = str(query or "").strip()
+    normalized_policy = (policy or SearchPolicy(result_budget=max(1, int(max_results)))).normalized(
+        normalized_query, max_results
+    )
+    limitations = _provider_limitations(selected_adapter)
     started_at = perf_counter()
 
-    if not normalized_query:
+    if not normalized_policy.queries:
         bundle = build_web_evidence_bundle(
             normalized_query, [], provider=provider, status="no_results", error_category="empty_query"
         )
@@ -421,6 +611,8 @@ def run_search(
             latency_ms=0,
             error_category="empty_query",
             evidence_bundle=bundle,
+            policy=normalized_policy,
+            provider_limitations=limitations,
         )
 
     configured = getattr(selected_adapter, "is_configured", None)
@@ -439,12 +631,29 @@ def run_search(
             latency_ms=int((perf_counter() - started_at) * 1000),
             error_category="missing_config",
             evidence_bundle=bundle,
+            policy=normalized_policy,
+            provider_limitations=limitations,
         )
 
+    tool_call_count = 0
     try:
-        raw_results = _normalize_results(
-            selected_adapter.search(normalized_query, max_results=max(1, int(max_results)))
-        )
+        provider_results: list[SearchResult] = []
+        for planned_query in normalized_policy.queries[:normalized_policy.tool_budget]:
+            remaining = normalized_policy.result_budget - len(provider_results)
+            if remaining <= 0:
+                break
+            tool_call_count += 1
+            search_kwargs: dict[str, Any] = {"max_results": remaining}
+            if _supports_keyword(selected_adapter.search, "policy"):
+                search_kwargs["policy"] = normalized_policy
+            provider_results.extend(_normalize_results(
+                selected_adapter.search(planned_query, **search_kwargs)
+            ))
+        provider_results = _dedupe_search_results(provider_results)
+        raw_results = [
+            result for result in provider_results
+            if _policy_allows_result(result, normalized_policy)
+        ][:normalized_policy.result_budget]
     except Exception as exc:
         error_type = type(exc).__name__
         logger.warning("Web search provider failed (%s).", error_type)
@@ -463,9 +672,15 @@ def run_search(
             error_category="provider_error",
             error_type=error_type,
             evidence_bundle=bundle,
+            policy=normalized_policy,
+            tool_call_count=tool_call_count,
+            provider_limitations=limitations,
         )
 
-    if not raw_results:
+    if provider_results and not raw_results:
+        outcome = "all_rejected"
+        error_category = "all_rejected"
+    elif not raw_results:
         outcome = "no_results"
         error_category = "no_results"
     else:
@@ -496,6 +711,9 @@ def run_search(
         results=raw_results,
         error_category=error_category,
         evidence_bundle=bundle,
+        policy=normalized_policy,
+        tool_call_count=tool_call_count,
+        provider_limitations=limitations,
     )
 
 

@@ -60,6 +60,7 @@ def test_default_scope_is_the_principals_personal_scope():
     assert access.scope_id == "personal-a"
     assert access.scope_kind is ScopeKind.PERSONAL
     assert access.principal_id == "principal-a"
+    assert access.workspace_id is None
 
 
 def test_active_membership_authorizes_enterprise_scope_with_server_roles():
@@ -69,6 +70,7 @@ def test_active_membership_authorizes_enterprise_scope_with_server_roles():
     assert access.membership_id == "member-a"
     assert access.roles == ("member", "researcher")
     assert access.authz_version == 4
+    assert access.workspace_id is None
 
 
 def test_other_personal_scope_and_inactive_enterprise_membership_are_denied():
@@ -83,3 +85,11 @@ def test_client_cannot_invent_a_scope_or_unmapped_capsule():
         _store().resolve("cap-a", "made-up")
     with pytest.raises(ScopeResolutionError, match="no principal mapping"):
         _store().resolve("cap-unknown")
+
+
+def test_malformed_membership_authority_is_denied():
+    store = _store()
+    store._client.tables["holo_tenant_memberships"][0]["roles"] = "member"
+
+    with pytest.raises(ScopeResolutionError, match="authority is invalid"):
+        store.resolve("cap-a", "work-a")

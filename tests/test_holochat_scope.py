@@ -31,6 +31,28 @@ def test_enterprise_access_requires_server_resolved_membership():
         AccessContext("p1", "tenant-a", ScopeKind.ENTERPRISE, tenant_id="a")
 
 
+def test_session_binding_preserves_private_authorization_context():
+    access = AccessContext(
+        "p1", "work-a", ScopeKind.ENTERPRISE,
+        tenant_id="tenant-a", workspace_id=None, membership_id="membership-a",
+        roles=("member", "researcher"), authz_version=4,
+    ).for_session("session-a")
+
+    assert access.session_id == "session-a"
+    assert access.workspace_id is None
+    assert access.operator_metadata() == {
+        "principal_id": "p1",
+        "scope_id": "work-a",
+        "scope_kind": "enterprise",
+        "tenant_id": "tenant-a",
+        "workspace_id": None,
+        "membership_id": "membership-a",
+        "roles": ["member", "researcher"],
+        "authz_version": 4,
+        "session_id": "session-a",
+    }
+
+
 def test_records_and_sessions_are_immutable_to_one_scope():
     access = _personal()
     own = ScopedRecord(

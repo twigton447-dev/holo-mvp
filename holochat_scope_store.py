@@ -37,8 +37,13 @@ class HoloChatScopeStore:
         if not mapping:
             raise ScopeResolutionError("capsule has no principal mapping")
 
-        principal_id = str(mapping["principal_id"])
-        scope_id = str(requested_scope_id or mapping["personal_scope_id"])
+        principal_id = str(mapping.get("principal_id") or "").strip()
+        personal_scope_id = str(mapping.get("personal_scope_id") or "").strip()
+        if not principal_id or not personal_scope_id:
+            raise ScopeResolutionError("capsule principal mapping is invalid")
+        scope_id = str(requested_scope_id or personal_scope_id).strip()
+        if not scope_id:
+            raise ScopeResolutionError("scope is unavailable")
         scope = self._one(
             "holo_scopes",
             "scope_id, scope_kind, owner_principal_id, tenant_id, disabled_at",
@@ -54,6 +59,7 @@ class HoloChatScopeStore:
                 principal_id=principal_id,
                 scope_id=scope_id,
                 scope_kind=ScopeKind.PERSONAL,
+                workspace_id=None,
             )
 
         if scope.get("scope_kind") != ScopeKind.ENTERPRISE.value or not scope.get("tenant_id"):
@@ -68,12 +74,26 @@ class HoloChatScopeStore:
         )
         if not membership:
             raise ScopeResolutionError("active enterprise membership is required")
+        membership_id = str(membership.get("membership_id") or "").strip()
+        roles = membership.get("roles")
+        try:
+            authz_version = int(membership.get("authz_version"))
+        except (TypeError, ValueError):
+            raise ScopeResolutionError("enterprise membership authority is invalid")
+        if (
+            not membership_id
+            or not isinstance(roles, (list, tuple))
+            or any(not str(role).strip() for role in roles)
+            or authz_version < 1
+        ):
+            raise ScopeResolutionError("enterprise membership authority is invalid")
         return AccessContext(
             principal_id=principal_id,
             scope_id=scope_id,
             scope_kind=ScopeKind.ENTERPRISE,
             tenant_id=tenant_id,
-            membership_id=str(membership["membership_id"]),
-            roles=tuple(str(role) for role in (membership.get("roles") or [])),
-            authz_version=int(membership.get("authz_version") or 1),
+            workspace_id=None,
+            membership_id=membership_id,
+            roles=tuple(str(role).strip() for role in roles),
+            authz_version=authz_version,
         )

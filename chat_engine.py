@@ -1161,12 +1161,24 @@ def _captain_brief_block(tenor: Optional[str]) -> str:
     )
 
 
-_CURRENT_INFO_RE = _re.compile(
+_EXPLICIT_SEARCH_RE = _re.compile(
+    r"\b(search(?:\s+the)?\s+web|web\s+search|browse(?:\s+the)?\s+web|"
+    r"look\s+(?:it|this|that)\s+up|find\s+(?:me\s+)?(?:current\s+)?sources?)\b",
+    _re.IGNORECASE,
+)
+_VOLATILE_INFO_RE = _re.compile(
     r"\b("
-    r"today|tonight|currently|current|latest|recent|right now|now|new|news|"
-    r"price|prices|stock|stocks|weather|forecast|score|scores|schedule|"
-    r"ceo|president|released|available|outage|down|online|updated"
+    r"news|headlines?|price|prices|stock|stocks|weather|forecast|"
+    r"score|scores|standings|schedule|ceo|president|prime minister|"
+    r"released|release date|availability|outage|service status|updated"
     r")\b",
+    _re.IGNORECASE,
+)
+_CURRENT_FACT_RE = _re.compile(
+    r"\b(latest|current|currently|recent|today|tonight|right now)\b"
+    r".{0,48}\b(deploy(?:ment)?|status|version|release|update|news|headlines?|"
+    r"price|stock|weather|forecast|score|standings|schedule|outage|"
+    r"ceo|president|prime minister|availability)\b",
     _re.IGNORECASE,
 )
 
@@ -1180,7 +1192,11 @@ def _compact_text(value: Any, *, limit: int = 160) -> str:
 
 def _deterministic_search_query(user_message: str) -> Optional[str]:
     text = (user_message or "").strip()
-    if not text or not _CURRENT_INFO_RE.search(text):
+    if not text or not (
+        _EXPLICIT_SEARCH_RE.search(text)
+        or _VOLATILE_INFO_RE.search(text)
+        or _CURRENT_FACT_RE.search(text)
+    ):
         return None
     return _compact_text(text, limit=180)
 

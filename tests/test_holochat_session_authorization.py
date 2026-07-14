@@ -306,7 +306,7 @@ def test_durable_owner_is_checked_before_history_restore():
     assert brain.history_loads == []
 
 
-def test_hybrid_scope_is_server_resolved_and_passed_to_engine(monkeypatch):
+def test_hybrid_scope_is_server_resolved_and_passed_to_engine(monkeypatch, caplog):
     client, engine = _client(monkeypatch, owner="capsule-a")
     main._capsule_brain._client = object()
     main._capsule_brain.get_chat_session = lambda session_id: {
@@ -325,10 +325,12 @@ def test_hybrid_scope_is_server_resolved_and_passed_to_engine(monkeypatch):
             return AccessContext(
                 "principal-a", "work-a", ScopeKind.ENTERPRISE,
                 tenant_id="tenant-a", membership_id="member-a",
+                workspace_id=None, roles=("member", "researcher"), authz_version=4,
             )
 
     monkeypatch.setattr(main, "HoloChatScopeStore", Resolver)
     monkeypatch.setenv("HOLOCHAT_HYBRID_SCOPES_ENABLED", "1")
+    caplog.set_level("INFO", logger="holo.main")
 
     response = client.post(
         "/v1/chat",
@@ -343,6 +345,22 @@ def test_hybrid_scope_is_server_resolved_and_passed_to_engine(monkeypatch):
     assert response.status_code == 200
     assert engine.send_calls[0][2]["scope_id"] == "work-a"
     assert engine.send_calls[0][2]["capsule_id"] == "capsule-a"
+    assert "principal_id" not in response.json()
+    assert "membership_id" not in response.json()
+    assert any(
+        getattr(record, "holochat_access", None) == {
+            "principal_id": "principal-a",
+            "scope_id": "work-a",
+            "scope_kind": "enterprise",
+            "tenant_id": "tenant-a",
+            "workspace_id": None,
+            "membership_id": "member-a",
+            "roles": ["member", "researcher"],
+            "authz_version": 4,
+            "session_id": "work-session",
+        }
+        for record in caplog.records
+    )
 
 
 def test_scope_selection_is_rejected_until_hybrid_schema_is_enabled(monkeypatch):

@@ -87,6 +87,9 @@ class ScopedFakeBrain(FakeBrain):
 
 
 class _PrivateMetadataChatEngine:
+    def __init__(self, turn_cost=0.0175):
+        self.turn_cost = turn_cost
+
     def _result(self):
         return {
             "session_id": "session-1",
@@ -96,7 +99,14 @@ class _PrivateMetadataChatEngine:
             "thread_health_level": "GREEN",
             "elapsed_ms": 4,
             "tokens": {"input": 10, "output": 2},
-            "runtime": {"gov_turn_plan": {"narrative_packet": {"private": "memory"}}},
+            "runtime": {
+                "gov_turn_plan": {"narrative_packet": {"private": "memory"}},
+                "cost_breakdown": {"turn_estimated_cost_usd": self.turn_cost},
+                "selected_analyst": {"provider": "fake-worker", "model": "fake-worker-v1"},
+                "context_telemetry": {
+                    "gov_model": {"provider": "fake-gov", "model": "fake-gov-v1"},
+                },
+            },
             "context_budget": {"worker_context_receipt": {"receipt_hash": "private"}},
             "usage": {"estimated_cost_usd": 1.0},
             "holo4dna": {"trace": "private"},
@@ -147,6 +157,8 @@ def test_chat_api_does_not_return_private_runtime_by_default(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_EXPOSE_PRIVATE_RUNTIME", raising=False)
     monkeypatch.setenv("HOLO_API_KEY", "test-api-key")
     monkeypatch.setattr(main, "_chat_engine", _PrivateMetadataChatEngine())
+    tracked = []
+    monkeypatch.setattr(main, "_track_usage", lambda *args, **kwargs: tracked.append((args, kwargs)))
     client = TestClient(main.app)
 
     response = client.post(
@@ -162,6 +174,13 @@ def test_chat_api_does_not_return_private_runtime_by_default(monkeypatch):
     assert "context_budget" not in body
     assert "usage" not in body
     assert "holo4dna" not in body
+    assert tracked[0][1]["cost_usd"] == 0.0175
+    assert tracked[0][1]["worker_identity"] == {
+        "provider": "fake-worker", "model": "fake-worker-v1",
+    }
+    assert tracked[0][1]["hologov_identity"] == {
+        "provider": "fake-gov", "model": "fake-gov-v1",
+    }
 
 
 def test_stream_api_filters_private_runtime_and_tracks_usage(monkeypatch):
@@ -186,6 +205,24 @@ def test_stream_api_filters_private_runtime_and_tracks_usage(monkeypatch):
     assert tracked[0][0][1:3] == ("/v1/chat/stream", 200)
     assert tracked[0][1]["input_tokens"] == 10
     assert tracked[0][1]["output_tokens"] == 2
+    assert tracked[0][1]["cost_usd"] == 0.0175
+
+
+def test_chat_usage_telemetry_keeps_unknown_complete_cost_explicit():
+    telemetry = main._chat_usage_telemetry({
+        "usage": {"estimated_cost_usd": 0.01},
+        "runtime": {
+            "cost_breakdown": {"turn_estimated_cost_usd": None},
+            "selected_analyst": {"provider": "fake-worker", "model": "unpriced"},
+            "context_telemetry": {
+                "gov_model": {"provider": "fake-gov", "model": "unpriced"},
+            },
+        },
+    })
+
+    assert telemetry["cost_usd"] is None
+    assert telemetry["worker_identity"]["provider"] == "fake-worker"
+    assert telemetry["hologov_identity"]["provider"] == "fake-gov"
 
 
 def test_holobrain_endpoint_requires_auth(monkeypatch):

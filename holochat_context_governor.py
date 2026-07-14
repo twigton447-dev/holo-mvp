@@ -40,6 +40,7 @@ REQUIRED_STATE_FIELDS = (
 DEFAULT_RESEED_CHAR_LIMIT = 3600
 DEFAULT_ROLLING_SUMMARY_LIMIT = 16000
 DEFAULT_HOLOBRAIN_INJECTION_CHAR_LIMIT = 2400
+DEFAULT_WORKER_NARRATIVE_PACKET_TOKEN_LIMIT = 4500
 
 
 class HoloBrainInjectionMode(str, Enum):
@@ -391,7 +392,17 @@ def validate_gov_turn_plan(plan: GovTurnPlan) -> dict[str, Any]:
     worker_provider = _provider_name(plan.worker_provider_selection)
     advisor_fallback = bool(plan.fallback_eligibility.get("advisor_fallback_allowed"))
     worker_fallback_active = bool(plan.fallback_eligibility.get("worker_fallback_active"))
-    if advisor_provider in FALLBACK_ONLY_ADVISOR_PROVIDERS and not advisor_fallback:
+    minimax_is_private_hologov = (
+        advisor_provider == "minimax"
+        and plan.advisor_provider_selection.get("role") == "hologov_control_proposal_source"
+        and plan.advisor_provider_selection.get("authority") == "proposal_only"
+        and plan.advisor_provider_selection.get("visible_worker_eligible") is False
+    )
+    if (
+        advisor_provider in FALLBACK_ONLY_ADVISOR_PROVIDERS
+        and not advisor_fallback
+        and not minimax_is_private_hologov
+    ):
         failures.append("minimax_advisor_without_fallback_eligibility")
     if worker_provider in FALLBACK_ONLY_ADVISOR_PROVIDERS and not worker_fallback_active:
         failures.append("minimax_worker_without_active_fallback")
@@ -597,12 +608,275 @@ def build_gov_turn_plan(
     return replace(plan, telemetry=telemetry_with_hash, kernel_validation_result=validation)
 
 
+def project_gov_narrative_packet_for_worker(
+    packet: dict[str, Any] | None,
+    *,
+    token_limit: int | None = None,
+) -> dict[str, Any]:
+    """Render canonical HoloGov state as a bounded, evidence-first worker brief.
+
+    The complete ledger remains private canonical state. Fresh workers receive
+    the parts needed to reason well without recursively ingesting operator-only
+    bookkeeping or full prior worker responses already present in raw history.
+    """
+    source = dict(packet or {})
+    limit = token_limit or _int_env(
+        "HOLOCHAT_WORKER_GOV_PACKET_MAX_TOKENS",
+        DEFAULT_WORKER_NARRATIVE_PACKET_TOKEN_LIMIT,
+    )
+
+    def texts(
+        name: str,
+        *,
+        count: int,
+        char_limit: int,
+        prefer_recent: bool = False,
+    ) -> list[str]:
+        values: list[str] = []
+        raw = list(source.get(name) or [])
+        selected = raw[-count:] if prefer_recent else raw
+        for item in selected:
+            text = sanitize_text(item, limit=char_limit)
+            if text and text not in values:
+                values.append(text)
+            if len(values) >= count:
+                break
+        return values
+
+    def records(
+        name: str,
+        *,
+        count: int,
+        fields: tuple[str, ...],
+        char_limit: int = 360,
+        prefer_recent: bool = False,
+    ) -> list[dict[str, Any]]:
+        raw = [item for item in source.get(name) or [] if isinstance(item, dict)]
+        selected = raw[-count:] if prefer_recent else raw[:count]
+        projected: list[dict[str, Any]] = []
+        for item in selected:
+            clean: dict[str, Any] = {}
+            for field_name in fields:
+                value = item.get(field_name)
+                if isinstance(value, list):
+                    clean_values = [
+                        text
+                        for entry in value[:8]
+                        if (text := sanitize_text(entry, limit=180))
+                    ]
+                    if clean_values:
+                        clean[field_name] = clean_values
+                elif isinstance(value, (bool, int, float)):
+                    clean[field_name] = value
+                else:
+                    text = sanitize_text(value, limit=char_limit)
+                    if text:
+                        clean[field_name] = text
+            if clean:
+                projected.append(clean)
+        return projected
+
+    def bounded_mapping(
+        value: dict[str, Any] | None,
+        *,
+        max_keys: int = 16,
+        max_items: int = 8,
+        text_limit: int = 360,
+    ) -> dict[str, Any]:
+        def visit(item: Any, depth: int) -> Any:
+            if depth >= 3:
+                return sanitize_text(item, limit=text_limit)
+            if isinstance(item, dict):
+                clean: dict[str, Any] = {}
+                for raw_key, raw_value in list(item.items())[:max_keys]:
+                    key = sanitize_text(raw_key, limit=60)
+                    if key:
+                        clean[key] = visit(raw_value, depth + 1)
+                return clean
+            if isinstance(item, (list, tuple)):
+                return [visit(entry, depth + 1) for entry in list(item)[:max_items]]
+            if isinstance(item, (bool, int, float)) or item is None:
+                return item
+            return sanitize_text(item, limit=text_limit)
+
+        bounded = visit(value or {}, 0)
+        return bounded if isinstance(bounded, dict) else {}
+
+    ledger = texts("chronological_ledger", count=12, char_limit=360)
+    raw_ledger = list(source.get("chronological_ledger") or [])
+    if len(raw_ledger) > 12:
+        ledger = [
+            *[sanitize_text(item, limit=360) for item in raw_ledger[:2]],
+            *[sanitize_text(item, limit=360) for item in raw_ledger[-10:]],
+        ]
+        ledger = [item for item in ledger if item]
+
+    contributions: list[dict[str, Any]] = []
+    for item in [entry for entry in source.get("worker_contributions") or [] if isinstance(entry, dict)][-6:]:
+        note = sanitize_text(item.get("hologov_note") or item.get("contribution"), limit=480)
+        if not note:
+            continue
+        contributions.append({
+            "turn": item.get("turn"),
+            "worker": sanitize_text(item.get("worker"), limit=80),
+            "standing_contribution": note,
+            "status": sanitize_text(item.get("status"), limit=40),
+        })
+
+    projected = {
+        "packet_source": sanitize_text(source.get("packet_source"), limit=80),
+        "control_health": bounded_mapping(source.get("control_health") or {}, max_keys=8, max_items=4),
+        "gov_role": sanitize_text(source.get("gov_role"), limit=420),
+        "worker_context_contract": sanitize_text(source.get("worker_context_contract"), limit=420),
+        "holobrain_operator": sanitize_text(source.get("holobrain_operator"), limit=420),
+        "holobrain_scope": sanitize_text(source.get("holobrain_scope"), limit=420),
+        "conversation_phase": sanitize_text(source.get("conversation_phase"), limit=40),
+        "current_state_of_affairs": sanitize_text(source.get("current_state_of_affairs"), limit=1800),
+        "rolling_summary": sanitize_text(source.get("rolling_summary"), limit=8000),
+        "narrative_arc": sanitize_text(source.get("narrative_arc"), limit=2400),
+        "active_tension": sanitize_text(source.get("active_tension"), limit=1000),
+        "user_portrait": texts("user_portrait", count=12, char_limit=500, prefer_recent=True),
+        "key_anchors": texts("key_anchors", count=12, char_limit=320),
+        "settled_decisions": texts("settled_decisions", count=12, char_limit=420),
+        "unresolved_questions": texts("unresolved_questions", count=10, char_limit=420),
+        "chronological_ledger": ledger,
+        "active_threads": records(
+            "active_threads",
+            count=6,
+            fields=("id", "subject", "summary", "importance", "origin_turn", "last_turn"),
+        ),
+        "relevant_parked_threads": records(
+            "parked_threads",
+            count=4,
+            fields=("id", "subject", "summary", "importance", "origin_turn", "last_turn"),
+            prefer_recent=True,
+        ),
+        "resurfaced_threads": records(
+            "resurfaced_threads",
+            count=4,
+            fields=("id", "subject", "prior_turn", "reason"),
+            prefer_recent=True,
+        ),
+        "worker_contributions": contributions,
+        "contradictions": records(
+            "contradictions",
+            count=8,
+            fields=("claim_a", "claim_b", "status", "source_turns"),
+            prefer_recent=True,
+        ),
+        "episode_registry": records(
+            "episode_registry",
+            count=6,
+            fields=("episode_id", "source_type", "source_id", "summary", "selection_reason", "token_estimate"),
+        ),
+        "evidence_ledger": records(
+            "evidence_ledger",
+            count=8,
+            fields=("source_id", "source_key", "title", "url", "domain", "published_at", "content_hash"),
+        ),
+        "holobrain_projection": bounded_mapping(
+            source.get("holobrain_projection") or {},
+            max_keys=16,
+            max_items=8,
+            text_limit=420,
+        ),
+        "context_manifest": bounded_mapping(
+            source.get("context_manifest") or {},
+            max_keys=16,
+            max_items=8,
+            text_limit=360,
+        ),
+        "context_pressure": bounded_mapping(source.get("context_pressure") or {}, max_keys=12, max_items=6),
+        "confidence_notes": texts("confidence_notes", count=8, char_limit=320),
+        "preserve": texts("preserve", count=10, char_limit=420),
+        "reject": texts("reject", count=8, char_limit=420),
+        "worker_assignment": bounded_mapping(
+            source.get("worker_assignment") or {},
+            max_keys=10,
+            max_items=8,
+            text_limit=600,
+        ),
+        "next_worker_directive": sanitize_text(source.get("next_worker_directive"), limit=2400),
+    }
+    projected = {key: value for key, value in projected.items() if value not in (None, "", [], {})}
+
+    if _estimate_tokens(json.dumps(projected, sort_keys=True, default=str)) > limit:
+        projected.pop("relevant_parked_threads", None)
+        projected.pop("confidence_notes", None)
+        projected["worker_contributions"] = contributions[-3:]
+        projected["chronological_ledger"] = ledger[:2] + ledger[-6:]
+        projected["user_portrait"] = projected.get("user_portrait", [])[:8]
+        projected["key_anchors"] = projected.get("key_anchors", [])[:8]
+    if _estimate_tokens(json.dumps(projected, sort_keys=True, default=str)) > limit:
+        projected.pop("chronological_ledger", None)
+        projected.pop("worker_contributions", None)
+        projected["rolling_summary"] = sanitize_text(source.get("rolling_summary"), limit=6000)
+        projected["narrative_arc"] = sanitize_text(source.get("narrative_arc"), limit=1600)
+        projected["next_worker_directive"] = sanitize_text(source.get("next_worker_directive"), limit=1600)
+        projected = {key: value for key, value in projected.items() if value not in (None, "", [], {})}
+    if _estimate_tokens(json.dumps(projected, sort_keys=True, default=str)) > limit:
+        projected = {
+            "control_health": bounded_mapping(source.get("control_health") or {}, max_keys=8, max_items=4),
+            "conversation_phase": sanitize_text(source.get("conversation_phase"), limit=40),
+            "current_state_of_affairs": sanitize_text(source.get("current_state_of_affairs"), limit=800),
+            "rolling_summary": sanitize_text(source.get("rolling_summary"), limit=max(800, limit * 2)),
+            "active_tension": sanitize_text(source.get("active_tension"), limit=500),
+            "user_portrait": texts("user_portrait", count=6, char_limit=240),
+            "key_anchors": texts("key_anchors", count=6, char_limit=200),
+            "active_threads": records(
+                "active_threads",
+                count=3,
+                fields=("id", "subject", "summary", "importance"),
+                char_limit=240,
+            ),
+            "holobrain_projection": bounded_mapping(
+                source.get("holobrain_projection") or {},
+                max_keys=8,
+                max_items=4,
+                text_limit=240,
+            ),
+            "worker_assignment": bounded_mapping(
+                source.get("worker_assignment") or {},
+                max_keys=8,
+                max_items=5,
+                text_limit=320,
+            ),
+            "next_worker_directive": sanitize_text(source.get("next_worker_directive"), limit=800),
+        }
+        projected = {key: value for key, value in projected.items() if value not in (None, "", [], {})}
+    if _estimate_tokens(json.dumps(projected, sort_keys=True, default=str)) > limit:
+        for optional_key in (
+            "holobrain_projection",
+            "key_anchors",
+            "user_portrait",
+            "active_threads",
+            "active_tension",
+            "worker_assignment",
+            "control_health",
+        ):
+            projected.pop(optional_key, None)
+            if _estimate_tokens(json.dumps(projected, sort_keys=True, default=str)) <= limit:
+                break
+    if _estimate_tokens(json.dumps(projected, sort_keys=True, default=str)) > limit:
+        projected = {
+            "current_state_of_affairs": sanitize_text(source.get("current_state_of_affairs"), limit=600),
+            "rolling_summary": sanitize_text(source.get("rolling_summary"), limit=max(80, limit * 3)),
+            "next_worker_directive": sanitize_text(source.get("next_worker_directive"), limit=500),
+        }
+        projected = {key: value for key, value in projected.items() if value}
+        while projected and _estimate_tokens(json.dumps(projected, sort_keys=True, default=str)) > limit:
+            longest_key = max(projected, key=lambda key: len(str(projected[key])))
+            text = str(projected[longest_key])
+            if len(text) <= 80:
+                projected.pop(longest_key)
+            else:
+                projected[longest_key] = sanitize_text(text, limit=max(80, len(text) // 2))
+    return projected
+
+
 def render_gov_turn_plan_for_worker(plan: GovTurnPlan) -> str:
     payload = plan.model_dump()
-    worker_packet = dict(payload["narrative_packet"])
-    # The receipt measures the delivered prompt and therefore cannot be part of
-    # the prompt it hashes. Keep it private in operator/state telemetry.
-    worker_packet.pop("worker_context_receipt", None)
+    worker_packet = project_gov_narrative_packet_for_worker(payload["narrative_packet"])
     public_packet = {
         "turn_id": payload["turn_id"],
         "route": payload["route"],
@@ -861,6 +1135,20 @@ def deterministic_visible_release(
         _VISIBLE_STERILE_RE.match(text)
         or _VISIBLE_HOSTILE_POSTURE_RE.search(text)
     ):
+        safe_parts = [
+            part.strip()
+            for part in re.split(r"(?<=[.!?])\s+|\n+", text)
+            if part.strip()
+            and not _VISIBLE_STERILE_RE.match(part.strip())
+            and not _VISIBLE_HOSTILE_POSTURE_RE.search(part)
+        ]
+        if safe_parts:
+            return GovVisibleReleaseDecision(
+                release=True,
+                text="\n\n".join(safe_parts),
+                reason="deterministic_constitutional_tone_repair_preserved_safe_substance",
+                repaired=True,
+            )
         return GovVisibleReleaseDecision(
             release=True,
             text=(

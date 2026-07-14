@@ -48,6 +48,7 @@ from holochat_context_governor import (
     deterministic_visible_release,
     has_meaningful_holobrain_delta,
     load_state_from_capsule_context,
+    project_gov_narrative_packet_for_worker,
     render_gov_turn_plan_for_worker,
     should_auto_compact,
     stable_hash,
@@ -85,6 +86,7 @@ from llm_adapters import (
     GovernorAdapter,
     load_adapters,
     load_fast_adapters,
+    load_holochat_governor_adapters,
 )
 from project_brain import ProjectBrain
 import web_search
@@ -241,11 +243,24 @@ FRONTIER_RUNTIME_PROFILES = {"frontier_active", "legacy_frontier"}
 DEFAULT_HOLOCHAT_MODEL_PROVIDERS = ("openai", "xai")
 FALLBACK_HOLOCHAT_MODEL_PROVIDERS: set[str] = set()
 DISABLED_HOLOCHAT_MODEL_PROVIDERS = {"minimax"}
-CANONICAL_HOLOCHAT_MODEL_BY_PROVIDER = {
-    "openai": "gpt-5.5",
-    "xai": "grok-4.3",
+HOLOCHAT_MODEL_TIER_ENV = "HOLOCHAT_MODEL_TIER"
+# Visible intelligence stays frontier by default. Cost containment now belongs
+# in the private HoloGov provider seat, not in the worker rotation.
+DEFAULT_HOLOCHAT_MODEL_TIER = "frontier"
+HOLOCHAT_MODEL_BY_TIER = {
+    "economy": {
+        "openai": "gpt-5.4-mini",
+        "xai": "grok-4.3",
+    },
+    "frontier": {
+        "openai": "gpt-5.5",
+        "xai": "grok-4.3",
+    },
 }
-CANONICAL_HOLOCHAT_GOV_PROVIDER = "openai"
+# Compatibility name for code/tests that refer to the intended frontier law.
+CANONICAL_HOLOCHAT_MODEL_BY_PROVIDER = HOLOCHAT_MODEL_BY_TIER["frontier"]
+CANONICAL_HOLOCHAT_GOV_PROVIDER = "minimax"
+CANONICAL_HOLOCHAT_GOV_PROVIDERS = (CANONICAL_HOLOCHAT_GOV_PROVIDER,)
 DEFAULT_THREAD_HANDOFF_MIN_TURNS = 24
 THREAD_HANDOFF_FORCE_SCORE = 5
 # Preserve the original HoloChat behavior for normal-length threads: workers and
@@ -316,7 +331,9 @@ _BALANCED_GOV_ESCALATION_TERMS = (
 _STATIC_CHAT_PRICING_VERSION = "official_public_pricing_2026-07-14"
 _STATIC_CHAT_PRICING_USD_PER_M_TOKEN: dict[tuple[str, str], tuple[float, float]] = {
     ("openai", "gpt-5.5"): (5.00, 30.00),
+    ("openai", "gpt-5.4-mini"): (0.75, 4.50),
     ("xai", "grok-4.3"): (1.25, 2.50),
+    ("minimax", "MiniMax-M2.7-highspeed"): (0.60, 2.40),
 }
 
 THREAD_HANDOFF_MESSAGE = "This thread is getting long. Start a fresh thread to keep Holo sharp."
@@ -335,8 +352,34 @@ def _holochat_experiment_mode() -> bool:
     return _truthy_env("HOLOCHAT_EXPERIMENT_MODE") and _holochat_allow_noncanonical_policy()
 
 
+def _holochat_model_tier() -> str:
+    """Select the approved HC cost tier without relaxing provider policy."""
+    configured = str(os.getenv(HOLOCHAT_MODEL_TIER_ENV, DEFAULT_HOLOCHAT_MODEL_TIER)).strip().lower()
+    if not _holochat_experiment_mode():
+        if configured != DEFAULT_HOLOCHAT_MODEL_TIER:
+            logger.warning(
+                "Ignoring noncanonical %s=%s outside experiment mode; using %s",
+                HOLOCHAT_MODEL_TIER_ENV,
+                configured,
+                DEFAULT_HOLOCHAT_MODEL_TIER,
+            )
+        return DEFAULT_HOLOCHAT_MODEL_TIER
+    if configured in HOLOCHAT_MODEL_BY_TIER:
+        return configured
+    logger.warning(
+        "Unknown %s=%s; using %s",
+        HOLOCHAT_MODEL_TIER_ENV,
+        configured,
+        DEFAULT_HOLOCHAT_MODEL_TIER,
+    )
+    return DEFAULT_HOLOCHAT_MODEL_TIER
+
+
 def _single_hologov_call_enabled(runtime_profile: str) -> bool:
     """Canonical HoloChat uses one provider-backed HoloGov compilation per turn."""
+    canonical = str(runtime_profile or "").strip().lower() == CANONICAL_RUNTIME_PROFILE
+    if canonical and not _holochat_experiment_mode():
+        return True
     configured = os.getenv("HOLOCHAT_SINGLE_GOV_CALL")
     if configured is not None:
         return str(configured).strip().lower() in {"1", "true", "yes", "on"}
@@ -357,7 +400,7 @@ def _holochat_runtime_profile() -> str:
     runtime_profile = (os.getenv("HOLOCHAT_RUNTIME_PROFILE") or DEFAULT_RUNTIME_PROFILE).strip().lower()
     if runtime_profile in LEGACY_CANONICAL_RUNTIME_PROFILES:
         return DEFAULT_RUNTIME_PROFILE
-    if runtime_profile != DEFAULT_RUNTIME_PROFILE and not _holochat_allow_noncanonical_policy():
+    if runtime_profile != DEFAULT_RUNTIME_PROFILE and not _holochat_experiment_mode():
         logger.warning(
             "HoloChat canonical runtime policy forced %s; ignored HOLOCHAT_RUNTIME_PROFILE=%s",
             DEFAULT_RUNTIME_PROFILE,
@@ -369,7 +412,7 @@ def _holochat_runtime_profile() -> str:
 
 def _holochat_model_providers() -> tuple[str, ...]:
     raw = os.getenv("HOLOCHAT_MODEL_PROVIDERS")
-    if raw is None or not _holochat_allow_noncanonical_policy():
+    if raw is None or not _holochat_experiment_mode():
         return DEFAULT_HOLOCHAT_MODEL_PROVIDERS
     providers = tuple(
         provider.strip().lower()
@@ -390,9 +433,10 @@ def _normalize_holochat_model_policy(adapters: list[Any]) -> list[Any]:
     if _holochat_experiment_mode():
         logger.warning("HoloChat experiment mode active; using explicit runner model IDs.")
         return adapters
+    model_policy = HOLOCHAT_MODEL_BY_TIER[_holochat_model_tier()]
     for adapter in adapters:
         provider = str(getattr(adapter, "provider", "") or "").strip().lower()
-        canonical_model = CANONICAL_HOLOCHAT_MODEL_BY_PROVIDER.get(provider)
+        canonical_model = model_policy.get(provider)
         if not canonical_model:
             continue
         current_model = getattr(adapter, "model_id", getattr(adapter, "model", None))
@@ -890,6 +934,8 @@ def _positive_int_env(name: str, default: int, *, minimum: int = 0) -> int:
 
 
 def _hologov_control_compilation_enabled() -> bool:
+    if not _holochat_experiment_mode():
+        return True
     raw = os.getenv(
         "HOLOCHAT_GOV_CONTROL_PACKET_ENABLED",
         os.getenv("HOLOCHAT_DEEP_GOV_ENABLED", "1"),
@@ -1485,11 +1531,11 @@ def _estimated_input_tokens(
     provider_input_tokens: Any,
 ) -> tuple[int, str]:
     budget_tokens = _context_budget_input_estimate(context_budget)
-    if budget_tokens:
-        return budget_tokens, "context_budget_estimate"
     input_tokens = _safe_positive_int(provider_input_tokens)
     if input_tokens:
         return input_tokens, "provider_usage"
+    if budget_tokens:
+        return budget_tokens, "context_budget_estimate"
     return 0, "unavailable"
 
 
@@ -1508,6 +1554,81 @@ def _estimate_turn_cost_usd(
         (output_tokens / 1_000_000) * output_per_m
     )
     return round(estimated, 6), "static_pricing_estimate"
+
+
+def _holochat_turn_cost_breakdown(
+    *,
+    worker_usage: Optional[dict[str, Any]],
+    gov_turn_plan: Optional[GovTurnPlan],
+    failover: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    """Estimate every model charge in one visible HoloChat turn."""
+    worker_usage = dict(worker_usage or {})
+    worker_cost = worker_usage.get("estimated_cost_usd")
+    control = {}
+    if gov_turn_plan is not None:
+        control = dict(
+            ((gov_turn_plan.telemetry or {}).get("hologov_control_compilation") or {})
+        )
+    gov_calls: list[dict[str, Any]] = []
+    provider = str(control.get("provider") or "").strip().lower()
+    model = str(control.get("model") or "").strip()
+    input_tokens = _safe_positive_int(control.get("input_tokens"))
+    output_tokens = _safe_positive_int(control.get("output_tokens"))
+    if provider and model:
+        cost, source = _estimate_turn_cost_usd(provider, model, input_tokens, output_tokens)
+        gov_calls.append({
+            "provider": provider,
+            "model": model,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+            "estimated_cost_usd": cost,
+            "cost_source": source,
+            "call_role": "hologov_fallback" if control.get("gov_fallback") else "hologov_primary",
+        })
+    fallback = control.get("gov_fallback") or {}
+    if fallback.get("active"):
+        primary = fallback.get("primary") or {}
+        primary_usage = fallback.get("primary_usage") or {}
+        primary_provider = str(primary.get("provider") or "").strip().lower()
+        primary_model = str(primary.get("model") or "").strip()
+        primary_input = _safe_positive_int(primary_usage.get("input_tokens"))
+        primary_output = _safe_positive_int(primary_usage.get("output_tokens"))
+        if primary_provider and primary_model and (primary_input or primary_output):
+            cost, source = _estimate_turn_cost_usd(
+                primary_provider,
+                primary_model,
+                primary_input,
+                primary_output,
+            )
+            gov_calls.insert(0, {
+                "provider": primary_provider,
+                "model": primary_model,
+                "input_tokens": primary_input,
+                "output_tokens": primary_output,
+                "estimated_cost_usd": cost,
+                "cost_source": source,
+                "call_role": "hologov_failed_primary",
+            })
+    gov_costs = [call.get("estimated_cost_usd") for call in gov_calls]
+    all_gov_costs_known = bool(gov_calls) and all(value is not None for value in gov_costs)
+    known_gov_cost = sum(float(value) for value in gov_costs if value is not None)
+    unpriced_failed_attempts = list((failover or {}).get("skipped") or [])
+    all_turn_costs_known = all_gov_costs_known and not unpriced_failed_attempts
+    return {
+        "worker_estimated_cost_usd": worker_cost,
+        "hologov_estimated_cost_usd": round(known_gov_cost, 6) if all_gov_costs_known else None,
+        "turn_estimated_cost_usd": (
+            round(float(worker_cost) + known_gov_cost, 6)
+            if worker_cost is not None and all_turn_costs_known
+            else None
+        ),
+        "hologov_calls": gov_calls,
+        "unpriced_failed_attempts": unpriced_failed_attempts,
+        "estimate": True,
+        "pricing_version": _STATIC_CHAT_PRICING_VERSION,
+        "pricing_note": "Uses provider-reported tokens when available; exact billing may differ.",
+    }
 
 
 def _turn_usage_metadata(
@@ -1637,6 +1758,11 @@ def _turn_runtime_metadata(
         }
     if usage is not None:
         metadata["usage"] = usage
+        metadata["cost_breakdown"] = _holochat_turn_cost_breakdown(
+            worker_usage=usage,
+            gov_turn_plan=gov_turn_plan,
+            failover=failover,
+        )
     if failover is not None:
         metadata["failover"] = failover
     if governor_trace is not None:
@@ -1676,6 +1802,7 @@ def _runtime_metadata(
     frontier_assist_enabled = balanced and bool(bench_pool)
     return {
         "runtime_profile": runtime_profile,
+        "model_tier": "experiment" if _holochat_experiment_mode() else _holochat_model_tier(),
         "active_pool": _adapter_pool_metadata(active_pool),
         "bench_pool": _adapter_pool_metadata(bench_pool),
         "frontier_enabled": not canonical_only,
@@ -1704,10 +1831,11 @@ def _select_runtime_pools(
         active_pool = _filter_holochat_enabled_adapters(
             _normalize_holochat_model_policy(_call_pool_loader(fast_loader, provider_allowlist))
         )
-        if not active_pool:
+        active_providers = {str(getattr(adapter, "provider", "")).lower() for adapter in active_pool}
+        if active_providers != set(DEFAULT_HOLOCHAT_MODEL_PROVIDERS):
             raise RuntimeError(
-                "HoloChat canonical runtime has no worker adapters; "
-                "frontier fallback is disabled."
+                "HoloChat canonical runtime requires both OpenAI and xAI worker adapters; "
+                f"available={sorted(active_providers)}; frontier fallback is disabled."
             )
         return runtime_profile, active_pool, []
     if runtime_profile == BALANCED_RUNTIME_PROFILE:
@@ -1807,10 +1935,38 @@ class HoloChatEngine:
             self._adapters,
             self._bench,
         )
-        advisor_pool = _rotation_analyst_adapters(self._adapters)
-        fixed_governor = (os.getenv("HOLOCHAT_GOV_PROVIDER") or "openai").strip().lower() or None
+        gov_provider_pool = load_holochat_governor_adapters(
+            provider_allowlist=(None if _holochat_experiment_mode() else CANONICAL_HOLOCHAT_GOV_PROVIDERS),
+        )
+        advisor_pool = gov_provider_pool
+        if not advisor_pool:
+            raise RuntimeError(
+                "HoloChat runtime has no private HoloGov adapter; refusing to reuse a visible worker provider."
+            )
+        configured_governor = (
+            os.getenv("HOLOCHAT_GOV_PROVIDER") or CANONICAL_HOLOCHAT_GOV_PROVIDER
+        ).strip().lower() or CANONICAL_HOLOCHAT_GOV_PROVIDER
+        fixed_governor = (
+            configured_governor
+            if _holochat_experiment_mode()
+            else CANONICAL_HOLOCHAT_GOV_PROVIDER
+        )
+        if configured_governor != fixed_governor:
+            logger.warning(
+                "Ignoring noncanonical HOLOCHAT_GOV_PROVIDER=%s outside experiment mode; using %s",
+                configured_governor,
+                fixed_governor,
+            )
         self._gov_advisor = GovernorAdapter(advisor_pool, fixed_governor=fixed_governor) # provider advisor; deterministic HoloGov admits its proposals
         self._governor = self._gov_advisor  # legacy test/API alias; not canonical authority
+        self._runtime_info["hologov_pool"] = _adapter_pool_metadata(advisor_pool)
+        self._runtime_info["hologov_policy"] = {
+            "primary_provider": fixed_governor,
+            "fallback_mode": "local_deterministic_kernel",
+            "provider_retry_allowed": False,
+            "visible_worker_eligible": False,
+            "proposal_authority": "deterministic_kernel_admission_required",
+        }
         self._brain    = ProjectBrain()
         self._holo_context_builder = HoloContextBuilder()
         self._holo_router = None
@@ -3652,6 +3808,25 @@ def _holobrain_worker_projection(
     injection_plan: HoloBrainInjectionPlan,
 ) -> dict[str, Any]:
     """Build the only HoloBrain projection a visible worker may receive."""
+    restricted_mode = injection_plan.mode in {
+        HoloBrainInjectionMode.NONE,
+        HoloBrainInjectionMode.HASHES_ONLY,
+        HoloBrainInjectionMode.ARTIFACT_REFS,
+    }
+    if restricted_mode:
+        return {
+            "authority": "HoloGov-selected worker projection; no raw HoloBrain library access",
+            "injection_mode": injection_plan.mode.value,
+            "injection_reason": injection_plan.reason,
+            "state_hash": injection_plan.state_hash,
+            "durable_context": [],
+            "latest_session": {},
+            "source_counts": {
+                "capsule_keys_available": len(capsule_context or {}),
+                "life_entries_available": len(life_context or []),
+                "durable_items_admitted": 0,
+            },
+        }
     portrait: list[str] = []
     for item in _capsule_portrait_lines(capsule_context, limit=10) + _life_context_portrait_lines(life_context, limit=10):
         if item not in portrait:
@@ -3825,9 +4000,58 @@ def _holobrain_stewardship_plan(
 
 
 _ACCUSATORY_HOLOGOV_RE = _re.compile(
-    r"(?i)\b(?:the user|this person|they|he|she)\s+(?:is|are)\s+"
-    r"(?:manipulative|lazy|dishonest|irrational|evasive|delusional|attention[- ]seeking)\b"
+    r"(?i)(?:"
+    r"\b(?:the user|this person|they|he|she)\s+(?:is|are|seems?|appears?)\s+"
+    r"(?:manipulative|lazy|dishonest|irrational|evasive|delusional|attention[- ]seeking|"
+    r"avoidant|defensive|resistant|unaccountable)\b|"
+    r"\b(?:the user|this person|they|he|she)\s+(?:keeps?\s+)?"
+    r"(?:deflects?|deflecting|avoids? accountability|refuses? to listen|makes? excuses)\b|"
+    r"\b(?:you|your)\s+(?:keep\s+)?(?:deflecting|avoiding accountability|making excuses)\b|"
+    r"\b(?:your|their) pattern is (?:evasive|avoidant|defensive|manipulative)\b"
+    r")"
 )
+
+
+def _merge_hologov_rolling_summary(
+    baseline: dict[str, Any],
+    candidate: str,
+    *,
+    limit: int,
+) -> str:
+    """Keep a bounded deterministic spine when a provider summary omits it."""
+    prior = _compact_text(baseline.get("rolling_summary"), limit=1600)
+    spine_lines: list[str] = []
+    if prior:
+        spine_lines.append(f"Origin and prior arc: {prior}")
+    for label, field_name, count in (
+        ("Settled", "settled_decisions", 4),
+        ("Open", "unresolved_questions", 4),
+        ("Anchor", "key_anchors", 4),
+    ):
+        for item in list(baseline.get(field_name) or [])[-count:]:
+            text = _compact_text(item, limit=320)
+            if text:
+                spine_lines.append(f"{label}: {text}")
+    for item in list(baseline.get("contradictions") or [])[-3:]:
+        if not isinstance(item, dict) or str(item.get("status") or "").lower() == "reconciled":
+            continue
+        left = _compact_text(item.get("claim_a"), limit=220)
+        right = _compact_text(item.get("claim_b"), limit=220)
+        if left or right:
+            spine_lines.append(f"Unresolved contradiction: {left} / {right}".strip(" /"))
+    if not spine_lines:
+        return candidate
+
+    candidate_normalized = " ".join(candidate.lower().split())
+    missing = [
+        line for line in spine_lines
+        if " ".join(line.split(":", 1)[-1].lower().split()) not in candidate_normalized
+    ]
+    if not missing:
+        return candidate
+    prefix = "CANONICAL SPINE\n" + "\n".join(f"- {line}" for line in missing)
+    available = max(0, limit - len(prefix) - 2)
+    return prefix + ("\n\n" + candidate[-available:] if available and candidate else "")
 
 
 def _hologov_state_payload(state: Optional[HoloState]) -> dict[str, Any]:
@@ -4836,6 +5060,8 @@ def _admit_hologov_narrative_proposal(
     }.items():
         value = safe_text(proposal.get(field_name), limit=limit)
         if value:
+            if field_name == "rolling_summary":
+                value = _merge_hologov_rolling_summary(merged, value, limit=limit)
             merged[field_name] = value
             admitted_fields.append(field_name)
         elif field_name in proposal:
@@ -4853,7 +5079,7 @@ def _admit_hologov_narrative_proposal(
         if values:
             if field_name == "user_portrait":
                 existing = [str(item) for item in merged.get(field_name) or []]
-                merged[field_name] = (existing + [item for item in values if item not in existing])[:24]
+                merged[field_name] = (existing + [item for item in values if item not in existing])[-24:]
             else:
                 merged[field_name] = values
             admitted_fields.append(field_name)
@@ -5299,7 +5525,7 @@ def _build_worker_gov_turn_plan(
         selected_history=worker_history,
         episodes=list(session.retrieved_episodes or []),
         evidence_bundle=dict(session.web_evidence_bundle or {}),
-        gov_packet=narrative_packet,
+        gov_packet=project_gov_narrative_packet_for_worker(narrative_packet),
     )
     narrative_packet["worker_context_receipt"] = context_receipt
     narrative_packet.setdefault("context_manifest", {})["worker_context_receipt_hash"] = context_receipt["receipt_hash"]
@@ -5314,7 +5540,13 @@ def _build_worker_gov_turn_plan(
         worker_provider_selection=_adapter_identity_dict(adapter),
         advisor_provider_selection={
             **_adapter_identity_dict(gov_advisor),
-            "role": "gov_advisor_proposal_source",
+            "role": (
+                "hologov_control_proposal_source"
+                if _adapter_provider_name(gov_advisor) == "minimax"
+                else "gov_advisor_proposal_source"
+            ),
+            "visible_worker_eligible": False,
+            "authority": "proposal_only",
         },
         turn_policy=turn_policy,
         selected_context_ids=selected,
@@ -5357,7 +5589,9 @@ def _build_worker_gov_turn_plan(
             "worker_fallback_allowed": True,
             "worker_fallback_condition": "primary_provider_failure_only",
             "worker_fallback_active": bool(worker_fallback_active),
-            "advisor_fallback_allowed": bool(getattr(turn_policy, "fallback_allowed", False)),
+            "advisor_fallback_allowed": bool(
+                getattr(gov_advisor, "get_gov_fallback_trace", lambda: {})().get("active")
+            ),
             "minimax_normal_routing_allowed": False,
         },
         release_constraints=[
@@ -5386,8 +5620,7 @@ def _record_worker_context_delivery(
     history: list[dict[str, str]],
     user_prompt: str,
 ) -> dict[str, Any]:
-    packet = dict(plan.narrative_packet or {})
-    packet.pop("worker_context_receipt", None)
+    packet = project_gov_narrative_packet_for_worker(plan.narrative_packet)
     receipt = build_worker_context_receipt(
         history_metadata=_provider_history_metadata(
             history,

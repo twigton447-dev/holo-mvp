@@ -215,6 +215,24 @@ def test_visible_release_allows_benign_tone_repair_language():
     assert decision.reason == "visible_output_admitted"
 
 
+def test_visible_release_removes_hostile_sentence_but_preserves_safe_substance():
+    decision = deterministic_visible_release(
+        "Help me decide what to do next.",
+        (
+            "There are two viable options, and the timing tradeoff matters. "
+            "You need to admit you obviously ignored the real issue. "
+            "Start by verifying the deadline, then compare the reversible choice first."
+        ),
+    )
+
+    assert decision.repaired is True
+    assert decision.release is True
+    assert "two viable options" in decision.text
+    assert "verifying the deadline" in decision.text
+    assert "need to admit" not in decision.text
+    assert decision.reason == "deterministic_constitutional_tone_repair_preserved_safe_substance"
+
+
 def test_send_metadata_reports_visible_release_decision(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     adapter = CapturingAdapter(response="I will not scold you. Here is the practical next move.")

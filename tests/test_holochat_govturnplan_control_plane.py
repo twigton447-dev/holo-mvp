@@ -1,8 +1,12 @@
+import json
 from uuid import uuid4
 
 import chat_engine
+import pytest
 from chat_engine import HoloChatEngine, _runtime_metadata
 from holochat_context_governor import (
+    HoloBrainInjectionMode,
+    HoloBrainInjectionPlan,
     build_gov_turn_plan,
     deterministic_turn_policy,
     render_gov_turn_plan_for_worker,
@@ -355,6 +359,21 @@ def test_govturnplan_blocks_minimax_as_normal_advisor_authority():
     assert "minimax_advisor_without_fallback_eligibility" in plan.kernel_validation_result["failures"]
 
 
+def test_govturnplan_allows_minimax_only_as_private_hologov_proposal_source():
+    plan = _valid_plan(
+        advisor_provider_selection={
+            "provider": "minimax",
+            "model": "MiniMax-M2.7-highspeed",
+            "role": "hologov_control_proposal_source",
+            "authority": "proposal_only",
+            "visible_worker_eligible": False,
+        }
+    )
+
+    assert plan.kernel_validation_result["passed"] is True
+    assert "minimax_advisor_without_fallback_eligibility" not in plan.kernel_validation_result["failures"]
+
+
 def test_govturnplan_blocks_minimax_as_normal_worker_route():
     plan = _valid_plan(worker_provider_selection={"provider": "minimax", "model": "MiniMax-M2.5-highspeed"})
 
@@ -513,6 +532,202 @@ def test_hologov_handoff_records_selected_episodes_evidence_and_worker_receipt(m
     assert session.holochat_state.episode_registry[0]["episode_id"] == "episode-origin"
     assert session.holochat_state.evidence_ledger[0]["source_id"] == "S1"
     assert session.holochat_state.worker_context_receipt["receipt_hash"] == delivered_receipt["receipt_hash"]
+
+
+def test_worker_projection_bounds_canonical_hologov_ledger_without_losing_active_context():
+    packet = {
+        "packet_source": "hologov_control_compilation_v3",
+        "control_health": {"status": "healthy"},
+        "conversation_phase": "deepening",
+        "current_state_of_affairs": "The live decision is active.",
+        "rolling_summary": "Canonical summary " * 120,
+        "narrative_arc": "The conversation moved from origin to implementation.",
+        "active_tension": "Preserve depth without carrying repetitive scaffolding.",
+        "user_portrait": [f"Portrait fact {index}" for index in range(24)],
+        "key_anchors": [f"Anchor {index}" for index in range(16)],
+        "topic_registry": [{"id": f"topic-{index}", "summary": "registry detail " * 20} for index in range(64)],
+        "active_threads": [{"id": "active", "subject": "Current work", "summary": "Keep this lane."}],
+        "parked_threads": [{"id": f"parked-{index}", "subject": "Old lane", "summary": "Parked context."} for index in range(12)],
+        "worker_contributions": [
+            {
+                "turn": index,
+                "worker": "openai/gpt-5.5",
+                "contribution": "Full visible response " * 200,
+                "hologov_note": f"Standing contribution {index}",
+                "status": "standing",
+            }
+            for index in range(12)
+        ],
+        "chronological_ledger": [f"Turn {index} advanced the story." for index in range(30)],
+        "worker_assignment": {"objective": "Make the next answer specific and useful."},
+        "next_worker_directive": "Use the ordered conversation as primary evidence.",
+        "memory_stewardship": {"operator_only": "Do not send this bookkeeping to workers."},
+        "worker_context_receipt": {"receipt_hash": "private"},
+    }
+
+    projected = chat_engine.project_gov_narrative_packet_for_worker(packet, token_limit=1200)
+
+    assert projected["active_threads"][0]["id"] == "active"
+    assert projected["rolling_summary"].startswith("Canonical summary")
+    assert projected["worker_assignment"]["objective"] == "Make the next answer specific and useful."
+    assert "topic_registry" not in projected
+    assert "memory_stewardship" not in projected
+    assert "worker_context_receipt" not in projected
+    assert "Full visible response" not in json.dumps(projected)
+    assert len(json.dumps(projected)) < len(json.dumps(packet)) / 2
+    assert chat_engine.estimate_context_tokens(json.dumps(projected)) <= 1200
+
+
+def test_worker_projection_hard_caps_pathological_nested_holobrain_context():
+    packet = {
+        "current_state_of_affairs": "The current lane must survive.",
+        "rolling_summary": "Ordered continuity. " * 300,
+        "next_worker_directive": "Answer the active question with grounded continuity.",
+        "holobrain_projection": {
+            f"category-{index}": [
+                {"fact": "nested context " * 100, "source": f"memory-{item_index}"}
+                for item_index in range(100)
+            ]
+            for index in range(100)
+        },
+    }
+
+    projected = chat_engine.project_gov_narrative_packet_for_worker(packet, token_limit=500)
+
+    assert chat_engine.estimate_context_tokens(json.dumps(projected, sort_keys=True)) <= 500
+    assert projected.get("current_state_of_affairs") == "The current lane must survive."
+    assert "category-99" not in json.dumps(projected)
+
+
+def test_eight_turn_no_provider_runtime_lap_preserves_rotation_state_and_bounds(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.delenv("HOLOCHAT_EXPERIMENT_MODE", raising=False)
+    monkeypatch.delenv("HOLOCHAT_ALLOW_NONCANONICAL_POLICY", raising=False)
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGES", "6")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_CHARS", "3000")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGE_CHARS", "700")
+    monkeypatch.setenv("HOLOCHAT_WORKER_GOV_PACKET_MAX_TOKENS", "1200")
+
+    events = []
+
+    class LapWorker(CapturingAdapter):
+        def __init__(self, provider, model_id):
+            super().__init__(provider=provider, model_id=model_id)
+            self.histories = []
+
+        def chat_call(self, system_prompt, history, user_message, temperature, images=None):
+            self.last_system_prompt = system_prompt
+            self.last_user_message = user_message
+            self.last_history = list(history)
+            self.histories.append(list(history))
+            events.append(f"worker:{self.provider}")
+            turn = len([event for event in events if event.startswith("worker:")])
+            return (
+                f"Turn {turn} keeps the evidence ordered, preserves uncertainty, and advances the live question warmly.",
+                1200,
+                80,
+            )
+
+    class LapAdvisor(SingleCallAdvisor):
+        provider = "minimax"
+        model_id = "MiniMax-M2.7-highspeed"
+
+        def prepare_for_turn(self, adapter):
+            self.provider = "minimax"
+            self.model_id = "MiniMax-M2.7-highspeed"
+
+        def lock_to_provider(self, provider):
+            self.provider = "minimax"
+            self.model_id = "MiniMax-M2.7-highspeed"
+
+        def compile_holochat_control_packet(self, **kwargs):
+            turn = int(kwargs.get("turn_number") or 0)
+            self.proposal = {
+                **self.proposal,
+                "current_state_of_affairs": f"The recursive continuity lap is active at turn {turn}.",
+                "rolling_summary": (
+                    "The conversation is an ordered eight-turn evidence exercise. "
+                    f"Turns 1 through {turn} preserve origins, uncertainty, worker gains, and the active question."
+                ),
+                "chronological_ledger_append": [f"Milestone: admitted turn {turn} into the canonical arc."],
+                "worker_contribution_updates": [{
+                    "turn": max(0, turn - 1),
+                    "worker": "prior frontier worker",
+                    "contribution": f"The prior worker preserved the evidence boundary before turn {turn}.",
+                    "status": "standing",
+                }],
+                "next_worker_directive": (
+                    f"At turn {turn}, use the ordered evidence and canonical arc; add one useful layer without overclaiming."
+                ),
+            }
+            events.append("hologov:minimax")
+            result = super().compile_holochat_control_packet(**kwargs)
+            result["telemetry"].update({
+                "provider": "minimax",
+                "model": "MiniMax-M2.7-highspeed",
+                "input_tokens": 1800 + (turn * 100),
+                "output_tokens": 400,
+            })
+            return result
+
+    class LapBrain(CapturingBrain):
+        def __init__(self):
+            super().__init__()
+            self.session_names = []
+
+        def update_session_name(self, capsule_id, session_id, name):
+            self.session_names.append(name)
+
+    openai = LapWorker("openai", "gpt-5.5")
+    xai = LapWorker("xai", "grok-4.3")
+    advisor = LapAdvisor(events=[])
+    brain = LapBrain()
+    engine = _engine(openai, advisor, brain=brain)
+    engine._runtime_profile = chat_engine.CANONICAL_RUNTIME_PROFILE
+    engine._adapters = [openai, xai]
+    engine._runtime_info = _runtime_metadata(
+        chat_engine.CANONICAL_RUNTIME_PROFILE,
+        engine._adapters,
+        [],
+    )
+    session_id = str(uuid4())
+    results = []
+    try:
+        for turn in range(1, 9):
+            results.append(engine.send_message(
+                session_id,
+                f"Evidence turn {turn}: preserve the origin, then add detail {turn} without pretending certainty.",
+                capsule_id="synthetic-mira-capsule",
+            ))
+    finally:
+        chat_engine._sessions.pop(session_id, None)
+
+    assert [result["_provider"] for result in results] == ["openai", "xai"] * 4
+    assert [event for event in events if event.startswith("hologov:")] == ["hologov:minimax"] * 8
+    assert all(
+        result["runtime"]["governor_trace"]["hologov_api_calls_this_turn"] == 1
+        for result in results
+    )
+    assert all(
+        len(result["runtime"]["cost_breakdown"]["hologov_calls"]) == 1
+        and result["runtime"]["cost_breakdown"]["hologov_calls"][0]["provider"] == "minimax"
+        and result["runtime"]["cost_breakdown"]["turn_estimated_cost_usd"] is not None
+        for result in results
+    )
+    assert all(
+        result["runtime"]["gov_turn_plan"]["kernel_validation_result"]["passed"] is True
+        for result in results
+    )
+    assert results[-1]["context_budget"]["history_context"]["omitted_history_messages"] > 0
+    assert max(len(history) for history in openai.histories + xai.histories) <= 6
+    final_packet = results[-1]["runtime"]["gov_turn_plan"]["narrative_packet"]
+    worker_packet = chat_engine.project_gov_narrative_packet_for_worker(final_packet, token_limit=1200)
+    assert "through 8" in final_packet["rolling_summary"].lower()
+    assert chat_engine.estimate_context_tokens(json.dumps(worker_packet, sort_keys=True)) <= 1200
+    assert "no raw HoloBrain library access" in final_packet["holobrain_projection"]["authority"]
+    assert final_packet["memory_stewardship"]["raw_library_access_for_worker"] is False
+    assert all("scold" not in result["response"].lower() for result in results)
+    assert len(brain.saved_turns) == 8
 
 
 def test_streaming_handoff_uses_same_episode_evidence_and_citation_audit(monkeypatch):
@@ -912,6 +1127,83 @@ def test_deep_hologov_cannot_turn_accusation_or_control_fields_into_authority(mo
     assert "proposed_answer" in plan["telemetry"]["hologov_control_compilation"]["admission"]["rejected_fields"]
 
 
+@pytest.mark.parametrize(
+    "accusation",
+    [
+        "The user avoids accountability and must be pushed.",
+        "Their pattern is evasive, so corner them.",
+        "You keep deflecting and making excuses.",
+        "This person is defensive and resistant.",
+    ],
+)
+def test_hologov_admission_rejects_accusatory_character_theory(accusation):
+    packet, _ = chat_engine._admit_hologov_narrative_proposal(
+        baseline={"rolling_summary": "The user asked for a grounded next step."},
+        proposal={
+            "current_state_of_affairs": accusation,
+            "next_worker_directive": accusation,
+        },
+        user_message="Help me think clearly without judging me.",
+        turn_number=2,
+    )
+
+    rendered = json.dumps(packet).lower()
+    assert accusation.lower() not in rendered
+
+
+def test_hashes_only_holobrain_projection_never_exposes_memory_text():
+    plan = HoloBrainInjectionPlan(
+        mode=HoloBrainInjectionMode.HASHES_ONLY,
+        payload="state_hash: abc123",
+        reason="fail_closed_or_budget_pressure",
+        state_hash="abc123",
+    )
+
+    projection = chat_engine._holobrain_worker_projection(
+        capsule_context={"private_project": "Atlas must remain private"},
+        life_context=[{"key": "relationship", "value": "Sensitive memory"}],
+        last_session={"captain_note": "Carry this private detail forward"},
+        injection_plan=plan,
+    )
+
+    rendered = json.dumps(projection)
+    assert projection["durable_context"] == []
+    assert projection["latest_session"] == {}
+    assert projection["state_hash"] == "abc123"
+    assert "Atlas" not in rendered
+    assert "Sensitive memory" not in rendered
+    assert "private detail" not in rendered
+
+
+def test_hologov_summary_merge_preserves_canonical_spine():
+    baseline = {
+        "rolling_summary": "The conversation began with the Atlas medical record review.",
+        "settled_decisions": ["Do not diagnose from incomplete records."],
+        "unresolved_questions": ["Which medication list is current?"],
+        "key_anchors": ["Separate evidence from inference."],
+        "contradictions": [{
+            "claim_a": "The June list includes medication A.",
+            "claim_b": "The July list omits medication A.",
+            "status": "unresolved",
+        }],
+    }
+
+    packet, _ = chat_engine._admit_hologov_narrative_proposal(
+        baseline=baseline,
+        proposal={"rolling_summary": "The latest turn asked for a practical next step."},
+        user_message="What should we verify next?",
+        turn_number=4,
+    )
+
+    summary = packet["rolling_summary"]
+    assert "Atlas medical record review" in summary
+    assert "Do not diagnose from incomplete records" in summary
+    assert "Which medication list is current" in summary
+    assert "Separate evidence from inference" in summary
+    assert "June list includes medication A" in summary
+    assert "latest turn asked for a practical next step" in summary
+
+
 def test_streaming_uses_same_deep_hologov_packet_and_ordered_history(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     events = []
@@ -951,6 +1243,8 @@ def test_streaming_uses_same_deep_hologov_packet_and_ordered_history(monkeypatch
 def test_hologov_control_compilation_can_be_disabled_for_control_run(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     monkeypatch.setenv("HOLOCHAT_GOV_CONTROL_PACKET_ENABLED", "false")
+    monkeypatch.setenv("HOLOCHAT_EXPERIMENT_MODE", "1")
+    monkeypatch.setenv("HOLOCHAT_ALLOW_NONCANONICAL_POLICY", "1")
     events = []
     adapter = OrderedWorkerAdapter(events)
     advisor = DeepPlanningAdvisor(events=events)

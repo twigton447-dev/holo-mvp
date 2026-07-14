@@ -89,26 +89,61 @@ def score_text(text: str, *, hologov_trace: dict[str, Any] | None = None) -> dic
     if hologov_trace:
         runtime_audit = hologov_trace.get("runtime_audit") or {}
         pressure_eval = hologov_trace.get("pressure_eval") or {}
+        embedded_checks = pressure_eval.get("checks") or {}
         trace_checks = {
             "all_govturnplans_valid": bool(runtime_audit.get("all_govturnplans_valid")),
-            "all_gov_fixed_openai": bool(runtime_audit.get("all_gov_fixed_openai")),
+            "all_gov_policy_compliant": bool(
+                runtime_audit.get("all_gov_policy_compliant")
+                if "all_gov_policy_compliant" in runtime_audit
+                else runtime_audit.get("all_gov_fixed_openai")
+            ),
             "hologov_packet_every_turn": bool(
                 ((pressure_eval.get("checks") or {}).get("hologov_packet_every_turn"))
             ),
-            "rolling_summary_when_history_bounded": bool(
-                ((pressure_eval.get("checks") or {}).get("rolling_summary_when_history_bounded"))
-            ),
+            "rolling_summary_when_history_bounded": embedded_checks.get("rolling_summary_when_history_bounded"),
         }
     all_checks = {**checks, **trace_checks}
-    score = sum(1 for value in all_checks.values() if value)
+    exercised = {name: value for name, value in all_checks.items() if value is not None}
+    unexercised = [name for name, value in all_checks.items() if value is None]
+    score = sum(1 for value in exercised.values() if value)
     return {
         "score": score,
-        "max_score": len(all_checks),
+        "max_score": len(exercised),
         "checks": all_checks,
+        "unexercised_checks": unexercised,
         "interpretation": (
-            "strong" if score >= max(1, len(all_checks) - 1) else
-            "mixed" if score >= max(1, int(len(all_checks) * 0.7)) else
+            "partial" if unexercised else
+            "strong" if score >= max(1, len(exercised) - 1) else
+            "mixed" if score >= max(1, int(len(exercised) * 0.7)) else
             "weak"
+        ),
+    }
+
+
+def _normalize_embedded_score(payload: dict[str, Any], embedded: dict[str, Any]) -> dict[str, Any]:
+    checks = dict(embedded.get("checks") or {})
+    audit = payload.get("runtime_audit") or {}
+    history_rows = audit.get("history_by_turn") or []
+    if history_rows and not any(int(row.get("omitted_messages") or 0) > 0 for row in history_rows):
+        if "rolling_summary_when_history_bounded" in checks:
+            checks["rolling_summary_when_history_bounded"] = None
+    adaptive_name = ((payload.get("adaptive_script") or {}).get("name"))
+    if adaptive_name != "mira_recursive_context" and "recursive_topic_lifecycle" in checks:
+        checks["recursive_topic_lifecycle"] = None
+    exercised = {name: value for name, value in checks.items() if value is not None}
+    unexercised = [name for name, value in checks.items() if value is None]
+    score = sum(1 for value in exercised.values() if value)
+    max_score = len(exercised)
+    return {
+        "score": score,
+        "max_score": max_score,
+        "checks": checks,
+        "unexercised_checks": unexercised,
+        "interpretation": (
+            "partial_pressure_run" if unexercised else
+            "strong_pressure_run" if score >= max(1, max_score - 1) else
+            "needs_review" if score >= max(1, max_score - 3) else
+            "regression_risk"
         ),
     }
 
@@ -118,13 +153,11 @@ def score_file(path: str) -> dict[str, Any]:
     payload = _final_payload_from_jsonl(text)
     embedded = payload.get("pressure_eval") if payload else None
     if embedded:
+        normalized = _normalize_embedded_score(payload, embedded)
         return {
             "path": str(Path(path).expanduser()),
             "source": "holochat_final_audit",
-            "score": embedded.get("score"),
-            "max_score": embedded.get("max_score"),
-            "checks": embedded.get("checks"),
-            "interpretation": embedded.get("interpretation"),
+            **normalized,
         }
     scored = score_text(text, hologov_trace=payload or None)
     return {"path": str(Path(path).expanduser()), "source": "text_scan", **scored}

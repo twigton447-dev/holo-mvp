@@ -172,8 +172,9 @@ def test_streaming_done_metadata_includes_searched_without_raw_results(monkeypat
     assert done["runtime"]["governor_trace"]["web_search"]["result_count"] == 1
     assert done["runtime"]["gov_arc_state"]["web_decision"] == "checked via deterministic_governor"
     assert done["usage"] == done["runtime"]["usage"]
-    assert done["usage"]["input_token_estimate"] == done["context_budget"]["total_token_estimate"]
-    assert done["usage"]["input_token_source"] == "context_budget_estimate"
+    assert done["usage"]["input_token_estimate"] == 10
+    assert done["usage"]["input_token_source"] == "provider_usage"
+    assert done["usage"]["context_budget_input_token_estimate"] == done["context_budget"]["total_token_estimate"]
     assert done["usage"]["output_token_estimate"] == 4
     assert done["usage"]["output_token_source"] == "provider_usage"
     assert done["usage"]["latency_ms"] >= 0
@@ -762,7 +763,7 @@ def test_frontend_thread_meter_uses_thread_health_score():
     assert "body.dev-tools #thread-meter.dev-only" in html
     assert "function updateThreadMeter(score)" in html
     assert "updateThreadMeter(doneData.thread_health_score)" in html
-    assert "updateThreadMeter(data.thread_health_score)" in html
+    assert "updateThreadMeter(data.thread_health_score)" not in html
     assert "updateThreadMeter(100)" in html
     assert "Thread health ${pct}%" in html
     assert "pct <= 40" in html
@@ -845,6 +846,22 @@ def test_frontend_streaming_uses_paced_text_reveal():
     assert "pacedStream.push(evt.text);" in html
     assert "if (pacedStream) await pacedStream.drain();" in html
     assert "bubbleEl.innerHTML = renderMarkdown(accumulated);" not in html
+
+
+def test_frontend_stream_disconnect_does_not_replay_paid_turn():
+    html = Path("frontend/chat.html").read_text()
+    send_message = html.split("async function sendMessage()", 1)[1].split(
+        "function createStreamingBubble()", 1
+    )[0]
+
+    assert send_message.count('fetch("/v1/chat/stream",') == 1
+    assert 'fetch("/v1/chat",' not in send_message
+    assert "if (!streamOk)" in send_message
+    assert 'throw new Error("Invalid stream event.")' in send_message
+    assert 'streamError = "Connection interrupted before the response was complete.' in send_message
+    assert "appendError(streamError, retryTurn)" in send_message
+    assert "restoreDraft();" in send_message
+    assert 'title = "Retry message"' in html
 
 
 def test_frontend_uses_editorial_reader_typography_without_heavy_default_bold():

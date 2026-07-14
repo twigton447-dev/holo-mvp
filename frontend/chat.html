@@ -2369,6 +2369,7 @@
 
     const { text: attachmentText, images } = await readAttachmentsAsText();
     const fullMessage = text + attachmentText;
+    const draftAttachments = attachedFiles.slice();
 
     input.value = "";
     autoResize(input);
@@ -2391,8 +2392,26 @@
     if (incognitoMode) reqBody.incognito = true;
     if (handoffTransitionForTurn) reqBody.handoff_transition = handoffTransitionForTurn;
 
-    // Attempt streaming first; fall back to non-streaming on failure
+    const restoreDraft = () => {
+      input.value = text;
+      autoResize(input);
+      attachedFiles = draftAttachments;
+      const attachmentBar = document.getElementById("attachments-bar");
+      attachmentBar.innerHTML = "";
+      attachedFiles.forEach(renderAttachmentPill);
+    };
+    let retryTurn = null;
+    const userEl = document.querySelector("#messages .msg.user:last-of-type");
+    retryTurn = () => {
+      if (userEl && userEl.parentNode) userEl.remove();
+      restoreDraft();
+      sendMessage();
+    };
+
+    // One click makes one paid turn request. Network failure is ambiguous, so
+    // never replay automatically through a second endpoint.
     let streamOk = false;
+    let streamError = "Connection interrupted. Please try again.";
     try {
       const res = await fetch("/v1/chat/stream", {
         method: "POST", headers: authHeaders(), body: JSON.stringify(reqBody),
@@ -2417,7 +2436,8 @@
           for (const line of lines) {
             if (!line.startsWith("data: ")) continue;
             let evt;
-            try { evt = JSON.parse(line.slice(6)); } catch { continue; }
+            try { evt = JSON.parse(line.slice(6)); }
+            catch { throw new Error("Invalid stream event."); }
 
             if (evt.type === "searching") {
               typingEl.querySelector(".bubble").textContent = "Searching the web…";
@@ -2436,18 +2456,14 @@
             } else if (evt.type === "done") {
               doneData = evt;
             } else if (evt.type === "error") {
-              stopAmbientBubbles();
-              typingEl.remove();
-              appendError(evt.detail || "Something went wrong. Please try again.");
+              throw new Error(evt.detail || "Something went wrong. Please try again.");
             }
           }
         }
 
-        // Handle stream that ended with no tokens and no done event
-        if (!holoEl && !doneData) {
-          stopAmbientBubbles();
-          if (typingEl.parentNode) typingEl.remove();
-          appendError("Connection interrupted. Please try again.");
+        // An EOF without a done event is not safe to replay.
+        if (!doneData) {
+          streamError = "Connection interrupted before the response was complete. Please retry.";
           streamOk = false;
         }
 
@@ -2489,64 +2505,17 @@
           }
         }
       }
-    } catch (_streamErr) {
+    } catch (streamErr) {
+      streamError = streamErr.message || streamError;
       streamOk = false;
     }
 
     if (!streamOk) {
-      // Non-streaming fallback
-      try {
-        stopAmbientBubbles();
-        typingEl.querySelector && (typingEl.querySelector(".bubble").textContent = "Thinking…");
-        const res = await fetch("/v1/chat", {
-          method: "POST", headers: authHeaders(), body: JSON.stringify(reqBody),
-        });
-        stopAmbientBubbles();
-        typingEl.remove();
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          appendError(err.detail || "Something went wrong. Please try again.");
-          return;
-        }
-        const data = await res.json();
-        sessionId = data.session_id;
-        clearActiveHandoffTransition();
-        appendHoloMessage(data);
-        if (data.turn_number === 1) {
-          const firstMsg = document.querySelectorAll(".msg.user .bubble")[0]?.innerText || "";
-          prependSession(data.session_id, firstMsg);
-        } else if (data.turn_number === 2) {
-          setTimeout(() => loadSessionList(), 5000);
-          setTimeout(() => loadSessionList(), 12000);
-        }
-        turnCount++;
-        maybePromptDepthChoice();
-        if (turnCount === FREE_TURN_LIMIT && !capsuleToken) {
-          document.getElementById("free-limit-banner").classList.remove("hidden");
-        }
-        if (data.thought) setTimeout(() => spawnThought(data.thought), 1800);
-	        if (data.artifacts && data.artifacts.length > 0) {
-	          for (const a of data.artifacts) {
-	            _artifactRegistry.unshift({ artifact_id: a.artifact_id, title: a.title, created_at: new Date().toISOString() });
-	          }
-	          if (_activePanelTab === "artifacts") renderArtifactList();
-	        }
-	        updateThreadMeter(data.thread_health_score);
-	        setTimeout(() => refreshMemoryContext(), 2000);
-        if (data.handoff && data.handoff.suggested) setTimeout(() => showHandoff(data.handoff), 1200);
-        if (data.thread_health_level === "YELLOW" && data.turn_number >= 14 && !document.getElementById("thread-nudge")) {
-          const nudge = document.createElement("div");
-          nudge.id = "thread-nudge";
-          nudge.style.cssText = "text-align:center;padding:8px 16px;font-size:12px;color:var(--text4);";
-          nudge.innerHTML = `This thread is getting long. <a href="#" onclick="newThread();return false;" style="color:var(--accent);text-decoration:none;">Start fresh thread →</a>`;
-          document.getElementById("messages").appendChild(nudge);
-          scrollToBottom();
-        }
-      } catch (e) {
-        stopAmbientBubbles();
-        if (typingEl.parentNode) typingEl.remove();
-        appendError("Connection interrupted. Please try again.");
-      }
+      stopAmbientBubbles();
+      if (typingEl.parentNode) typingEl.remove();
+      document.querySelector(".msg.holo.streaming")?.remove();
+      restoreDraft();
+      appendError(streamError, retryTurn);
     }
 
     isLoading = false;
@@ -2759,12 +2728,25 @@
     return el;
   }
 
-  function appendError(msg) {
+  function appendError(msg, onRetry) {
     const container = document.getElementById("messages");
     const el        = document.createElement("div");
     el.className    = "msg holo";
     el.innerHTML    = `<div class="holo-icon">✦</div><div class="holo-body"><div class="bubble" style="color:#f87171">${escHtml(msg)}</div></div>`;
+    if (onRetry) {
+      const retry = document.createElement("button");
+      retry.className = "msg-action";
+      retry.type = "button";
+      retry.title = "Retry message";
+      retry.textContent = "Retry";
+      retry.addEventListener("click", () => {
+        el.remove();
+        onRetry();
+      });
+      el.querySelector(".holo-body").appendChild(retry);
+    }
     container.appendChild(el);
+    return el;
   }
 
   function renderBattery(line) {

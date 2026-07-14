@@ -400,6 +400,12 @@ _RISK_RANK = {"NONE": 0, "LOW": 1, "MEDIUM": 2, "HIGH": 3}
 
 class ProjectBrain:
 
+    @staticmethod
+    def _hybrid_scopes_enabled() -> bool:
+        return str(os.getenv("HOLOCHAT_HYBRID_SCOPES_ENABLED", "")).strip().lower() in {
+            "1", "true", "yes", "on",
+        }
+
     def __init__(self):
         url = os.getenv("SUPABASE_URL")
         key = os.getenv("SUPABASE_KEY")
@@ -1069,9 +1075,12 @@ class ProjectBrain:
         if not self._client or not session_id:
             return None
         try:
+            columns = "session_id, capsule_id"
+            if self._hybrid_scopes_enabled():
+                columns += ", scope_id"
             rows = (
                 self._client.table("holo_chat_sessions")
-                .select("session_id, capsule_id, scope_id")
+                .select(columns)
                 .eq("session_id", session_id)
                 .limit(1)
                 .execute()

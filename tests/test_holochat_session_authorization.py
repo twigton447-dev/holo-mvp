@@ -257,6 +257,66 @@ def test_persistence_skips_incognito_or_anonymous_sessions():
     brain._client.table.assert_not_called()
 
 
+class SessionMetadataQuery:
+    def __init__(self, rows):
+        self.rows = rows
+        self.selected_columns = None
+
+    def select(self, columns):
+        self.selected_columns = columns
+        return self
+
+    def eq(self, key, value):
+        assert key == "session_id"
+        self.rows = [row for row in self.rows if row.get(key) == value]
+        return self
+
+    def limit(self, count):
+        self.rows = self.rows[:count]
+        return self
+
+    def execute(self):
+        return type("Response", (), {"data": self.rows})()
+
+
+class SessionMetadataClient:
+    def __init__(self, rows):
+        self.query = SessionMetadataQuery(rows)
+
+    def table(self, name):
+        assert name == "holo_chat_sessions"
+        return self.query
+
+
+def test_legacy_session_read_does_not_require_unmigrated_scope_column(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_HYBRID_SCOPES_ENABLED", raising=False)
+    brain = ProjectBrain.__new__(ProjectBrain)
+    brain._client = SessionMetadataClient([{
+        "session_id": "legacy-session",
+        "capsule_id": "capsule-a",
+    }])
+
+    session = brain.get_chat_session("legacy-session")
+
+    assert session["capsule_id"] == "capsule-a"
+    assert brain._client.query.selected_columns == "session_id, capsule_id"
+
+
+def test_scoped_session_read_requires_scope_column_only_after_feature_enable(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_HYBRID_SCOPES_ENABLED", "1")
+    brain = ProjectBrain.__new__(ProjectBrain)
+    brain._client = SessionMetadataClient([{
+        "session_id": "scoped-session",
+        "capsule_id": "capsule-a",
+        "scope_id": "work-a",
+    }])
+
+    session = brain.get_chat_session("scoped-session")
+
+    assert session["scope_id"] == "work-a"
+    assert brain._client.query.selected_columns == "session_id, capsule_id, scope_id"
+
+
 class SessionBrain:
     def __init__(self, stored=None):
         self.stored = stored

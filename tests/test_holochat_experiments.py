@@ -19,7 +19,7 @@ def test_manifest_is_deterministic_and_dry_run_only():
 
 def test_catalog_has_requested_versioned_prices():
     assert PRICING_VERSION == "official-2026-07-14"
-    assert len(PRICE_CATALOG) == 10
+    assert len(PRICE_CATALOG) == 11
     assert str(PRICE_CATALOG["openai/gpt-5.5"].input_per_million) == "5"
     assert str(PRICE_CATALOG["deepseek/v4-pro"].output_per_million) == "0.87"
 
@@ -34,6 +34,20 @@ def test_call_events_and_aggregate_expose_accounting_schema():
     assert event["quality"]["score"] is None
     assert manifest["aggregate"]["call_count"] == 4
     assert manifest["aggregate"]["estimated_cost_usd"] != "0"
+
+
+def test_condition_a_manifest_does_not_charge_disabled_hologov_control():
+    manifest = build_manifest(
+        lane="frontier",
+        condition="A",
+        rotations=3,
+        input_tokens_per_call=1_000,
+        output_tokens_per_call=500,
+    )
+
+    assert [event["role"] for event in manifest["call_events"]] == ["worker"] * 3
+    assert manifest["aggregate"]["call_count"] == 3
+    assert manifest["rotation"]["strategy"] == "alternating_workers_no_governor_control"
 
 
 def test_live_requires_both_explicit_gates(tmp_path: Path):
@@ -55,7 +69,8 @@ def test_live_invokes_injected_runner_only_after_gates(tmp_path: Path):
     assert received[0][0][-1] == "--disable-gov-control"
     assert received[0][2]["OPENAI_FAST_MODEL"] == "gpt-5.4-mini"
     assert received[0][2]["XAI_FAST_MODEL"] == "grok-4.3"
-    assert received[0][2]["HOLOCHAT_GOV_MODEL"] == "gpt-5.4-mini"
+    assert received[0][2]["HOLOCHAT_GOV_PROVIDER"] == "minimax"
+    assert received[0][2]["MINIMAX_GOV_MODEL"] == "MiniMax-M2.7-highspeed"
     assert received[0][2]["HOLOCHAT_EXPERIMENT_MODE"] == "1"
     assert received[0][2]["HOLOCHAT_RUNTIME_PROFILE"] == "holochat_canonical"
     assert "OPENAI_API_KEY" not in received[0][2]
@@ -78,8 +93,27 @@ def test_live_frontier_environment_applies_its_models(tmp_path: Path):
 
     assert "--respect-env" in captured["command"]
     assert captured["env"]["OPENAI_FAST_MODEL"] == "gpt-5.5"
-    assert captured["env"]["XAI_FAST_MODEL"] == "grok-4.5"
-    assert captured["env"]["HOLOCHAT_GOV_MODEL"] == "gpt-5.5"
+    assert captured["env"]["XAI_FAST_MODEL"] == "grok-4.3"
+    assert captured["env"]["MINIMAX_GOV_MODEL"] == "MiniMax-M2.7-highspeed"
+
+
+def test_live_forwards_minimax_credential_and_cost_cap(tmp_path: Path):
+    smoke = tmp_path / "holochat_live_smoke.py"
+    smoke.write_text("# --experiment-mode\n# HOLOCHAT_EXPERIMENT_MODE\n", encoding="utf-8")
+    captured = {}
+
+    run_live_smoke(
+        manifest=build_manifest(lane="frontier", condition="D", rotations=8),
+        live=True,
+        confirm_live=True,
+        smoke_script=smoke,
+        credential_env={"MINIMAX_API_KEY": "test-only-placeholder"},
+        max_estimated_cost_usd=0.75,
+        runner=lambda command, check, env: captured.update(command=command, env=env),
+    )
+
+    assert captured["env"]["MINIMAX_API_KEY"] == "test-only-placeholder"
+    assert captured["command"][-2:] == ["--max-estimated-cost-usd", "0.75"]
 
 
 def test_condition_c_and_d_execute_distinct_context_modes(tmp_path: Path):

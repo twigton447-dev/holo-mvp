@@ -240,17 +240,29 @@ The rolling summary should preserve:
 
 Every worker call must also produce a private `WorkerContextReceipt`. The receipt records raw, selected, and omitted history counts; selected history hashes; selected episode IDs and token estimates; admitted evidence source IDs; Gov packet token estimate; total estimated worker input; and a stable receipt hash. It is operator telemetry, never normal user-facing content.
 
+The complete HoloGov ledger remains private canonical state. The worker receives a bounded projection of that ledger, not repeated operator bookkeeping or full prior responses already present in ordered history. The projection prioritizes current state, iterative summary, active tension, user portrait, anchors, active and relevant parked lanes, selected HoloBrain episodes/evidence, standing contribution summaries, and the current assignment. The default worker-facing HoloGov narrative-packet ceiling is 4.5k estimated tokens; raw conversation and admitted evidence must retain room to remain primary.
+
 When raw history is bounded, the summary and lane ledger become more important, but selection must still preserve origins, relevant older evidence, and recent turns. Thread length should not determine HoloChat intelligence. HoloGov's navigation and the worker's access to recursive evidence should.
 
 ## Current Provider Policy
 
 Current intended HoloChat policy:
 
-- HoloGov: fixed OpenAI `gpt-5.5`.
+- HoloGov: fixed private MiniMax `MiniMax-M2.7-highspeed` proposal compiler.
 - Visible workers: rotate OpenAI `gpt-5.5` and xAI `grok-4.3`.
-- No mini models in normal operation.
-- MiniMax is not in normal rotation.
-- Fallback policy should be explicit, rare, logged, and never confused with normal HoloChat rotation.
+- HoloGov output is never visible authority. The deterministic kernel admits, repairs, or rejects its typed control packet before a worker receives it.
+- Canonical HoloChat permits exactly one paid HoloGov call per visible turn. If the MiniMax packet is malformed, incomplete, truncated, or unavailable, the deterministic kernel uses its local canonical-state fallback and marks control degraded. It never makes a hidden second provider call.
+
+### Cost Policy
+
+Frontier intelligence remains the visible quality target. MiniMax occupies one locked, private HoloGov-only
+seat because conversation accounting and state compilation consume substantial recurring tokens. It is not
+part of worker rotation and cannot speak to the user. Canonical operation always uses the frontier worker tier,
+one HoloGov provider call, and HoloGov control compilation. Economy workers, multi-call legacy Gov behavior,
+or disabled control compilation require both explicit noncanonical experiment gates.
+- No mini models in visible normal operation.
+- MiniMax is not in visible rotation.
+- HoloGov provider fallback is local, explicit, and logged; visible worker failover remains a separate provider-failure path.
 
 Provider output is work product. HoloGov and the kernel decide what becomes admitted state or visible output.
 

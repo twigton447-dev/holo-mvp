@@ -25,7 +25,15 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--live", action="store_true", help="First explicit live execution gate.")
     parser.add_argument("--confirm-live", action="store_true", help="Second explicit live execution gate.")
+    parser.add_argument(
+        "--max-estimated-cost-usd",
+        type=float,
+        default=None,
+        help="Stop the live child before the next projected turn would cross this estimate.",
+    )
     args = parser.parse_args()
+    if (args.live or args.confirm_live) and args.max_estimated_cost_usd is None:
+        parser.error("live execution requires --max-estimated-cost-usd")
 
     manifest = build_manifest(lane=args.lane, condition=args.condition, rotations=args.rotations, scenario=args.scenario)
     if args.output:
@@ -33,7 +41,7 @@ def main() -> int:
     if args.live or args.confirm_live:
         credential_env = {
             name: os.environ[name]
-            for name in ("OPENAI_API_KEY", "XAI_API_KEY", "SUPABASE_URL", "SUPABASE_KEY")
+            for name in ("OPENAI_API_KEY", "XAI_API_KEY", "MINIMAX_API_KEY", "SUPABASE_URL", "SUPABASE_KEY")
             if os.environ.get(name)
         }
         run_live_smoke(
@@ -41,6 +49,7 @@ def main() -> int:
             live=args.live,
             confirm_live=args.confirm_live,
             credential_env=credential_env,
+            max_estimated_cost_usd=args.max_estimated_cost_usd,
         )
         manifest["mode"] = "live_smoke_launched"
         manifest["provider_calls_made"] = True

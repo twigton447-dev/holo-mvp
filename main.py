@@ -186,8 +186,10 @@ if _frontend_dir.exists():
 
 def _track_usage(api_key: str, endpoint: str, status_code: int,
                  input_tokens: int = 0, output_tokens: int = 0,
-                 cost_usd: float = 0.0, latency_ms: int = 0,
-                 access_context: Optional[AccessContext] = None) -> None:
+                 cost_usd: Optional[float] = None, latency_ms: int = 0,
+                 access_context: Optional[AccessContext] = None,
+                 worker_identity: Optional[dict[str, Any]] = None,
+                 hologov_identity: Optional[dict[str, Any]] = None) -> None:
     """Fire-and-forget usage log. Never raises."""
     if access_context is not None:
         logger.info(
@@ -196,6 +198,16 @@ def _track_usage(api_key: str, endpoint: str, status_code: int,
                 "holochat_access": access_context.operator_metadata(),
                 "holochat_endpoint": endpoint,
                 "holochat_status_code": status_code,
+            },
+        )
+    if worker_identity is not None or hologov_identity is not None:
+        logger.info(
+            "HoloChat runtime usage telemetry",
+            extra={
+                "holochat_endpoint": endpoint,
+                "holochat_worker_identity": worker_identity,
+                "holochat_hologov_identity": hologov_identity,
+                "holochat_cost_usd": cost_usd,
             },
         )
     if _db is None:
@@ -213,6 +225,27 @@ def _track_usage(api_key: str, endpoint: str, status_code: int,
         })
     except Exception:
         pass
+
+
+def _chat_usage_telemetry(result: dict[str, Any]) -> dict[str, Any]:
+    """Extract final, non-client-facing spend and runtime identities."""
+    runtime = result.get("runtime")
+    runtime = runtime if isinstance(runtime, dict) else {}
+    cost_breakdown = runtime.get("cost_breakdown")
+    cost_breakdown = cost_breakdown if isinstance(cost_breakdown, dict) else {}
+    worker_identity = runtime.get("selected_analyst")
+    worker_identity = worker_identity if isinstance(worker_identity, dict) else None
+    context_telemetry = runtime.get("context_telemetry")
+    context_telemetry = context_telemetry if isinstance(context_telemetry, dict) else {}
+    hologov_identity = context_telemetry.get("gov_model")
+    hologov_identity = hologov_identity if isinstance(hologov_identity, dict) else None
+
+    # Do not fall back to the worker-only estimate: it excludes HoloGov spend.
+    return {
+        "cost_usd": cost_breakdown.get("turn_estimated_cost_usd"),
+        "worker_identity": worker_identity,
+        "hologov_identity": hologov_identity,
+    }
 
 
 def _private_runtime_metadata_enabled() -> bool:
@@ -1043,13 +1076,17 @@ async def chat(
 
     elapsed = int((time.time() - t0) * 1000)
     tokens  = result.get("tokens", {})
+    usage_telemetry = _chat_usage_telemetry(result)
     access_context = _bind_session_access(request, access_context, result.get("session_id"))
     _track_usage(
         _key, "/v1/chat", 200,
         input_tokens  = tokens.get("input", 0),
         output_tokens = tokens.get("output", 0),
+        cost_usd      = usage_telemetry["cost_usd"],
         latency_ms    = elapsed,
         access_context=access_context,
+        worker_identity=usage_telemetry["worker_identity"],
+        hologov_identity=usage_telemetry["hologov_identity"],
     )
 
     response_content = {
@@ -1098,7 +1135,8 @@ async def chat_stream(
       {"type": "searching"}                          — Governor triggered a web search
       {"type": "done",      "session_id": "...", ...} — final metadata (same fields as /v1/chat)
 
-    The client should fall back to /v1/chat if this endpoint is unavailable.
+    Clients must not replay an ambiguous interrupted stream through /v1/chat.
+    Preserve the draft and require an explicit user retry instead.
     """
     if _chat_engine is None:
         raise HTTPException(status_code=503, detail="Chat engine not initialized.")
@@ -1149,6 +1187,7 @@ async def chat_stream(
             ):
                 if isinstance(chunk, dict) and chunk.get("done"):
                     tokens = chunk.get("tokens") or {}
+                    usage_telemetry = _chat_usage_telemetry(chunk)
                     completed_access = _bind_session_access(
                         request, access_context, chunk.get("session_id") or session_id,
                     )
@@ -1158,8 +1197,11 @@ async def chat_stream(
                         200,
                         input_tokens=tokens.get("input", 0),
                         output_tokens=tokens.get("output", 0),
+                        cost_usd=usage_telemetry["cost_usd"],
                         latency_ms=int((time.time() - started_at) * 1000),
                         access_context=completed_access,
+                        worker_identity=usage_telemetry["worker_identity"],
+                        hologov_identity=usage_telemetry["hologov_identity"],
                     )
                     usage_tracked = True
                     yield _sse({"type": "done", **_public_stream_metadata(chunk)})

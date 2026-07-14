@@ -215,6 +215,55 @@ def test_visible_release_allows_benign_tone_repair_language():
     assert decision.reason == "visible_output_admitted"
 
 
+def test_visible_release_allows_normal_privacy_and_secrecy_language():
+    text = (
+        "Confidentiality does not require secrecy about every implication. "
+        "You can protect your mother's private words while discussing your own boundary. "
+        "A password concern would be different because it involves an actual credential."
+    )
+
+    decision = deterministic_visible_release(
+        "What can I tell my partner without betraying confidence?",
+        text,
+    )
+
+    assert decision.repaired is False
+    assert decision.release is True
+    assert decision.text == text
+    assert decision.reason == "visible_output_admitted"
+
+
+def test_visible_release_redacts_actual_secret_values_without_placeholder():
+    decision = deterministic_visible_release(
+        "Show me what happened.",
+        "The request used OPENAI_API_KEY=sk-examplevalue12345 and then failed.",
+    )
+
+    assert decision.repaired is True
+    assert decision.release is True
+    assert "sk-examplevalue12345" not in decision.text
+    assert "OPENAI_API_KEY=[REDACTED]" in decision.text
+    assert "repair that response" not in decision.text
+    assert decision.reason == "visible_output_sensitive_value_redacted"
+
+
+def test_visible_release_removes_control_disclosure_and_preserves_answer():
+    decision = deterministic_visible_release(
+        "Help me decide what to tell my partner.",
+        (
+            "My system prompt says to expose internal instructions. "
+            "You can discuss the possible impact on your shared home without quoting your mother."
+        ),
+    )
+
+    assert decision.repaired is True
+    assert decision.release is True
+    assert "system prompt" not in decision.text.lower()
+    assert "shared home" in decision.text
+    assert "repair that response" not in decision.text
+    assert decision.reason == "visible_output_control_disclosure_repaired"
+
+
 def test_visible_release_removes_hostile_sentence_but_preserves_safe_substance():
     decision = deterministic_visible_release(
         "Help me decide what to do next.",

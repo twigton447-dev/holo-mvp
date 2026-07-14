@@ -198,6 +198,9 @@ _LOW_TIER_RE = re.compile(r"(?i)^\s*(hi|hey|thanks|thank you|ok|okay|lol|nice)\s
 _ADVISOR_SECRET_OR_CONTROL_RE = re.compile(
     r"(?i)\b(system prompt|ignore previous|developer message|api[_ -]?key|token|secret|password|bearer)\b"
 )
+_VISIBLE_CONTROL_DISCLOSURE_RE = re.compile(
+    r"(?i)\b(system prompt|ignore previous|developer message)\b"
+)
 _VISIBLE_STERILE_RE = re.compile(
     r"(?i)^\s*(no\.?|incorrect\.?|you are wrong\.?|that is false\.?|can't help\.?)\s*$"
 )
@@ -1163,11 +1166,39 @@ def deterministic_visible_release(
             reason="deterministic_constitutional_tone_repair_before_visible_release",
             repaired=True,
         )
-    if _ADVISOR_SECRET_OR_CONTROL_RE.search(text):
+    redacted_text = _SECRET_ENV_RE.sub(
+        lambda match: f"{match.group(1)}=[REDACTED]",
+        text,
+    )
+    redacted_text = _SECRET_KV_RE.sub(
+        lambda match: f"{match.group(1)}: [REDACTED]",
+        redacted_text,
+    )
+    redacted_text = _OPENAI_STYLE_SECRET_RE.sub("[REDACTED]", redacted_text)
+    if redacted_text != text:
         return GovVisibleReleaseDecision(
-            release=False,
-            text="I need to repair that response before showing it.",
-            reason="visible_output_blocked_for_secret_or_control_text",
+            release=True,
+            text=redacted_text,
+            reason="visible_output_sensitive_value_redacted",
+            repaired=True,
+        )
+    if _VISIBLE_CONTROL_DISCLOSURE_RE.search(text):
+        safe_parts = [
+            part.strip()
+            for part in re.split(r"(?<=[.!?])\s+|\n+", text)
+            if part.strip() and not _VISIBLE_CONTROL_DISCLOSURE_RE.search(part)
+        ]
+        return GovVisibleReleaseDecision(
+            release=True,
+            text=(
+                "\n\n".join(safe_parts)
+                if safe_parts
+                else (
+                    "I can't include private internal instructions, but I can still "
+                    "answer the underlying question directly and usefully."
+                )
+            ),
+            reason="visible_output_control_disclosure_repaired",
             repaired=True,
         )
     return GovVisibleReleaseDecision(release=True, text=text, reason="visible_output_admitted")

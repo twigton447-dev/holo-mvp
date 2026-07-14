@@ -258,7 +258,7 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     html = Path("frontend/chat.html").read_text()
 
     assert "<span>HoloChat</span>" in html
-    assert '<span id="brand-sub">2.1</span>' in html
+    assert '<span id="brand-sub">3.0</span>' in html
     assert "#brand-sub { display: inline;" in html
     assert "<span>My Chats</span>" in html
     assert 'title="My Chats">My Chats</button>' in html

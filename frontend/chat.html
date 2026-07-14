@@ -125,8 +125,10 @@
     .msg-action { background: none; border: none; cursor: pointer; padding: 5px 7px; border-radius: 7px; color: var(--text3); font-size: 13px; display: flex; align-items: center; transition: background 0.12s, color 0.12s; }
     .msg-action:hover { background: var(--bg2); color: var(--text2); }
     .msg-action.copied { color: #22c55e; }
-    .trust-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; min-height: 18px; }
+    .trust-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 18px; }
     .web-checked { color: var(--text3); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 600; line-height: 1.3; }
+    .web-source { color: var(--text2); font-family: var(--ui-font); font-size: 11px; text-decoration: none; border-bottom: 1px solid var(--border); }
+    .web-source:hover { color: var(--accent); border-bottom-color: var(--accent); }
     .label { font-size: 11px; color: var(--text2); padding: 0 4px; }
     .chips { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
     .chip { display: flex; align-items: flex-start; gap: 13px; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border); border-left-color: rgba(91,122,229,0.7); background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01)); color: var(--text2); font-family: var(--ui-font); font-size: 13px; font-weight: 450; line-height: 1.45; cursor: pointer; text-align: left; transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s; width: 100%; box-shadow: 0 10px 24px rgba(0,0,0,0.08); }
@@ -776,7 +778,7 @@
 <div id="app">
   <div id="header">
     <div id="header-brand">
-      <h1><span>HoloChat</span> <span id="brand-sub">3.0</span><span id="space-label"></span></h1>
+      <h1><span>HoloChat</span> <span id="brand-sub">3.1</span><span id="space-label"></span></h1>
     </div>
     <div id="header-right">
       <div id="incognito-badge">◉ Incognito</div>
@@ -2877,12 +2879,33 @@
     try { sessionStorage.removeItem(HANDOFF_TRANSITION_KEY); } catch {}
   }
 
-  function startHandoffThread() {
+  async function checkpointCurrentThread(lifecycle = "thread_open") {
+    if (!sessionId || !capsuleToken || incognitoMode) return true;
+    try {
+      const response = await fetch(`/v1/chat/${sessionId}/memory-checkpoint`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ lifecycle }),
+      });
+      if (response.ok) return true;
+      // The static 3.1 UI may publish before the reviewed backend migration.
+      // Preserve thread switching until that endpoint is available.
+      if (response.status === 404) return true;
+      if (response.status === 409) {
+        alert("Holo needs you to clarify the pending correction or forget request before leaving this thread.");
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
+  async function startHandoffThread() {
     const transition = _pendingHandoffTransition || safeHandoffTransition(null);
     try {
       sessionStorage.setItem(HANDOFF_TRANSITION_KEY, JSON.stringify(transition));
     } catch {}
-    newThread({ fromHandoff: true, handoffTransition: transition });
+    await newThread({ fromHandoff: true, handoffTransition: transition });
   }
 
   function handoffWelcomeHtml(transition = {}) {
@@ -2895,7 +2918,9 @@
     return `<div id="empty" class="handoff-empty"><h2>${title}</h2><p>${body}</p>${nextPath ? `<p>A useful next move: ${escHtml(nextPath)}</p>` : ""}</div>`;
   }
 
-	  function newThread(options = {}) {
+	  async function newThread(options = {}) {
+	    const lifecycle = options.fromHandoff === true ? "thread_fork" : "thread_open";
+	    if (!(await checkpointCurrentThread(lifecycle))) return;
 	    sessionId = null;
 	    turnCount = 0;
 	    updateThreadMeter(100);
@@ -2959,7 +2984,15 @@
     const attrs = query
       ? ` title="Search query: ${query}" data-search-query="${query}"`
       : ` title="Web checked"`;
-    return `<div class="trust-row"><span class="web-checked"${attrs}>Web checked</span></div>`;
+    const sources = Array.isArray(data.web_sources) ? data.web_sources.slice(0, 6) : [];
+    const sourceLinks = sources.map(source => {
+      const url = String(source && source.url || "");
+      if (!/^https?:\/\//i.test(url)) return "";
+      const sourceId = escHtml(source.source_id || "Source");
+      const domain = escHtml(source.domain || source.title || "source");
+      return `<a class="web-source" href="${escAttr(url)}" target="_blank" rel="noopener noreferrer">[${sourceId}] ${domain}</a>`;
+    }).join("");
+    return `<div class="trust-row"><span class="web-checked"${attrs}>Web checked</span>${sourceLinks}</div>`;
   }
 
   function openRuntimePanel() {
@@ -3603,6 +3636,7 @@
     if (sid === sessionId || sid === _loadingSessionId) return;
     _loadingSessionId = sid;
     try {
+      if (!(await checkpointCurrentThread("thread_open"))) return;
       const res = await fetch(`/v1/chat/${sid}/history`, {
         headers: { "x-api-key": API_KEY, "Authorization": `Bearer ${capsuleToken}` }
       });

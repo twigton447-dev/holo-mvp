@@ -2888,6 +2888,9 @@
         body: JSON.stringify({ lifecycle }),
       });
       if (response.ok) return true;
+      // The static 3.1 UI may publish before the reviewed backend migration.
+      // Preserve thread switching until that endpoint is available.
+      if (response.status === 404) return true;
       if (response.status === 409) {
         alert("Holo needs you to clarify the pending correction or forget request before leaving this thread.");
       }

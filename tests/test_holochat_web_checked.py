@@ -507,6 +507,7 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
 
     assert "<span>HoloChat</span>" in html
     assert '<span id="brand-sub">3.1</span>' in html
+    assert 'if (response.status === 404) return true;' in html
     assert "#brand-sub { display: inline;" in html
     assert "<span>My Chats</span>" in html
     assert 'title="My Chats">My Chats</button>' in html

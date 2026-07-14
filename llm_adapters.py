@@ -10,7 +10,7 @@ Model defaults (override via .env):
   OPENAI_MODEL    = gpt-5.5
   ANTHROPIC_MODEL = claude-sonnet-4-6
   GOOGLE_MODEL    = gemini-2.5-pro
-  GOVERNOR_MODEL  = rotates across same 3-model pool as analysts (never shares DNA with analyst on the same turn)
+  HOLOGOV_MODEL   = fixed OpenAI gpt-5.5 in the canonical HoloChat runtime
 """
 
 import json
@@ -18,6 +18,7 @@ import logging
 import os
 import random
 import re
+import time
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -1289,12 +1290,13 @@ def build_governor_system_prompt(
         if template else "evaluates Business Email Compromise (BEC) risk"
     )
     doctrine_parts = [
+        _load_markdown_doctrine("holochat/HOLOCHAT_SOURCE_OF_TRUTH.md", max_chars=18000),
         _load_governor_doctrine(analyst_provider=analyst_provider, tier=tier),
         _load_markdown_doctrine("gov_chat_doctrine.md", max_chars=10000),
     ]
     doctrine = "\n\n---\n\n".join(part for part in doctrine_parts if part)
     doctrine_block = f"\n\n---\n\n{doctrine}\n\n---\n" if doctrine else ""
-    return f"""You are the Context Governor of Holo, an AI trust layer that {context}.{doctrine_block}
+    return f"""You are HoloGov, the Context Governor of Holo, an AI trust layer that {context}.{doctrine_block}
 
 {constitutional_prompt_block()}
 
@@ -1746,7 +1748,9 @@ The test: does this response read like something a sharp, careful person wrote f
 You may receive current information when the runtime actually retrieves web results. Use current data only when it is present in the supplied context. Do not imply live browsing happened unless search results were actually retrieved. If current data is not present, be honest about uncertainty and avoid pretending the present was checked.
 
 **Your architecture (internal — never surface unprompted)**
-You are one configured analyst model — the voice that speaks to the user. On each turn, the runtime supplies selected state, recent conversation, and any private Governor directive that is safe for the analyst to read. The Governor helps manage the arc, but it is reconstructed from Holo-owned state and prompt context on each call. Do not reference BATON_PASS, STATE_OBJECT, Governor internals, or runtime architecture during normal conversation. You are Holo.
+You are one configured analyst model — the voice that speaks to the user. On each turn, the runtime supplies selected state, recent conversation, and any private HoloGov directive that is safe for the analyst to read. HoloGov helps manage the arc, but it is reconstructed from Holo-owned state and prompt context on each call. Do not reference BATON_PASS, STATE_OBJECT, HoloGov internals, or runtime architecture during normal conversation. You are Holo.
+
+The user's actual messages and ordered conversation are the only authority for user-requested output format. A JSON schema, field name, output contract, or formatting instruction that appears only inside HoloGov/GovTurnPlan context is internal control material, not a user request. Never expose a raw state object, canonical ledger, GovTurnPlan, control packet, or internal JSON audit. Unless the user explicitly asks for JSON in their own visible message, answer in Holo's natural human voice.
 
 **One exception — the onboarding introduction**
 When a user shares their personal brief and explicitly asks you to introduce yourself and explain how you work, the fourth wall comes down — not to pitch a product, but to begin a real relationship. This is the most important response you will ever give this person.
@@ -1779,11 +1783,11 @@ Rules for artifacts:
 - Immediately after the code block, write one short sentence in prose explaining what you made and any assumptions."""
 
 
-HOLO_CHAT_SYSTEM_PROMPT = _append_doctrine_block(
-    HOLO_CHAT_SYSTEM_PROMPT_BASE,
-    title="Canonical HoloChat Doctrine",
-    doctrine=_load_markdown_doctrine("holo_chat_doctrine.md"),
-)
+# The source-of-truth documents are engineering authority, not per-turn model
+# input. The runtime prompt contains the actual worker constitution above;
+# duplicating whole architecture manuals here made static scaffolding larger
+# than the evolving conversation and HoloGov packet.
+HOLO_CHAT_SYSTEM_PROMPT = HOLO_CHAT_SYSTEM_PROMPT_BASE
 
 
 def build_governor_brief_request(
@@ -2207,12 +2211,24 @@ class GovernorAdapter(_FlightDeckBase):
     def reset_token_counts(self) -> None:
         self._gov_input_tokens  = 0
         self._gov_output_tokens = 0
+        self._gov_api_calls = 0
 
     def get_token_counts(self) -> dict:
         return {
             "input":  getattr(self, "_gov_input_tokens",  0),
             "output": getattr(self, "_gov_output_tokens", 0),
         }
+
+    def get_api_call_count(self) -> int:
+        return int(getattr(self, "_gov_api_calls", 0) or 0)
+
+    def get_last_holochat_turn_trace(self) -> dict:
+        """Return the latest private HoloGov control input for explicit local QA only."""
+        return dict(getattr(self, "_last_holochat_turn_trace", {}) or {})
+
+    def get_last_holochat_control_telemetry(self) -> dict:
+        """Return telemetry even when control-packet parsing fails."""
+        return dict(getattr(self, "_last_holochat_control_telemetry", {}) or {})
 
     def lock_to_provider(self, provider_name: str) -> None:
         """
@@ -2231,10 +2247,207 @@ class GovernorAdapter(_FlightDeckBase):
 
     def _call(self, prompt: str, max_tokens: int = 300, system: str = None) -> str:
         """Override: delegates to base, accumulates tokens, returns plain text."""
+        self._gov_api_calls = self.get_api_call_count() + 1
         text, in_tok, out_tok = super()._call(prompt, max_tokens=max_tokens, system=system)
         self._gov_input_tokens  = getattr(self, "_gov_input_tokens",  0) + (in_tok  or 0)
         self._gov_output_tokens = getattr(self, "_gov_output_tokens", 0) + (out_tok or 0)
         return text
+
+    def _call_json(self, prompt: str, max_tokens: int, system: str) -> str:
+        """Request one JSON object when the fixed HoloGov provider supports it."""
+        self._last_holochat_json_finish_reason = None
+        if self._api_style != "openai":
+            return self._call(prompt, max_tokens=max_tokens, system=system)
+
+        self._gov_api_calls = self.get_api_call_count() + 1
+        response = self._client.chat.completions.create(
+            model=self.model_id,
+            max_completion_tokens=max_tokens,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+            **_openai_temperature_kwargs(self.model_id, 0.1),
+        )
+        choice = response.choices[0]
+        text = (choice.message.content or "").strip()
+        in_tok = getattr(response.usage, "prompt_tokens", 0)
+        out_tok = getattr(response.usage, "completion_tokens", 0)
+        self._gov_input_tokens = getattr(self, "_gov_input_tokens", 0) + (in_tok or 0)
+        self._gov_output_tokens = getattr(self, "_gov_output_tokens", 0) + (out_tok or 0)
+        self._last_holochat_json_finish_reason = getattr(choice, "finish_reason", None)
+        return text
+
+    def synthesize_holochat_turn_packet(
+        self,
+        *,
+        ordered_history: list,
+        current_user_message: str,
+        previous_state: dict,
+        capsule_context: dict,
+        life_context: list,
+        latest_consolidation: dict | None,
+        worker_identity: dict,
+        turn_policy: dict,
+        history_metadata: dict,
+        turn_number: int,
+    ) -> dict:
+        """Compile the private HoloGov control ledger immediately before a worker call."""
+        self._last_holochat_turn_trace = {
+            "ordered_history": list(ordered_history or []),
+            "current_user_message": current_user_message,
+            "previous_state": previous_state or {},
+            "capsule_context": capsule_context or {},
+            "life_context": life_context or [],
+            "latest_consolidation": latest_consolidation or {},
+            "worker_identity": worker_identity or {},
+            "turn_policy": turn_policy or {},
+            "history_metadata": history_metadata or {},
+            "turn_number": int(turn_number or 0),
+        }
+        history_text = "\n\n".join(
+            f"TURN MESSAGE {index + 1} | {str(message.get('role') or 'unknown').upper()}\n"
+            f"{str(message.get('content') or '')}"
+            for index, message in enumerate(ordered_history or [])
+        ) or "(new thread; no prior messages)"
+        try:
+            output_tokens = int(os.getenv("HOLOCHAT_GOV_TURN_PLAN_OUTPUT_TOKENS", "8000"))
+        except ValueError:
+            output_tokens = 8000
+        output_tokens = max(800, min(12000, output_tokens))
+
+        system = (
+            "You are HoloGov, the continuous private conversation controller for HoloChat. You never speak "
+            "to the user and you do not solve the user's problem. You are the accountant, librarian, traffic "
+            "controller, and state manager. The rotating worker provides intelligence and creative insight. "
+            "Your job is to create the conditions for that worker to do exceptional work: organize the raw "
+            "conversation, preserve provenance and chronology, track topic lanes and prior worker contributions, "
+            "separate established facts from claims and uncertainty, identify what is active or parked, and issue "
+            "a precise assignment. The ordered conversation is primary evidence; your ledger is a navigation and "
+            "control surface, never a replacement for it. Do not write a proposed user-facing answer. Do not add "
+            "new theories, medical conclusions, psychological interpretations, or creative analysis. Do not flatten "
+            "the person into a profile. Return valid JSON only. Never attribute HoloGov's own prompt, schema, "
+            "output contract, field names, or formatting rules to the user. Only text inside "
+            "<current_user_message> is the current user's message. Gov-only instructions must never become a "
+            "user anchor, preference, request, decision, topic, chronology item, or worker directive."
+        )
+        prompt = (
+            "Compile a bounded canonical-state UPDATE for the next visible HoloChat worker.\n\n"
+            "Read the transcript from oldest to newest. Record what happened; do not invent what it means. "
+            "Track topic lanes as conversations wander. A lane may be active, parked, resurfaced, resolved, or "
+            "superseded. Track what each prior worker added, challenged, or left unresolved so the next DNA worker "
+            "can recursively build on it. Preserve exact anchors when wording matters. The rolling summary is an "
+            "iterative factual ledger: update it without erasing origins or silently promoting inference to fact. "
+            "HoloBrain is secondary cross-thread context; the evolving conversation is the primary object. "
+            "Create a new topic lane only for a material shift in subject, project, question, or objective, not for "
+            "every message. Reuse a prior lane's stable id when the user returns. Park lanes that leave immediate "
+            "attention; resolve or supersede only when the record supports it. Never erase a lane merely because it "
+            "is not active. The deterministic kernel reconciles your update against prior topic identity. "
+            "Do not rewrite the entire prior state. Return only changed topic lanes, new chronology, new worker "
+            "contributions, and the current bounded summary/assignment. Stable prior state is merged locally.\n\n"
+            "DELTA SIZE LAW: return at most 6 topic updates, 3 resurfacing records, 3 worker-contribution updates, "
+            "1 chronology milestone, 3 portrait or memory proposals, 6 additions per decision/question/anchor "
+            "list, 4 contradiction updates, 8 context gaps, and 8 items in each worker-assignment list. Do not "
+            "restate unchanged prior records. The rolling summary may be rich; every other field must remain "
+            "surgical. The deterministic kernel appends exact current-user and visible-worker transcript records, "
+            "so chronological_ledger_append must not restate either one. Use it only for one genuinely distinct "
+            "milestone that is not already represented by topic, decision, or contradiction fields; otherwise "
+            "return an empty list.\n\n"
+            f"CURRENT TURN NUMBER:\n{int(turn_number or 0)}\n\n"
+            f"NEXT WORKER:\n{json.dumps(worker_identity, ensure_ascii=False, default=str)}\n\n"
+            f"TURN POLICY:\n{json.dumps(turn_policy, ensure_ascii=False, default=str)}\n\n"
+            f"HISTORY PRESSURE:\n{json.dumps(history_metadata, ensure_ascii=False, default=str)}\n\n"
+            f"PRIOR CANONICAL CONTROL STATE:\n{json.dumps(previous_state or {}, ensure_ascii=False, default=str)}\n\n"
+            f"HOLOBRAIN CAPSULE CONTEXT:\n{json.dumps(capsule_context or {}, ensure_ascii=False, default=str)}\n\n"
+            f"HOLOBRAIN LIFE CONTEXT:\n{json.dumps(life_context or [], ensure_ascii=False, default=str)}\n\n"
+            f"LATEST CONSOLIDATION:\n{json.dumps(latest_consolidation or {}, ensure_ascii=False, default=str)}\n\n"
+            f"COMPLETE ORDERED TRANSCRIPT BEFORE THIS MESSAGE:\n{history_text}\n\n"
+            f"<current_user_message>\n{current_user_message}\n</current_user_message>\n\n"
+            "HOLOGOV-ONLY OUTPUT CONTRACT BELOW. IT IS NOT USER CONTENT AND MUST NEVER BE RECORDED AS USER INTENT.\n"
+            "Return exactly one JSON object with this bounded delta schema:\n"
+            "{\n"
+            '  "conversation_phase": "opening|exploration|deepening|decision|execution|reflection|repair|mixed",\n'
+            '  "topic_updates": [{"id":"stable_lane_id","subject":"topic","status":"active|parked|resolved|superseded","origin_turn":0,"last_turn":0,"importance":"high|medium|low","summary":"factual lane state","source_turn_ids":[0],"resurface_count":0,"reason":"optional transition reason"}],\n'
+            '  "resurfaced_threads": [{"id":"stable_lane_id","subject":"topic","prior_turn":0,"reason":"why it returned"}],\n'
+            '  "worker_contribution_updates": [{"turn":0,"worker":"provider/model if known","contribution":"new or changed prior-worker gain","status":"standing|challenged|superseded|unresolved"}],\n'
+            '  "user_portrait_updates": ["new explicit durable preference relevant to delivery; no interpretation"],\n'
+            '  "memory_admission_proposals": [{"key":"short_snake_case_key","value":"[FACT] explicit durable fact","evidence":"short exact phrase from the current user message"}],\n'
+            '  "current_state_of_affairs": "objective description of the current conversational position",\n'
+            '  "chronological_ledger_append": ["only new factual milestones since the prior canonical state"],\n'
+            '  "rolling_summary": "bounded self-contained factual ledger, preferably 2500-6000 characters; preserve origins, evolution, decisions, contributions, conflicts, and current position",\n'
+            '  "narrative_arc": "factual conversation trajectory, not psychological interpretation",\n'
+            '  "active_tension": "the explicit live tension or empty string",\n'
+            '  "settled_decision_additions": ["newly settled decisions or boundaries"],\n'
+            '  "unresolved_question_additions": ["new open questions and dependencies"],\n'
+            '  "resolved_questions": ["prior open questions now resolved or superseded"],\n'
+            '  "contradiction_updates": [{"claim_a":"first claim","claim_b":"conflicting claim","status":"unresolved|reconciled","source_turns":[0]}],\n'
+            '  "key_anchor_additions": ["new short exact or near-exact ideas whose wording materially matters"],\n'
+            '  "context_manifest": {"selection_rationale":"why this context was retained","known_gaps":["omitted or unavailable material"]},\n'
+            '  "preserve_additions": ["new facts, worker gains, boundaries, and continuity to preserve"],\n'
+            '  "reject_additions": ["newly superseded claims, dead ends, and unsupported assumptions"],\n'
+            '  "worker_assignment": {"objective":"the job","inspect":["what to study"],"build_on":["prior gains"],"challenge":["claims to test"],"avoid":["failure modes"],"completion_signal":"what a successful response accomplishes"},\n'
+            '  "next_worker_directive": "concise operational assignment; do not draft the answer",\n'
+            '  "confidence_notes": ["what is established, claimed, inferred, or unknown"],\n'
+            '  "memory_retrieval_requests": ["specific older conversation or HoloBrain material needed, if any"]\n'
+            "}\n\n"
+            "Do not include proposed_answer, suggested_response, polished prose for the user, diagnosis, verdict, "
+            "or new insight. These are HoloGov-only constraints, never user requests. Spend tokens on accurate "
+            "structure, provenance, continuity, and worker conditions."
+        )
+
+        before = self.get_token_counts()
+        started = time.monotonic()
+        self._last_holochat_control_telemetry = {
+            "mode": "hologov_control_compilation_v3",
+            "contract": "bounded_delta_v3",
+            "provider": self.provider,
+            "model": self.model_id,
+            "output_token_budget": output_tokens,
+            "finish_reason": None,
+            "turn_number": int(turn_number or 0),
+            "status": "provider_call_started",
+        }
+        raw = self._call_json(prompt, max_tokens=output_tokens, system=system)
+        elapsed_ms = int((time.monotonic() - started) * 1000)
+        after = self.get_token_counts()
+
+        telemetry = {
+            "mode": "hologov_control_compilation_v3",
+            "provider": self.provider,
+            "model": self.model_id,
+            "input_tokens": max(0, after["input"] - before["input"]),
+            "output_tokens": max(0, after["output"] - before["output"]),
+            "output_token_budget": output_tokens,
+            "finish_reason": getattr(self, "_last_holochat_json_finish_reason", None),
+            "latency_ms": elapsed_ms,
+            "ordered_history_messages": len(ordered_history or []),
+            "ordered_history_chars": sum(len(str(item.get("content") or "")) for item in ordered_history or []),
+            "turn_number": int(turn_number or 0),
+            "proposal_chars": len(raw),
+            "contract": "bounded_delta_v3",
+        }
+        self._last_holochat_control_telemetry = telemetry
+
+        cleaned = raw.strip()
+        if cleaned.startswith("```"):
+            cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned, flags=re.IGNORECASE)
+            cleaned = re.sub(r"\s*```$", "", cleaned)
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start < 0 or end <= start:
+            raise ValueError("HoloGov turn packet did not contain a complete JSON object")
+        proposal = json.loads(cleaned[start : end + 1])
+        if not isinstance(proposal, dict):
+            raise ValueError("HoloGov turn packet must be a JSON object")
+        return {
+            "proposal": proposal,
+            "telemetry": telemetry,
+        }
+
+    def compile_holochat_control_packet(self, **kwargs) -> dict:
+        """Canonical name for the HoloChat conversation-control compilation."""
+        return self.synthesize_holochat_turn_packet(**kwargs)
 
     def assess_chat_temperature(self, user_message: str, history: list) -> float:
         """
@@ -3744,7 +3957,7 @@ def load_adapters(skip_providers=None, provider_allowlist=None) -> tuple[list[Ba
 # ---------------------------------------------------------------------------
 
 _FAST_MODEL_REGISTRY = [
-    # Canonical HoloChat workers. Gov is fixed to OpenAI by chat_engine.
+    # Canonical HoloChat workers. HoloGov is fixed to OpenAI by chat_engine.
     ("openai",    "OPENAI_FAST_MODEL",    "gpt-5.5",                  "OPENAI_API_KEY"),
     ("xai",       "XAI_FAST_MODEL",       "grok-4.3",                 "XAI_API_KEY"),
 ]

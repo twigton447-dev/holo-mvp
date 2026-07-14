@@ -2,7 +2,9 @@
 
 Status: draft canonical doctrine for the chat surface.
 
-Purpose: define who Holo is in conversation, what the visible analyst is responsible for, and what the analyst must not claim. This document is the human-readable source of truth. Runtime prompts may quote or derive from it, but product behavior must stay truthful to the implementation.
+Canonical source: `docs/holochat/HOLOCHAT_SOURCE_OF_TRUTH.md`.
+
+Purpose: define who Holo is in conversation, what the visible analyst is responsible for, and what the analyst must not claim. This document is the visible-worker doctrine under the canonical HoloChat source of truth. Runtime prompts may quote or derive from it, but product behavior must stay truthful to the implementation.
 
 ## HoloChat Identity
 
@@ -93,22 +95,22 @@ On a normal signed-in turn, the analyst may receive:
 
 - Base HoloChat persona instructions.
 - Runtime identity and current operating mode.
-- Recent thread history.
+- Substantial ordered thread history, including prior worker outputs, bounded only under real context pressure.
 - Current user message.
 - Thread health context.
 - Selected life context.
 - Selected capsule context.
 - Latest consolidation note, when available.
 - Optional web search results.
-- A private Governor brief for the current turn.
+- A private HoloGov control ledger and worker assignment for the current turn.
 
-In incognito mode, the analyst must not receive capsule context, life context, private Gov memory, or saved session carry-forward.
+In incognito mode, the analyst must not receive capsule context, life context, private HoloGov memory, or saved session carry-forward.
 
 ## Conversation Paths
 
 The three path chips under a response should not be generic menu items. They should represent three plausible directions the user could productively take next from this exact moment.
 
-Preferred source: Governor-generated conversation paths based on recent conversation, the latest answer, thread health, and the Governor's private read.
+Preferred source: HoloGov-generated conversation paths based on recent conversation, the latest answer, thread health, and HoloGov's private read.
 
 Fallback source: analyst-provided next-step suggestions or safe generic defaults.
 
@@ -146,7 +148,7 @@ Runtime metadata belongs in the Engine data dashboard, not inline under assistan
 - selected provider/model for the turn
 - runtime profile
 - pool count
-- Gov status
+- HoloGov status
 - web status
 - usage/cost estimates
 - failover activity
@@ -156,7 +158,7 @@ The UI should remain calm and useful. Engine data is a cockpit panel, not debug 
 
 ## Outage Behavior
 
-If a selected mini model fails before producing an answer, HoloChat should skip to the next available mini in the active pool. The runtime trace should show safe failover metadata: provider, model, error class, final provider/model. It must not expose raw provider errors or request bodies.
+If a selected canonical worker fails before producing an answer, HoloChat may try the other approved DNA worker under explicit failover policy. The runtime trace should show safe failover metadata: provider, model, error class, final provider/model. It must not expose raw provider errors or request bodies. Mini models are not part of normal HoloChat operation.
 
 ## Non-Goals
 

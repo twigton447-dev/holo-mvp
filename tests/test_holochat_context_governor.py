@@ -328,3 +328,28 @@ def test_meaningful_delta_ignores_routine_turn_without_durable_change():
 
     assert has_meaningful_holobrain_delta(previous, candidate) is False
     assert candidate.rolling_summary == previous.rolling_summary
+
+
+def test_meaningful_delta_includes_hologov_canonical_ledger_changes():
+    previous = build_holochat_state(
+        session_id="session-1",
+        turn_number=1,
+        user_message="Open the architecture lane.",
+        response_text="ok",
+        hologov_control_ledger={"topic_registry": [{"id": "architecture", "status": "active"}]},
+    )
+    candidate = build_holochat_state(
+        session_id="session-1",
+        turn_number=2,
+        user_message="Add a second lane.",
+        response_text="ok",
+        previous_state=previous,
+        hologov_control_ledger={
+            "topic_registry": [
+                {"id": "architecture", "status": "active"},
+                {"id": "interface", "status": "parked"},
+            ]
+        },
+    )
+
+    assert has_meaningful_holobrain_delta(previous, candidate) is True

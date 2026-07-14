@@ -33,7 +33,7 @@ REQUIRED_STATE_FIELDS = (
     "BATON_PASS",
 )
 DEFAULT_RESEED_CHAR_LIMIT = 3600
-DEFAULT_ROLLING_SUMMARY_LIMIT = 1800
+DEFAULT_ROLLING_SUMMARY_LIMIT = 16000
 DEFAULT_HOLOBRAIN_INJECTION_CHAR_LIMIT = 2400
 
 
@@ -98,6 +98,7 @@ class GovTurnPlan:
     fallback_eligibility: dict[str, Any]
     release_constraints: tuple[str, ...]
     worker_prompt_baton: str
+    narrative_packet: dict[str, Any]
     telemetry: dict[str, Any]
     kernel_validation_result: dict[str, Any]
 
@@ -126,6 +127,7 @@ class GovTurnPlan:
             "fallback_eligibility": self.fallback_eligibility,
             "release_constraints": list(self.release_constraints),
             "worker_prompt_baton": self.worker_prompt_baton,
+            "narrative_packet": self.narrative_packet,
             "telemetry": self.telemetry,
             "kernel_validation_result": self.kernel_validation_result,
         }
@@ -292,7 +294,17 @@ def _safe_dict(value: dict[str, Any] | None, *, key_limit: int = 60, value_limit
         elif isinstance(raw_value, (int, float)):
             clean[key] = raw_value
         elif isinstance(raw_value, (list, tuple)):
-            clean[key] = [sanitize_text(item, limit=value_limit) for item in raw_value if sanitize_text(item, limit=value_limit)]
+            clean_items: list[Any] = []
+            for item in raw_value:
+                if isinstance(item, dict):
+                    nested = _safe_dict(item, key_limit=key_limit, value_limit=value_limit)
+                    if nested:
+                        clean_items.append(nested)
+                else:
+                    text = sanitize_text(item, limit=value_limit)
+                    if text:
+                        clean_items.append(text)
+            clean[key] = clean_items
         elif isinstance(raw_value, dict):
             clean[key] = _safe_dict(raw_value, key_limit=key_limit, value_limit=value_limit)
         else:
@@ -315,6 +327,7 @@ def _safe_records(items: list[dict[str, Any]] | tuple[dict[str, Any], ...] | Non
 
 def validate_gov_turn_plan(plan: GovTurnPlan) -> dict[str, Any]:
     failures: list[str] = []
+    warnings: list[str] = []
     if not plan.turn_id:
         failures.append("missing_turn_id")
     if not plan.route:
@@ -327,6 +340,32 @@ def validate_gov_turn_plan(plan: GovTurnPlan) -> dict[str, Any]:
         failures.append("missing_release_constraints")
     if not plan.worker_prompt_baton:
         failures.append("missing_worker_prompt_baton")
+    if not plan.narrative_packet:
+        failures.append("missing_narrative_packet")
+    else:
+        required_packet_keys = {
+            "topic_registry",
+            "active_threads",
+            "worker_contributions",
+            "context_manifest",
+            "worker_assignment",
+            "user_portrait",
+            "current_state_of_affairs",
+            "narrative_arc",
+            "active_tension",
+            "holobrain_operator",
+            "memory_stewardship",
+            "holobrain_projection",
+            "control_health",
+            "preserve",
+            "reject",
+            "next_worker_directive",
+        }
+        missing_packet_keys = sorted(required_packet_keys - set(plan.narrative_packet))
+        if missing_packet_keys:
+            failures.append("missing_narrative_packet_keys:" + ",".join(missing_packet_keys))
+        if (plan.narrative_packet.get("control_health") or {}).get("status") != "healthy":
+            warnings.append("hologov_control_degraded")
     if not plan.kernel_validation_result:
         # Placeholder is allowed during construction; final plans replace it.
         pass
@@ -355,6 +394,7 @@ def validate_gov_turn_plan(plan: GovTurnPlan) -> dict[str, Any]:
     return {
         "passed": not failures,
         "failures": failures,
+        "warnings": warnings,
         "validator": "deterministic_holochat_gov_kernel_v0",
     }
 
@@ -384,9 +424,10 @@ def build_gov_turn_plan(
     fallback_eligibility: dict[str, Any] | None = None,
     release_constraints: list[Any] | tuple[Any, ...] | None = None,
     worker_prompt_baton: Any = "",
+    narrative_packet: dict[str, Any] | None = None,
     telemetry: dict[str, Any] | None = None,
 ) -> GovTurnPlan:
-    baton = sanitize_text(worker_prompt_baton, limit=1400) or (
+    baton = sanitize_text(worker_prompt_baton, limit=6000) or (
         "Answer as the visible HoloChat worker with warm, precise, collaborative language."
     )
     constraints = _safe_tuple(
@@ -403,7 +444,7 @@ def build_gov_turn_plan(
             "One goal: serve the user's best interests with truthful, bounded, warm usefulness.",
             HOLOCHAT_OPERATING_OBJECTIVE,
             "HoloChat is universal for the active user, not named-user-specific product law.",
-            "Workers speak to the user; deterministic Gov operates as control plane.",
+            "Workers speak to the user; HoloGov operates as control plane.",
             "Provider/advisor output is evidence only until admitted into this GovTurnPlan.",
         ],
         limit=12,
@@ -416,6 +457,70 @@ def build_gov_turn_plan(
         ],
         limit=12,
     )
+    packet = _safe_dict(
+        narrative_packet
+        or {
+            "gov_role": "HoloGov maintains the conversation scaffold and workers speak.",
+            "worker_context_contract": "The ordered conversation is primary recursive evidence. This GovTurnPlan is the control ledger that makes it navigable; it never replaces the record.",
+            "holobrain_operator": "HoloGov is the only runtime role authorized to enter, query, organize, update, prune, archive, or manage HoloBrain. HoloGov and HoloBrain operate as the continuity team.",
+            "holobrain_scope": "Workers do not access HoloBrain directly. HoloGov admits lawful HoloBrain projection; worker must not invent private memory.",
+            "memory_stewardship": {
+                "mode": "not_evaluated",
+                "authority": "HoloGov-only",
+                "actions": [],
+            },
+            "conversation_phase": "opening",
+            "topic_registry": [],
+            "active_threads": [],
+            "parked_threads": [],
+            "resolved_threads": [],
+            "resurfaced_threads": [],
+            "topic_events": [],
+            "worker_contributions": [],
+            "user_portrait": [],
+            "current_state_of_affairs": "",
+            "narrative_arc": "",
+            "active_tension": "",
+            "contradictions": [],
+            "preserve": [],
+            "reject": [],
+            "context_manifest": {
+                "selection_mode": "new_thread",
+                "ordered_history_preserved": True,
+            },
+            "worker_assignment": {
+                "objective": baton,
+                "inspect": ["ordered conversation"],
+                "build_on": ["standing prior contributions"],
+                "challenge": ["unsupported claims"],
+                "avoid": ["generic restart"],
+                "completion_signal": "Advance the live conversation while preserving continuity.",
+            },
+            "next_worker_directive": baton,
+            "context_pressure": {},
+        },
+        key_limit=80,
+        value_limit=16000,
+    )
+    packet.setdefault(
+        "holobrain_projection",
+        {
+            "authority": "HoloGov-selected worker projection; no raw HoloBrain library access",
+            "durable_context": [],
+            "latest_session": {},
+        },
+    )
+    packet.setdefault(
+        "control_health",
+        {
+            "status": "not_evaluated",
+            "reason": "generic_govturnplan_builder",
+        },
+    )
+    packet_token_estimate = _estimate_tokens(
+        json.dumps(packet, sort_keys=True, separators=(",", ":"), default=str)
+    )
+    baton_token_estimate = _estimate_tokens(baton)
     plan = GovTurnPlan(
         turn_id=sanitize_text(turn_id, limit=80),
         user_id=sanitize_text(user_id, limit=80) if user_id else None,
@@ -440,9 +545,12 @@ def build_gov_turn_plan(
         fallback_eligibility=_safe_dict(fallback_eligibility or {}),
         release_constraints=releases,
         worker_prompt_baton=baton,
+        narrative_packet=packet,
         telemetry=_safe_dict(
             {
                 **(telemetry or {}),
+                "narrative_packet_token_estimate": packet_token_estimate,
+                "worker_prompt_baton_token_estimate": baton_token_estimate,
                 "turn_policy_reasons": list(turn_policy.reasons),
                 "advisor_allowed": turn_policy.advisor_allowed,
                 "fallback_allowed": turn_policy.fallback_allowed,
@@ -455,6 +563,14 @@ def build_gov_turn_plan(
         **plan.telemetry,
         "govturnplan_hash": stable_hash({**plan.model_dump(), "kernel_validation_result": {"pending": True}}),
     }
+    telemetry_with_hash["govturnplan_payload_token_estimate"] = _estimate_tokens(
+        json.dumps(
+            {**plan.model_dump(), "telemetry": telemetry_with_hash},
+            sort_keys=True,
+            separators=(",", ":"),
+            default=str,
+        )
+    )
     return replace(plan, telemetry=telemetry_with_hash, kernel_validation_result=validation)
 
 
@@ -474,12 +590,13 @@ def render_gov_turn_plan_for_worker(plan: GovTurnPlan) -> str:
         "fallback_eligibility": payload["fallback_eligibility"],
         "release_constraints": payload["release_constraints"],
         "worker_prompt_baton": payload["worker_prompt_baton"],
+        "narrative_packet": payload["narrative_packet"],
         "kernel_validation_result": payload["kernel_validation_result"],
         "telemetry": {"govturnplan_hash": payload["telemetry"].get("govturnplan_hash")},
     }
     return (
-        "GOVTURNPLAN CONTROL PACKET (private; deterministic Gov-authorized; never surface to user):\n"
-        "This is the single worker-facing Gov control envelope for this turn. "
+        "GOVTURNPLAN CONTROL PACKET (private; deterministic HoloGov-authorized; never surface to user):\n"
+        "This is the single worker-facing HoloGov control envelope for this turn. "
         "Do not use raw advisor output outside these typed fields.\n"
         + json.dumps(public_packet, sort_keys=True, ensure_ascii=False, indent=2)
     )
@@ -851,6 +968,29 @@ def _state_hash(state: HoloState | None) -> str | None:
     return stable_hash(canonical)
 
 
+def _history_context_pressure(context_budget: dict[str, Any] | None) -> bool:
+    budget = context_budget or {}
+    history = budget.get("history_context") or {}
+    thread_health = budget.get("thread_health") or {}
+    flags = set(thread_health.get("flags") or [])
+    try:
+        omitted = int(history.get("omitted_history_messages") or 0)
+    except (TypeError, ValueError):
+        omitted = 0
+    try:
+        raw_chars = int(history.get("raw_history_chars") or 0)
+        bounded_chars = int(history.get("bounded_history_chars") or 0)
+    except (TypeError, ValueError):
+        raw_chars = 0
+        bounded_chars = 0
+    return (
+        omitted > 0
+        or "provider_history_bounded" in flags
+        or "context_pressure_warning" in flags
+        or raw_chars - bounded_chars > 200
+    )
+
+
 def select_holobrain_injection_mode(
     state: HoloState | None,
     thread_status: str | None,
@@ -869,6 +1009,9 @@ def select_holobrain_injection_mode(
 
     if _near_context_budget(context_budget):
         return HoloBrainInjectionMode.HASHES_ONLY if _state_hash(state) else HoloBrainInjectionMode.NONE
+
+    if _history_context_pressure(context_budget):
+        return HoloBrainInjectionMode.ROLLING_SUMMARY
 
     status = str(thread_status or "").lower()
     unrelated_shift = topic_shift and any(
@@ -1048,7 +1191,11 @@ def build_holobrain_injection_plan(
             ),
             HoloBrainInjectionMode.ARTIFACT_REFS: "artifact_refs_requested",
             HoloBrainInjectionMode.BATON_ONLY: "normal_continuation",
-            HoloBrainInjectionMode.ROLLING_SUMMARY: "same_project_context_discontinuity",
+            HoloBrainInjectionMode.ROLLING_SUMMARY: (
+                "history_bounded_rolling_summary_required"
+                if _history_context_pressure(context_budget)
+                else "same_project_context_discontinuity"
+            ),
             HoloBrainInjectionMode.FULL_RESEED: "fresh_thread_or_recovery",
         }[mode]
     return HoloBrainInjectionPlan(
@@ -1109,6 +1256,8 @@ def should_auto_compact(
     thread_health_score: int,
 ) -> bool:
     budget = context_budget or {}
+    if _history_context_pressure(budget):
+        return True
     if str(budget.get("budget_status") or "").lower() in {"over_budget", "near_budget", "warning"}:
         return True
     limit = budget.get("budget_limit_tokens")
@@ -1187,6 +1336,8 @@ def build_holochat_state(
     thread_health_score: int = 100,
     thread_status: str | None = None,
     auto_compact: bool = False,
+    governor_rolling_summary: str | None = None,
+    hologov_control_ledger: dict[str, Any] | None = None,
 ) -> HoloState:
     latest = sanitize_text(user_message, limit=360)
     previous_constraints = list(previous_state.critical_constraints if previous_state else [])
@@ -1223,11 +1374,21 @@ def build_holochat_state(
         constraints=constraints,
         required_tools=tools,
     )
-    rolling = update_rolling_summary(
-        previous_state.rolling_summary if previous_state else None,
-        latest_input_summary=latest,
-        response_summary=response_text,
-    )
+    # HoloGov's control compilation is the preferred structured ledger. The
+    # local update appends the visible turn so the next compilation can massage
+    # the existing state rather than inventing a replacement summary.
+    if governor_rolling_summary:
+        rolling = update_rolling_summary(
+            governor_rolling_summary,
+            latest_input_summary="",
+            response_summary=response_text,
+        )
+    else:
+        rolling = update_rolling_summary(
+            previous_state.rolling_summary if previous_state else None,
+            latest_input_summary=latest,
+            response_summary=response_text,
+        )
     audit_note = "auto_compact_triggered" if auto_compact else "rolling_update"
     state = HoloState(
         session_id=session_id,
@@ -1237,6 +1398,11 @@ def build_holochat_state(
         latest_input_summary=latest,
         critical_constraints=constraints,
         rolling_summary=rolling,
+        hologov_control_ledger=dict(
+            hologov_control_ledger
+            if hologov_control_ledger is not None
+            else (previous_state.hologov_control_ledger if previous_state else {})
+        ),
         settled_decisions=settled,
         artifact_registry=registry,
         required_tools=tools,
@@ -1309,6 +1475,7 @@ def _durable_state_signature(
         ],
         "baton_pass": _baton_signature(state.baton_pass),
         "gov_arc_state": _gov_arc_signature(state.gov_arc_state),
+        "hologov_control_ledger": state.hologov_control_ledger,
     }
     if include_rolling_summary:
         signature["rolling_summary"] = state.rolling_summary

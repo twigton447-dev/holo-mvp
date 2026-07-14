@@ -105,13 +105,20 @@ class ChatSession:
     @property
     def thread_health_score(self) -> int:
         """
-        Starts at 100, decays with turns and accumulated message volume.
-        Roughly reaches 0 around 20 turns with moderate message length.
+        Measure actual context pressure, not conversation age. A long coherent
+        relationship is healthy until the ordered transcript approaches the
+        configured provider-history budget.
         """
-        base       = max(0, 100 - (self.turn_count * 5))
         total_chars = sum(len(m["content"]) for m in self.history)
-        char_decay  = min(40, total_chars // 2000)
-        return max(0, base - char_decay)
+        capacity = max(1, _adapter_history_char_limit())
+        soft_limit = int(capacity * 0.65)
+        if total_chars <= soft_limit:
+            return 100
+        if total_chars <= capacity:
+            pressure = (total_chars - soft_limit) / max(1, capacity - soft_limit)
+            return max(20, int(round(100 - (pressure * 80))))
+        overflow = (total_chars - capacity) / capacity
+        return max(0, int(round(20 - (overflow * 20))))
 
     @property
     def thread_health_reasons(self) -> list[str]:
@@ -144,10 +151,8 @@ class ChatSession:
             flags.append("context_pressure_warning")
         elif self.thread_health_level == "RED":
             flags.append("context_pressure_critical")
-        if self.turn_count >= DEFAULT_THREAD_HANDOFF_MIN_TURNS:
-            flags.append("handoff_min_turns_reached")
-        elif self.thread_health_level == "RED":
-            flags.append("red_from_length_decay_before_visible_handoff")
+        if self.thread_health_level == "RED":
+            flags.append("internal_autocompact_required")
         if metrics["raw_history_chars"] > DEFAULT_ADAPTER_HISTORY_CHARS:
             flags.append("provider_history_bounded")
         return flags
@@ -165,17 +170,16 @@ class ChatSession:
     def thread_status(self) -> str:
         score = self.thread_health_score
         if score <= 20:
-            return "ROTATION_RECOMMENDED"
+            return "AUTOCOMPACT_REQUIRED"
         elif score <= 60:
-            return "CLEANUP_RECOMMENDED"
+            return "CONTEXT_PRESSURE"
         return "HEALTHY"
 
     @property
     def user_alert(self) -> str:
-        status = self.thread_status
-        if status == "HEALTHY":
-            return "NONE"
-        return status
+        # Context pressure is an internal runtime responsibility. Do not make
+        # the user manage HoloChat's context window.
+        return "NONE"
 
 
 # ---------------------------------------------------------------------------
@@ -197,9 +201,12 @@ CANONICAL_HOLOCHAT_MODEL_BY_PROVIDER = {
 CANONICAL_HOLOCHAT_GOV_PROVIDER = "openai"
 DEFAULT_THREAD_HANDOFF_MIN_TURNS = 24
 THREAD_HANDOFF_FORCE_SCORE = 5
-DEFAULT_ADAPTER_HISTORY_MESSAGES = 8
-DEFAULT_ADAPTER_HISTORY_CHARS = 8_000
-DEFAULT_ADAPTER_HISTORY_MESSAGE_CHARS = 1_800
+# Preserve the original HoloChat behavior for normal-length threads: workers and
+# HoloGov receive the ordered conversation from the beginning. These are safety
+# rails for genuinely long threads, not an early-compaction policy.
+DEFAULT_ADAPTER_HISTORY_MESSAGES = 120
+DEFAULT_ADAPTER_HISTORY_CHARS = 160_000
+DEFAULT_ADAPTER_HISTORY_MESSAGE_CHARS = 20_000
 MATERIAL_HISTORY_BOUNDING_CHARS = 200
 HOLOCHAT_MEMORY_PACK_VERSION = "holochat_recovery_pack_v0.1"
 
@@ -268,6 +275,24 @@ def _truthy_env(name: str) -> bool:
 
 def _holochat_allow_noncanonical_policy() -> bool:
     return _truthy_env("HOLOCHAT_ALLOW_NONCANONICAL_POLICY")
+
+
+def _single_hologov_call_enabled(runtime_profile: str) -> bool:
+    """Canonical HoloChat uses one provider-backed HoloGov compilation per turn."""
+    configured = os.getenv("HOLOCHAT_SINGLE_GOV_CALL")
+    if configured is not None:
+        return str(configured).strip().lower() in {"1", "true", "yes", "on"}
+    return str(runtime_profile or "").strip().lower() == CANONICAL_RUNTIME_PROFILE
+
+
+def _deterministic_worker_temperature(turn_policy: Any) -> float:
+    tier = str(getattr(turn_policy, "tier", "standard") or "standard").lower()
+    return {
+        "max": 0.25,
+        "high": 0.3,
+        "standard": 0.5,
+        "fast": 0.35,
+    }.get(tier, 0.5)
 
 
 def _holochat_runtime_profile() -> str:
@@ -476,8 +501,17 @@ def _thread_handoff_ready(session: "ChatSession") -> bool:
     )
 
 
+def _visible_thread_handoff_enabled() -> bool:
+    """Fresh-thread prompts are an opt-in legacy escape hatch, not normal HC flow."""
+    return os.getenv("HOLOCHAT_VISIBLE_THREAD_HANDOFF_ENABLED", "0").strip().lower() in {
+        "1", "true", "yes", "on",
+    }
+
+
 def _handoff_for_context_window(session: "ChatSession") -> Optional[dict[str, Any]]:
-    """Return one visible fresh-thread prompt per session/context window."""
+    """Return an opt-in fresh-thread prompt; normal HoloChat threads do not end."""
+    if not _visible_thread_handoff_enabled():
+        return None
     if not _thread_handoff_ready(session) or session.handoff_suggested:
         return None
     session.handoff_suggested = True
@@ -561,7 +595,7 @@ def _apply_handoff_transition_to_session(
         unresolved_questions=previous.unresolved_questions[:5],
         settled_decisions=previous.settled_decisions[:5],
         last_gov_read=(
-            "Gov is starting a fresh thread from a compact handoff seed, "
+            "HoloGov is starting a fresh thread from a compact handoff seed, "
             "selected memory, and current user input."
         ),
         current_directive=previous.current_directive,
@@ -738,22 +772,36 @@ def _governor_trace_metadata(
     memory_writes_count: int,
     thread_health_level: str,
     conversation_paths_count: int = 0,
+    single_call_mode: bool = False,
+    api_calls_this_turn: int = 0,
 ) -> dict[str, Any]:
     web_status = (web_trace or {}).get("status") or "off"
     memory_status = "skipped_incognito" if incognito else (
         "checked" if memory_extraction_attempted else "not_available"
     )
     return {
-        "temperature": "checked",
+        "temperature": "deterministic_from_turn_policy" if single_call_mode else "checked",
         "web_decision": web_status,
         "web_search": web_trace or _web_trace(None, source="none", results=None),
-        "claim_check": "checked",
+        "claim_check": "worker_plus_release_guard" if single_call_mode else "checked",
         "memory_extraction": memory_status,
         "memory_writes_count": _safe_positive_int(memory_writes_count),
         "conversation_paths": "generated" if conversation_paths_count else "skipped",
         "conversation_paths_count": _safe_positive_int(conversation_paths_count),
         "thread_health": thread_health_level,
+        "single_hologov_call_mode": bool(single_call_mode),
+        "hologov_api_calls_this_turn": _safe_positive_int(api_calls_this_turn),
     }
+
+
+def _governor_api_call_count(governor: Any) -> int:
+    getter = getattr(governor, "get_api_call_count", None)
+    if not callable(getter):
+        return 0
+    try:
+        return _safe_positive_int(getter())
+    except Exception:
+        return 0
 
 
 def _safe_positive_int(value: Any) -> int:
@@ -772,6 +820,16 @@ def _positive_int_env(name: str, default: int, *, minimum: int = 0) -> int:
         return max(minimum, int(raw))
     except ValueError:
         return default
+
+
+def _hologov_control_compilation_enabled() -> bool:
+    raw = os.getenv(
+        "HOLOCHAT_GOV_CONTROL_PACKET_ENABLED",
+        os.getenv("HOLOCHAT_DEEP_GOV_ENABLED", "1"),
+    )
+    return raw.strip().lower() not in {
+        "0", "false", "no", "off",
+    }
 
 
 def _adapter_history_message_limit() -> int:
@@ -804,10 +862,12 @@ def _bounded_adapter_history(
     max_messages: Optional[int] = None,
     max_chars: Optional[int] = None,
     message_char_limit: Optional[int] = None,
+    query_text: Optional[str] = None,
 ) -> list[dict[str, str]]:
     """
-    Keep restored Supabase history available in session storage, but do not
-    flood provider calls with the full raw thread after recovery.
+    Preserve the complete ordered thread while it fits. Under real pressure,
+    retain origins, the newest turns, relevant older material, and explicit
+    decisions/corrections. The returned messages remain chronologically ordered.
     """
     if not history:
         return []
@@ -821,26 +881,80 @@ def _bounded_adapter_history(
     if message_limit <= 0 or char_limit <= 0:
         return []
 
-    selected: list[dict[str, str]] = []
-    used_chars = 0
-    for message in reversed(history[-message_limit:]):
+    sanitized: list[dict[str, str]] = []
+    for message in history:
         role = str(message.get("role") or "unknown")
         if role not in {"system", "user", "assistant", "tool"}:
             role = "unknown"
         content = _compact_text(message.get("content"), limit=per_message_limit)
         if not content:
             continue
-        entry_chars = len(role) + len(content) + 2
-        if selected and used_chars + entry_chars > char_limit:
-            break
-        if used_chars + entry_chars > char_limit:
-            content = _compact_text(content, limit=max(1, char_limit - len(role) - 2))
-            entry_chars = len(role) + len(content) + 2
-        selected.append({"role": role, "content": content})
+        sanitized.append({"role": role, "content": content})
+
+    if len(sanitized) <= message_limit and _history_char_count(sanitized) <= char_limit:
+        return sanitized
+
+    count = len(sanitized)
+    # Reserve real space for all three evidence classes. Small test/context
+    # windows must not let origins plus recency crowd out a relevant older turn.
+    origin_count = min(count, min(6, max(2, message_limit // 10)))
+    recent_count = min(count, max(4, min(32, message_limit // 2)))
+    origin_indices = list(range(origin_count))
+    recent_indices = list(range(max(0, count - recent_count), count))
+    protected = set(origin_indices) | set(recent_indices)
+
+    query_terms = {
+        term
+        for term in _re.findall(r"[a-z0-9][a-z0-9_-]{3,}", (query_text or "").lower())
+        if term not in {
+            "about", "after", "again", "could", "from", "have", "into", "just",
+            "should", "that", "their", "there", "these", "they", "this", "what",
+            "when", "where", "which", "with", "would", "your",
+        }
+    }
+    signal_terms = (
+        "decided", "decision", "agreed", "must", "never", "remember", "important",
+        "correction", "actually", "no longer", "changed", "constraint", "boundary",
+        "unresolved", "evidence", "source", "diagnosis", "commitment",
+    )
+    ranked_middle: list[tuple[int, int]] = []
+    for index, message in enumerate(sanitized):
+        if index in protected:
+            continue
+        lowered = message["content"].lower()
+        overlap = sum(1 for term in query_terms if term in lowered)
+        signal = sum(1 for term in signal_terms if term in lowered)
+        role_bonus = 1 if message["role"] == "assistant" else 0
+        ranked_middle.append((overlap * 12 + signal * 4 + role_bonus, index))
+    ranked_middle.sort(key=lambda item: (item[0], item[1]), reverse=True)
+
+    # Origins first, then reserve relevant older evidence, then fill with the
+    # newest turns. Sort only after admission so provider order stays canonical.
+    relevance_slots = max(1, message_limit - len(origin_indices) - len(recent_indices))
+    relevant_indices = [index for score, index in ranked_middle if score > 0][:relevance_slots]
+    priority = origin_indices + relevant_indices + list(reversed(recent_indices))
+    priority += [index for _, index in ranked_middle if index not in relevant_indices]
+    selected_by_index: dict[int, dict[str, str]] = {}
+    used_chars = 0
+    for index in priority:
+        if index in selected_by_index or len(selected_by_index) >= message_limit:
+            continue
+        message = sanitized[index]
+        entry_chars = len(message["role"]) + len(message["content"]) + 2
+        remaining = char_limit - used_chars
+        if entry_chars > remaining:
+            if remaining < 400:
+                continue
+            message = {
+                "role": message["role"],
+                "content": _compact_text(message["content"], limit=max(1, remaining - len(message["role"]) - 2)),
+            }
+            entry_chars = len(message["role"]) + len(message["content"]) + 2
+        selected_by_index[index] = message
         used_chars += entry_chars
         if used_chars >= char_limit:
             break
-    return list(reversed(selected))
+    return [selected_by_index[index] for index in sorted(selected_by_index)]
 
 
 def _history_char_count(history: list[dict[str, str]]) -> int:
@@ -861,7 +975,11 @@ def _adapter_history_budget_content(
     ]
     omitted = max(0, total_history_messages - len(adapter_history))
     if omitted:
-        lines.insert(0, f"[context_budget] omitted {omitted} older raw history message(s); use HOLOSTATE, HoloBrain, and the recovery memory pack for continuity.")
+        lines.insert(
+            0,
+            f"[context_budget] omitted {omitted} raw history message(s) under real context pressure; "
+            "origins, relevant older evidence, and recent turns were retained. Use the HoloGov control ledger to navigate gaps.",
+        )
     return "\n".join(lines)
 
 
@@ -886,6 +1004,8 @@ def _provider_history_metadata(
         "history_char_cap": _adapter_history_char_limit(),
         "history_message_char_cap": _adapter_history_message_char_limit(),
         "omitted_history_marker_inserted": bool(omitted),
+        "selection_mode": "full_ordered_history" if not omitted else "origin_relevant_recent",
+        "ordered_history_preserved": True,
     }
 
 
@@ -1115,7 +1235,7 @@ def _update_gov_arc_state(
         unresolved_questions=previous.unresolved_questions[:5],
         settled_decisions=previous.settled_decisions[:5],
         last_gov_read=(
-            f"Gov reconstructed the turn from Holo-owned state, recent history, "
+            f"HoloGov reconstructed the turn from Holo-owned state, recent history, "
             f"selected context, and a {web_status} web decision."
         ),
         current_directive=directive,
@@ -1157,7 +1277,7 @@ def _thread_handoff_markdown(
         lines.extend(f"- {_compact_text(item, limit=240)}" for item in open_threads[:8])
     else:
         lines.append("- None captured.")
-    lines.extend(["", "## Gov Read", _compact_text(session_note.get("captain_note") or gov_arc_state.last_gov_read or "", limit=700)])
+    lines.extend(["", "## HoloGov Read", _compact_text(session_note.get("captain_note") or gov_arc_state.last_gov_read or "", limit=700)])
     if life_context:
         lines.extend(["", "## Memory Nutrients"])
         for entry in life_context[:8]:
@@ -1326,9 +1446,10 @@ def _turn_runtime_metadata(
             "selected_provider": selected.get("provider"),
             "selected_model": selected.get("model"),
             "active_pool_count": len(metadata.get("active_pool") or []),
-            "context_delivery_mode": "capped_ranked_prompt_slice",
+            "context_delivery_mode": "ordered_full_history_then_hologov_compaction",
             "lossless_memory_store": "HoloBrain/capsule",
             "analyst_receives_full_memory": False,
+            "analyst_receives_ordered_thread_until_pressure": True,
             "structured_state_object_mode": "active",
             "gov_arc_state_mode": "active_private",
             "baton_pass_mode": "active",
@@ -1358,6 +1479,7 @@ def _turn_runtime_metadata(
             "history_context": context_budget.get("history_context", {}),
             "memory_context": context_budget.get("memory_context", {}),
             "holobrain_injection": context_budget.get("holobrain_injection", {}),
+            "hologov_packet": context_budget.get("hologov_packet", {}),
             "thread_health": context_budget.get("thread_health", {}),
         }
     if usage is not None:
@@ -1394,18 +1516,18 @@ def _runtime_metadata(
     active_pool: list[Any],
     bench_pool: list[Any],
 ) -> dict[str, Any]:
-    mini_only = runtime_profile in LEGACY_CANONICAL_RUNTIME_PROFILES
+    canonical_only = runtime_profile in LEGACY_CANONICAL_RUNTIME_PROFILES
     balanced = runtime_profile == BALANCED_RUNTIME_PROFILE
     frontier_assist_enabled = balanced and bool(bench_pool)
     return {
         "runtime_profile": runtime_profile,
         "active_pool": _adapter_pool_metadata(active_pool),
         "bench_pool": _adapter_pool_metadata(bench_pool),
-        "frontier_enabled": not mini_only,
+        "frontier_enabled": not canonical_only,
         "frontier_assist_enabled": frontier_assist_enabled,
         "fallback_policy": (
             "canonical_worker_only_no_frontier_fallback"
-            if mini_only
+            if canonical_only
             else ("gov_triggered_frontier_assist" if balanced else "bench_failover_enabled")
         ),
         "serial_call": True,
@@ -1532,7 +1654,7 @@ class HoloChatEngine:
         )
         advisor_pool = _rotation_analyst_adapters(self._adapters)
         fixed_governor = (os.getenv("HOLOCHAT_GOV_PROVIDER") or "openai").strip().lower() or None
-        self._gov_advisor = GovernorAdapter(advisor_pool, fixed_governor=fixed_governor) # provider advisor; deterministic Gov admits its proposals
+        self._gov_advisor = GovernorAdapter(advisor_pool, fixed_governor=fixed_governor) # provider advisor; deterministic HoloGov admits its proposals
         self._governor = self._gov_advisor  # legacy test/API alias; not canonical authority
         self._brain    = ProjectBrain()
         self._holo_context_builder = HoloContextBuilder()
@@ -1541,7 +1663,7 @@ class HoloChatEngine:
             f"HoloChatEngine initialized. Runtime profile: {self._runtime_profile} | Active: "
             + ", ".join(a.provider for a in self._adapters)
             + (" | Bench: " + ", ".join(a.provider for a in self._bench) if self._bench else "")
-            + " | deterministic Gov Kernel ready | GovAdvisor ready"
+            + " | deterministic HoloGov Kernel ready | GovAdvisor ready"
         )
 
     def _gov_advisor_adapter(self):
@@ -1618,8 +1740,12 @@ class HoloChatEngine:
         adapter = _select_analyst_adapter(session, self._adapters)
         initial_adapter = adapter
         session.turn_count     += 1
-        adapter_history = _bounded_adapter_history(session.history)
+        adapter_history = _bounded_adapter_history(session.history, query_text=user_message)
         gov_advisor = self._gov_advisor_adapter()
+        single_hologov_call = _single_hologov_call_enabled(
+            getattr(self, "_runtime_profile", "")
+        )
+        gov_api_calls_before = _governor_api_call_count(gov_advisor)
         turn_policy = deterministic_turn_policy(
             user_message,
             history=session.history,
@@ -1637,28 +1763,49 @@ class HoloChatEngine:
             session.governor_rotation_threshold = random.randint(7, 11)
             if session.turn_count > 1:
                 logger.info(
-                    f"Governor rotated → {session.governor_provider} "
+                    f"HoloGov rotated → {session.governor_provider} "
                     f"(next rotation in {session.governor_rotation_threshold} turns)"
                 )
         else:
             gov_advisor.lock_to_provider(session.governor_provider)
 
-        # Provider advisor proposes instruments; deterministic Gov bounds/adopts.
-        advisor_temperature  = gov_advisor.assess_chat_temperature(user_message, session.history)
-        temperature = max(0.2, min(0.9, float(advisor_temperature or 0.5)))
-        if turn_policy.tier in {"high", "max"}:
-            temperature = min(temperature, 0.35)
-        elif turn_policy.tier == "fast":
-            temperature = min(temperature, 0.4)
-        governor_search_query = gov_advisor.should_search(user_message, session.history)
-
-        # Governor thinks about the human — skipped in incognito (would introduce bias)
-        raw_thought = None if incognito else gov_advisor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
-        thought_admission = admit_advisor_surface_thought(raw_thought)
-        thought = thought_admission.value if thought_admission.admitted else None
-        raw_tenor = None if incognito else gov_advisor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
-        tenor_admission = admit_advisor_prompt_directive(raw_tenor, user_message=user_message) if raw_tenor or not incognito else None
-        tenor = tenor_admission.value if tenor_admission and tenor_admission.admitted else None
+        # Canonical HoloChat spends its single HoloGov call on the rich typed
+        # packet immediately before the worker. Supporting controls stay local.
+        if single_hologov_call:
+            temperature = _deterministic_worker_temperature(turn_policy)
+            governor_search_query = None
+            raw_thought = None
+            thought_admission = admit_advisor_surface_thought(None)
+            thought = None
+            raw_tenor = None
+            tenor_admission = None
+            tenor = None
+        else:
+            advisor_temperature = gov_advisor.assess_chat_temperature(user_message, session.history)
+            temperature = max(0.2, min(0.9, float(advisor_temperature or 0.5)))
+            if turn_policy.tier in {"high", "max"}:
+                temperature = min(temperature, 0.35)
+            elif turn_policy.tier == "fast":
+                temperature = min(temperature, 0.4)
+            governor_search_query = gov_advisor.should_search(user_message, session.history)
+            raw_thought = None if incognito else gov_advisor.surface_thought(
+                session.history,
+                capsule_context,
+                baton_pass=_health_context(session),
+            )
+            thought_admission = admit_advisor_surface_thought(raw_thought)
+            thought = thought_admission.value if thought_admission.admitted else None
+            raw_tenor = None if incognito else gov_advisor.assess_tenor(
+                session.history,
+                capsule_context,
+                turn_count=session.turn_count,
+                analyst_provider=adapter.provider,
+            )
+            tenor_admission = admit_advisor_prompt_directive(
+                raw_tenor,
+                user_message=user_message,
+            ) if raw_tenor or not incognito else None
+            tenor = tenor_admission.value if tenor_admission and tenor_admission.admitted else None
         _add_timing(timings, "governor_pre_ms", gov_pre_timer)
 
         web_timer = _timer_start()
@@ -1762,22 +1909,12 @@ class HoloChatEngine:
                 session.auto_reseed_applied = True
                 session.auto_reseed_hash = stable_hash(holochat_state_block)
 
-        # Inject runtime identity + thread-health context + portrait + working memory.
-        # A candidate-specific GovTurnPlan is appended immediately before each
-        # visible worker provider call, after deterministic fallback state is known.
-        # Incognito: keeps runtime identity but strips memory context.
+        # Stable worker identity stays small. HoloGov alone reads HoloBrain and
+        # state; the candidate-specific GovTurnPlan carries the admitted projection
+        # immediately before the visible worker call.
         base_system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
-        if not incognito:
-            base_system_prompt += (
-                "\n\n" + _health_context(session)
-                + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
-                + ("\n\n" + holochat_state_block if holochat_state_block else "")
-                + ("\n\n" + _holochat_recovery_memory_pack() if _holochat_recovery_memory_pack() else "")
-                + ("\n\n" + _thread_handoff_transition_block(active_handoff_transition) if active_handoff_transition else "")
-                + ("\n\n" + _life_context_block(life_context) if life_context else "")
-                + ("\n\n" + _last_session_block(last_session) if last_session else "")
-                + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
-            )
+        if not incognito and active_handoff_transition:
+            base_system_prompt += "\n\n" + _thread_handoff_transition_block(active_handoff_transition)
         gov_turn_plan = None
         gov_turn_plan_block = ""
         context_budget = None
@@ -1809,13 +1946,14 @@ class HoloChatEngine:
                 logger.warning("HoloChat 4DNA shadow trace failed: %s", exc)
         _add_timing(timings, "context_assembly_ms", context_timer)
 
-        # Call the adapter. If the selected mini is down, skip forward through
-        # the active pool before falling back to any bench pool in non-mini profiles.
+        # Call the adapter. If the selected worker is down, skip forward through
+        # the active pool before falling back to any bench pool in non-canonical profiles.
         analyst_timer = _timer_start()
         failover_attempts: list[dict[str, Optional[str]]] = []
         last_err: Optional[Exception] = None
         response_text = ""
         in_tok = out_tok = 0
+        control_compilation_cache: dict[str, Any] = {}
         candidate_order = _adapter_candidate_order_for_attachments(self._adapters, adapter, images)
         for candidate in candidate_order:
             try:
@@ -1829,6 +1967,7 @@ class HoloChatEngine:
                     tenor=tenor,
                     tenor_admission=tenor_admission,
                     thought_admission=thought_admission,
+                    user_message=user_message,
                     search_query=search_query,
                     search_results=search_results,
                     web_trace=web_trace,
@@ -1841,6 +1980,7 @@ class HoloChatEngine:
                     holobrain_injection_plan=holobrain_injection_plan,
                     frontier_assist=frontier_assist,
                     worker_fallback_active=bool(failover_attempts),
+                    control_compilation_cache=control_compilation_cache,
                 )
                 if not candidate_plan.kernel_validation_result.get("passed"):
                     failures = ",".join(candidate_plan.kernel_validation_result.get("failures") or [])
@@ -1863,6 +2003,7 @@ class HoloChatEngine:
                     holochat_state_block=holochat_state_block,
                     holobrain_injection_plan=holobrain_injection_plan,
                     gov_turn_plan_block=candidate_plan_block,
+                    gov_turn_plan=candidate_plan,
                 )
                 response_text, in_tok, out_tok = candidate.chat_call(
                     candidate_system_prompt, adapter_history, enriched_message, temperature,
@@ -1903,6 +2044,7 @@ class HoloChatEngine:
                     tenor=tenor,
                     tenor_admission=tenor_admission,
                     thought_admission=thought_admission,
+                    user_message=user_message,
                     search_query=search_query,
                     search_results=search_results,
                     web_trace=web_trace,
@@ -1915,6 +2057,7 @@ class HoloChatEngine:
                     holobrain_injection_plan=holobrain_injection_plan,
                     frontier_assist=frontier_assist,
                     worker_fallback_active=True,
+                    control_compilation_cache=control_compilation_cache,
                 )
                 if not fallback_plan.kernel_validation_result.get("passed"):
                     failures = ",".join(fallback_plan.kernel_validation_result.get("failures") or [])
@@ -1937,6 +2080,7 @@ class HoloChatEngine:
                     holochat_state_block=holochat_state_block,
                     holobrain_injection_plan=holobrain_injection_plan,
                     gov_turn_plan_block=fallback_plan_block,
+                    gov_turn_plan=fallback_plan,
                 )
                 response_text, in_tok, out_tok = fallback.chat_call(
                     fallback_system_prompt, adapter_history, enriched_message, temperature,
@@ -1970,11 +2114,13 @@ class HoloChatEngine:
                 holo4dna_shadow.trace.extra_metadata["runtime_analyst_after_failover"] = actual_analyst
 
         gov_post_timer = _timer_start()
-        # Hallucination check — Governor scans for specific low-confidence claims
-        # and verifies them against live search. Silent on clean responses.
-        response_text, flagged_claims = gov_advisor.verify_claims(
-            response_text, web_search.search
-        )
+        # Canonical mode does not make a hidden post-worker HoloGov call. The
+        # worker, admitted web context, and deterministic release gate own release.
+        flagged_claims = []
+        if not single_hologov_call:
+            response_text, flagged_claims = gov_advisor.verify_claims(
+                response_text, web_search.search
+            )
         if flagged_claims:
             correction_admission = admit_advisor_claim_corrections(flagged_claims)
             corrections = list(correction_admission.value or []) if correction_admission.admitted else []
@@ -1985,18 +2131,19 @@ class HoloChatEngine:
         release_decision = deterministic_visible_release(user_message, response_text)
         response_text = release_decision.text
 
-        path_generator = getattr(gov_advisor, "generate_conversation_paths", None)
         conversation_paths = []
-        if path_generator and not incognito:
-            conversation_paths = path_generator(
-                history=session.history,
-                capsule_context=capsule_context,
-                user_message=user_message,
-                response_text=response_text,
-                tenor=tenor or "",
-                thread_health_level=session.thread_health_level,
-                gov_arc_state=session.gov_arc_state.model_dump(mode="json"),
-            )
+        if not single_hologov_call:
+            path_generator = getattr(gov_advisor, "generate_conversation_paths", None)
+            if path_generator and not incognito:
+                conversation_paths = path_generator(
+                    history=session.history,
+                    capsule_context=capsule_context,
+                    user_message=user_message,
+                    response_text=response_text,
+                    tenor=tenor or "",
+                    thread_health_level=session.thread_health_level,
+                    gov_arc_state=session.gov_arc_state.model_dump(mode="json"),
+                )
         _add_timing(timings, "governor_post_ms", gov_post_timer)
 
         # Extract and save any HTML artifacts — after claims check, before history commit
@@ -2022,9 +2169,15 @@ class HoloChatEngine:
         if capsule_id and not incognito:
             memory_extraction_attempted = True
             gov_post_timer = _timer_start()
-            proposed_updates = gov_advisor.extract_context_updates(session.history, capsule_context)
-            memory_admission = admit_advisor_memory_updates(proposed_updates)
-            updates = dict(memory_admission.value or {}) if memory_admission.admitted else {}
+            if single_hologov_call:
+                updates = _memory_updates_from_hologov_plan(
+                    gov_turn_plan,
+                    user_message=user_message,
+                )
+            else:
+                proposed_updates = gov_advisor.extract_context_updates(session.history, capsule_context)
+                memory_admission = admit_advisor_memory_updates(proposed_updates)
+                updates = dict(memory_admission.value or {}) if memory_admission.admitted else {}
             for key, value in updates.items():
                 self._brain.set_capsule_context(capsule_id, key, value)
             memory_writes_count = len(updates)
@@ -2038,7 +2191,7 @@ class HoloChatEngine:
             capsule_id=capsule_id,
             incognito=incognito,
             context_budget=context_budget,
-        ):
+        ) and not single_hologov_call:
             def _consolidate():
                 try:
                     proposed_result = gov_advisor.consolidate_session(
@@ -2068,17 +2221,29 @@ class HoloChatEngine:
 
         # Governor names the thread after turn 2 — enough context to know the topic
         if capsule_id and session.turn_count == 2 and not incognito:
-            _hist = list(session.history)
-            _sid  = session.session_id
-            _cid  = capsule_id
-            def _name_thread():
-                try:
-                    name_admission = admit_advisor_thread_name(gov_advisor.name_session(_hist))
-                    if name_admission.admitted and name_admission.value:
-                        self._brain.update_session_name(_cid, _sid, name_admission.value)
-                except Exception as e:
-                    logger.warning(f"Thread naming failed: {e}")
-            threading.Thread(target=_name_thread, daemon=True).start()
+            if single_hologov_call:
+                packet = (gov_turn_plan.narrative_packet or {}) if gov_turn_plan else {}
+                active_topics = packet.get("active_threads") or packet.get("topic_registry") or []
+                proposed_name = (
+                    _compact_text(active_topics[0].get("subject"), limit=60)
+                    if active_topics and isinstance(active_topics[0], dict)
+                    else _compact_text(user_message, limit=60)
+                )
+                name_admission = admit_advisor_thread_name(proposed_name)
+                if name_admission.admitted and name_admission.value:
+                    self._brain.update_session_name(capsule_id, session.session_id, name_admission.value)
+            else:
+                _hist = list(session.history)
+                _sid  = session.session_id
+                _cid  = capsule_id
+                def _name_thread():
+                    try:
+                        name_admission = admit_advisor_thread_name(gov_advisor.name_session(_hist))
+                        if name_admission.admitted and name_admission.value:
+                            self._brain.update_session_name(_cid, _sid, name_admission.value)
+                    except Exception as e:
+                        logger.warning(f"Thread naming failed: {e}")
+                threading.Thread(target=_name_thread, daemon=True).start()
 
         # Persist to Supabase — capsule_id links session to user permanently
         persistence_timer = _timer_start()
@@ -2116,30 +2281,46 @@ class HoloChatEngine:
             thread_health_score=session.thread_health_score,
         )
         holobrain_state_persisted = False
-        if not incognito:
-            previous_holobrain_state = session.holochat_state
-            next_holobrain_state = build_holochat_state(
-                session_id=session.session_id,
-                capsule_id=capsule_id,
-                turn_number=session.turn_count,
+        previous_holobrain_state = session.holochat_state
+        next_holobrain_state = build_holochat_state(
+            session_id=session.session_id,
+            capsule_id=None if incognito else capsule_id,
+            turn_number=session.turn_count,
+            user_message=user_message,
+            response_text=response_text,
+            previous_state=session.holochat_state,
+            artifacts_saved=artifacts_saved,
+            required_tools=_required_tools_for_turn(search_query, search_results),
+            gov_arc_state=session.gov_arc_state,
+            thread_health_score=session.thread_health_score,
+            thread_status=session.thread_status,
+            auto_compact=state_auto_compact,
+            governor_rolling_summary=(
+                (gov_turn_plan.narrative_packet or {}).get("rolling_summary")
+                if gov_turn_plan is not None
+                else None
+            ),
+            hologov_control_ledger=_hologov_control_ledger_from_plan(
+                gov_turn_plan,
                 user_message=user_message,
                 response_text=response_text,
-                previous_state=session.holochat_state,
-                artifacts_saved=artifacts_saved,
-                required_tools=_required_tools_for_turn(search_query, search_results),
-                gov_arc_state=session.gov_arc_state,
-                thread_health_score=session.thread_health_score,
-                thread_status=session.thread_status,
-                auto_compact=state_auto_compact,
-            )
+                worker_identity=_adapter_identity_dict(adapter),
+                turn_number=session.turn_count,
+            ),
+        )
+        session.holochat_state = next_holobrain_state
+        if not incognito:
             holobrain_state_persisted = has_meaningful_holobrain_delta(
                 previous_holobrain_state,
                 next_holobrain_state,
             )
-            session.holochat_state = next_holobrain_state
             if holobrain_state_persisted:
                 _persist_holochat_state(self._brain, capsule_id, session.holochat_state)
 
+        gov_api_calls_this_turn = max(
+            0,
+            _governor_api_call_count(gov_advisor) - gov_api_calls_before,
+        )
         usage = _turn_usage_metadata(
             analyst_adapter=adapter,
             context_budget=context_budget,
@@ -2166,6 +2347,8 @@ class HoloChatEngine:
                 memory_writes_count=memory_writes_count,
                 conversation_paths_count=len(conversation_paths),
                 thread_health_level=session.thread_health_level,
+                single_call_mode=single_hologov_call,
+                api_calls_this_turn=gov_api_calls_this_turn,
             ),
             gov_arc_state=session.gov_arc_state,
             frontier_assist=frontier_assist,
@@ -2265,8 +2448,12 @@ class HoloChatEngine:
         adapter = _select_analyst_adapter(session, self._adapters)
         initial_adapter = adapter
         session.turn_count     += 1
-        adapter_history = _bounded_adapter_history(session.history)
+        adapter_history = _bounded_adapter_history(session.history, query_text=user_message)
         gov_advisor = self._gov_advisor_adapter()
+        single_hologov_call = _single_hologov_call_enabled(
+            getattr(self, "_runtime_profile", "")
+        )
+        gov_api_calls_before = _governor_api_call_count(gov_advisor)
         turn_policy = deterministic_turn_policy(
             user_message,
             history=session.history,
@@ -2281,19 +2468,41 @@ class HoloChatEngine:
         else:
             gov_advisor.lock_to_provider(session.governor_provider)
 
-        advisor_temperature  = gov_advisor.assess_chat_temperature(user_message, session.history)
-        temperature = max(0.2, min(0.9, float(advisor_temperature or 0.5)))
-        if turn_policy.tier in {"high", "max"}:
-            temperature = min(temperature, 0.35)
-        elif turn_policy.tier == "fast":
-            temperature = min(temperature, 0.4)
-        governor_search_query = gov_advisor.should_search(user_message, session.history)
-        raw_thought  = None if incognito else gov_advisor.surface_thought(session.history, capsule_context, baton_pass=_health_context(session))
-        thought_admission = admit_advisor_surface_thought(raw_thought)
-        thought      = thought_admission.value if thought_admission.admitted else None
-        raw_tenor    = None if incognito else gov_advisor.assess_tenor(session.history, capsule_context, turn_count=session.turn_count, analyst_provider=adapter.provider)
-        tenor_admission = admit_advisor_prompt_directive(raw_tenor, user_message=user_message) if raw_tenor or not incognito else None
-        tenor        = tenor_admission.value if tenor_admission and tenor_admission.admitted else None
+        if single_hologov_call:
+            temperature = _deterministic_worker_temperature(turn_policy)
+            governor_search_query = None
+            raw_thought = None
+            thought_admission = admit_advisor_surface_thought(None)
+            thought = None
+            raw_tenor = None
+            tenor_admission = None
+            tenor = None
+        else:
+            advisor_temperature = gov_advisor.assess_chat_temperature(user_message, session.history)
+            temperature = max(0.2, min(0.9, float(advisor_temperature or 0.5)))
+            if turn_policy.tier in {"high", "max"}:
+                temperature = min(temperature, 0.35)
+            elif turn_policy.tier == "fast":
+                temperature = min(temperature, 0.4)
+            governor_search_query = gov_advisor.should_search(user_message, session.history)
+            raw_thought = None if incognito else gov_advisor.surface_thought(
+                session.history,
+                capsule_context,
+                baton_pass=_health_context(session),
+            )
+            thought_admission = admit_advisor_surface_thought(raw_thought)
+            thought = thought_admission.value if thought_admission.admitted else None
+            raw_tenor = None if incognito else gov_advisor.assess_tenor(
+                session.history,
+                capsule_context,
+                turn_count=session.turn_count,
+                analyst_provider=adapter.provider,
+            )
+            tenor_admission = admit_advisor_prompt_directive(
+                raw_tenor,
+                user_message=user_message,
+            ) if raw_tenor or not incognito else None
+            tenor = tenor_admission.value if tenor_admission and tenor_admission.admitted else None
         _add_timing(timings, "governor_pre_ms", gov_pre_timer)
 
         web_timer = _timer_start()
@@ -2388,20 +2597,11 @@ class HoloChatEngine:
                 session.auto_reseed_applied = True
                 session.auto_reseed_hash = stable_hash(holochat_state_block)
 
-        # Build the stable prompt body once, then append a candidate-specific
-        # GovTurnPlan immediately before each streaming worker call.
+        # Build the small stable prompt body once. HoloGov's candidate-specific
+        # plan is the only state/memory projection sent to the streaming worker.
         base_system_prompt = HOLO_CHAT_SYSTEM_PROMPT + "\n\n" + runtime_identity
-        if not incognito:
-            base_system_prompt += (
-                "\n\n" + _health_context(session)
-                + "\n\n" + _gov_arc_state_block(session.gov_arc_state)
-                + ("\n\n" + holochat_state_block if holochat_state_block else "")
-                + ("\n\n" + _holochat_recovery_memory_pack() if _holochat_recovery_memory_pack() else "")
-                + ("\n\n" + _thread_handoff_transition_block(active_handoff_transition) if active_handoff_transition else "")
-                + ("\n\n" + _life_context_block(life_context) if life_context else "")
-                + ("\n\n" + _last_session_block(last_session) if last_session else "")
-                + ("\n\n" + _capsule_context_block(capsule_context) if capsule_context else "")
-            )
+        if not incognito and active_handoff_transition:
+            base_system_prompt += "\n\n" + _thread_handoff_transition_block(active_handoff_transition)
         gov_turn_plan = None
         gov_turn_plan_block = ""
         context_budget = None
@@ -2445,6 +2645,7 @@ class HoloChatEngine:
         failover_attempts: list[dict[str, Optional[str]]] = []
         last_err: Optional[Exception] = None
         stream_completed = False
+        control_compilation_cache: dict[str, Any] = {}
         candidate_order = _adapter_candidate_order_for_attachments(self._adapters, adapter, images)
         for candidate in candidate_order:
             candidate_chunks: list[str] = []
@@ -2460,6 +2661,7 @@ class HoloChatEngine:
                     tenor=tenor,
                     tenor_admission=tenor_admission,
                     thought_admission=thought_admission,
+                    user_message=user_message,
                     search_query=search_query,
                     search_results=search_results,
                     web_trace=web_trace,
@@ -2472,6 +2674,7 @@ class HoloChatEngine:
                     holobrain_injection_plan=holobrain_injection_plan,
                     frontier_assist=frontier_assist,
                     worker_fallback_active=bool(failover_attempts),
+                    control_compilation_cache=control_compilation_cache,
                 )
                 if not candidate_plan.kernel_validation_result.get("passed"):
                     failures = ",".join(candidate_plan.kernel_validation_result.get("failures") or [])
@@ -2494,6 +2697,7 @@ class HoloChatEngine:
                     holochat_state_block=holochat_state_block,
                     holobrain_injection_plan=holobrain_injection_plan,
                     gov_turn_plan_block=candidate_plan_block,
+                    gov_turn_plan=candidate_plan,
                 )
                 for chunk in candidate.stream_chat_call(
                     candidate_system_prompt, adapter_history, enriched_message, temperature, images=images or None
@@ -2549,8 +2753,10 @@ class HoloChatEngine:
                 holo4dna_shadow.trace.extra_metadata["runtime_analyst_after_failover"] = actual_analyst
 
         gov_post_timer = _timer_start()
-        # Post-stream: claims check (may append a correction to response_text)
-        response_text, flagged_claims = gov_advisor.verify_claims(response_text, web_search.search)
+        # Canonical streaming uses the same one-call HoloGov contract.
+        flagged_claims = []
+        if not single_hologov_call:
+            response_text, flagged_claims = gov_advisor.verify_claims(response_text, web_search.search)
         if flagged_claims:
             correction_admission = admit_advisor_claim_corrections(flagged_claims)
             corrections = list(correction_admission.value or []) if correction_admission.admitted else []
@@ -2563,18 +2769,19 @@ class HoloChatEngine:
         if response_text:
             yield response_text
 
-        path_generator = getattr(gov_advisor, "generate_conversation_paths", None)
         conversation_paths = []
-        if path_generator and not incognito:
-            conversation_paths = path_generator(
-                history=session.history,
-                capsule_context=capsule_context,
-                user_message=user_message,
-                response_text=response_text,
-                tenor=tenor or "",
-                thread_health_level=session.thread_health_level,
-                gov_arc_state=session.gov_arc_state.model_dump(mode="json"),
-            )
+        if not single_hologov_call:
+            path_generator = getattr(gov_advisor, "generate_conversation_paths", None)
+            if path_generator and not incognito:
+                conversation_paths = path_generator(
+                    history=session.history,
+                    capsule_context=capsule_context,
+                    user_message=user_message,
+                    response_text=response_text,
+                    tenor=tenor or "",
+                    thread_health_level=session.thread_health_level,
+                    gov_arc_state=session.gov_arc_state.model_dump(mode="json"),
+                )
         _add_timing(timings, "governor_post_ms", gov_post_timer)
 
         # Commit history
@@ -2593,13 +2800,23 @@ class HoloChatEngine:
             self._brain.set_capsule_context(capsule_id, "last_session_id", session.session_id)
             self._brain.append_session_history(capsule_id, session.session_id, user_message)
 
-        # Background: context extraction, consolidation, thread naming, Supabase persist
+        admitted_memory_updates = (
+            _memory_updates_from_hologov_plan(gov_turn_plan, user_message=user_message)
+            if single_hologov_call and capsule_id and not incognito
+            else {}
+        )
+
+        # Background: persistence only in canonical one-call mode. Legacy modes
+        # retain their provider-backed auxiliary behavior for controlled comparison.
         def _post_stream():
             try:
                 if capsule_id and not incognito:
-                    proposed_updates = gov_advisor.extract_context_updates(session.history, capsule_context)
-                    memory_admission = admit_advisor_memory_updates(proposed_updates)
-                    updates = dict(memory_admission.value or {}) if memory_admission.admitted else {}
+                    if single_hologov_call:
+                        updates = admitted_memory_updates
+                    else:
+                        proposed_updates = gov_advisor.extract_context_updates(session.history, capsule_context)
+                        memory_admission = admit_advisor_memory_updates(proposed_updates)
+                        updates = dict(memory_admission.value or {}) if memory_admission.admitted else {}
                     for key, value in updates.items():
                         self._brain.set_capsule_context(capsule_id, key, value)
                     if _claim_autocompact_for_context_window(
@@ -2607,7 +2824,7 @@ class HoloChatEngine:
                         capsule_id=capsule_id,
                         incognito=incognito,
                         context_budget=context_budget,
-                    ):
+                    ) and not single_hologov_call:
                         proposed_result = gov_advisor.consolidate_session(session.history, capsule_context, session.session_id)
                         consolidation_admission = admit_advisor_consolidation(proposed_result)
                         result = dict(consolidation_admission.value or {}) if consolidation_admission.admitted else {}
@@ -2622,7 +2839,17 @@ class HoloChatEngine:
                             consolidation=result,
                         )
                     if session.turn_count == 2:
-                        name_admission = admit_advisor_thread_name(gov_advisor.name_session(list(session.history)))
+                        if single_hologov_call:
+                            packet = (gov_turn_plan.narrative_packet or {}) if gov_turn_plan else {}
+                            active_topics = packet.get("active_threads") or packet.get("topic_registry") or []
+                            proposed_name = (
+                                _compact_text(active_topics[0].get("subject"), limit=60)
+                                if active_topics and isinstance(active_topics[0], dict)
+                                else _compact_text(user_message, limit=60)
+                            )
+                        else:
+                            proposed_name = gov_advisor.name_session(list(session.history))
+                        name_admission = admit_advisor_thread_name(proposed_name)
                         if name_admission.admitted and name_admission.value:
                             self._brain.update_session_name(capsule_id, session.session_id, name_admission.value)
                 self._brain.save_chat_turn(
@@ -2641,6 +2868,7 @@ class HoloChatEngine:
 
         if holo4dna_shadow is not None:
             holo4dna_shadow.trace.memory_extraction_attempted = bool(capsule_id and not incognito)
+            holo4dna_shadow.trace.memory_writes_count = len(admitted_memory_updates)
             log_trace(holo4dna_shadow.trace, logger=logger)
 
         handoff = _handoff_for_context_window(session)
@@ -2651,7 +2879,7 @@ class HoloChatEngine:
             tenor=tenor,
             web_trace=web_trace,
             conversation_paths=conversation_paths,
-            memory_writes_count=0,
+            memory_writes_count=len(admitted_memory_updates),
             handoff=handoff,
         )
         state_auto_compact = should_auto_compact(
@@ -2660,30 +2888,46 @@ class HoloChatEngine:
             thread_health_score=session.thread_health_score,
         )
         holobrain_state_persisted = False
-        if not incognito:
-            previous_holobrain_state = session.holochat_state
-            next_holobrain_state = build_holochat_state(
-                session_id=session.session_id,
-                capsule_id=capsule_id,
-                turn_number=session.turn_count,
+        previous_holobrain_state = session.holochat_state
+        next_holobrain_state = build_holochat_state(
+            session_id=session.session_id,
+            capsule_id=None if incognito else capsule_id,
+            turn_number=session.turn_count,
+            user_message=user_message,
+            response_text=response_text,
+            previous_state=session.holochat_state,
+            artifacts_saved=artifacts_saved,
+            required_tools=_required_tools_for_turn(search_query, search_results),
+            gov_arc_state=session.gov_arc_state,
+            thread_health_score=session.thread_health_score,
+            thread_status=session.thread_status,
+            auto_compact=state_auto_compact,
+            governor_rolling_summary=(
+                (gov_turn_plan.narrative_packet or {}).get("rolling_summary")
+                if gov_turn_plan is not None
+                else None
+            ),
+            hologov_control_ledger=_hologov_control_ledger_from_plan(
+                gov_turn_plan,
                 user_message=user_message,
                 response_text=response_text,
-                previous_state=session.holochat_state,
-                artifacts_saved=artifacts_saved,
-                required_tools=_required_tools_for_turn(search_query, search_results),
-                gov_arc_state=session.gov_arc_state,
-                thread_health_score=session.thread_health_score,
-                thread_status=session.thread_status,
-                auto_compact=state_auto_compact,
-            )
+                worker_identity=_adapter_identity_dict(adapter),
+                turn_number=session.turn_count,
+            ),
+        )
+        session.holochat_state = next_holobrain_state
+        if not incognito:
             holobrain_state_persisted = has_meaningful_holobrain_delta(
                 previous_holobrain_state,
                 next_holobrain_state,
             )
-            session.holochat_state = next_holobrain_state
             if holobrain_state_persisted:
                 _persist_holochat_state(self._brain, capsule_id, session.holochat_state)
 
+        gov_api_calls_this_turn = max(
+            0,
+            _governor_api_call_count(gov_advisor) - gov_api_calls_before,
+        )
         usage = _turn_usage_metadata(
             analyst_adapter=adapter,
             context_budget=context_budget,
@@ -2707,9 +2951,11 @@ class HoloChatEngine:
                 web_trace=web_trace,
                 incognito=incognito,
                 memory_extraction_attempted=bool(capsule_id and not incognito),
-                memory_writes_count=0,
+                memory_writes_count=len(admitted_memory_updates),
                 conversation_paths_count=len(conversation_paths),
                 thread_health_level=session.thread_health_level,
+                single_call_mode=single_hologov_call,
+                api_calls_this_turn=gov_api_calls_this_turn,
             ),
             gov_arc_state=session.gov_arc_state,
             frontier_assist=frontier_assist,
@@ -2837,6 +3083,1245 @@ def _govturnplan_context_selection(
     return selected, dropped, reasons, memory_admissions, memory_rejections
 
 
+def _worker_continuity_baton(
+    *,
+    session: ChatSession,
+    tenor: Optional[str],
+    capsule_context: dict,
+    life_context: list,
+    holobrain_injection_plan: HoloBrainInjectionPlan,
+    turn_policy: Any,
+    user_message: str,
+) -> str:
+    provider_history = _bounded_adapter_history(session.history, query_text=user_message)
+    history_meta = _provider_history_metadata(
+        provider_history,
+        total_history_messages=len(session.history),
+        raw_history=session.history,
+    )
+    omitted = _safe_positive_int(history_meta.get("omitted_history_messages"))
+    lines = [
+        "Answer as the visible HoloChat worker with conversational warmth, truthful precision, and useful forward motion.",
+        "One goal: serve the user's best interests; never scold, prosecute, flatter, or fake intimacy.",
+        "You are a transient worker entering this turn; treat HoloGov's packet as the canonical state scaffold.",
+        "Treat the ordered raw thread as primary conversational evidence; use HoloGov's control ledger to navigate it without flattening it.",
+        "HoloGov is the only HoloBrain operator; use only the HoloBrain context HoloGov admitted into this packet.",
+    ]
+    if tenor:
+        if "Relationship repair mode" in tenor:
+            repair_directive = tenor[tenor.index("Relationship repair mode") :]
+            lines.append(f"Admitted HoloGov tenor for this turn: {_compact_text(repair_directive, limit=360)}")
+        else:
+            lines.append(f"Admitted HoloGov tenor for this turn: {_compact_text(tenor, limit=360)}")
+    if omitted:
+        lines.append(
+            f"Continuity alert: {omitted} older raw history message(s) are omitted from the provider history; "
+            "do not treat the visible recent transcript as complete."
+        )
+    if holobrain_injection_plan.mode == HoloBrainInjectionMode.ROLLING_SUMMARY:
+        lines.append(
+            "Use the HoloBrain rolling summary as the conversation spine: preserve the user's arc, current tension, "
+            "settled boundaries, and best prior insight across worker rotation."
+        )
+    elif holobrain_injection_plan.mode == HoloBrainInjectionMode.FULL_RESEED:
+        lines.append(
+            "Use the HoloBrain auto-reseed as the continuity spine for this turn; it is the compact state bridge."
+        )
+    elif holobrain_injection_plan.mode == HoloBrainInjectionMode.BATON_ONLY:
+        lines.append(
+            "Use the HoloBrain baton plus portrait context for continuity; do not over-infer beyond supplied memory."
+        )
+    if capsule_context or life_context:
+        lines.append(
+            "User portrait: use HoloBrain capsule/life context as grounding for style, boundaries, and priorities; "
+            "never recite private details or turn them into accusatory theory."
+        )
+    arc = session.gov_arc_state
+    if arc.current_tension:
+        lines.append(f"Current tension to preserve: {_compact_text(arc.current_tension, limit=220)}")
+    if arc.next_paths:
+        lines.append(
+            "Natural next paths: "
+            + "; ".join(_compact_text(path, limit=120) for path in arc.next_paths[:3])
+        )
+    if getattr(turn_policy, "tier", "") in {"high", "max"}:
+        lines.append(
+            "High-stakes turn: prefer bounded honesty over certainty theater; ask for missing facts when needed."
+        )
+    return "\n".join(lines)
+
+
+def _life_context_portrait_lines(life_context: list, *, limit: int = 8) -> list[str]:
+    lines: list[str] = []
+    for entry in life_context or []:
+        if not isinstance(entry, dict):
+            continue
+        key = _compact_text(entry.get("key") or entry.get("category") or "context", limit=64)
+        if _is_sensitive_holobrain_key(key):
+            continue
+        value = _compact_text(entry.get("value"), limit=180)
+        if value:
+            lines.append(f"{key}: {value}")
+        if len(lines) >= limit:
+            break
+    return lines
+
+
+def _capsule_portrait_lines(capsule_context: dict, *, limit: int = 8) -> list[str]:
+    lines: list[str] = []
+    for key, value in (capsule_context or {}).items():
+        key_text = _compact_text(key, limit=64)
+        if _is_sensitive_holobrain_key(key_text):
+            continue
+        value_text = _compact_text(value, limit=180)
+        if key_text and value_text:
+            lines.append(f"{key_text}: {value_text}")
+        if len(lines) >= limit:
+            break
+    return lines
+
+
+_SENSITIVE_HOLOBRAIN_KEY_PARTS = (
+    "password", "secret", "token", "api_key", "apikey", "credential",
+    "authorization", "bearer", "cookie", "jwt", "hash",
+)
+
+
+def _is_sensitive_holobrain_key(key: Any) -> bool:
+    normalized = str(key or "").strip().lower()
+    return normalized.startswith("_") or any(part in normalized for part in _SENSITIVE_HOLOBRAIN_KEY_PARTS)
+
+
+def _holobrain_worker_projection(
+    *,
+    capsule_context: dict,
+    life_context: list,
+    last_session: Optional[dict[str, Any]],
+    injection_plan: HoloBrainInjectionPlan,
+) -> dict[str, Any]:
+    """Build the only HoloBrain projection a visible worker may receive."""
+    portrait: list[str] = []
+    for item in _capsule_portrait_lines(capsule_context, limit=10) + _life_context_portrait_lines(life_context, limit=10):
+        if item not in portrait:
+            portrait.append(item)
+    latest: dict[str, Any] = {}
+    if isinstance(last_session, dict):
+        surfaced = _compact_text(last_session.get("what_surfaced"), limit=700)
+        captain_note = _compact_text(last_session.get("captain_note"), limit=500)
+        open_threads = last_session.get("open_threads") or []
+        if surfaced:
+            latest["what_surfaced"] = surfaced
+        if captain_note:
+            latest["carry_forward"] = captain_note
+        if isinstance(open_threads, list):
+            latest["open_threads"] = [
+                _compact_text(item, limit=240) for item in open_threads[:8] if _compact_text(item, limit=240)
+            ]
+    return {
+        "authority": "HoloGov-selected worker projection; no raw HoloBrain library access",
+        "injection_mode": injection_plan.mode.value,
+        "injection_reason": injection_plan.reason,
+        "durable_context": portrait[:16],
+        "latest_session": latest,
+        "source_counts": {
+            "capsule_keys_available": len(capsule_context or {}),
+            "life_entries_available": len(life_context or []),
+            "durable_items_admitted": min(16, len(portrait)),
+        },
+    }
+
+
+def _memory_lifecycle_status(key: Any, value: Any, *, confidence: Any = None, pruned_at: Any = None) -> str:
+    text = f"{key} {value}".lower()
+    if pruned_at:
+        return "archived"
+    if "forgotten" in text or "forget_requested" in text:
+        return "forgotten"
+    if "contradict" in text or "no longer true" in text or "superseded" in text:
+        return "contradicted"
+    try:
+        score = float(confidence)
+    except (TypeError, ValueError):
+        score = None
+    if score is not None and score < 0.35:
+        return "stale"
+    if "[inferred]" in text or "inferred" in text:
+        return "inferred"
+    if "[candidate]" in text or "candidate" in text:
+        return "candidate"
+    return "active"
+
+
+def _normalized_memory_value(value: Any) -> str:
+    return " ".join(str(value or "").lower().split())[:180]
+
+
+def _holobrain_stewardship_plan(
+    *,
+    capsule_context: dict,
+    life_context: list,
+    last_session: Optional[dict],
+    holochat_state: Optional[HoloState],
+) -> dict[str, Any]:
+    status_counts = {
+        "candidate": 0,
+        "active": 0,
+        "confirmed": 0,
+        "inferred": 0,
+        "stale": 0,
+        "archived": 0,
+        "contradicted": 0,
+        "forgotten": 0,
+    }
+    candidates: list[dict[str, Any]] = []
+    seen_values: dict[str, str] = {}
+    duplicate_pairs: list[dict[str, str]] = []
+
+    def add_record(source: str, key: Any, value: Any, *, confidence: Any = None, pruned_at: Any = None):
+        status = _memory_lifecycle_status(key, value, confidence=confidence, pruned_at=pruned_at)
+        status_counts[status] = status_counts.get(status, 0) + 1
+        normalized = _normalized_memory_value(value)
+        key_text = _compact_text(key, limit=80)
+        if normalized and normalized in seen_values and len(duplicate_pairs) < 6:
+            duplicate_pairs.append({"first": seen_values[normalized], "second": key_text})
+        elif normalized:
+            seen_values[normalized] = key_text
+        if status in {"candidate", "inferred", "stale", "contradicted", "archived", "forgotten"} and len(candidates) < 12:
+            candidates.append(
+                {
+                    "source": source,
+                    "key": key_text,
+                    "status": status,
+                    "confidence": confidence,
+                    "reason": _compact_text(value, limit=180),
+                }
+            )
+
+    for key, value in (capsule_context or {}).items():
+        if str(key).startswith("_"):
+            continue
+        add_record("capsule_context", key, value)
+
+    for entry in life_context or []:
+        if not isinstance(entry, dict):
+            continue
+        add_record(
+            "life_context",
+            entry.get("key") or entry.get("category") or "memory",
+            entry.get("value"),
+            confidence=entry.get("confidence"),
+            pruned_at=entry.get("pruned_at"),
+        )
+
+    actions: list[dict[str, Any]] = []
+    if duplicate_pairs:
+        actions.append(
+            {
+                "action": "consolidate_duplicates",
+                "count": len(duplicate_pairs),
+                "authority": "HoloGov_review_required",
+            }
+        )
+    if status_counts.get("inferred"):
+        actions.append(
+            {
+                "action": "confirm_or_reject_inferred_memory",
+                "count": status_counts["inferred"],
+                "authority": "HoloGov_review_required",
+            }
+        )
+    if status_counts.get("stale") or status_counts.get("contradicted"):
+        actions.append(
+            {
+                "action": "archive_or_prune_review",
+                "count": status_counts.get("stale", 0) + status_counts.get("contradicted", 0),
+                "authority": "HoloGov_review_required_kernel_enforced",
+            }
+        )
+    if last_session:
+        actions.append(
+            {
+                "action": "fold_latest_consolidation_into_rolling_summary",
+                "count": 1,
+                "authority": "HoloGov_review_required",
+            }
+        )
+    if holochat_state and getattr(holochat_state, "rolling_summary", ""):
+        actions.append(
+            {
+                "action": "preserve_iterative_rolling_summary",
+                "count": 1,
+                "authority": "HoloGov_active_state",
+            }
+        )
+
+    return {
+        "mode": "stewardship_scan_v0",
+        "authority": "HoloGov-only; non-destructive until kernel-authorized memory operation",
+        "status_counts": status_counts,
+        "review_candidates": candidates,
+        "duplicate_candidates": duplicate_pairs,
+        "actions": actions or [
+            {
+                "action": "preserve_active_memory",
+                "count": status_counts.get("active", 0),
+                "authority": "HoloGov_active_state",
+            }
+        ],
+        "raw_library_access_for_worker": False,
+    }
+
+
+_ACCUSATORY_HOLOGOV_RE = _re.compile(
+    r"(?i)\b(?:the user|this person|they|he|she)\s+(?:is|are)\s+"
+    r"(?:manipulative|lazy|dishonest|irrational|evasive|delusional|attention[- ]seeking)\b"
+)
+
+
+def _hologov_state_payload(state: Optional[HoloState]) -> dict[str, Any]:
+    if state is None:
+        return {}
+    try:
+        data = state.model_dump(mode="json")
+    except TypeError:
+        data = state.model_dump()
+    # HoloGov already receives the complete ordered transcript and HoloBrain
+    # sources separately. Send the canonical control spine, not duplicated audit
+    # metadata and artifact payloads.
+    return {
+        "schema_version": data.get("schema_version"),
+        "turn_number": data.get("turn_number"),
+        "user_goal": data.get("user_goal"),
+        "latest_input_summary": data.get("latest_input_summary"),
+        "critical_constraints": list(data.get("critical_constraints") or [])[:14],
+        "rolling_summary": _compact_text(data.get("rolling_summary"), limit=10000),
+        "settled_decisions": list(data.get("settled_decisions") or [])[:24],
+        "hologov_control_ledger": dict(data.get("hologov_control_ledger") or {}),
+        "gov_arc_state": dict(data.get("gov_arc_state") or {}),
+        "thread_health": dict(data.get("thread_health") or {}),
+    }
+
+
+_TOPIC_ID_RE = _re.compile(r"[^a-z0-9_-]+")
+_TOPIC_WORD_RE = _re.compile(r"[a-z0-9][a-z0-9_-]{2,}")
+_TOPIC_STOP_WORDS = {
+    "about", "after", "again", "also", "because", "could", "from", "have",
+    "into", "just", "maybe", "should", "that", "their", "there", "these",
+    "they", "this", "what", "when", "where", "which", "with", "would", "your",
+}
+_TOPIC_STATUSES = {"active", "parked", "resolved", "superseded"}
+
+
+def _topic_turn_number(value: Any, *, default: int) -> int:
+    try:
+        return max(0, int(value))
+    except (TypeError, ValueError):
+        return max(0, default)
+
+
+def _topic_subject_key(subject: Any) -> str:
+    return " ".join(_TOPIC_WORD_RE.findall(str(subject or "").lower()))
+
+
+def _topic_terms(subject: Any) -> set[str]:
+    return {
+        term
+        for term in _TOPIC_WORD_RE.findall(str(subject or "").lower())
+        if term not in _TOPIC_STOP_WORDS
+    }
+
+
+def _topic_lane_id(subject: Any, requested_id: Any = None) -> str:
+    cleaned = _TOPIC_ID_RE.sub("-", str(requested_id or "").strip().lower()).strip("-_")
+    if cleaned:
+        return cleaned[:64]
+    subject_key = _topic_subject_key(subject) or "conversation"
+    return f"topic-{stable_hash(subject_key)[:12]}"
+
+
+def _fallback_topic_subject(user_message: str) -> str:
+    first_sentence = _re.split(r"(?<=[.!?])\s+", _compact_text(user_message, limit=220), maxsplit=1)[0]
+    return _compact_text(first_sentence or "Current conversation", limit=120)
+
+
+def _normalize_topic_registry_record(
+    item: dict[str, Any],
+    *,
+    default_status: str,
+    turn_number: int,
+) -> dict[str, Any]:
+    subject = _compact_text(item.get("subject") or item.get("summary") or "Conversation topic", limit=180)
+    status = str(item.get("status") or default_status).strip().lower()
+    if status not in _TOPIC_STATUSES:
+        status = default_status
+    origin_turn = _topic_turn_number(item.get("origin_turn"), default=turn_number)
+    last_turn = _topic_turn_number(item.get("last_turn"), default=turn_number)
+    source_turns: list[int] = []
+    for raw in item.get("source_turn_ids") or item.get("source_turns") or []:
+        parsed = _topic_turn_number(raw, default=-1)
+        if parsed >= 0 and parsed not in source_turns:
+            source_turns.append(parsed)
+    record = {
+        "id": _topic_lane_id(subject, item.get("id")),
+        "subject": subject,
+        "status": status,
+        "origin_turn": origin_turn,
+        "last_turn": max(origin_turn, last_turn),
+        "importance": str(item.get("importance") or "medium").strip().lower()[:12],
+        "summary": _compact_text(item.get("summary") or subject, limit=700),
+        "source_turn_ids": source_turns[-24:],
+        "resurface_count": _topic_turn_number(item.get("resurface_count"), default=0),
+    }
+    reason = _compact_text(item.get("reason") or item.get("park_reason"), limit=260)
+    if reason:
+        record["park_reason"] = reason
+    return record
+
+
+def _previous_topic_registry(packet: dict[str, Any], *, turn_number: int) -> list[dict[str, Any]]:
+    raw_registry = packet.get("topic_registry")
+    if isinstance(raw_registry, list) and raw_registry:
+        return [
+            _normalize_topic_registry_record(item, default_status="parked", turn_number=turn_number)
+            for item in raw_registry
+            if isinstance(item, dict)
+        ]
+    records: list[dict[str, Any]] = []
+    for field_name, status in (
+        ("active_threads", "active"),
+        ("parked_threads", "parked"),
+        ("resolved_threads", "resolved"),
+    ):
+        for item in packet.get(field_name) or []:
+            if isinstance(item, dict):
+                records.append(
+                    _normalize_topic_registry_record(item, default_status=status, turn_number=turn_number)
+                )
+    return records
+
+
+def _match_previous_topic(
+    item: dict[str, Any],
+    previous: list[dict[str, Any]],
+) -> Optional[dict[str, Any]]:
+    requested_id = _topic_lane_id(item.get("subject"), item.get("id"))
+    by_id = next((record for record in previous if record.get("id") == requested_id), None)
+    if by_id:
+        return by_id
+    subject_key = _topic_subject_key(item.get("subject"))
+    exact = next(
+        (record for record in previous if _topic_subject_key(record.get("subject")) == subject_key),
+        None,
+    )
+    if exact:
+        return exact
+    terms = _topic_terms(item.get("subject"))
+    best: tuple[float, Optional[dict[str, Any]]] = (0.0, None)
+    for record in previous:
+        prior_terms = _topic_terms(record.get("subject"))
+        if not terms or not prior_terms:
+            continue
+        overlap = len(terms & prior_terms) / max(1, len(terms | prior_terms))
+        if overlap > best[0]:
+            best = (overlap, record)
+    return best[1] if best[0] >= 0.6 else None
+
+
+def _reconcile_topic_registry(
+    *,
+    baseline: dict[str, Any],
+    proposals: dict[str, list[dict[str, Any]]],
+    user_message: str,
+    turn_number: int,
+) -> dict[str, Any]:
+    """Preserve topic identity while admitting HoloGov-created lane transitions."""
+    previous = _previous_topic_registry(baseline, turn_number=max(0, turn_number - 1))
+    registry: dict[str, dict[str, Any]] = {record["id"]: dict(record) for record in previous}
+    events: list[dict[str, Any]] = []
+
+    registry_proposals = list(proposals.get("topic_registry") or [])
+    for item in registry_proposals:
+        status = str(item.get("status") or "parked").lower()
+        target = {
+            "active": "active_threads",
+            "parked": "parked_threads",
+            "resolved": "resolved_threads",
+            "superseded": "resolved_threads",
+        }.get(status, "parked_threads")
+        existing = proposals.get(target) or []
+        item_id = _topic_lane_id(item.get("subject"), item.get("id"))
+        item_subject = _topic_subject_key(item.get("subject"))
+        if not any(
+            _topic_lane_id(other.get("subject"), other.get("id")) == item_id
+            or _topic_subject_key(other.get("subject")) == item_subject
+            for other in existing
+        ):
+            proposals.setdefault(target, []).append(item)
+
+    resurfaced_by_id: dict[str, dict[str, Any]] = {}
+    for item in proposals.get("resurfaced_threads") or []:
+        prior = _match_previous_topic(item, previous)
+        lane_id = prior["id"] if prior else _topic_lane_id(item.get("subject"), item.get("id"))
+        active_match = any(
+            (_match_previous_topic(active_item, previous) or {}).get("id") == lane_id
+            or _topic_lane_id(active_item.get("subject"), active_item.get("id")) == lane_id
+            for active_item in (proposals.get("active_threads") or [])
+        )
+        nonactive_match = any(
+            (_match_previous_topic(nonactive_item, previous) or {}).get("id") == lane_id
+            or _topic_lane_id(nonactive_item.get("subject"), nonactive_item.get("id")) == lane_id
+            for field_name in ("parked_threads", "resolved_threads")
+            for nonactive_item in (proposals.get(field_name) or [])
+        )
+        # Referencing or updating a parked lane is not a resurface. A resurface
+        # means the lane actually returns to active attention.
+        if nonactive_match and not active_match:
+            continue
+        resurfaced_by_id[lane_id] = item
+        if not active_match:
+            active_item = dict(prior or item)
+            active_item.update({
+                "id": lane_id,
+                "subject": item.get("subject") or (prior or {}).get("subject"),
+                "status": "active",
+                "last_turn": turn_number,
+            })
+            proposals.setdefault("active_threads", []).append(active_item)
+
+    mentioned: set[str] = set()
+    active_ids: set[str] = set()
+
+    def admit(item: dict[str, Any], status: str) -> dict[str, Any]:
+        prior = _match_previous_topic(item, previous)
+        normalized = _normalize_topic_registry_record(item, default_status=status, turn_number=turn_number)
+        if prior:
+            normalized["id"] = prior["id"]
+            normalized["origin_turn"] = prior.get("origin_turn", normalized["origin_turn"])
+            normalized["resurface_count"] = prior.get("resurface_count", 0)
+            if not item.get("summary"):
+                normalized["summary"] = prior.get("summary") or normalized["summary"]
+            normalized["source_turn_ids"] = list(prior.get("source_turn_ids") or [])
+        lane_id = normalized["id"]
+        prior_status = str((prior or {}).get("status") or "")
+        resurface_proposal = resurfaced_by_id.get(lane_id) or {}
+        if not prior and resurface_proposal:
+            prior_turn = _topic_turn_number(resurface_proposal.get("prior_turn"), default=turn_number)
+            normalized["origin_turn"] = min(normalized["origin_turn"], prior_turn)
+            if prior_turn not in normalized["source_turn_ids"]:
+                normalized["source_turn_ids"].append(prior_turn)
+        normalized["status"] = status
+        if status == "active":
+            normalized["last_turn"] = turn_number
+            if turn_number not in normalized["source_turn_ids"]:
+                normalized["source_turn_ids"].append(turn_number)
+            if prior_status == "parked" or lane_id in resurfaced_by_id:
+                normalized["resurface_count"] = int(normalized.get("resurface_count") or 0) + 1
+                events.append({
+                    "event": "resurfaced",
+                    "topic_id": lane_id,
+                    "turn": turn_number,
+                    "prior_turn": (prior or {}).get(
+                        "last_turn",
+                        _topic_turn_number(resurface_proposal.get("prior_turn"), default=normalized["origin_turn"]),
+                    ),
+                })
+            elif not prior:
+                events.append({"event": "created", "topic_id": lane_id, "turn": turn_number})
+            active_ids.add(lane_id)
+            normalized.pop("park_reason", None)
+        elif status == "parked":
+            normalized["last_turn"] = (prior or {}).get("last_turn", normalized["last_turn"])
+            normalized["parked_turn"] = turn_number
+            if prior_status == "active":
+                events.append({"event": "parked", "topic_id": lane_id, "turn": turn_number})
+        elif status in {"resolved", "superseded"}:
+            normalized["resolved_turn"] = turn_number
+            if prior_status != status:
+                events.append({"event": status, "topic_id": lane_id, "turn": turn_number})
+        normalized["source_turn_ids"] = normalized["source_turn_ids"][-24:]
+        registry[lane_id] = normalized
+        mentioned.add(lane_id)
+        return normalized
+
+    for item in proposals.get("active_threads") or []:
+        admit(item, "active")
+    for item in proposals.get("parked_threads") or []:
+        admit(item, "parked")
+    for item in proposals.get("resolved_threads") or []:
+        status = str(item.get("status") or "resolved").lower()
+        admit(item, status if status in {"resolved", "superseded"} else "resolved")
+
+    has_topic_proposal = any(proposals.get(name) for name in (
+        "topic_registry", "active_threads", "parked_threads", "resurfaced_threads", "resolved_threads",
+    ))
+    if has_topic_proposal and active_ids:
+        for prior in previous:
+            lane_id = prior["id"]
+            if prior.get("status") == "active" and lane_id not in mentioned:
+                parked = dict(prior)
+                parked["status"] = "parked"
+                parked["parked_turn"] = turn_number
+                parked["park_reason"] = "Attention shifted to another conversation lane."
+                registry[lane_id] = parked
+                events.append({"event": "parked", "topic_id": lane_id, "turn": turn_number})
+
+    if not registry:
+        subject = _fallback_topic_subject(user_message)
+        lane_id = _topic_lane_id(subject)
+        registry[lane_id] = {
+            "id": lane_id,
+            "subject": subject,
+            "status": "active",
+            "origin_turn": turn_number,
+            "last_turn": turn_number,
+            "importance": "medium",
+            "summary": subject,
+            "source_turn_ids": [turn_number],
+            "resurface_count": 0,
+        }
+        events.append({"event": "created", "topic_id": lane_id, "turn": turn_number, "source": "local_fallback"})
+
+    ordered = sorted(
+        registry.values(),
+        key=lambda record: (
+            {"active": 0, "parked": 1, "resolved": 2, "superseded": 3}.get(record.get("status"), 4),
+            -int(record.get("last_turn") or 0),
+            int(record.get("origin_turn") or 0),
+        ),
+    )[:64]
+    active = [record for record in ordered if record.get("status") == "active"]
+    parked = [record for record in ordered if record.get("status") == "parked"]
+    resolved = [record for record in ordered if record.get("status") in {"resolved", "superseded"}]
+    resurfaced = []
+    for event in events:
+        if event.get("event") != "resurfaced":
+            continue
+        record = registry.get(str(event.get("topic_id"))) or {}
+        resurfaced.append({
+            "id": record.get("id"),
+            "subject": record.get("subject"),
+            "prior_turn": event.get("prior_turn"),
+            "reason": _compact_text(
+                (resurfaced_by_id.get(str(record.get("id"))) or {}).get("reason")
+                or "The current user message returned to this lane.",
+                limit=260,
+            ),
+        })
+    return {
+        "topic_registry": ordered,
+        "active_threads": active,
+        "parked_threads": parked,
+        "resolved_threads": resolved,
+        "resurfaced_threads": resurfaced,
+        "topic_events": events,
+    }
+
+
+def _hologov_control_ledger_from_plan(
+    plan: Optional[GovTurnPlan],
+    *,
+    user_message: str = "",
+    response_text: str = "",
+    worker_identity: Optional[dict[str, Any]] = None,
+    turn_number: int = 0,
+) -> dict[str, Any]:
+    """Persist admitted control state plus the completed visible turn."""
+    if plan is None:
+        return {}
+    packet = plan.narrative_packet or {}
+    fields = (
+        "conversation_phase",
+        "active_threads",
+        "parked_threads",
+        "resolved_threads",
+        "resurfaced_threads",
+        "topic_registry",
+        "topic_events",
+        "worker_contributions",
+        "chronological_ledger",
+        "settled_decisions",
+        "unresolved_questions",
+        "contradictions",
+        "key_anchors",
+        "context_manifest",
+        "worker_assignment",
+        "rolling_summary",
+    )
+    ledger = {field: packet.get(field) for field in fields if packet.get(field) not in (None, "", [], {})}
+
+    def append_unique(items: list[Any], value: Any, *, limit: int) -> list[Any]:
+        merged = list(items or [])
+        if value not in merged:
+            merged.append(value)
+        if len(merged) <= limit:
+            return merged
+        # Preserve the origin and the most recent state under long-run pressure.
+        return merged[:4] + merged[-(limit - 4):]
+
+    if response_text:
+        identity = worker_identity or plan.worker_provider_selection or {}
+        worker = "/".join(
+            str(identity.get(key) or "").strip()
+            for key in ("provider", "model")
+            if str(identity.get(key) or "").strip()
+        ) or "visible-worker"
+        contribution = {
+            "turn": int(turn_number or 0),
+            "worker": worker,
+            "contribution": _compact_text(response_text, limit=900),
+            "status": "standing",
+        }
+        ledger["worker_contributions"] = append_unique(
+            list(ledger.get("worker_contributions") or []),
+            contribution,
+            limit=48,
+        )
+        chronology = list(ledger.get("chronological_ledger") or [])
+        if user_message:
+            chronology = append_unique(
+                chronology,
+                f"Turn {int(turn_number or 0)} user: {_compact_text(user_message, limit=700)}",
+                limit=60,
+            )
+        chronology = append_unique(
+            chronology,
+            f"Turn {int(turn_number or 0)} {worker}: {_compact_text(response_text, limit=900)}",
+            limit=60,
+        )
+        ledger["chronological_ledger"] = chronology
+    return ledger
+
+
+def _memory_updates_from_hologov_plan(
+    plan: Optional[GovTurnPlan],
+    *,
+    user_message: str,
+) -> dict[str, str]:
+    """Admit only HoloGov memory proposals grounded in exact current-user evidence."""
+    if plan is None:
+        return {}
+    proposals = (plan.narrative_packet or {}).get("memory_admission_proposals") or []
+    if not isinstance(proposals, list):
+        return {}
+    normalized_user = " ".join(str(user_message or "").casefold().split())
+    candidates: dict[str, str] = {}
+    for record in proposals[:3]:
+        if not isinstance(record, dict):
+            continue
+        evidence = _compact_text(record.get("evidence"), limit=240)
+        normalized_evidence = " ".join(evidence.casefold().split())
+        if not normalized_evidence or normalized_evidence not in normalized_user:
+            continue
+        key = _re.sub(r"[^a-z0-9_]+", "_", str(record.get("key") or "").strip().lower())[:60].strip("_")
+        value = _compact_text(record.get("value"), limit=500)
+        if not key or not value:
+            continue
+        if not value.startswith("[FACT]"):
+            value = f"[FACT] {value}"
+        candidates[key] = value
+    admission = admit_advisor_memory_updates(candidates)
+    return dict(admission.value or {}) if admission.admitted else {}
+
+
+def _admit_hologov_narrative_proposal(
+    *,
+    baseline: dict[str, Any],
+    proposal: dict[str, Any],
+    user_message: str,
+    turn_number: int,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Admit narrative intelligence without granting provider control authority."""
+    merged = dict(baseline)
+    admitted_fields: list[str] = []
+    rejected_fields: list[str] = []
+
+    def safe_text(value: Any, *, limit: int) -> str:
+        text = _compact_text(value, limit=limit)
+        if not text or _ACCUSATORY_HOLOGOV_RE.search(text):
+            return ""
+        return text
+
+    def safe_list(value: Any, *, item_limit: int, count: int) -> list[str]:
+        if not isinstance(value, list):
+            return []
+        items: list[str] = []
+        for item in value[:count]:
+            text = safe_text(item, limit=item_limit)
+            if text and text not in items:
+                items.append(text)
+        return items
+
+    phase = safe_text(proposal.get("conversation_phase"), limit=40).lower()
+    if phase in {"opening", "exploration", "deepening", "decision", "execution", "reflection", "repair", "mixed"}:
+        merged["conversation_phase"] = phase
+        admitted_fields.append("conversation_phase")
+    elif "conversation_phase" in proposal:
+        rejected_fields.append("conversation_phase")
+
+    def safe_records(value: Any, *, fields: tuple[str, ...], count: int) -> list[dict[str, Any]]:
+        if not isinstance(value, list):
+            return []
+        records: list[dict[str, Any]] = []
+        for item in value[:count]:
+            if not isinstance(item, dict):
+                continue
+            record: dict[str, Any] = {}
+            for field_name in fields:
+                raw = item.get(field_name)
+                if isinstance(raw, list):
+                    values = safe_list(raw, item_limit=500, count=12)
+                    if values:
+                        record[field_name] = values
+                else:
+                    text = safe_text(raw, limit=900)
+                    if text:
+                        record[field_name] = text
+            if record:
+                records.append(record)
+        return records
+
+    topic_proposals: dict[str, list[dict[str, Any]]] = {}
+    topic_updates = safe_records(
+        proposal.get("topic_updates"),
+        fields=("id", "subject", "status", "origin_turn", "last_turn", "importance", "summary", "source_turn_ids", "resurface_count", "reason"),
+        count=32,
+    )
+    for record in topic_updates:
+        status = str(record.get("status") or "parked").lower()
+        target = {
+            "active": "active_threads",
+            "parked": "parked_threads",
+            "resolved": "resolved_threads",
+            "superseded": "resolved_threads",
+        }.get(status, "parked_threads")
+        topic_proposals.setdefault(target, []).append(record)
+    if topic_updates:
+        admitted_fields.append("topic_updates")
+    elif "topic_updates" in proposal:
+        rejected_fields.append("topic_updates")
+    for field_name, fields, count in (
+        ("topic_registry", ("id", "subject", "status", "origin_turn", "last_turn", "importance", "summary", "source_turn_ids", "resurface_count", "reason"), 64),
+        ("active_threads", ("id", "subject", "status", "origin_turn", "last_turn", "importance", "summary", "source_turn_ids", "resurface_count"), 24),
+        ("parked_threads", ("id", "subject", "status", "origin_turn", "last_turn", "importance", "summary", "source_turn_ids", "resurface_count", "reason"), 48),
+        ("resolved_threads", ("id", "subject", "status", "origin_turn", "last_turn", "importance", "summary", "source_turn_ids", "reason"), 48),
+        ("resurfaced_threads", ("id", "subject", "prior_turn", "reason"), 24),
+    ):
+        records = safe_records(proposal.get(field_name), fields=fields, count=count)
+        if records:
+            topic_proposals[field_name] = records
+            admitted_fields.append(field_name)
+        elif field_name in proposal:
+            rejected_fields.append(field_name)
+
+    topic_baseline = baseline
+    if topic_proposals and any(
+        event.get("source") == "local_fallback" and _topic_turn_number(event.get("turn"), default=-1) == turn_number
+        for event in (baseline.get("topic_events") or [])
+        if isinstance(event, dict)
+    ):
+        topic_baseline = {
+            **baseline,
+            "topic_registry": [],
+            "active_threads": [],
+            "parked_threads": [],
+            "resolved_threads": [],
+            "resurfaced_threads": [],
+            "topic_events": [],
+        }
+    topic_state = _reconcile_topic_registry(
+        baseline=topic_baseline,
+        proposals=topic_proposals,
+        user_message=user_message,
+        turn_number=turn_number,
+    )
+    merged.update(topic_state)
+    if "topic_registry" not in admitted_fields:
+        admitted_fields.append("topic_registry")
+
+    for field_name, update_field, fields, count in (
+        ("worker_contributions", "worker_contribution_updates", ("turn", "worker", "contribution", "status"), 48),
+        ("contradictions", "contradiction_updates", ("claim_a", "claim_b", "status", "source_turns"), 24),
+    ):
+        full_records = safe_records(proposal.get(field_name), fields=fields, count=count)
+        updates = safe_records(proposal.get(update_field), fields=fields, count=count)
+        records = full_records or updates
+        if records:
+            existing = [dict(item) for item in (merged.get(field_name) or []) if isinstance(item, dict)]
+
+            def record_key(record: dict[str, Any]) -> str:
+                if field_name == "worker_contributions":
+                    turn = str(record.get("turn") or "").strip().lower()
+                    worker = " ".join(str(record.get("worker") or "").lower().split())
+                    return f"{turn}|{worker}" if turn or worker else ""
+                claims = sorted(
+                    " ".join(str(record.get(name) or "").lower().split())
+                    for name in ("claim_a", "claim_b")
+                )
+                return "|".join(claims) if any(claims) else ""
+
+            index = {
+                key: position
+                for position, record in enumerate(existing)
+                if (key := record_key(record))
+            }
+
+            def same_contradiction_lane(left: dict[str, Any], right: dict[str, Any]) -> bool:
+                left_turns = {str(item) for item in left.get("source_turns") or []}
+                right_turns = {str(item) for item in right.get("source_turns") or []}
+                if not left_turns or left_turns != right_turns:
+                    return False
+                stop_words = {
+                    "a", "an", "and", "as", "at", "be", "by", "for", "from", "in", "is",
+                    "it", "of", "on", "or", "that", "the", "this", "to", "turn", "was",
+                }
+
+                def terms(record: dict[str, Any]) -> set[str]:
+                    text = " ".join(str(record.get(name) or "") for name in ("claim_a", "claim_b"))
+                    return {
+                        token for token in _re.findall(r"[a-z0-9]+", text.lower())
+                        if token not in stop_words and len(token) > 1
+                    }
+
+                left_terms = terms(left)
+                right_terms = terms(right)
+                if not left_terms or not right_terms:
+                    return False
+                return len(left_terms & right_terms) / min(len(left_terms), len(right_terms)) >= 0.35
+
+            for record in records:
+                key = record_key(record)
+                position = index.get(key) if key else None
+                if position is None and field_name == "contradictions":
+                    position = next(
+                        (
+                            candidate_position
+                            for candidate_position, candidate in enumerate(existing)
+                            if same_contradiction_lane(candidate, record)
+                        ),
+                        None,
+                    )
+                if position is not None:
+                    current = dict(existing[position])
+                    if field_name == "worker_contributions":
+                        note = safe_text(record.get("contribution"), limit=700)
+                        if note and note != current.get("contribution"):
+                            current["hologov_note"] = note
+                        if record.get("status"):
+                            current["status"] = record["status"]
+                    else:
+                        if record.get("status"):
+                            current["status"] = record["status"]
+                        source_turns = list(current.get("source_turns") or [])
+                        for source_turn in record.get("source_turns") or []:
+                            if source_turn not in source_turns:
+                                source_turns.append(source_turn)
+                        if source_turns:
+                            current["source_turns"] = source_turns[-12:]
+                        for claim_field in ("claim_a", "claim_b"):
+                            if record.get(claim_field):
+                                current[claim_field] = record[claim_field]
+                    existing[position] = current
+                    updated_key = record_key(current)
+                    if updated_key:
+                        index[updated_key] = position
+                    continue
+                existing.append(record)
+                if key:
+                    index[key] = len(existing) - 1
+            merged[field_name] = existing[-count:]
+            admitted_fields.append(field_name if full_records else update_field)
+        else:
+            if field_name in proposal:
+                rejected_fields.append(field_name)
+            if update_field in proposal:
+                rejected_fields.append(update_field)
+
+    memory_proposals = safe_records(
+        proposal.get("memory_admission_proposals"),
+        fields=("key", "value", "evidence"),
+        count=3,
+    )
+    if memory_proposals:
+        merged["memory_admission_proposals"] = memory_proposals
+        admitted_fields.append("memory_admission_proposals")
+    elif "memory_admission_proposals" in proposal:
+        rejected_fields.append("memory_admission_proposals")
+
+    assignment = proposal.get("worker_assignment")
+    if isinstance(assignment, dict):
+        clean_assignment: dict[str, Any] = {}
+        for field_name in ("objective", "completion_signal"):
+            text = safe_text(assignment.get(field_name), limit=1600)
+            if text:
+                clean_assignment[field_name] = text
+        for field_name in ("inspect", "build_on", "challenge", "avoid"):
+            values = safe_list(assignment.get(field_name), item_limit=500, count=8)
+            if values:
+                clean_assignment[field_name] = values
+        if clean_assignment:
+            merged["worker_assignment"] = clean_assignment
+            admitted_fields.append("worker_assignment")
+        else:
+            rejected_fields.append("worker_assignment")
+
+    manifest = proposal.get("context_manifest")
+    if isinstance(manifest, dict):
+        actual_manifest = dict(merged.get("context_manifest") or {})
+        rationale = safe_text(manifest.get("selection_rationale"), limit=1400)
+        gaps = safe_list(manifest.get("known_gaps"), item_limit=500, count=8)
+        if rationale:
+            actual_manifest["hologov_selection_rationale"] = rationale
+        if gaps:
+            actual_manifest["known_gaps"] = gaps
+        if rationale or gaps:
+            merged["context_manifest"] = actual_manifest
+            admitted_fields.append("context_manifest")
+
+    for field_name, limit in {
+        "current_state_of_affairs": 2400,
+        "rolling_summary": 10000,
+        "narrative_arc": 6000,
+        "active_tension": 1800,
+    }.items():
+        value = safe_text(proposal.get(field_name), limit=limit)
+        if value:
+            merged[field_name] = value
+            admitted_fields.append(field_name)
+        elif field_name in proposal:
+            rejected_fields.append(field_name)
+
+    for field_name, (item_limit, count) in {
+        "user_portrait": (900, 24),
+        "settled_decisions": (700, 24),
+        "unresolved_questions": (700, 24),
+        "key_anchors": (500, 16),
+        "confidence_notes": (500, 12),
+        "memory_retrieval_requests": (500, 8),
+    }.items():
+        values = safe_list(proposal.get(field_name), item_limit=item_limit, count=count)
+        if values:
+            if field_name == "user_portrait":
+                existing = [str(item) for item in merged.get(field_name) or []]
+                merged[field_name] = (existing + [item for item in values if item not in existing])[:24]
+            else:
+                merged[field_name] = values
+            admitted_fields.append(field_name)
+        elif field_name in proposal:
+            rejected_fields.append(field_name)
+
+    for update_field, field_name, item_limit, update_count, total_count in (
+        ("user_portrait_updates", "user_portrait", 900, 6, 24),
+        ("chronological_ledger_append", "chronological_ledger", 800, 1, 60),
+        ("settled_decision_additions", "settled_decisions", 700, 6, 24),
+        ("unresolved_question_additions", "unresolved_questions", 700, 6, 24),
+        ("key_anchor_additions", "key_anchors", 500, 6, 16),
+    ):
+        candidate_count = update_count + 3 if field_name == "chronological_ledger" else update_count
+        values = safe_list(proposal.get(update_field), item_limit=item_limit, count=candidate_count)
+        if field_name == "chronological_ledger":
+            current_turn_prefix = _re.compile(rf"^\s*turn\s+{int(turn_number)}\b", _re.IGNORECASE)
+            values = [value for value in values if not current_turn_prefix.search(value)][:update_count]
+        if values:
+            existing = [str(item) for item in merged.get(field_name) or []]
+            combined = existing + [item for item in values if item not in existing]
+            if field_name == "chronological_ledger" and len(combined) > total_count:
+                combined = combined[:4] + combined[-(total_count - 4):]
+            else:
+                combined = combined[-total_count:]
+            merged[field_name] = combined
+            admitted_fields.append(update_field)
+        elif update_field in proposal:
+            rejected_fields.append(update_field)
+
+    resolved_questions = safe_list(proposal.get("resolved_questions"), item_limit=700, count=24)
+    if resolved_questions:
+        existing = [str(item) for item in merged.get("unresolved_questions") or []]
+        resolved_normalized = {" ".join(item.lower().split()) for item in resolved_questions}
+        merged["unresolved_questions"] = [
+            item for item in existing
+            if " ".join(item.lower().split()) not in resolved_normalized
+        ]
+        admitted_fields.append("resolved_questions")
+    elif "resolved_questions" in proposal:
+        rejected_fields.append("resolved_questions")
+
+    for field_name, update_field in (
+        ("preserve", "preserve_additions"),
+        ("reject", "reject_additions"),
+    ):
+        values = safe_list(proposal.get(field_name), item_limit=700, count=20)
+        updates = safe_list(proposal.get(update_field), item_limit=700, count=20)
+        existing = [str(item) for item in merged.get(field_name) or []]
+        if values:
+            merged[field_name] = (existing + [item for item in values if item not in existing])[:28]
+            admitted_fields.append(field_name)
+        elif updates:
+            merged[field_name] = (existing + [item for item in updates if item not in existing])[:28]
+            admitted_fields.append(update_field)
+        elif field_name in proposal:
+            rejected_fields.append(field_name)
+        elif update_field in proposal:
+            rejected_fields.append(update_field)
+
+    directive = safe_text(proposal.get("next_worker_directive"), limit=5000)
+    directive_admission = (
+        admit_advisor_prompt_directive(directive, user_message=user_message)
+        if directive
+        else None
+    )
+    if directive_admission and directive_admission.admitted:
+        merged["next_worker_directive"] = directive_admission.value
+        admitted_fields.append("next_worker_directive")
+    elif "next_worker_directive" in proposal:
+        rejected_fields.append("next_worker_directive")
+
+    for forbidden in ("proposed_answer", "suggested_response", "user_facing_answer", "final_answer"):
+        if forbidden in proposal:
+            rejected_fields.append(forbidden)
+
+    merged["packet_source"] = "hologov_control_compilation_v3"
+    return merged, {
+        "admitted": True,
+        "admitted_fields": admitted_fields,
+        "rejected_fields": rejected_fields,
+        "topic_events": list(topic_state.get("topic_events") or []),
+        "provider_authority": "conversation_control_proposal_only",
+    }
+
+
+def _gov_narrative_packet(
+    *,
+    session: ChatSession,
+    capsule_context: dict,
+    life_context: list,
+    last_session: Optional[dict],
+    holobrain_injection_plan: HoloBrainInjectionPlan,
+    turn_policy: Any,
+    user_message: str,
+    search_results: Optional[str],
+) -> dict[str, Any]:
+    provider_history = _bounded_adapter_history(session.history, query_text=user_message)
+    history_meta = _provider_history_metadata(
+        provider_history,
+        total_history_messages=len(session.history),
+        raw_history=session.history,
+    )
+    omitted = _safe_positive_int(history_meta.get("omitted_history_messages"))
+    state = session.holochat_state
+    arc = session.gov_arc_state
+    previous_control = dict(getattr(state, "hologov_control_ledger", {}) or {})
+    topic_state = _reconcile_topic_registry(
+        baseline=previous_control,
+        proposals={},
+        user_message=user_message,
+        turn_number=session.turn_count,
+    )
+    preserve = [
+        "HoloGov is the continuous conversation accountant and controller; workers are transient and produce the insight.",
+        "Treat the ordered raw conversation and prior worker outputs as primary evidence, not disposable noise.",
+        "Preserve prior worker gains so the next DNA worker can confirm, challenge, or extend them.",
+        "Preserve the user's agency and dignity; do not make the answer about winning compliance.",
+        "Preserve truthful warmth: reality first, never cruelty, never fake certainty.",
+        "Use the control ledger to navigate gaps when real context pressure requires omission.",
+    ]
+    if state and state.rolling_summary:
+        preserve.append("Carry forward the rolling summary as an iterative control spine, never as a replacement for the ordered conversation.")
+    if capsule_context or life_context:
+        preserve.append("Use scoped HoloBrain context as secondary grounding for explicit preferences and durable boundaries.")
+    if search_results:
+        preserve.append("Use admitted search results silently where relevant; do not perform source theater.")
+    reject = [
+        "Reject scolding, gotcha framing, shame, sterile disclaimers, and bureaucratic distance.",
+        "Reject false memory, hidden-profile theatrics, and claims of knowing private context beyond admitted memory.",
+        "Reject overconfident medical, financial, legal, or dependency promises.",
+    ]
+    directive_parts = [
+        "Inspect the ordered conversation and prior worker contributions before answering.",
+        "Use this packet as navigation and control structure, never as a replacement for primary conversational evidence.",
+        "Build on what prior DNA workers established, challenge weak claims where useful, and add a genuinely new layer.",
+        "Answer the live request directly; HoloGov organizes and the worker performs the reasoning.",
+    ]
+    if omitted:
+        directive_parts.append(
+            f"{omitted} raw history message(s) are omitted under context pressure; origins, relevant older evidence, and recent turns remain selected."
+        )
+    if getattr(turn_policy, "tier", "") in {"high", "max"}:
+        directive_parts.append("This is high-stakes: prefer precise limits and practical next steps over confidence theater.")
+    memory_stewardship = _holobrain_stewardship_plan(
+        capsule_context=capsule_context,
+        life_context=life_context,
+        last_session=last_session,
+        holochat_state=state,
+    )
+    holobrain_projection = _holobrain_worker_projection(
+        capsule_context=capsule_context,
+        life_context=life_context,
+        last_session=last_session,
+        injection_plan=holobrain_injection_plan,
+    )
+    rolling_summary = _compact_text((state.rolling_summary if state else None), limit=16000)
+    return {
+        "gov_role": "HoloGov maintains conversation structure, provenance, topic lanes, state correctness, context allocation, and worker handoff. HoloGov does not create the answer or the insight.",
+        "worker_context_contract": "The worker is a fresh DNA speaker each turn. The ordered raw conversation is primary evidence; this control ledger makes that evidence navigable and preserves recursive gains.",
+        "holobrain_operator": "HoloGov is the only runtime role authorized to enter, query, organize, update, prune, archive, or manage HoloBrain. HoloGov and HoloBrain operate as the continuity team.",
+        "holobrain_scope": "Workers do not access HoloBrain directly. HoloGov provides the richest lawful admitted HoloBrain projection; the worker must not invent or expose unavailable private memory.",
+        "memory_stewardship": memory_stewardship,
+        "holobrain_projection": holobrain_projection,
+        "packet_source": "deterministic_continuity_fallback_v1",
+        "control_health": {
+            "status": "degraded",
+            "reason": "provider_control_compilation_not_yet_admitted",
+        },
+        "conversation_phase": previous_control.get("conversation_phase") or "opening",
+        "topic_registry": topic_state["topic_registry"],
+        "active_threads": topic_state["active_threads"],
+        "parked_threads": topic_state["parked_threads"],
+        "resolved_threads": topic_state["resolved_threads"],
+        "resurfaced_threads": topic_state["resurfaced_threads"],
+        "topic_events": topic_state["topic_events"],
+        "worker_contributions": previous_control.get("worker_contributions") or [],
+        "memory_admission_proposals": [],
+        "user_portrait": (_capsule_portrait_lines(capsule_context) + _life_context_portrait_lines(life_context))[:12],
+        "current_state_of_affairs": _compact_text(user_message, limit=360),
+        "chronological_ledger": list(previous_control.get("chronological_ledger") or [])[:60],
+        "rolling_summary": rolling_summary,
+        "narrative_arc": _compact_text(rolling_summary or arc.last_gov_read, limit=2400),
+        "active_tension": _compact_text(arc.current_tension or arc.topic_shift_reason or "", limit=260),
+        "settled_decisions": list(getattr(state, "settled_decisions", []) or [])[:16],
+        "unresolved_questions": list(arc.unresolved_questions or [])[:12],
+        "contradictions": previous_control.get("contradictions") or [],
+        "key_anchors": list(previous_control.get("key_anchors") or [])[:24],
+        "confidence_notes": list(previous_control.get("confidence_notes") or [])[:20],
+        "memory_retrieval_requests": [],
+        "preserve": preserve,
+        "reject": reject,
+        "context_manifest": {
+            "selection_mode": history_meta.get("selection_mode"),
+            "ordered_history_preserved": history_meta.get("ordered_history_preserved"),
+            "raw_history_messages": history_meta.get("raw_history_messages"),
+            "selected_history_messages": history_meta.get("bounded_history_messages"),
+            "omitted_history_messages": omitted,
+            "selection_rationale": "Full ordered history while it fits; otherwise preserve origins, relevant older evidence, explicit decisions/corrections, and recent turns.",
+        },
+        "worker_assignment": {
+            "objective": _compact_text(user_message, limit=700),
+            "inspect": ["ordered conversation", "prior worker contributions", "settled decisions", "open questions"],
+            "build_on": ["standing prior insights and evidence"],
+            "challenge": ["unsupported or superseded claims"],
+            "avoid": ["generic restart", "repeating settled ground", "inventing missing context"],
+            "completion_signal": "The response advances the live conversation with one coherent new layer while preserving continuity.",
+        },
+        "next_worker_directive": " ".join(directive_parts),
+        "context_pressure": {
+            "raw_history_messages": history_meta.get("raw_history_messages"),
+            "bounded_history_messages": history_meta.get("bounded_history_messages"),
+            "omitted_history_messages": omitted,
+            "holobrain_injection_mode": holobrain_injection_plan.mode.value,
+            "holobrain_injection_reason": holobrain_injection_plan.reason,
+        },
+    }
+
+
 def _build_worker_gov_turn_plan(
     *,
     session: ChatSession,
@@ -2848,6 +4333,7 @@ def _build_worker_gov_turn_plan(
     tenor: Optional[str],
     tenor_admission: Any,
     thought_admission: Any,
+    user_message: str,
     search_query: Optional[str],
     search_results: Optional[str],
     web_trace: dict[str, Any],
@@ -2860,6 +4346,7 @@ def _build_worker_gov_turn_plan(
     holobrain_injection_plan: HoloBrainInjectionPlan,
     frontier_assist: dict[str, Any],
     worker_fallback_active: bool = False,
+    control_compilation_cache: Optional[dict[str, Any]] = None,
 ) -> GovTurnPlan:
     selected, dropped, drop_reasons, memory_admissions, memory_rejections = _govturnplan_context_selection(
         incognito=incognito,
@@ -2886,14 +4373,145 @@ def _build_worker_gov_turn_plan(
                 "reason": getattr(thought_admission, "reason", "not_admitted"),
             }
         )
-    baton = tenor or (
-        "Answer as the visible HoloChat worker with warm, precise, collaborative language. "
-        "Do not scold, prosecute, or use gotcha framing."
+    baton = _worker_continuity_baton(
+        session=session,
+        tenor=tenor,
+        capsule_context=capsule_context,
+        life_context=life_context,
+        holobrain_injection_plan=holobrain_injection_plan,
+        turn_policy=turn_policy,
+        user_message=user_message,
     )
+    narrative_packet = _gov_narrative_packet(
+        session=session,
+        capsule_context=capsule_context,
+        life_context=life_context,
+        last_session=last_session,
+        holobrain_injection_plan=holobrain_injection_plan,
+        turn_policy=turn_policy,
+        user_message=user_message,
+        search_results=search_results,
+    )
+    control_compilation_telemetry: dict[str, Any] = {
+        "mode": "local_fallback",
+        "reason": "advisor_does_not_support_control_compilation",
+    }
+    synthesize = getattr(gov_advisor, "compile_holochat_control_packet", None)
+    if not callable(synthesize):
+        synthesize = getattr(gov_advisor, "synthesize_holochat_turn_packet", None)
+    if callable(synthesize) and _hologov_control_compilation_enabled():
+        provider_history = _bounded_adapter_history(session.history, query_text=user_message)
+        history_metadata = _provider_history_metadata(
+            provider_history,
+            total_history_messages=len(session.history),
+            raw_history=session.history,
+        )
+        current_worker = _adapter_identity_dict(adapter)
+        synthesis = None
+        compilation_error_type = None
+        failed_call_telemetry: dict[str, Any] = {}
+        reused_for_failover = bool(control_compilation_cache and control_compilation_cache.get("attempted"))
+        if reused_for_failover:
+            synthesis = control_compilation_cache.get("synthesis")
+            compilation_error_type = control_compilation_cache.get("error_type")
+            failed_call_telemetry = dict(control_compilation_cache.get("failed_call_telemetry") or {})
+        else:
+            try:
+                synthesis = synthesize(
+                    ordered_history=provider_history,
+                    current_user_message=user_message,
+                    previous_state=_hologov_state_payload(session.holochat_state),
+                    capsule_context=capsule_context,
+                    life_context=life_context,
+                    latest_consolidation=last_session,
+                    worker_identity=current_worker,
+                    turn_policy={
+                        "tier": getattr(turn_policy, "tier", "standard"),
+                        "reasons": list(getattr(turn_policy, "reasons", ()) or ()),
+                        "fallback_allowed": bool(getattr(turn_policy, "fallback_allowed", False)),
+                    },
+                    history_metadata=history_metadata,
+                    turn_number=session.turn_count,
+                )
+                if control_compilation_cache is not None:
+                    control_compilation_cache.update({
+                        "attempted": True,
+                        "synthesis": synthesis,
+                        "error_type": None,
+                        "failed_call_telemetry": {},
+                        "compiled_for_worker": current_worker,
+                    })
+            except Exception as exc:
+                logger.warning("HoloGov control compilation failed: %s", exc)
+                telemetry_getter = getattr(gov_advisor, "get_last_holochat_control_telemetry", None)
+                failed_call_telemetry = telemetry_getter() if callable(telemetry_getter) else {}
+                compilation_error_type = exc.__class__.__name__
+                if control_compilation_cache is not None:
+                    control_compilation_cache.update({
+                        "attempted": True,
+                        "synthesis": None,
+                        "error_type": compilation_error_type,
+                        "failed_call_telemetry": failed_call_telemetry,
+                        "compiled_for_worker": current_worker,
+                    })
+
+        if compilation_error_type:
+            control_compilation_telemetry = {
+                **failed_call_telemetry,
+                "mode": "local_fallback",
+                "reason": "control_compilation_error",
+                "error_type": compilation_error_type,
+                "reused_for_worker_failover": reused_for_failover,
+                "compiled_for_worker": (control_compilation_cache or {}).get("compiled_for_worker"),
+                "applied_to_worker": current_worker,
+            }
+        else:
+            proposal = synthesis.get("proposal") if isinstance(synthesis, dict) else None
+            if isinstance(proposal, dict):
+                narrative_packet, admission = _admit_hologov_narrative_proposal(
+                    baseline=narrative_packet,
+                    proposal=proposal,
+                    user_message=user_message,
+                    turn_number=session.turn_count,
+                )
+                control_compilation_telemetry = {
+                    **(synthesis.get("telemetry") or {}),
+                    "admission": admission,
+                    "reused_for_worker_failover": reused_for_failover,
+                    "compiled_for_worker": (control_compilation_cache or {}).get("compiled_for_worker") or current_worker,
+                    "applied_to_worker": current_worker,
+                }
+            else:
+                control_compilation_telemetry = {
+                    **((synthesis.get("telemetry") or {}) if isinstance(synthesis, dict) else {}),
+                    "mode": "local_fallback",
+                    "reason": "control_compilation_missing_proposal",
+                    "reused_for_worker_failover": reused_for_failover,
+                    "compiled_for_worker": (control_compilation_cache or {}).get("compiled_for_worker") or current_worker,
+                    "applied_to_worker": current_worker,
+                }
+    elif callable(synthesize):
+        control_compilation_telemetry = {
+            "mode": "disabled_for_control_run",
+            "reason": "HOLOCHAT_GOV_CONTROL_PACKET_ENABLED=false",
+        }
+    if control_compilation_telemetry.get("mode") == "hologov_control_compilation_v3":
+        narrative_packet["control_health"] = {
+            "status": "healthy",
+            "reason": "bounded_hologov_delta_admitted",
+        }
+    else:
+        narrative_packet["control_health"] = {
+            "status": "degraded",
+            "reason": control_compilation_telemetry.get("reason") or "control_compilation_unavailable",
+        }
+    deep_directive = _compact_text(narrative_packet.get("next_worker_directive"), limit=5000)
+    if deep_directive and deep_directive not in baton:
+        baton = baton + "\n\nHOLOGOV CONTROL ASSIGNMENT:\n" + deep_directive
     return build_gov_turn_plan(
         turn_id=f"{session.session_id}:{session.turn_count}",
         user_id=stable_hash(capsule_id) if capsule_id and not incognito else None,
-        route="Visible Worker -> Deterministic Gov State Update -> GovTurnPlan -> Visible Worker",
+        route="Visible Worker -> HoloGov State Update -> GovTurnPlan -> Visible Worker",
         visible_worker_role="holochat_visible_worker",
         worker_provider_selection=_adapter_identity_dict(adapter),
         advisor_provider_selection={
@@ -2924,10 +4542,12 @@ def _build_worker_gov_turn_plan(
             "No scolding, shame, gotcha, cold, curt, sterile, hostile, or prosecutorial posture.",
             "Relationship repair beats cleverness, pressure, or hard-truth performance.",
             "HoloBrain memory grounds continuity; it must never become accusatory theory about the user.",
+            "Only HoloGov may operate HoloBrain; visible workers receive admitted HoloBrain projections through GovTurnPlan.",
+            "Never expose internal state, GovTurnPlan fields, control schemas, or raw JSON unless the user explicitly requested JSON in their own message.",
         ],
         persona_identity_constraints=[
             "HoloChat is universal for every active user.",
-            "Gov operates; visible workers speak.",
+            "HoloGov operates; visible workers speak.",
             "Provider output is subordinate work product until admitted.",
         ],
         contradiction_repairs=contradiction_repairs,
@@ -2943,13 +4563,16 @@ def _build_worker_gov_turn_plan(
             "Deterministic visible release guard must run before user-visible output.",
             "Streaming chunks are buffered until release admission.",
             "Surface thought metadata must be admitted before UI exposure.",
+            "Internal control-packet formatting must never leak into visible worker prose.",
         ],
         worker_prompt_baton=baton,
+        narrative_packet=narrative_packet,
         telemetry={
             "temperature": round(float(temperature), 3),
             "frontier_assist_triggered": bool((frontier_assist or {}).get("triggered")),
             "incognito": bool(incognito),
             "worker_fallback_active": bool(worker_fallback_active),
+            "hologov_control_compilation": control_compilation_telemetry,
         },
     )
 
@@ -3033,6 +4656,62 @@ def _required_tools_for_turn(search_query: Optional[str], search_results: Option
     return [RequiredTools.NONE]
 
 
+def _govturnplan_budget_profile(
+    gov_turn_plan: Optional[GovTurnPlan],
+    gov_turn_plan_block: Optional[str],
+) -> dict[str, Any]:
+    if gov_turn_plan is None:
+        return {
+            "included": False,
+            "reason": "not_built",
+            "govturnplan_block_token_estimate": estimate_context_tokens(gov_turn_plan_block or ""),
+        }
+    payload = gov_turn_plan.model_dump()
+    narrative_packet = payload.get("narrative_packet") or {}
+    telemetry = payload.get("telemetry") or {}
+    stewardship = narrative_packet.get("memory_stewardship") or {}
+    control_compilation = telemetry.get("hologov_control_compilation") or {}
+    holobrain_projection = narrative_packet.get("holobrain_projection") or {}
+    return {
+        "included": True,
+        "packet_source": narrative_packet.get("packet_source"),
+        "control_health": narrative_packet.get("control_health") or {},
+        "govturnplan_hash": telemetry.get("govturnplan_hash"),
+        "govturnplan_block_token_estimate": estimate_context_tokens(gov_turn_plan_block or ""),
+        "govturnplan_payload_token_estimate": _safe_positive_int(telemetry.get("govturnplan_payload_token_estimate")),
+        "narrative_packet_token_estimate": _safe_positive_int(telemetry.get("narrative_packet_token_estimate")),
+        "worker_prompt_baton_token_estimate": _safe_positive_int(telemetry.get("worker_prompt_baton_token_estimate")),
+        "user_portrait_items": len(narrative_packet.get("user_portrait") or []),
+        "preserve_rules": len(narrative_packet.get("preserve") or []),
+        "reject_rules": len(narrative_packet.get("reject") or []),
+        "chronological_ledger_items": len(narrative_packet.get("chronological_ledger") or []),
+        "topic_registry_count": len(narrative_packet.get("topic_registry") or []),
+        "active_thread_count": len(narrative_packet.get("active_threads") or []),
+        "parked_thread_count": len(narrative_packet.get("parked_threads") or []),
+        "resolved_thread_count": len(narrative_packet.get("resolved_threads") or []),
+        "resurfaced_thread_count": len(narrative_packet.get("resurfaced_threads") or []),
+        "topic_event_count": len(narrative_packet.get("topic_events") or []),
+        "worker_contribution_count": len(narrative_packet.get("worker_contributions") or []),
+        "contradiction_count": len(narrative_packet.get("contradictions") or []),
+        "context_selection_mode": (narrative_packet.get("context_manifest") or {}).get("selection_mode"),
+        "rolling_summary_token_estimate": estimate_context_tokens(narrative_packet.get("rolling_summary") or ""),
+        "control_compilation": control_compilation,
+        "holobrain_projection": {
+            "authority": holobrain_projection.get("authority"),
+            "injection_mode": holobrain_projection.get("injection_mode"),
+            "source_counts": holobrain_projection.get("source_counts") or {},
+        },
+        "memory_stewardship": {
+            "mode": stewardship.get("mode"),
+            "authority": stewardship.get("authority"),
+            "action_count": len(stewardship.get("actions") or []),
+            "review_candidate_count": len(stewardship.get("review_candidates") or []),
+            "status_counts": stewardship.get("status_counts") or {},
+            "raw_library_access_for_worker": stewardship.get("raw_library_access_for_worker"),
+        },
+    }
+
+
 def _runtime_context_budget(
     *,
     session: ChatSession,
@@ -3050,8 +4729,12 @@ def _runtime_context_budget(
     holochat_state_block: Optional[str] = None,
     holobrain_injection_plan: Optional[HoloBrainInjectionPlan] = None,
     gov_turn_plan_block: Optional[str] = None,
+    gov_turn_plan: Optional[GovTurnPlan] = None,
 ) -> dict[str, Any]:
-    provider_history = adapter_history if adapter_history is not None else _bounded_adapter_history(session.history)
+    provider_history = adapter_history if adapter_history is not None else _bounded_adapter_history(
+        session.history,
+        query_text=user_message,
+    )
     provider_history_meta = _provider_history_metadata(
         provider_history,
         total_history_messages=len(session.history),
@@ -3260,6 +4943,23 @@ def _runtime_context_budget(
         }
     )
 
+    if not incognito:
+        # These sources are available to HoloGov, but the visible worker receives
+        # only the admitted projection inside GovTurnPlan. Keep telemetry aligned
+        # with the actual provider prompt instead of double-counting raw memory.
+        for block in blocks:
+            if block.get("block_name") in {
+                "thread_health",
+                "holochat_state_object",
+                "holochat_memory_pack",
+                "life_context",
+                "latest_consolidation",
+                "capsule_context",
+            }:
+                block["content"] = ""
+                block["included"] = False
+                block["reason"] = "projected_through_hologov_govturnplan"
+
     ledger = build_context_budget_ledger(blocks).model_dump(mode="json")
     rows_by_name = {row.get("block_name"): row for row in ledger.get("rows", [])}
     for row in ledger.get("rows", []):
@@ -3279,10 +4979,13 @@ def _runtime_context_budget(
         "char_count": plan.char_count,
         "token_estimate": plan.token_estimate,
     }
+    ledger["hologov_packet"] = _govturnplan_budget_profile(gov_turn_plan, gov_turn_plan_block)
     ledger["history_context"] = provider_history_meta
+    narrative_packet = (gov_turn_plan.narrative_packet or {}) if gov_turn_plan is not None else {}
+    holobrain_projection = narrative_packet.get("holobrain_projection") or {}
     ledger["memory_context"] = {
         "memory_pack_version": HOLOCHAT_MEMORY_PACK_VERSION,
-        "memory_pack_included": bool(memory_pack) and not incognito,
+        "memory_pack_included": False,
         "life_context_entries_available": len(life_context or []),
         "capsule_context_keys_available": len(capsule_context or {}),
         "life_context_included": bool(rows_by_name.get("life_context", {}).get("included")),
@@ -3290,6 +4993,10 @@ def _runtime_context_budget(
         "latest_consolidation_included": bool(rows_by_name.get("latest_consolidation", {}).get("included")),
         "life_context_token_estimate": _safe_positive_int(rows_by_name.get("life_context", {}).get("token_estimate")),
         "capsule_context_token_estimate": _safe_positive_int(rows_by_name.get("capsule_context", {}).get("token_estimate")),
+        "projected_via_hologov": bool(holobrain_projection),
+        "projection_injection_mode": holobrain_projection.get("injection_mode"),
+        "projection_durable_items": ((holobrain_projection.get("source_counts") or {}).get("durable_items_admitted")),
+        "raw_worker_holobrain_access": False,
         "dropped_memory_blocks": [
             name
             for name in ("life_context", "capsule_context", "latest_consolidation", "holochat_state_object")
@@ -3412,7 +5119,7 @@ def _build_holo4dna_shadow_turn(
         capsule_context=capsule_context,
         life_context=life_context,
         latest_consolidation=last_session,
-        recent_history=_bounded_adapter_history(session.history),
+        recent_history=_bounded_adapter_history(session.history, query_text=user_message),
         web_results=search_results,
         incognito=incognito,
         runtime_info=runtime_info,

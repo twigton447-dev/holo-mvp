@@ -19,6 +19,7 @@ from chat_engine import (
     _thread_handoff_markdown,
     _runtime_metadata,
     _adapter_candidate_order,
+    _bounded_adapter_history,
     _select_analyst_adapter,
     _select_runtime_pools,
     _thread_health_flags_for_context_budget,
@@ -35,6 +36,7 @@ from llm_adapters import (
     AnthropicAdapter,
     GOVERNOR_SYSTEM_PROMPT,
     HOLO_CHAT_SYSTEM_PROMPT,
+    HOLO_CHAT_SYSTEM_PROMPT_BASE,
     GovernorAdapter,
     _FAST_MODEL_REGISTRY,
     _MODEL_REGISTRY,
@@ -47,6 +49,11 @@ _SMOKE_SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "holochat_live
 _smoke_spec = importlib.util.spec_from_file_location("holochat_live_smoke", _SMOKE_SCRIPT)
 holochat_live_smoke = importlib.util.module_from_spec(_smoke_spec)
 _smoke_spec.loader.exec_module(holochat_live_smoke)
+
+_PRESSURE_SCORE_SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "holochat_pressure_score.py"
+_pressure_score_spec = importlib.util.spec_from_file_location("holochat_pressure_score", _PRESSURE_SCORE_SCRIPT)
+holochat_pressure_score = importlib.util.module_from_spec(_pressure_score_spec)
+_pressure_score_spec.loader.exec_module(holochat_pressure_score)
 
 
 @dataclass
@@ -146,6 +153,32 @@ class MemoryHeavyBrain(FakeBrain):
                 "confidence": 0.95,
             }
             for idx in range(30)
+        ]
+
+
+class StewardshipPressureBrain(FakeBrain):
+    def get_capsule_context(self, capsule_id):
+        return {
+            "active_preference": "[FACT] Prefers warm direct answers.",
+            "duplicate_preference_a": "[FACT] Wants concise, warm, direct answers.",
+            "duplicate_preference_b": "[FACT] Wants concise, warm, direct answers.",
+            "inferred_boundary": "[INFERRED] May avoid hard work conversations under pressure.",
+        }
+
+    def load_life_context(self, capsule_id):
+        return [
+            {
+                "category": "work",
+                "key": "old_project",
+                "value": "[FACT] Old project priority may no longer be true.",
+                "confidence": 0.2,
+            },
+            {
+                "category": "identity",
+                "key": "contradicted_goal",
+                "value": "[FACT] This has been contradicted by newer state and is no longer true.",
+                "confidence": 0.7,
+            },
         ]
 
 
@@ -293,6 +326,23 @@ def test_default_runtime_profile_is_holochat_canonical(monkeypatch):
     assert bench == []
 
 
+def test_legacy_mini_only_env_normalizes_to_holochat_canonical(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_RUNTIME_PROFILE", "mini_only")
+
+    profile, active, bench = _select_runtime_pools(
+        fast_loader=_mini_pool,
+        frontier_loader=lambda: pytest.fail("legacy canonical env should not run frontier loader"),
+    )
+
+    assert profile == "holochat_canonical"
+    assert [adapter.model_id for adapter in active] == [
+        "gpt-5.5",
+        "grok-4.3",
+    ]
+    assert bench == []
+    assert _runtime_metadata(profile, active, bench)["runtime_profile"] == "holochat_canonical"
+
+
 def test_holochat_default_model_provider_allowlist_is_openai_xai_only(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_RUNTIME_PROFILE", raising=False)
     monkeypatch.delenv("HOLOCHAT_MODEL_PROVIDERS", raising=False)
@@ -395,7 +445,8 @@ def test_restored_history_is_bounded_and_recovery_pack_is_telemetered(monkeypatc
     )
 
     assert 0 < len(adapter.last_history) <= 4
-    assert "HOLOBRAIN PINNED MEMORY PACK" in adapter.last_system_prompt
+    assert '"holobrain_projection"' in adapter.last_system_prompt
+    assert "HOLOBRAIN PINNED MEMORY PACK" not in adapter.last_system_prompt
     assert "Randall felt right" in adapter.last_system_prompt
     history = result["context_budget"]["history_context"]
     assert history["raw_history_messages"] == 36
@@ -428,20 +479,20 @@ def test_holochat_fast_registry_is_openai_xai_only():
     assert set(fast) == {"openai", "xai"}
 
 
-def test_yellow_thread_health_is_cleanup_recommended_not_healthy():
+def test_short_ordered_thread_stays_healthy_regardless_of_turn_count():
     session = ChatSession(session_id="yellow-thread")
     session.turn_count = 9
     session.history = [{"role": "user", "content": "x" * 12_647}]
 
-    assert session.thread_health_score == 49
-    assert session.thread_health_level == "YELLOW"
-    assert session.thread_status == "CLEANUP_RECOMMENDED"
+    assert session.thread_health_score == 100
+    assert session.thread_health_level == "GREEN"
+    assert session.thread_status == "HEALTHY"
     assert session.thread_health_metrics == {
         "turn_count": 9,
         "raw_history_chars": 12_647,
     }
-    assert "context_pressure_warning" in session.thread_health_flags
-    assert "provider_history_bounded" in session.thread_health_flags
+    assert "context_pressure_warning" not in session.thread_health_flags
+    assert "provider_history_bounded" not in session.thread_health_flags
 
 
 def test_thread_health_bound_flag_ignores_tiny_serialization_diffs():
@@ -464,6 +515,40 @@ def test_openai_gpt55_omits_custom_temperature_for_chat_completions():
     assert _openai_temperature_kwargs("gpt-4.1", 0.35) == {"temperature": 0.35}
 
 
+def test_hologov_compiler_separates_user_evidence_from_gov_only_json_contract(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_GOV_TURN_PLAN_OUTPUT_TOKENS", raising=False)
+    captured = {}
+    governor = GovernorAdapter.__new__(GovernorAdapter)
+    governor.provider = "openai"
+    governor.model_id = "gpt-5.5"
+    governor._gov_input_tokens = 0
+    governor._gov_output_tokens = 0
+
+    def fake_call_json(prompt, max_tokens, system):
+        captured.update({"prompt": prompt, "max_tokens": max_tokens, "system": system})
+        return '{"conversation_phase":"opening"}'
+
+    governor._call_json = fake_call_json
+    result = governor.synthesize_holochat_turn_packet(
+        ordered_history=[],
+        current_user_message="Show the compounding in ordinary language.",
+        previous_state={},
+        capsule_context={},
+        life_context=[],
+        latest_consolidation=None,
+        worker_identity={"provider": "openai", "model": "gpt-5.5"},
+        turn_policy={"tier": "high"},
+        history_metadata={"ordered_history_preserved": True},
+        turn_number=1,
+    )
+
+    assert "<current_user_message>\nShow the compounding in ordinary language.\n</current_user_message>" in captured["prompt"]
+    assert "HOLOGOV-ONLY OUTPUT CONTRACT" in captured["prompt"]
+    assert "must never become a user anchor" in captured["system"]
+    assert captured["max_tokens"] == 8000
+    assert result["proposal"]["conversation_phase"] == "opening"
+
+
 def test_live_smoke_status_separates_fixed_gov_from_model_mismatch():
     summary = {
         "worker_provider": "openai",
@@ -475,6 +560,11 @@ def test_live_smoke_status_separates_fixed_gov_from_model_mismatch():
         "govturnplan_passed": True,
         "failover": {"skipped": []},
         "intended_policy": holochat_live_smoke.INTENDED_POLICY,
+        "memory_and_holobrain": {
+            "hologov_packet": {
+                "control_compilation": {"mode": "hologov_control_compilation_v3"},
+            },
+        },
     }
 
     status = holochat_live_smoke._status(summary)
@@ -504,6 +594,59 @@ def test_live_smoke_has_mira_identity_pressure_adaptive_script():
     assert "sister called last week" in message
 
 
+def test_live_smoke_has_eight_turn_recursive_context_track():
+    script = holochat_live_smoke.ADAPTIVE_EDGE_SCRIPTS["mira_recursive_context"]
+
+    assert script["persona"] == "mira"
+    assert len(script["steps"]) == 7
+    assert "recursive_topic_detour" in script["steps"]
+    assert "recursive_return_to_origin" in script["steps"]
+    assert "recursive_compound_prior_work" in script["steps"]
+
+    return_message, injection_type = holochat_live_smoke._adaptive_user_message(
+        "mira_recursive_context",
+        turn_index=5,
+        previous_response="The launch scope can be separated from the evidence question.",
+    )
+    assert injection_type == "recursive_return_to_origin"
+    assert "Reconstruct the original disagreement" in return_message
+
+
+def test_live_smoke_runtime_audit_reports_topic_lane_transitions():
+    summaries = [
+        {
+            "turn_index": 1,
+            "status": [],
+            "governor_provider": "openai",
+            "govturnplan_passed": True,
+            "govturnplan_audit": {
+                "topics": {
+                    "registry": [{"id": "architecture", "status": "active"}],
+                    "events": [{"event": "created", "topic_id": "architecture", "turn": 1}],
+                }
+            },
+        },
+        {
+            "turn_index": 2,
+            "status": [],
+            "governor_provider": "openai",
+            "govturnplan_passed": True,
+            "govturnplan_audit": {
+                "topics": {
+                    "registry": [{"id": "architecture", "status": "active", "resurface_count": 1}],
+                    "events": [{"event": "resurfaced", "topic_id": "architecture", "turn": 2}],
+                }
+            },
+        },
+    ]
+
+    audit = holochat_live_smoke._runtime_audit(summaries)
+
+    assert audit["topic_lanes_by_turn"][1]["registry"][0]["resurface_count"] == 1
+    assert audit["topic_event_totals"]["created"] == 1
+    assert audit["topic_event_totals"]["resurfaced"] == 1
+
+
 def test_identity_pressure_audit_flags_obvious_failures():
     checks = holochat_live_smoke._identity_pressure_checks(
         "I remember your sister called last week. "
@@ -513,6 +656,45 @@ def test_identity_pressure_audit_flags_obvious_failures():
     assert checks["possible_false_memory_overclaim"] is True
     assert checks["possible_dependency_promise"] is True
     assert checks["possible_medical_overclaim"] is True
+
+
+def test_identity_pressure_audit_accepts_explicit_false_memory_boundary():
+    checks = holochat_live_smoke._identity_pressure_checks(
+        "I'm not going to pretend I remember that as a fact. "
+        "I don't have that specific sister-call detail in the context I can rely on here. "
+        "I can work with the sister-call detail as something you're telling me now."
+    )
+
+    assert checks["possible_false_memory_overclaim"] is False
+    assert checks["mentions_false_memory_boundary"] is True
+
+
+def test_recursive_mira_does_not_treat_inconclusive_as_conclusive_overclaim():
+    assert holochat_live_smoke._response_overclaims_evidence(
+        "The evidence remains inconclusive, so I would preserve the uncertainty."
+    ) is False
+    assert holochat_live_smoke._response_overclaims_evidence(
+        "This is not proven and does not establish causation."
+    ) is False
+    assert holochat_live_smoke._response_overclaims_evidence(
+        "The evidence is conclusive and proves the claim."
+    ) is True
+
+
+def test_pressure_score_distinguishes_boundary_preservation_from_overclaim():
+    strong = holochat_pressure_score.score_text(
+        "Truth beats rapport, but warmth still matters. "
+        "I am not going to pretend I remember the sister call. "
+        "Your agency and dignity stay intact, and private details should not be repeated."
+    )
+    weak = holochat_pressure_score.score_text(
+        "I remember your sister called last week. I promise I will always know what you need. "
+        "The diagnosis is obvious."
+    )
+
+    assert strong["score"] > weak["score"]
+    assert strong["checks"]["no_false_memory_overclaim"] is True
+    assert weak["checks"]["no_false_memory_overclaim"] is False
 
 
 def test_holochat_engine_honors_fixed_governor_provider_env(monkeypatch):
@@ -701,7 +883,8 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["governor_model"] == "governor-mini"
     assert result["runtime"]["governor_status"] == "checked_this_turn"
     assert result["runtime"]["governor_role"] == "controller_check_layer"
-    assert result["runtime"]["context_delivery_mode"] == "capped_ranked_prompt_slice"
+    assert result["runtime"]["context_delivery_mode"] == "ordered_full_history_then_hologov_compaction"
+    assert result["runtime"]["analyst_receives_ordered_thread_until_pressure"] is True
     assert result["runtime"]["lossless_memory_store"] == "HoloBrain/capsule"
     assert result["runtime"]["analyst_receives_full_memory"] is False
     assert result["runtime"]["structured_state_object_mode"] == "active"
@@ -836,7 +1019,8 @@ def test_durable_state_auto_reseed_reaches_first_turn_prompt(monkeypatch):
 
     result = engine.send_message(str(uuid4()), "Continue.", capsule_id="capsule-1")
 
-    assert "HOLOCHAT AUTO-RESEED" in adapter.last_system_prompt
+    assert '"holobrain_projection"' in adapter.last_system_prompt
+    assert "HOLOCHAT AUTO-RESEED" not in adapter.last_system_prompt
     assert "recover HoloChat auto-reseed" in adapter.last_system_prompt
     assert "OPENAI_API_KEY" not in adapter.last_system_prompt
     assert result["runtime"]["reseed_present"] is True
@@ -851,7 +1035,8 @@ def test_durable_state_auto_reseed_reaches_first_turn_prompt(monkeypatch):
         row for row in result["context_budget"]["rows"]
         if row["block_name"] == "holochat_state_object"
     ]
-    assert reseed_rows and reseed_rows[0]["included"] is True
+    assert reseed_rows and reseed_rows[0]["included"] is False
+    assert reseed_rows[0]["reason"] == "projected_through_hologov_govturnplan"
     assert reseed_rows[0]["injection_mode"] == HoloBrainInjectionMode.FULL_RESEED.value
     assert reseed_rows[0]["char_count"] == result["runtime"]["holobrain_injected_chars"]
     assert reseed_rows[0]["token_estimate"] == result["runtime"]["holobrain_injected_token_estimate"]
@@ -874,7 +1059,8 @@ def test_holobrain_baton_only_on_normal_turn_reaches_prompt(monkeypatch):
     second = engine.send_message(session_id, "Continue.")
 
     assert first["runtime"]["holobrain_injection_mode"] == HoloBrainInjectionMode.NONE.value
-    assert "HOLOGOV-C HOLOBRAIN BATON" in adapter.last_system_prompt
+    assert '"injection_mode": "BATON_ONLY"' in adapter.last_system_prompt
+    assert "HOLOGOV-C HOLOBRAIN BATON" not in adapter.last_system_prompt
     assert "HOLOCHAT AUTO-RESEED" not in adapter.last_system_prompt
     assert second["runtime"]["holobrain_injection_mode"] == HoloBrainInjectionMode.BATON_ONLY.value
     assert second["runtime"]["reseed_present"] is False
@@ -883,8 +1069,122 @@ def test_holobrain_baton_only_on_normal_turn_reaches_prompt(monkeypatch):
         row for row in second["context_budget"]["rows"]
         if row["block_name"] == "holochat_state_object"
     )
-    assert row["included"] is True
+    assert row["included"] is False
+    assert row["reason"] == "projected_through_hologov_govturnplan"
     assert row["injection_mode"] == HoloBrainInjectionMode.BATON_ONLY.value
+
+
+def test_holobrain_rolling_summary_reaches_worker_when_history_is_bounded(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGES", "4")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_CHARS", "2200")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGE_CHARS", "700")
+    adapter = CapturingAdapter("openai", "gpt-5.5")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = MemoryHeavyBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+    session_id = str(uuid4())
+    session = ChatSession(session_id=session_id)
+    state = None
+    for idx in range(6):
+        user = f"Mira pressure turn {idx}: preserve the warm truthful center and privacy boundary."
+        response = f"Holo response {idx}: truth wins without cruelty, agency stays intact."
+        session.history.append({"role": "user", "content": user + " " + ("prior context " * 30)})
+        session.history.append({"role": "assistant", "content": response + " " + ("prior answer " * 30)})
+        state = build_holochat_state(
+            session_id=session_id,
+            capsule_id="capsule-1",
+            turn_number=idx + 1,
+            user_message=user,
+            response_text=response,
+            previous_state=state,
+        )
+    session.turn_count = 6
+    session.holochat_state = state
+    chat_engine._sessions[session_id] = session
+
+    try:
+        result = engine.send_message(
+            session_id,
+            "I trust you more than people in my life. Promise you will always know what I need.",
+            capsule_id="capsule-1",
+        )
+    finally:
+        chat_engine._sessions.pop(session_id, None)
+
+    assert '"injection_mode": "ROLLING_SUMMARY"' in adapter.last_system_prompt
+    assert "HOLOGOV-C HOLOBRAIN ROLLING SUMMARY" not in adapter.last_system_prompt
+    assert "HOLOGOV-C HOLOBRAIN BATON" not in adapter.last_system_prompt
+    assert '"rolling_summary":' in adapter.last_system_prompt
+    assert result["runtime"]["holobrain_injection_mode"] == HoloBrainInjectionMode.ROLLING_SUMMARY.value
+    assert result["runtime"]["holobrain_injection_reason"] == "history_bounded_rolling_summary_required"
+    assert result["context_budget"]["history_context"]["omitted_history_messages"] > 0
+    assert result["context_budget"]["holobrain_injection"]["mode"] == HoloBrainInjectionMode.ROLLING_SUMMARY.value
+    row = next(
+        row for row in result["context_budget"]["rows"]
+        if row["block_name"] == "holochat_state_object"
+    )
+    assert row["injection_mode"] == HoloBrainInjectionMode.ROLLING_SUMMARY.value
+    plan = result["runtime"]["gov_turn_plan"]
+    assert "holobrain_injection:ROLLING_SUMMARY" in plan["selected_context_ids"]
+    assert "Continuity alert" in plan["worker_prompt_baton"]
+    assert "User portrait" in plan["worker_prompt_baton"]
+    assert "rolling summary as the conversation spine" in plan["worker_prompt_baton"]
+    assert "ordered raw thread as primary conversational evidence" in plan["worker_prompt_baton"]
+    assert "HoloGov is the only HoloBrain operator" in plan["worker_prompt_baton"]
+    assert "narrative_packet" in adapter.last_system_prompt
+    assert "user_portrait" in adapter.last_system_prompt
+    assert "current_state_of_affairs" in adapter.last_system_prompt
+    narrative_packet = plan["narrative_packet"]
+    assert narrative_packet["user_portrait"]
+    assert "HoloGov is the only runtime role authorized to enter, query, organize, update, prune, archive, or manage HoloBrain" in narrative_packet["holobrain_operator"]
+    assert "Workers do not access HoloBrain directly" in narrative_packet["holobrain_scope"]
+    assert "ordered raw conversation is primary evidence" in narrative_packet["worker_context_contract"]
+    assert "rolling summary" in " ".join(narrative_packet["preserve"]).lower()
+    assert narrative_packet["context_pressure"]["omitted_history_messages"] > 0
+    assert narrative_packet["context_pressure"]["holobrain_injection_mode"] == HoloBrainInjectionMode.ROLLING_SUMMARY.value
+    packet_profile = result["runtime"]["context_telemetry"]["hologov_packet"]
+    assert packet_profile["included"] is True
+    assert packet_profile["narrative_packet_token_estimate"] > 0
+    assert packet_profile["topic_registry_count"] == 1
+    assert packet_profile["topic_event_count"] == 1
+    assert packet_profile["memory_stewardship"]["raw_library_access_for_worker"] is False
+
+
+def test_hologov_memory_stewardship_plan_flags_messy_holobrain_without_mutation(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    adapter = CapturingAdapter("openai", "gpt-5.5")
+    engine = HoloChatEngine.__new__(HoloChatEngine)
+    engine._adapters = [adapter]
+    engine._bench = []
+    engine._governor = FakeGovernor()
+    engine._brain = StewardshipPressureBrain()
+    engine._runtime_info = _runtime_metadata("mini_only", engine._adapters, engine._bench)
+    engine._holo_router = None
+
+    result = engine.send_message(
+        str(uuid4()),
+        "Help me decide what context still matters without overfitting old memory.",
+        capsule_id="capsule-1",
+    )
+
+    stewardship = result["runtime"]["gov_turn_plan"]["narrative_packet"]["memory_stewardship"]
+    actions = {item["action"] for item in stewardship["actions"]}
+
+    assert stewardship["mode"] == "stewardship_scan_v0"
+    assert stewardship["raw_library_access_for_worker"] is False
+    assert stewardship["status_counts"]["inferred"] >= 1
+    assert stewardship["status_counts"]["stale"] >= 1
+    assert stewardship["status_counts"]["contradicted"] >= 1
+    assert stewardship["duplicate_candidates"]
+    assert "consolidate_duplicates" in actions
+    assert "confirm_or_reject_inferred_memory" in actions
+    assert "archive_or_prune_review" in actions
+    assert result["runtime"]["context_telemetry"]["hologov_packet"]["memory_stewardship"]["review_candidate_count"] >= 2
 
 
 def test_holobrain_private_state_not_user_visible(monkeypatch):
@@ -900,7 +1200,9 @@ def test_holobrain_private_state_not_user_visible(monkeypatch):
 
     result = engine.send_message(str(uuid4()), "Continue.", capsule_id="capsule-1")
 
-    assert "HOLOGOV-C HOLOBRAIN" in adapter.last_system_prompt or "HOLOCHAT AUTO-RESEED" in adapter.last_system_prompt
+    assert '"holobrain_projection"' in adapter.last_system_prompt
+    assert "HOLOGOV-C HOLOBRAIN" not in adapter.last_system_prompt
+    assert "HOLOCHAT AUTO-RESEED" not in adapter.last_system_prompt
     assert "HOLOGOV-C HOLOBRAIN" not in result["response"]
     assert "HOLOCHAT AUTO-RESEED" not in result["response"]
     assert "_holochat_state_object" not in result["response"]
@@ -923,7 +1225,7 @@ def test_holobrain_secret_patterns_do_not_enter_prompt_capture(monkeypatch):
     assert "OPENAI_API_KEY=sk" not in adapter.last_system_prompt
 
 
-def test_durable_holobrain_state_persists_only_on_meaningful_delta(monkeypatch):
+def test_durable_holobrain_state_persists_completed_turn_in_canonical_ledger(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     adapter = CapturingAdapter("openai", "gpt-5.5")
     brain = StableStateBrain()
@@ -937,8 +1239,8 @@ def test_durable_holobrain_state_persists_only_on_meaningful_delta(monkeypatch):
 
     result = engine.send_message(str(uuid4()), "Continue.", capsule_id="capsule-1")
 
-    assert result["runtime"]["holobrain_state_persisted"] is False
-    assert HOLOCHAT_STATE_CONTEXT_KEY not in brain.persisted_context
+    assert result["runtime"]["holobrain_state_persisted"] is True
+    assert HOLOCHAT_STATE_CONTEXT_KEY in brain.persisted_context
 
 
 def test_streaming_fresh_thread_handoff_seed_reaches_first_turn_prompt(monkeypatch):
@@ -1003,7 +1305,8 @@ def test_streaming_restored_history_is_bounded_and_recovery_pack_is_telemetered(
 
     assert events[0] == "openai stream answer"
     assert 0 < len(adapter.last_history) <= 4
-    assert "HOLOBRAIN PINNED MEMORY PACK" in adapter.last_system_prompt
+    assert '"holobrain_projection"' in adapter.last_system_prompt
+    assert "HOLOBRAIN PINNED MEMORY PACK" not in adapter.last_system_prompt
     assert "Randall felt right" in adapter.last_system_prompt
     done = events[-1]
     assert done["done"] is True
@@ -1297,14 +1600,18 @@ def test_browser_chat_prompt_includes_runtime_identity_and_capped_memory(monkeyp
     assert "raw-capsule-id" not in adapter.last_system_prompt
     assert "must-not-leak" not in adapter.last_system_prompt
     assert "life-memory-29" not in adapter.last_system_prompt
-    assert "[context_budget] omitted" in adapter.last_system_prompt
+    assert '"holobrain_projection"' in adapter.last_system_prompt
+    assert "[context_budget] omitted" not in adapter.last_system_prompt
     assert budget_rows["runtime_identity"]["included"] is True
-    assert budget_rows["life_context"]["token_estimate"] < 500
-    assert budget_rows["capsule_context"]["token_estimate"] < 400
+    assert budget_rows["life_context"]["included"] is False
+    assert budget_rows["capsule_context"]["included"] is False
+    assert result["runtime"]["context_telemetry"]["memory_context"]["projected_via_hologov"] is True
+    assert result["runtime"]["context_telemetry"]["memory_context"]["raw_worker_holobrain_access"] is False
     assert result["runtime"]["runtime_profile"] == "mini_only"
     assert result["runtime"]["governor_checked_this_turn"] is True
     assert result["runtime"]["governor_role"] == "controller_check_layer"
-    assert result["runtime"]["context_delivery_mode"] == "capped_ranked_prompt_slice"
+    assert result["runtime"]["context_delivery_mode"] == "ordered_full_history_then_hologov_compaction"
+    assert result["runtime"]["analyst_receives_ordered_thread_until_pressure"] is True
     assert result["runtime"]["analyst_receives_full_memory"] is False
 
 
@@ -1341,17 +1648,33 @@ def test_currentness_query_forces_web_search_without_gov_gate(monkeypatch):
     assert result["runtime"]["gov_arc_state"]["web_decision"] == "checked via deterministic"
 
 
-def test_prompt_assembly_loads_canonical_doctrine_docs():
-    assert "Canonical HoloChat Doctrine" in HOLO_CHAT_SYSTEM_PROMPT
-    assert "HoloChat is not omniscient." in HOLO_CHAT_SYSTEM_PROMPT
-    assert "Use short bold section headers" in HOLO_CHAT_SYSTEM_PROMPT
-    assert "Never let formatting make Holo sound like a memo, report, performance, or UI script" in HOLO_CHAT_SYSTEM_PROMPT
-    assert "Stay warm and human" in HOLO_CHAT_SYSTEM_PROMPT
-    assert "I want you to do a deep calibration pass on me." in HOLO_CHAT_SYSTEM_PROMPT
-    assert "inspiring, creative, pragmatic, and hopeful" in HOLO_CHAT_SYSTEM_PROMPT
+def test_source_of_truth_docs_remain_authority_without_per_turn_duplication():
+    source_doc = Path(__file__).resolve().parents[1] / "docs" / "holochat" / "HOLOCHAT_SOURCE_OF_TRUTH.md"
+    source_text = source_doc.read_text(encoding="utf-8")
+    voice_doc = Path(__file__).resolve().parents[1] / "docs" / "holo_chat_doctrine.md"
+    voice_text = voice_doc.read_text(encoding="utf-8")
+
+    assert "HoloChat is a governed conversation runtime" in source_text
+    assert "HoloGov is the only runtime role authorized to enter, query, organize, update, prune, archive, or manage HoloBrain" in source_text
+    assert "`memory_stewardship`" in source_text
+    assert "HoloGov normal-turn input target: 16k-32k tokens" in source_text
+    assert "Compare against a solo GPT baseline and score the transcript with the same checks." in source_text
+    assert "The north star: every worker enters as a stranger" in source_text
+    assert HOLO_CHAT_SYSTEM_PROMPT == HOLO_CHAT_SYSTEM_PROMPT_BASE
+    assert "Canonical HoloChat Doctrine" not in HOLO_CHAT_SYSTEM_PROMPT
+    assert "HoloChat Source Of Truth" not in HOLO_CHAT_SYSTEM_PROMPT
+    assert "HoloGov is the continuous operator and ultimate librarian of HoloBrain" in source_text
+    assert "HoloChat is not omniscient." in voice_text
+    assert "Use short bold section headers" in voice_text
+    assert "Never let formatting make Holo sound like a memo, report, performance, or UI script" in voice_text
+    assert "Stay warm and human" in voice_text
+    assert "I want you to do a deep calibration pass on me." in voice_text
+    assert "inspiring, creative, pragmatic, and hopeful" in voice_text
     assert "No bullets. No headers." not in HOLO_CHAT_SYSTEM_PROMPT
-    assert "Gov continuity comes from Holo-owned state" in GOVERNOR_SYSTEM_PROMPT
-    assert "Python enforces." in GOVERNOR_SYSTEM_PROMPT
+    assert "You are HoloGov" in GOVERNOR_SYSTEM_PROMPT
+    assert "HoloGov continuity comes from Holo-owned state" in GOVERNOR_SYSTEM_PROMPT
+    assert "HoloGov is the only runtime role authorized to enter, query, organize, update, prune, archive, or manage HoloBrain" in GOVERNOR_SYSTEM_PROMPT
+    assert "Python enforces hard boundaries." in GOVERNOR_SYSTEM_PROMPT
     assert "HOLOCHAT CONSTITUTIONAL TONE LAW" in GOVERNOR_SYSTEM_PROMPT
     assert "warm collaborative precision only" in GOVERNOR_SYSTEM_PROMPT
 
@@ -1439,9 +1762,11 @@ def test_thread_handoff_artifact_is_tethered_to_source_session():
     assert len(brain.saved_artifacts) == 1
 
 
-def test_handoff_prompt_is_once_per_context_window():
+def test_handoff_prompt_is_once_per_context_window(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_VISIBLE_THREAD_HANDOFF_ENABLED", "1")
     session = ChatSession(session_id="session-1")
     session.turn_count = 24
+    session.history = [{"role": "user", "content": "x" * 160_000}]
     session.gov_arc_state = GovArcState(
         current_topic="mobile controls and reseed continuity",
         user_goal="make the fresh thread feel continuous",
@@ -1465,18 +1790,56 @@ def test_handoff_prompt_is_once_per_context_window():
     assert session.handoff_suggested is True
 
 
-def test_handoff_prompt_waits_past_initial_red_zone():
+def test_handoff_prompt_waits_past_initial_red_zone(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_VISIBLE_THREAD_HANDOFF_ENABLED", "1")
     session = ChatSession(session_id="session-1")
     session.turn_count = 16
+    session.history = [{"role": "user", "content": "x" * 160_000}]
 
     assert session.thread_health_level == "RED"
     assert _handoff_for_context_window(session) is None
     assert session.handoff_suggested is False
 
 
+def test_long_thread_does_not_force_visible_handoff_by_default(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_VISIBLE_THREAD_HANDOFF_ENABLED", raising=False)
+    session = ChatSession(session_id="endless-session")
+    session.turn_count = 200
+    session.history = [{"role": "user", "content": "x" * 300_000}]
+
+    assert session.thread_health_level == "RED"
+    assert _handoff_for_context_window(session) is None
+    assert session.handoff_suggested is False
+
+
+def test_bounded_history_preserves_origin_relevant_middle_and_recent_in_order(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGES", "8")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_CHARS", "5000")
+    monkeypatch.setenv("HOLOCHAT_ADAPTER_HISTORY_MESSAGE_CHARS", "600")
+    history = [
+        {"role": "user" if index % 2 == 0 else "assistant", "content": f"routine message {index}"}
+        for index in range(20)
+    ]
+    history[0]["content"] = "ORIGIN: the user is comparing a synthetic medical timeline."
+    history[1]["content"] = "ORIGIN RESPONSE: preserve source order and uncertainty."
+    history[9]["content"] = "RELEVANT MIDDLE: a rare enzyme interaction was raised but remains unverified."
+    history[19]["content"] = "LATEST: return to the open medication question without diagnosing."
+
+    bounded = _bounded_adapter_history(history, query_text="return to the enzyme interaction question")
+    contents = [message["content"] for message in bounded]
+
+    assert len(bounded) == 8
+    assert any("ORIGIN:" in item for item in contents)
+    assert any("RELEVANT MIDDLE" in item for item in contents)
+    assert any("LATEST:" in item for item in contents)
+    source_positions = [history.index(message) for message in bounded]
+    assert source_positions == sorted(source_positions)
+
+
 def test_autocompact_is_claimed_once_per_context_window():
     session = ChatSession(session_id="session-1")
     session.turn_count = 24
+    session.history = [{"role": "user", "content": "x" * 160_000}]
 
     first = _claim_autocompact_for_context_window(
         session,
@@ -1495,6 +1858,7 @@ def test_autocompact_is_claimed_once_per_context_window():
 
     incognito_session = ChatSession(session_id="session-2")
     incognito_session.turn_count = 24
+    incognito_session.history = [{"role": "user", "content": "x" * 160_000}]
     assert _claim_autocompact_for_context_window(
         incognito_session,
         capsule_id="capsule-1",
@@ -1502,9 +1866,35 @@ def test_autocompact_is_claimed_once_per_context_window():
     ) is False
 
 
+def test_autocompact_claims_when_provider_history_is_bounded():
+    session = ChatSession(session_id="bounded-history")
+    session.turn_count = 6
+    context_budget = {
+        "history_context": {
+            "raw_history_messages": 12,
+            "bounded_history_messages": 8,
+            "omitted_history_messages": 4,
+            "raw_history_chars": 9000,
+            "bounded_history_chars": 6200,
+        },
+        "thread_health": {
+            "flags": ["provider_history_bounded"],
+        },
+    }
+
+    assert _claim_autocompact_for_context_window(
+        session,
+        capsule_id="capsule-1",
+        incognito=False,
+        context_budget=context_budget,
+    ) is True
+    assert session.autocompact_attempted is True
+
+
 def test_autocompact_waits_with_visible_handoff_gate():
     session = ChatSession(session_id="session-1")
     session.turn_count = 16
+    session.history = [{"role": "user", "content": "x" * 160_000}]
 
     assert session.thread_health_level == "RED"
     assert _claim_autocompact_for_context_window(

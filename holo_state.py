@@ -141,6 +141,7 @@ class HoloState(BaseModel):
     latest_input_summary: str | None = None
     critical_constraints: list[str] = Field(default_factory=list)
     rolling_summary: str | None = None
+    hologov_control_ledger: dict[str, Any] = Field(default_factory=dict)
     settled_decisions: list[str] = Field(default_factory=list)
     artifact_registry: list[dict[str, Any]] = Field(default_factory=list)
     required_tools: list[RequiredTools] = Field(default_factory=lambda: [RequiredTools.NONE])
@@ -158,6 +159,7 @@ class HoloState(BaseModel):
             "LATEST_INPUT_SUMMARY": self.latest_input_summary,
             "CRITICAL_CONSTRAINTS": self.critical_constraints,
             "ROLLING_SUMMARY": self.rolling_summary,
+            "HOLOGOV_CONTROL_LEDGER": self.hologov_control_ledger,
             "SETTLED_DECISIONS": self.settled_decisions,
             "ARTIFACTS_REGISTRY": self.artifact_registry,
             "REQUIRED_TOOLS": [tool.value if isinstance(tool, RequiredTools) else str(tool) for tool in self.required_tools],

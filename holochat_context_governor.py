@@ -194,12 +194,49 @@ _HIGH_TIER_RE = re.compile(
     r"provider|governor|state|conflict|uncertain|product critical"
     r")\b"
 )
+_SAFETY_CRITICAL_RE = re.compile(
+    r"(?i)\b("
+    r"suicid(?:e|al)|self[- ]?harm|kill myself|hurt myself|"
+    r"chemical weapon|biological weapon|radiological weapon|nuclear weapon|"
+    r"explosive|bomb|detonat(?:e|or|ion)|weaponiz(?:e|ation)|"
+    r"poison(?:ing)?|assassinat(?:e|ion)|kidnap(?:ping)?|"
+    r"malware|ransomware|credential theft|phishing|doxx(?:ing)?|stalk(?:ing)?|"
+    r"fraud|extort(?:ion)?|human trafficking"
+    r")\b"
+)
+_OPERATIONAL_HARM_ACTION_RE = re.compile(
+    r"(?i)\b("
+    r"how (?:do|can|would) (?:i|we)|instructions?|recipe|methods?|most effective way|best way|step[- ]by[- ]step|"
+    r"write|code|program|develop|generate|"
+    r"build|construct|make|create|synthesi[sz]e|weaponize|disperse|detonate|"
+    r"optimi[sz]e|deploy|infect|exploit|bypass safeguards?|evade detection"
+    r")\b"
+)
+_PROTECTIVE_SAFETY_CONTEXT_RE = re.compile(
+    r"(?i)\b(prevent(?:ion)?|protect(?:ion|ive)?|defen[cs]e|detect(?:ion)?|"
+    r"respond|response|emergency|exposure|history|law|policy|safety|mitigat(?:e|ion))\b"
+)
+_CLEAR_HARM_ACTION_RE = re.compile(
+    r"(?i)\b(bypass|evade|steal|weaponize|detonate|infect|exploit|kill|hurt|"
+    r"disperse|synthesi[sz]e|assassinate|extort)\b"
+)
+_OPERATIONAL_HARM_DETAIL_RE = re.compile(
+    r"(?i)\b("
+    r"ingredients?|precursors?|quantit(?:y|ies)|dosage|concentration|"
+    r"mix(?:ing)?|assembly|trigger|detonat(?:e|or|ion)|dispers(?:e|al)|"
+    r"payload|delivery mechanism|evade detection|bypass safeguards?"
+    r")\b"
+)
 _LOW_TIER_RE = re.compile(r"(?i)^\s*(hi|hey|thanks|thank you|ok|okay|lol|nice)\s*[.!?]*\s*$")
 _ADVISOR_SECRET_OR_CONTROL_RE = re.compile(
     r"(?i)\b(system prompt|ignore previous|developer message|api[_ -]?key|token|secret|password|bearer)\b"
 )
 _VISIBLE_CONTROL_DISCLOSURE_RE = re.compile(
     r"(?i)\b(system prompt|ignore previous|developer message)\b"
+)
+_VISIBLE_INTERNAL_REPAIR_LEAK_RE = re.compile(
+    r"(?i)\b(?:i|we) need to (?:repair|revise|rewrite|check) (?:this|that|the) "
+    r"response before (?:showing|sending|releasing) it\.?"
 )
 _VISIBLE_STERILE_RE = re.compile(
     r"(?i)^\s*(no\.?|incorrect\.?|you are wrong\.?|that is false\.?|can't help\.?)\s*$"
@@ -910,6 +947,19 @@ def relationship_rupture_detected(text: Any) -> bool:
     return bool(_RUPTURE_RE.search(str(text or "")))
 
 
+def safety_critical_turn(text: Any) -> bool:
+    return bool(_SAFETY_CRITICAL_RE.search(str(text or "")))
+
+
+def dangerous_operational_request(text: Any) -> bool:
+    value = str(text or "")
+    if not (_SAFETY_CRITICAL_RE.search(value) and _OPERATIONAL_HARM_ACTION_RE.search(value)):
+        return False
+    if _PROTECTIVE_SAFETY_CONTEXT_RE.search(value) and not _CLEAR_HARM_ACTION_RE.search(value):
+        return False
+    return True
+
+
 def advisor_provider_allowed(provider: Any, *, fallback_eligible: bool = False) -> bool:
     normalized = str(provider or "").strip().lower()
     if not normalized:
@@ -929,6 +979,8 @@ def deterministic_turn_policy(
 ) -> GovTurnPolicy:
     text = str(user_message or "")
     reasons: list[str] = []
+    if safety_critical_turn(text):
+        reasons.append("safety_critical")
     if relationship_rupture_detected(text):
         reasons.append("relationship_rupture")
     if _HIGH_TIER_RE.search(text):
@@ -945,7 +997,7 @@ def deterministic_turn_policy(
         reasons.append("long_thread_state_risk")
 
     if reasons:
-        tier = "max" if any(reason in reasons for reason in ("relationship_rupture", "governor_uncertainty", "state_or_advisor_conflict")) else "high"
+        tier = "max" if any(reason in reasons for reason in ("safety_critical", "relationship_rupture", "governor_uncertainty", "state_or_advisor_conflict")) else "high"
         return GovTurnPolicy(tier=tier, reasons=tuple(reasons), advisor_allowed=True, fallback_allowed=False)
     if _LOW_TIER_RE.match(text):
         return GovTurnPolicy(tier="fast", reasons=("routine_low_risk",), advisor_allowed=False, fallback_allowed=False)
@@ -1134,6 +1186,33 @@ def deterministic_visible_release(
     response_text: Any,
 ) -> GovVisibleReleaseDecision:
     text = str(response_text or "")
+    if dangerous_operational_request(user_message) and _OPERATIONAL_HARM_DETAIL_RE.search(text):
+        return GovVisibleReleaseDecision(
+            release=True,
+            text=(
+                "I can't help with operational instructions that could harm people. "
+                "I can help with prevention, emergency response, protective measures, "
+                "historical context, or other safety-focused information."
+            ),
+            reason="operational_harm_details_blocked_before_visible_release",
+            repaired=True,
+        )
+    if _VISIBLE_INTERNAL_REPAIR_LEAK_RE.search(text):
+        safe_parts = [
+            part.strip()
+            for part in re.split(r"(?<=[.!?])\s+|\n+", text)
+            if part.strip() and not _VISIBLE_INTERNAL_REPAIR_LEAK_RE.search(part)
+        ]
+        return GovVisibleReleaseDecision(
+            release=True,
+            text=(
+                "\n\n".join(safe_parts)
+                if safe_parts
+                else "Let me answer that directly and carefully."
+            ),
+            reason="internal_repair_language_removed_before_visible_release",
+            repaired=True,
+        )
     if (
         _VISIBLE_STERILE_RE.match(text)
         or _VISIBLE_HOSTILE_POSTURE_RE.search(text)

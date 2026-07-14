@@ -2781,14 +2781,9 @@
   }
 
   function normalizeConversationPaths(suggestions) {
-    const fallback = [
-      "Name the real decision underneath this",
-      "Turn the strongest insight into one next move",
-      "Check the assumption this answer depends on"
-    ];
     const seen = new Set();
     const paths = [];
-    for (const item of [...(suggestions || []), ...fallback]) {
+    for (const item of (suggestions || [])) {
       const text = String(item || "").trim();
       const key = text.toLowerCase();
       if (!text || seen.has(key)) continue;
@@ -2801,6 +2796,7 @@
 
   function renderConversationPaths(suggestions) {
     const paths = normalizeConversationPaths(suggestions);
+    if (!paths.length) return "";
     return `
       <div class="chips" aria-label="Conversation paths">
         ${paths.map((s, i) => `<button class="chip" onclick="useChip(this)"><span class="chip-num">${i + 1}</span>${escHtml(s)}</button>`).join("")}

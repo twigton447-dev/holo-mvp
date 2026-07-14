@@ -1100,6 +1100,73 @@ def test_canonical_runtime_makes_exactly_one_hologov_call_and_reuses_plan_on_wor
     assert brain.context_updates["current_project"].startswith("[FACT]")
 
 
+def test_canonical_worker_supplies_dynamic_paths_without_an_extra_hologov_call(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    response = """The bounded pilot turns uncertainty into evidence without pretending the risk is gone.
+
+[[HOLO_CONVERSATION_PATHS]]
+1. Which pilot boundary would protect the relationship if demand grows unexpectedly?
+2. Draft the smallest paid scope that creates evidence without creating dependence.
+3. What fear remains after the practical downside has been honestly bounded?
+[[/HOLO_CONVERSATION_PATHS]]"""
+    adapter = CapturingAdapter(response=response)
+    advisor = SingleCallAdvisor(events=[])
+    engine = _engine(adapter, advisor)
+    engine._runtime_profile = chat_engine.CANONICAL_RUNTIME_PROFILE
+    engine._runtime_info = _runtime_metadata(
+        chat_engine.CANONICAL_RUNTIME_PROFILE, engine._adapters, []
+    )
+
+    result = engine.send_message(
+        str(uuid4()),
+        "Help me decide whether to accept a bounded paid pilot.",
+        capsule_id="cap-1",
+    )
+
+    assert advisor.api_calls == 1
+    assert "HOLO_CONVERSATION_PATHS" not in result["response"]
+    assert "HOLO_CONVERSATION_PATHS" not in engine._brain.saved_turns[-1]["holo_response"]
+    assert result["conversation_paths"] == [
+        "Which pilot boundary would protect the relationship if demand grows unexpectedly?",
+        "Draft the smallest paid scope that creates evidence without creating dependence.",
+        "What fear remains after the practical downside has been honestly bounded?",
+    ]
+
+
+def test_canonical_stream_buffers_and_extracts_dynamic_worker_paths(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    response = """Keep the material truth shared while protecting private detail.
+
+[[HOLO_CONVERSATION_PATHS]]
+1. Which material fact does joint ownership make impossible to keep private?
+2. Draft one sentence that protects privacy without hiding the shared consequence.
+3. Where does loyalty become concealment when another person's home is involved?
+[[/HOLO_CONVERSATION_PATHS]]"""
+    adapter = CapturingAdapter(response=response)
+    advisor = SingleCallAdvisor(events=[])
+    engine = _engine(adapter, advisor)
+    engine._runtime_profile = chat_engine.CANONICAL_RUNTIME_PROFILE
+    engine._runtime_info = _runtime_metadata(
+        chat_engine.CANONICAL_RUNTIME_PROFILE, engine._adapters, []
+    )
+
+    events = list(engine.stream_message(
+        str(uuid4()),
+        "What can I disclose about a private expectation affecting our shared home?",
+        capsule_id="cap-1",
+    ))
+    visible = "".join(event for event in events if isinstance(event, str))
+    done = next(event for event in events if isinstance(event, dict) and event.get("done"))
+
+    assert advisor.api_calls == 1
+    assert "HOLO_CONVERSATION_PATHS" not in visible
+    assert done["conversation_paths"] == [
+        "Which material fact does joint ownership make impossible to keep private?",
+        "Draft one sentence that protects privacy without hiding the shared consequence.",
+        "Where does loyalty become concealment when another person's home is involved?",
+    ]
+
+
 def test_deep_hologov_cannot_turn_accusation_or_control_fields_into_authority(monkeypatch):
     monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
     proposal = {

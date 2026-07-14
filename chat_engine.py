@@ -46,6 +46,7 @@ from holochat_context_governor import (
     build_gov_turn_plan,
     deterministic_turn_policy,
     deterministic_visible_release,
+    dangerous_operational_request,
     has_meaningful_holobrain_delta,
     load_state_from_capsule_context,
     project_gov_narrative_packet_for_worker,
@@ -271,6 +272,39 @@ DEFAULT_ADAPTER_HISTORY_CHARS = 160_000
 DEFAULT_ADAPTER_HISTORY_MESSAGE_CHARS = 20_000
 MATERIAL_HISTORY_BOUNDING_CHARS = 200
 HOLOCHAT_MEMORY_PACK_VERSION = "holochat_recovery_pack_v0.1"
+_CONVERSATION_PATHS_START = "[[HOLO_CONVERSATION_PATHS]]"
+_CONVERSATION_PATHS_END = "[[/HOLO_CONVERSATION_PATHS]]"
+
+
+def _extract_worker_conversation_paths(response_text: str) -> tuple[str, list[str]]:
+    """Remove the worker-only continuation footer and admit exactly three paths."""
+    text = str(response_text or "")
+    start = text.find(_CONVERSATION_PATHS_START)
+    if start < 0:
+        return text.strip(), []
+
+    end = text.find(_CONVERSATION_PATHS_END, start + len(_CONVERSATION_PATHS_START))
+    if end < 0:
+        # The footer is required to be last. A truncated footer must never leak
+        # into visible output or durable conversation history.
+        return text[:start].rstrip(), []
+
+    footer = text[start + len(_CONVERSATION_PATHS_START):end]
+    clean_text = (text[:start] + text[end + len(_CONVERSATION_PATHS_END):]).strip()
+    paths: list[str] = []
+    seen: set[str] = set()
+    for raw_line in footer.splitlines():
+        match = _re.match(r"^\s*(?:\d+[.)]|[-*])\s+(.+?)\s*$", raw_line)
+        if not match:
+            continue
+        path = _re.sub(r"\s+", " ", match.group(1)).strip()
+        key = path.casefold()
+        if not path or len(path) > 180 or key in seen:
+            continue
+        seen.add(key)
+        paths.append(path)
+
+    return clean_text, paths if len(paths) == 3 else []
 
 _BALANCED_USER_POWER_TERMS = (
     "frontier",
@@ -1248,6 +1282,8 @@ def _deterministic_search_query(user_message: str) -> Optional[str]:
 
 
 def _resolve_search_query(user_message: str, governor_query: Optional[str]) -> tuple[Optional[str], str, str]:
+    if dangerous_operational_request(user_message):
+        return None, "deterministic_safety", "blocked_operational_harm_search"
     gov_query = _compact_text(governor_query, limit=180) if governor_query else ""
     if gov_query:
         admission = admit_advisor_search_query(user_message, gov_query)
@@ -2561,6 +2597,7 @@ class HoloChatEngine:
                 note = " · ".join(corrections)
                 response_text += f"\n\n*One thing worth correcting: {note}*"
 
+        response_text, worker_conversation_paths = _extract_worker_conversation_paths(response_text)
         release_decision = deterministic_visible_release(user_message, response_text)
         response_text = release_decision.text
         response_text, web_citation_audit = admit_web_citations(
@@ -2568,8 +2605,8 @@ class HoloChatEngine:
             session.web_evidence_bundle,
         )
 
-        conversation_paths = []
-        if not single_hologov_call:
+        conversation_paths = worker_conversation_paths
+        if not conversation_paths and not single_hologov_call:
             path_generator = getattr(gov_advisor, "generate_conversation_paths", None)
             if path_generator and not incognito:
                 conversation_paths = path_generator(
@@ -3260,6 +3297,7 @@ class HoloChatEngine:
                 note = " · ".join(corrections)
                 response_text += f"\n\n*One thing worth correcting: {note}*"
 
+        response_text, worker_conversation_paths = _extract_worker_conversation_paths(response_text)
         release_decision = deterministic_visible_release(user_message, response_text)
         response_text = release_decision.text
         response_text, web_citation_audit = admit_web_citations(
@@ -3269,8 +3307,8 @@ class HoloChatEngine:
         if response_text:
             yield response_text
 
-        conversation_paths = []
-        if not single_hologov_call:
+        conversation_paths = worker_conversation_paths
+        if not conversation_paths and not single_hologov_call:
             path_generator = getattr(gov_advisor, "generate_conversation_paths", None)
             if path_generator and not incognito:
                 conversation_paths = path_generator(
@@ -5224,6 +5262,8 @@ def _gov_narrative_packet(
         "Reject scolding, gotcha framing, shame, sterile disclaimers, and bureaucratic distance.",
         "Reject false memory, hidden-profile theatrics, and claims of knowing private context beyond admitted memory.",
         "Reject overconfident medical, financial, legal, or dependency promises.",
+        "Reject guru-style narrative forcing: do not promote anger, delay, resistance, market signals, or family expectations into proof of a hidden psychological theory.",
+        "Reject advice that ignores shared decision rights, collateral stakeholders, or work the ordered history shows the user already completed.",
     ]
     directive_parts = [
         "Inspect the ordered conversation and prior worker contributions before answering.",
@@ -5599,6 +5639,7 @@ def _build_worker_gov_turn_plan(
             "Streaming chunks are buffered until release admission.",
             "Surface thought metadata must be admitted before UI exposure.",
             "Internal control-packet formatting must never leak into visible worker prose.",
+            "Operational assistance for violence, self-harm, CBRN, malware, fraud, stalking, or abuse must be blocked and redirected to safety-focused help.",
         ],
         worker_prompt_baton=baton,
         narrative_packet=narrative_packet,

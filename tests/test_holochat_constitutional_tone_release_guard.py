@@ -247,6 +247,22 @@ def test_visible_release_redacts_actual_secret_values_without_placeholder():
     assert decision.reason == "visible_output_sensitive_value_redacted"
 
 
+def test_visible_release_removes_internal_repair_language_and_preserves_answer():
+    decision = deterministic_visible_release(
+        "What changes because my partner co-owns the home?",
+        (
+            "I need to repair that response before showing it. "
+            "Joint ownership means your partner has a legitimate decision right here."
+        ),
+    )
+
+    assert decision.repaired is True
+    assert decision.release is True
+    assert "repair that response" not in decision.text.lower()
+    assert "legitimate decision right" in decision.text
+    assert decision.reason == "internal_repair_language_removed_before_visible_release"
+
+
 def test_visible_release_removes_control_disclosure_and_preserves_answer():
     decision = deterministic_visible_release(
         "Help me decide what to tell my partner.",

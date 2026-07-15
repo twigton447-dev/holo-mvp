@@ -6,7 +6,7 @@ Owner: HoloOps / HoloArchitecture / HoloChat QA.
 
 Last updated: 2026-07-14.
 
-Current release label: HoloChat 3.1.
+Current release label: HoloChat 3.2.
 
 This document defines what HoloChat is, how it should work, and which runtime role is responsible for what. Product behavior, prompts, HoloGov packets, HoloBrain memory policy, tests, and future implementation work should align to this document unless HoloOps explicitly supersedes it.
 

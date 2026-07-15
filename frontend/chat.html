@@ -798,7 +798,7 @@
 <div id="app">
   <div id="header">
     <div id="header-brand">
-      <h1><span>HoloChat</span> <span id="brand-sub">3.1</span><span id="space-label"></span></h1>
+      <h1><span>HoloChat</span> <span id="brand-sub">3.2</span><span id="space-label"></span></h1>
     </div>
     <div id="header-right">
       <div id="incognito-badge">◉ Incognito</div>
@@ -2868,14 +2868,9 @@
   }
 
   function normalizeConversationPaths(suggestions) {
-    const fallback = [
-      "Name the real decision underneath this",
-      "Turn the strongest insight into one next move",
-      "Check the assumption this answer depends on"
-    ];
     const seen = new Set();
     const paths = [];
-    for (const item of [...(suggestions || []), ...fallback]) {
+    for (const item of (suggestions || [])) {
       const text = String(item || "").trim();
       const key = text.toLowerCase();
       if (!text || seen.has(key)) continue;
@@ -2888,6 +2883,7 @@
 
   function renderConversationPaths(suggestions) {
     const paths = normalizeConversationPaths(suggestions);
+    if (!paths.length) return "";
     return `
       <div class="chips" aria-label="Conversation paths">
         ${paths.map((s, i) => `<button class="chip" onclick="useChip(this)"><span class="chip-num">${i + 1}</span>${escHtml(s)}</button>`).join("")}
@@ -2957,7 +2953,7 @@
         body: JSON.stringify({ lifecycle }),
       });
       if (response.ok) return true;
-      // The static 3.1 UI may publish before the reviewed backend migration.
+      // The static UI may publish before the reviewed backend migration.
       // Preserve thread switching until that endpoint is available.
       if (response.status === 404) return true;
       if (response.status === 409) {

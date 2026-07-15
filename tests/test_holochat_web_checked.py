@@ -1093,7 +1093,7 @@ def test_frontend_runtime_rail_uses_truthful_serial_labels():
     html = Path("frontend/chat.html").read_text()
 
     assert "<span>HoloChat</span>" in html
-    assert '<span id="brand-sub">3.1</span>' in html
+    assert '<span id="brand-sub">3.2</span>' in html
     assert 'if (response.status === 404) return true;' in html
     assert "#brand-sub { display: inline;" in html
     assert "<span>My Chats</span>" in html
@@ -1368,11 +1368,16 @@ def test_holochat_runtime_prompt_prefers_structured_human_answers():
     assert "create a scan anchor only where it helps" in prompt
     assert "Use bullets when they create momentum" in prompt
     assert "choose the person over the format" in prompt
-    assert 'Do not append a literal "Next-step suggestions" menu' in prompt
-    assert "runtime/Governor layer owns clickable continuation paths" in prompt
+    assert 'Do not append a visible "Next-step suggestions" menu' in prompt
+    assert "[[HOLO_CONVERSATION_PATHS]]" in prompt
+    assert "one should pressure-test an assumption or missing risk" in prompt
     assert "Do not leave complex answers as one flat wall of prose" in prompt
     assert "Format guidance for this response: use short **bold headers**" in prompt
     assert "If a sentence could appear in a generic AI demo" in prompt
+    assert "Do not force the person's situation into a clean revelation" in prompt
+    assert "Anger, hesitation, correction, or resistance is not evidence" in prompt
+    assert "identify who actually has decision rights" in prompt
+    assert "never generate a plausible memory audit" in prompt
     assert "No bullets. No headers." not in prompt
     assert "Holo should feel like a vivid, attentive person" in doctrine
     assert "For complex answers, structure is a kindness." in doctrine
@@ -1471,7 +1476,41 @@ def test_frontend_assistant_messages_render_three_conversation_paths():
     assert 'class="inline-next-step" onclick="useChip(this)"' in html
     assert 'aria-label="Next-step suggestions"' in html
     assert "inline-next-num" in html
-    assert "Name the real decision underneath this" in html
-    assert "Turn the strongest insight into one next move" in html
-    assert "Check the assumption this answer depends on" in html
+    assert "Name the real decision underneath this" not in html
+    assert "Turn the strongest insight into one next move" not in html
+    assert "Check the assumption this answer depends on" not in html
+    assert 'if (!paths.length) return "";' in html
     assert "renderConversationPaths(suggestions)" in html
+
+
+def test_worker_conversation_paths_are_extracted_and_never_released():
+    from chat_engine import _extract_worker_conversation_paths
+
+    response = """A useful answer with a real point.
+
+[[HOLO_CONVERSATION_PATHS]]
+1. Which family expectation needs a concrete boundary before the pilot begins?
+2. Draft the smallest paid pilot that protects time and preserves honest evidence.
+3. What changes if uncertainty is treated as information instead of a veto?
+[[/HOLO_CONVERSATION_PATHS]]"""
+
+    clean, paths = _extract_worker_conversation_paths(response)
+
+    assert clean == "A useful answer with a real point."
+    assert paths == [
+        "Which family expectation needs a concrete boundary before the pilot begins?",
+        "Draft the smallest paid pilot that protects time and preserves honest evidence.",
+        "What changes if uncertainty is treated as information instead of a veto?",
+    ]
+    assert "HOLO_CONVERSATION_PATHS" not in clean
+
+
+def test_malformed_worker_conversation_paths_fail_closed():
+    from chat_engine import _extract_worker_conversation_paths
+
+    clean, paths = _extract_worker_conversation_paths(
+        "Visible answer.\n[[HOLO_CONVERSATION_PATHS]]\n1. Truncated metadata"
+    )
+
+    assert clean == "Visible answer."
+    assert paths == []

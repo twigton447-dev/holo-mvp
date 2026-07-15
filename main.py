@@ -189,7 +189,8 @@ def _track_usage(api_key: str, endpoint: str, status_code: int,
                  cost_usd: Optional[float] = None, latency_ms: int = 0,
                  access_context: Optional[AccessContext] = None,
                  worker_identity: Optional[dict[str, Any]] = None,
-                 hologov_identity: Optional[dict[str, Any]] = None) -> None:
+                 hologov_identity: Optional[dict[str, Any]] = None,
+                 session_id: Optional[str] = None) -> None:
     """Fire-and-forget usage log. Never raises."""
     if access_context is not None:
         logger.info(
@@ -208,6 +209,7 @@ def _track_usage(api_key: str, endpoint: str, status_code: int,
                 "holochat_worker_identity": worker_identity,
                 "holochat_hologov_identity": hologov_identity,
                 "holochat_cost_usd": cost_usd,
+                "holochat_session_id": session_id,
             },
         )
     if _db is None:
@@ -1087,6 +1089,7 @@ async def chat(
         access_context=access_context,
         worker_identity=usage_telemetry["worker_identity"],
         hologov_identity=usage_telemetry["hologov_identity"],
+        session_id=result.get("session_id"),
     )
 
     response_content = {
@@ -1100,6 +1103,7 @@ async def chat(
         "thought":             result.get("thought"),
         "artifacts":           result.get("artifacts", []),
         "handoff":             result.get("handoff"),
+        "conversation_paths":  result.get("conversation_paths", []),
         "searched":            bool(result.get("searched", result.get("search_query") is not None)),
     }
     if result.get("search_query") is not None:
@@ -1202,6 +1206,7 @@ async def chat_stream(
                         access_context=completed_access,
                         worker_identity=usage_telemetry["worker_identity"],
                         hologov_identity=usage_telemetry["hologov_identity"],
+                        session_id=chunk.get("session_id"),
                     )
                     usage_tracked = True
                     yield _sse({"type": "done", **_public_stream_metadata(chunk)})

@@ -1206,7 +1206,7 @@ async def chat_stream(
                     usage_tracked = True
                     yield _sse({"type": "done", **_public_stream_metadata(chunk)})
                 elif isinstance(chunk, dict) and chunk.get("searching"):
-                    yield _sse({"type": "searching"})
+                    yield _sse({"type": "searching", "scope": str(chunk.get("scope") or "current")})
                 else:
                     yield _sse({"type": "token", "text": chunk})
         except Exception as e:

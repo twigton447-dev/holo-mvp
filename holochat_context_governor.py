@@ -991,6 +991,70 @@ def admit_advisor_prompt_directive(
     )
 
 
+# High-stakes-and-current classes where stale answers can materially harm the
+# user. HoloGov authorizes retrieval for these even when the user never says
+# "search" or "current"; the classifier is deterministic so the decision is
+# reproducible and provider-free.
+HIGH_STAKES_SEARCH_CLASSES: tuple[tuple[str, "re.Pattern[str]"], ...] = (
+    (
+        "clinical_trials",
+        re.compile(
+            r"(?i)\b(clinical\s+trials?|nct\d{6,}|trial\s+(?:eligibility|enrollment|arms?)|"
+            r"actively\s+recruiting)\b"
+        ),
+    ),
+    (
+        "medical_current_evidence",
+        re.compile(
+            r"(?i)\b(nccn|asco|uspstf|pdq\b|standard\s+of\s+care|"
+            r"treatment\s+(?:guidance|guidelines?|recommendations?|options?|protocols?)|"
+            r"(?:fda|ema)\s+(?:approval|approved|clearance|recall|warning)|"
+            r"(?:drug|medication|supplement|herb|vitamin)s?\b[^.?!]{0,80}\binteract|"
+            r"interact\w*\b[^.?!]{0,80}\b(?:chemo(?:therapy)?|drugs?|medications?|supplements?)|"
+            r"chemo(?:therapy)?|immunotherapy|radiation\s+therapy|oncolog\w+|"
+            r"dos(?:e|ing|age)\s+(?:guidance|limits?|recommendations?))\b"
+        ),
+    ),
+    (
+        "legal_tax_rules_current",
+        re.compile(
+            r"(?i)\b(tax(?:es)?\b[^.?!]{0,40}\b(?:rules?|law|brackets?|deadlines?|deductions?|credits?)|"
+            r"(?:rules?|laws?|brackets?|deadlines?|deductions?|credits?)\b[^.?!]{0,40}\btax(?:es)?\b|"
+            r"new\s+(?:rules?|laws?|regulations?)|regulatory\s+(?:change|update)s?|"
+            r"irs\b|compliance\s+deadlines?|filing\s+deadlines?|"
+            r"visa\s+(?:rules?|requirements?)|immigration\s+(?:rules?|policy))\b"
+        ),
+    ),
+    (
+        "housing_market_current",
+        re.compile(
+            r"(?i)\b(mortgage\s+rates?|interest\s+rates?|rent(?:al)?\s+(?:prices?|rates?|market)|"
+            r"housing\s+(?:market|prices?|costs?|inventory)|home\s+(?:prices?|values?)|"
+            r"cost\s+of\s+living|affordab(?:le|ility)|median\s+(?:rent|home\s+price)|"
+            r"property\s+tax(?:es)?|insurance\s+premiums?)\b"
+        ),
+    ),
+    (
+        "volatile_events_current",
+        re.compile(
+            r"(?i)\b(what(?:'s|\s+is)\s+happening\s+(?:with|to|at)|"
+            r"any\s+(?:news|updates?)\s+(?:on|about)|stock\s+price|share\s+price|"
+            r"earnings\s+(?:call|report)|layoffs?|acquisitions?|mergers?|outages?|"
+            r"recalls?|in\s+stock|back\s+in\s+stock|product\s+availability)\b"
+        ),
+    ),
+)
+
+
+def classify_search_risk(user_message: Any) -> str | None:
+    """Deterministic HoloGov trigger: name the high-stakes-current class, if any."""
+    text = str(user_message or "")
+    for risk_class, pattern in HIGH_STAKES_SEARCH_CLASSES:
+        if pattern.search(text):
+            return risk_class
+    return None
+
+
 def admit_advisor_search_query(user_message: Any, advisor_query: Any) -> GovAdvisorAdmission:
     query = sanitize_text(advisor_query, limit=180)
     if not query:
@@ -1003,6 +1067,9 @@ def admit_advisor_search_query(user_message: Any, advisor_query: Any) -> GovAdvi
         "latest",
         "recent",
         "this week",
+        "this month",
+        "this year",
+        "as of",
         "news",
         "weather",
         "stock",
@@ -1013,6 +1080,12 @@ def admit_advisor_search_query(user_message: Any, advisor_query: Any) -> GovAdvi
     )
     if any(marker in text for marker in current_markers):
         return GovAdvisorAdmission(admitted=True, value=query, reason="deterministic_gov_authorized_current_info_search")
+    if classify_search_risk(user_message):
+        return GovAdvisorAdmission(
+            admitted=True,
+            value=query,
+            reason="deterministic_gov_authorized_high_stakes_current_search",
+        )
     return GovAdvisorAdmission(admitted=False, value=None, reason="deterministic_gov_denied_advisor_search")
 
 

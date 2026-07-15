@@ -1238,7 +1238,8 @@ def test_browser_chat_path_remains_serial_and_reports_runtime(monkeypatch):
     assert result["runtime"]["governor_trace"]["temperature"] == "checked"
     assert result["runtime"]["governor_trace"]["web_decision"] == "off"
     assert result["runtime"]["governor_trace"]["web_search"]["attempted"] is False
-    assert result["runtime"]["governor_trace"]["web_search"]["provider"] == "tavily"
+    # No search ran, so no provider may be claimed — "tavily" here was misleading telemetry.
+    assert result["runtime"]["governor_trace"]["web_search"]["provider"] == "none"
     assert result["runtime"]["governor_trace"]["claim_check"] == "checked"
     assert result["runtime"]["governor_trace"]["conversation_paths"] == "generated"
     assert result["runtime"]["gov_arc_state_mode"] == "active_private"

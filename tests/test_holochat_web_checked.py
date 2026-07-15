@@ -8,6 +8,8 @@ import web_search
 from chat_engine import HoloChatEngine, _deterministic_search_query
 from holo_context import HoloContextBuilder
 from holo_router import HoloRouter
+from holochat_context_governor import admit_advisor_search_query, classify_search_risk
+from holochat_evidence import admit_web_citations, render_web_evidence
 
 
 @dataclass
@@ -412,16 +414,22 @@ def test_openai_search_forwards_supported_policy_without_live_call():
 
 
 def test_no_provider_configuration_returns_missing_config_without_provider_call(monkeypatch):
-    monkeypatch.delenv("TAVILY_API_KEY", raising=False)
+    for name in (
+        "HOLOCHAT_OPENCLAW_SEARCH_ENABLED",
+        "HOLOCHAT_OPENCLAW_SEARCH_DEDICATED_GATEWAY",
+        "HOLOCHAT_OPENCLAW_GATEWAY_URL",
+        "HOLOCHAT_OPENCLAW_GATEWAY_TOKEN",
+    ):
+        monkeypatch.delenv(name, raising=False)
 
     def provider_call(*args, **kwargs):
         raise AssertionError("provider should not be called without configuration")
 
-    monkeypatch.setattr(web_search.TavilySearchAdapter, "search", provider_call)
+    monkeypatch.setattr(web_search.OpenClawSearchAdapter, "search", provider_call)
 
     run = web_search.run_search("current facts")
 
-    assert run.provider == "tavily"
+    assert run.provider == "openclaw_web_search"
     assert run.outcome == "missing_config"
     assert run.error_category == "missing_config"
     assert run.result_count == 0
@@ -504,6 +512,98 @@ def test_openai_and_xai_hosted_search_normalize_sources_without_live_calls():
     assert openai_client.calls[0]["include"] == ["web_search_call.action.sources"]
     assert xai_run.provider == "xai_web_search"
     assert xai_client.calls[0]["model"] == "xai-test"
+
+
+def test_openai_title_url_citations_are_admitted_as_link_only_without_passage():
+    response = {
+        "output": [
+            {
+                "type": "web_search_call",
+                "action": {"sources": [
+                    {
+                        "url": "https://clinicaltrials.gov/study/NCT00000001",
+                        "title": "Clinical trial record",
+                    },
+                ]},
+            },
+            {
+                "type": "message",
+                "content": [{"annotations": [
+                    {
+                        "type": "url_citation",
+                        "url": "https://clinicaltrials.gov/study/NCT00000001",
+                        "title": "Clinical trial record",
+                    },
+                ]}],
+            },
+        ],
+    }
+
+    run = web_search.run_search(
+        "Find current vaginal cancer clinical trials",
+        adapter=web_search.OpenAIWebSearchAdapter(
+            client=FakeResponsesClient(response), model="openai-test"
+        ),
+    )
+
+    assert run.outcome == "checked"
+    assert len(run.evidence_bundle["sources"]) == 1
+    source = run.evidence_bundle["sources"][0]
+    assert source["citation_only"] is True
+    assert source["snippet"] == ""
+    assert "citation_scope" in render_web_evidence(run.evidence_bundle)
+
+    response_text = "Open the current trial record here [S1]."
+    admitted_text, audit = admit_web_citations(response_text, run.evidence_bundle)
+
+    assert admitted_text == response_text
+    assert audit["status"] == "valid"
+    assert audit["repaired"] is False
+    assert audit["unsupported_source_ids"] == []
+    assert audit["citation_only_cited_source_ids"] == ["S1"]
+    assert audit["claim_support_verified"] is False
+    assert audit["claim_support_status"] == "citation_only"
+
+
+def test_hosted_search_timeout_is_bounded(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_SEARCH_TIMEOUT_SECONDS", "5")
+    assert web_search._search_timeout_seconds() == 10.0
+    monkeypatch.setenv("HOLOCHAT_SEARCH_TIMEOUT_SECONDS", "90")
+    assert web_search._search_timeout_seconds() == 60.0
+    monkeypatch.setenv("HOLOCHAT_SEARCH_TIMEOUT_SECONDS", "invalid")
+    assert web_search._search_timeout_seconds() == 50.0
+
+
+def test_openai_search_request_has_explicit_retrieval_cost_controls(monkeypatch):
+    response = {
+        "output": [{
+            "type": "web_search_call",
+            "action": {"sources": [{"url": "https://example.com", "title": "Evidence"}]},
+        }],
+    }
+    client = FakeResponsesClient(response)
+    monkeypatch.setenv("HOLOCHAT_SEARCH_MAX_OUTPUT_TOKENS", "99999")
+    monkeypatch.setenv("HOLOCHAT_SEARCH_MAX_TOOL_CALLS", "0")
+    monkeypatch.setenv("HOLOCHAT_SEARCH_REASONING_EFFORT", "not-a-tier")
+
+    run = web_search.run_search(
+        "current evidence",
+        adapter=web_search.OpenAIWebSearchAdapter(client=client, model="openai-test"),
+    )
+
+    assert run.outcome == "checked"
+    request = client.calls[0]
+    assert request["max_output_tokens"] == 4096
+    assert request["max_tool_calls"] == 1
+    assert request["reasoning"] == {"effort": "low"}
+    assert "retrieval broker" in request["instructions"]
+
+
+def test_openai_search_cost_controls_clamp_to_safe_ranges(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_SEARCH_MAX_OUTPUT_TOKENS", "10")
+    monkeypatch.setenv("HOLOCHAT_SEARCH_MAX_TOOL_CALLS", "99")
+    assert web_search._search_max_output_tokens() == 256
+    assert web_search._search_max_tool_calls() == 8
 
 
 def test_gemini_grounding_and_custom_function_search_share_the_evidence_contract():
@@ -609,6 +709,363 @@ def test_deepseek_selection_uses_holochat_custom_retrieval_backend(monkeypatch):
         "hosted_web_search_not_available",
         "custom_retrieval_function_required",
     ]
+
+
+# ---------------------------------------------------------------------------
+# Governed contextual triggering, backend fallback, and failure transparency
+# ---------------------------------------------------------------------------
+
+HIGH_STAKES_CURRENT_PROBES = (
+    "Is Franklin TN affordable right now?",
+    "Find current vaginal cancer clinical trials",
+    "What are current NCCN recommendations?",
+    "Can this supplement interact with chemo?",
+    "What is the latest mortgage rate?",
+    "Are there new rules for 2026 taxes?",
+    "What's happening with this company today?",
+)
+
+
+class CapturingAdapter(FakeAdapter):
+    def __init__(self, provider="provider0", model_id="model0", response="checked answer"):
+        super().__init__(provider, model_id)
+        self.seen_user_messages = []
+        self._response = response
+
+    def chat_call(self, system_prompt, history, user_message, temperature, images=None):
+        self.seen_user_messages.append(user_message)
+        return self._response, 10, 4
+
+
+def _patch_failing_search(monkeypatch, status="missing_config"):
+    def fake_run(query):
+        bundle = web_search.build_web_evidence_bundle(
+            query, [], provider="test-search", status=status, error_category=status
+        )
+        return web_search.SearchRun(
+            query=query, provider="test-search", outcome=status,
+            latency_ms=0, error_category=status, evidence_bundle=bundle,
+        )
+    monkeypatch.setattr(chat_engine.web_search, "run_search", fake_run)
+
+
+def test_high_stakes_current_queries_force_search_without_explicit_wording():
+    for probe in HIGH_STAKES_CURRENT_PROBES:
+        assert _deterministic_search_query(probe) == probe, probe
+        assert classify_search_risk(probe) is not None, probe
+    # Timeless or purely conversational turns must stay search-free.
+    assert classify_search_risk("Now use everything you know and tell me who I really am.") is None
+    assert classify_search_risk("Write me a poem about turtles.") is None
+    assert _deterministic_search_query("Write me a poem about turtles.") is None
+
+
+def test_gov_admits_advisor_search_for_high_stakes_without_currentness_words():
+    admission = admit_advisor_search_query(
+        "Can this supplement interact with chemo?",
+        "supplement chemotherapy interaction evidence",
+    )
+    assert admission.admitted is True
+    assert admission.reason == "deterministic_gov_authorized_high_stakes_current_search"
+
+    denied = admit_advisor_search_query("Write me a poem about turtles.", "turtle poems")
+    assert denied.admitted is False
+
+
+def test_hologov_policy_for_clinical_trials_requires_authoritative_domains():
+    risk, policy = chat_engine._search_policy_for_turn(
+        "Find current vaginal cancer clinical trials"
+    )
+    assert risk == "clinical_trials"
+    normalized = policy.normalized("clinical trials", 5)
+    assert "clinicaltrials.gov" in normalized.allowed_domains
+    assert "cancer.gov" in normalized.allowed_domains
+    assert normalized.risk_class == "clinical_trials"
+
+    risk_med, policy_med = chat_engine._search_policy_for_turn(
+        "Can this supplement interact with chemo?"
+    )
+    assert risk_med == "medical_current_evidence"
+    assert policy_med.result_budget == 6
+    assert policy_med.allowed_domains == ()
+
+    risk_none, default_policy = chat_engine._search_policy_for_turn(
+        "Tell me a story about turtles."
+    )
+    assert risk_none is None
+    assert default_policy.allowed_domains == ()
+
+
+def test_run_search_with_fallback_moves_past_unconfigured_provider():
+    class UnconfiguredTavily(StaticSearchAdapter):
+        provider = "tavily"
+
+        def is_configured(self):
+            return False
+
+    good = StaticSearchAdapter([
+        web_search.SearchResult(url="https://example.com/ok", title="OK", snippet="Live fact.")
+    ])
+    good.provider = "openai_web_search"
+
+    run = web_search.run_search_with_fallback(
+        "current facts", adapters=[UnconfiguredTavily([]), good]
+    )
+
+    assert run.outcome == "checked"
+    assert run.provider == "openai_web_search"
+    assert run.fallback_trace == [
+        {"provider": "tavily", "outcome": "missing_config", "error_type": None},
+        {"provider": "openai_web_search", "outcome": "checked", "error_type": None},
+    ]
+
+
+def test_openclaw_adapter_uses_only_structured_search_results_without_live_gateway():
+    received = []
+
+    def invoke(payload):
+        received.append(payload)
+        return {
+            "ok": True,
+            "result": {
+                "results": [
+                    {
+                        "url": "https://clinicaltrials.gov/study/NCT00000001",
+                        "title": "Clinical trial record",
+                        "content": "Recruiting study summary.",
+                    },
+                ],
+            },
+        }
+
+    run = web_search.run_search(
+        "current clinical trials",
+        adapter=web_search.OpenClawSearchAdapter(invoke=invoke),
+    )
+
+    assert run.outcome == "checked"
+    assert run.provider == "openclaw_web_search"
+    assert run.results[0].url == "https://clinicaltrials.gov/study/NCT00000001"
+    assert received[0]["tool"] == "web_search"
+    assert received[0]["args"] == {"query": "current clinical trials", "count": 5}
+    assert received[0]["sessionKey"] == "holochat-search"
+    assert "idempotencyKey" not in received[0]
+
+
+def test_openclaw_adapter_fails_closed_on_unstructured_gateway_prose_without_live_gateway():
+    adapter = web_search.OpenClawSearchAdapter(
+        invoke=lambda _: {"ok": True, "result": {"content": [{"type": "text", "text": "Trust me."}]}},
+    )
+
+    run = web_search.run_search("current facts", adapter=adapter)
+
+    assert run.outcome == "no_results"
+    assert run.result_count == 0
+
+
+def test_openclaw_adapter_requires_explicit_dedicated_private_gateway(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_OPENCLAW_SEARCH_ENABLED", "true")
+    monkeypatch.setenv("HOLOCHAT_OPENCLAW_SEARCH_DEDICATED_GATEWAY", "false")
+    monkeypatch.setenv("HOLOCHAT_OPENCLAW_GATEWAY_URL", "http://127.0.0.1:18789")
+    monkeypatch.setenv("HOLOCHAT_OPENCLAW_GATEWAY_TOKEN", "test-token")
+    assert web_search.OpenClawSearchAdapter().is_configured() is False
+
+    monkeypatch.setenv("HOLOCHAT_OPENCLAW_SEARCH_DEDICATED_GATEWAY", "true")
+    assert web_search.OpenClawSearchAdapter().is_configured() is True
+
+    monkeypatch.setenv("HOLOCHAT_OPENCLAW_GATEWAY_URL", "https://gateway.example.com")
+    assert web_search.OpenClawSearchAdapter().is_configured() is False
+
+    monkeypatch.setenv("HOLOCHAT_OPENCLAW_ALLOW_REMOTE_GATEWAY", "true")
+    assert web_search.OpenClawSearchAdapter().is_configured() is True
+
+
+def test_search_cost_cap_blocks_a_second_configured_provider(monkeypatch):
+    class FailingConfigured(StaticSearchAdapter):
+        provider = "openai_web_search"
+
+        def is_configured(self):
+            return True
+
+    second = StaticSearchAdapter([
+        web_search.SearchResult(url="https://example.com/second", title="Second", snippet="Should not run."),
+    ])
+    second.provider = "xai_web_search"
+
+    monkeypatch.setenv("HOLOCHAT_SEARCH_MAX_PROVIDER_CALLS", "1")
+    run = web_search.run_search_with_fallback(
+        "current facts",
+        adapters=[FailingConfigured([]), second],
+    )
+
+    assert run.outcome == "no_results"
+    assert run.fallback_trace == [
+        {"provider": "openai_web_search", "outcome": "no_results", "error_type": None},
+        {"provider": "xai_web_search", "outcome": "skipped_cost_cap", "error_type": None},
+    ]
+
+
+def test_search_cost_cap_clamps_to_safe_range(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_SEARCH_MAX_PROVIDER_CALLS", "0")
+    assert web_search._max_configured_search_calls() == 1
+    monkeypatch.setenv("HOLOCHAT_SEARCH_MAX_PROVIDER_CALLS", "99")
+    assert web_search._max_configured_search_calls() == 4
+
+
+def test_run_search_with_fallback_reports_missing_config_not_silent(monkeypatch):
+    for name in (
+        "OPENAI_API_KEY", "XAI_API_KEY",
+        "GEMINI_API_KEY", "GOOGLE_API_KEY",
+        "HOLOCHAT_SEARCH_PROVIDERS", "HOLOCHAT_SEARCH_PROVIDER",
+        "HOLOCHAT_OPENCLAW_SEARCH_ENABLED",
+        "HOLOCHAT_OPENCLAW_SEARCH_DEDICATED_GATEWAY",
+        "HOLOCHAT_OPENCLAW_GATEWAY_URL",
+        "HOLOCHAT_OPENCLAW_GATEWAY_TOKEN",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+    run = web_search.run_search_with_fallback("current facts")
+
+    assert run.outcome == "missing_config"
+    assert [item["provider"] for item in run.fallback_trace] == [
+        "openclaw_web_search", "openai_web_search", "xai_web_search", "gemini_google_search",
+    ]
+    assert all(item["outcome"] == "missing_config" for item in run.fallback_trace)
+    assert run.metadata()["fallback_trace"] == run.fallback_trace
+
+
+def test_run_search_with_fallback_honors_legacy_run_search_patches(monkeypatch):
+    sentinel = web_search.SearchRun(
+        query="q", provider="patched", outcome="checked", latency_ms=0,
+        evidence_bundle=web_search.build_web_evidence_bundle(
+            "q", [{"url": "https://example.com/p", "title": "P", "content": "patched"}],
+            provider="patched",
+        ),
+    )
+    monkeypatch.setattr(web_search, "run_search", lambda query: sentinel)
+
+    run = web_search.run_search_with_fallback("q")
+
+    assert run is sentinel
+
+
+def test_search_backend_order_is_independent_of_worker_rotation(monkeypatch):
+    monkeypatch.setenv("HOLOCHAT_SEARCH_PROVIDERS", "openai, xai")
+    assert web_search.resolve_search_provider_order() == ("openai", "xai")
+
+    monkeypatch.delenv("HOLOCHAT_SEARCH_PROVIDERS", raising=False)
+    monkeypatch.setenv("HOLOCHAT_SEARCH_PROVIDER", "xai")
+    assert web_search.resolve_search_provider_order() == ("xai", "openclaw", "openai", "gemini")
+
+    monkeypatch.delenv("HOLOCHAT_SEARCH_PROVIDER", raising=False)
+    assert web_search.resolve_search_provider_order() == web_search.DEFAULT_SEARCH_PROVIDER_ORDER
+
+
+def test_visible_worker_rotation_never_binds_search_backend(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+
+    def fake_run(query):
+        bundle = web_search.build_web_evidence_bundle(
+            query,
+            [{"url": "https://example.com/live", "title": "Live", "content": "Live fact."}],
+            provider="openai_web_search",
+        )
+        return web_search.SearchRun(
+            query=query, provider="openai_web_search", outcome="checked",
+            latency_ms=0, evidence_bundle=bundle,
+        )
+
+    monkeypatch.setattr(chat_engine.web_search, "run_search", fake_run)
+    engine = _engine()
+    engine._adapters = [FakeAdapter("xai", "grok-4.3")]
+
+    result = engine.send_message(str(uuid4()), "Should search?")
+
+    assert result["_provider"] == "xai"
+    assert result["runtime"]["governor_trace"]["web_search"]["provider"] == "openai_web_search"
+    assert result["searched"] is True
+
+
+def test_worker_prompt_receives_admitted_evidence_packet(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    _patch_structured_search(monkeypatch, "compact search result")
+    engine = _engine()
+    worker = CapturingAdapter()
+    engine._adapters = [worker]
+
+    result = engine.send_message(str(uuid4()), "Should search?")
+
+    assert result["searched"] is True
+    prompt = worker.seen_user_messages[-1]
+    assert "[ADMITTED WEB EVIDENCE" in prompt
+    assert "[S1]" in prompt
+
+
+def test_worker_prompt_receives_explicit_failure_notice_when_search_unavailable(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    _patch_failing_search(monkeypatch, "missing_config")
+    engine = _engine()
+    worker = CapturingAdapter(response="Try https://example.org/trials for options.")
+    engine._adapters = [worker]
+
+    result = engine.send_message(str(uuid4()), "Should search?")
+
+    assert result["searched"] is False
+    assert result["web_status"] == "missing_config"
+    prompt = worker.seen_user_messages[-1]
+    assert "WEB CHECK UNAVAILABLE" in prompt
+    assert "missing_config" in prompt
+    assert result["response"].rstrip().endswith(chat_engine.UNVERIFIED_LINKS_NOTE)
+
+
+def test_unverified_links_note_disclosed_only_when_authorized_check_failed():
+    body = "Try https://example.org/trials for options."
+    noted = chat_engine._annotate_unverified_links(
+        body, search_attempted=True, evidence_sources_present=False
+    )
+    assert noted.endswith(chat_engine.UNVERIFIED_LINKS_NOTE)
+    assert chat_engine._annotate_unverified_links(
+        body, search_attempted=False, evidence_sources_present=False
+    ) == body
+    assert chat_engine._annotate_unverified_links(
+        body, search_attempted=True, evidence_sources_present=True
+    ) == body
+    plain = "No links here."
+    assert chat_engine._annotate_unverified_links(
+        plain, search_attempted=True, evidence_sources_present=False
+    ) == plain
+
+
+def test_streaming_searching_event_carries_contextual_scope(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_4DNA_SHADOW", raising=False)
+    _patch_structured_search(monkeypatch, "trial evidence")
+    engine = _engine()
+
+    events = list(engine.stream_message(
+        str(uuid4()), "Find current vaginal cancer clinical trials"
+    ))
+    searching = next(e for e in events if isinstance(e, dict) and e.get("searching"))
+    done = next(e for e in events if isinstance(e, dict) and e.get("done"))
+
+    assert searching["scope"] == "clinical_trials"
+    assert done["searched"] is True
+
+
+def test_frontend_and_stream_surface_contextual_search_trust_signals():
+    html = Path("frontend/chat.html").read_text()
+    main_py = Path("main.py").read_text()
+
+    assert "WEB_UNAVAILABLE_STATUSES" in html
+    assert "Web checked · no usable sources" in html
+    assert "function showSearchWaitLabel" in html
+    assert "showSearchWaitLabel(typingEl, evt.scope)" in html
+    assert "Holo is checking trusted medical sources…" in html
+    assert "Holo is checking current sources…" in html
+    assert "Holo is thinking through the right answer…" in html
+    assert "Holo is connecting the evidence…" in html
+    assert "@keyframes waitWipe" in html
+    assert "prefers-reduced-motion" in html
+    assert "const LINK_ATTRS = 'target=\"_blank\" rel=\"noopener noreferrer\"'" in html
+    assert '"scope": str(chunk.get("scope") or "current")' in main_py
 
 
 def test_frontend_has_web_checked_render_path():

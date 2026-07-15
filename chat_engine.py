@@ -44,6 +44,7 @@ from holochat_context_governor import (
     build_holobrain_injection_plan,
     build_holochat_state,
     build_gov_turn_plan,
+    classify_search_risk,
     deterministic_turn_policy,
     deterministic_visible_release,
     has_meaningful_holobrain_delta,
@@ -1242,9 +1243,52 @@ def _deterministic_search_query(user_message: str) -> Optional[str]:
         _EXPLICIT_SEARCH_RE.search(text)
         or _VOLATILE_INFO_RE.search(text)
         or _CURRENT_FACT_RE.search(text)
+        or classify_search_risk(text)
     ):
         return None
     return _compact_text(text, limit=180)
+
+
+# Authoritative primary sources for clinical-trial retrieval. HoloGov restricts
+# admission to these domains so trial availability is never sourced from
+# aggregator or content-farm pages.
+CLINICAL_TRIALS_AUTHORITATIVE_DOMAINS = (
+    "clinicaltrials.gov",
+    "cancer.gov",
+    "nccn.org",
+    "cancer.org",
+    "foundationforwomenscancer.org",
+    "medlineplus.gov",
+    "fda.gov",
+)
+
+
+def _search_policy_for_turn(user_message: str) -> tuple[Optional[str], web_search.SearchPolicy]:
+    """HoloGov-owned retrieval policy per risk class; provider-independent."""
+    risk_class = classify_search_risk(user_message)
+    if risk_class == "clinical_trials":
+        return risk_class, web_search.SearchPolicy(
+            allowed_domains=CLINICAL_TRIALS_AUTHORITATIVE_DOMAINS,
+            risk_class=risk_class,
+            result_budget=6,
+            tool_budget=2,
+            live_vs_cached="prefer_live",
+        )
+    if risk_class in {"medical_current_evidence", "legal_tax_rules_current"}:
+        return risk_class, web_search.SearchPolicy(
+            risk_class=risk_class,
+            result_budget=6,
+            tool_budget=2,
+            live_vs_cached="prefer_live",
+        )
+    if risk_class:
+        return risk_class, web_search.SearchPolicy(
+            risk_class=risk_class,
+            result_budget=5,
+            tool_budget=1,
+            live_vs_cached="prefer_live",
+        )
+    return None, web_search.SearchPolicy(result_budget=5, tool_budget=1)
 
 
 def _resolve_search_query(user_message: str, governor_query: Optional[str]) -> tuple[Optional[str], str, str]:
@@ -1299,7 +1343,7 @@ def _web_trace(
         "decision": "search_requested" if attempted else "not_needed",
         "source": source,
         "attempted": attempted,
-        "provider": run.provider if run is not None else "tavily",
+        "provider": run.provider if run is not None else "none",
         "status": status,
         "outcome": status,
         "result_count": run.result_count if run is not None else _web_result_count(results),
@@ -1312,9 +1356,10 @@ def _web_trace(
 
 def _run_web_search_for_turn(user_message: str, governor_query: Optional[str]) -> tuple[Optional[str], Optional[str], dict[str, Any]]:
     search_query, source, decision = _resolve_search_query(user_message, governor_query)
+    risk_class, search_policy = _search_policy_for_turn(user_message)
     run: Optional[web_search.SearchRun] = None
     if search_query:
-        run = web_search.run_search(search_query)
+        run = web_search.run_search_with_fallback(search_query, policy=search_policy)
     results = run.rendered_text or None if run is not None else None
     trace = _web_trace(search_query, source=source, results=results, run=run)
     evidence_bundle = run.evidence_bundle if run is not None else None
@@ -1326,7 +1371,76 @@ def _run_web_search_for_turn(user_message: str, governor_query: Optional[str]) -
     ]
     trace["evidence_bundle_hash"] = (evidence_bundle or {}).get("bundle_hash")
     trace["decision"] = decision
+    trace["risk_class"] = risk_class
     return search_query, results, trace
+
+
+def _worker_web_context_block(
+    user_message: str,
+    search_query: Optional[str],
+    search_results: Optional[str],
+    web_trace: dict[str, Any],
+) -> str:
+    """Deterministic worker-facing web context: admitted evidence or plain failure.
+
+    The worker must never have to guess whether the web was checked. Success
+    delivers the admitted evidence ledger; an authorized-but-failed check
+    delivers an explicit unavailability notice so the worker states the failure
+    instead of hedging or inventing source-like URLs.
+    """
+    if search_results:
+        return (
+            f"{user_message}\n\n"
+            f"[ADMITTED WEB EVIDENCE: Use only relevant sources below for web-derived claims. "
+            f"Cite those claims inline with the supplied [S#] identifiers and never invent a source. "
+            f"If the evidence is insufficient or irrelevant, say so plainly.]\n\n"
+            f"{search_results}"
+        )
+    if search_query:
+        reason = str(web_trace.get("status") or "unknown")
+        risk_class = str(web_trace.get("risk_class") or "")
+        medical = risk_class in {"clinical_trials", "medical_current_evidence"}
+        next_step = (
+            "For clinical-trial or treatment questions, point the user to ClinicalTrials.gov "
+            "and NCI's trial search directly, and encourage confirming options with their "
+            "gynecologic oncologist or a trial navigator. "
+            if medical
+            else "Offer one concrete way the user can verify directly (an official site to check). "
+        )
+        return (
+            f"{user_message}\n\n"
+            f"[WEB CHECK UNAVAILABLE: HoloGov authorized a live web check for this turn, but it "
+            f"returned no admitted evidence (reason code: {reason}). Say plainly, near the start of "
+            f"your answer, that you could not check live sources right now. Do not present any URL "
+            f"as verified or current, do not invent citations, and date any general-knowledge facts "
+            f"you rely on. {next_step}Never imply browsing happened.]"
+        )
+    return user_message
+
+
+_ANSWER_BODY_URL_RE = _re.compile(r"https?://", _re.IGNORECASE)
+UNVERIFIED_LINKS_NOTE = (
+    "*The links above come from general knowledge — a live web check wasn't available for this "
+    "turn, so I couldn't verify them.*"
+)
+
+
+def _annotate_unverified_links(
+    response_text: str,
+    *,
+    search_attempted: bool,
+    evidence_sources_present: bool,
+) -> str:
+    """Disclose general-knowledge URLs whenever an authorized web check failed."""
+    text = str(response_text or "")
+    if evidence_sources_present or not search_attempted or not text:
+        return text
+    body_without_code = _re.sub(r"```[\s\S]*?```", "", text)
+    if not _ANSWER_BODY_URL_RE.search(body_without_code):
+        return text
+    if UNVERIFIED_LINKS_NOTE in text:
+        return text
+    return text.rstrip() + "\n\n" + UNVERIFIED_LINKS_NOTE
 
 
 def _retrieve_episode_context(
@@ -2258,17 +2372,13 @@ class HoloChatEngine:
         )
 
         context_timer = _timer_start()
-        # Build enriched message — search results injected for the model only,
-        # not stored in history (history stays clean with the original message)
-        enriched_message = user_message
+        # Build enriched message — search results (or an explicit failure notice)
+        # injected for the model only, not stored in history (history stays clean
+        # with the original message)
+        enriched_message = _worker_web_context_block(
+            user_message, search_query, search_results, web_trace
+        )
         if search_results:
-            enriched_message = (
-                f"{user_message}\n\n"
-                f"[ADMITTED WEB EVIDENCE: Use only relevant sources below for web-derived claims. "
-                f"Cite those claims inline with the supplied [S#] identifiers and never invent a source. "
-                f"If the evidence is insufficient or irrelevant, say so plainly.]\n\n"
-                f"{search_results}"
-            )
             logger.info(f"  Search query: '{search_query}'")
 
         logger.info(
@@ -2566,6 +2676,11 @@ class HoloChatEngine:
         response_text, web_citation_audit = admit_web_citations(
             response_text,
             session.web_evidence_bundle,
+        )
+        response_text = _annotate_unverified_links(
+            response_text,
+            search_attempted=search_attempted,
+            evidence_sources_present=bool((session.web_evidence_bundle or {}).get("sources")),
         )
 
         conversation_paths = []
@@ -3025,15 +3140,9 @@ class HoloChatEngine:
         )
 
         context_timer = _timer_start()
-        enriched_message = user_message
-        if search_results:
-            enriched_message = (
-                f"{user_message}\n\n"
-                f"[ADMITTED WEB EVIDENCE: Use only relevant sources below for web-derived claims. "
-                f"Cite those claims inline with the supplied [S#] identifiers and never invent a source. "
-                f"If the evidence is insufficient or irrelevant, say so plainly.]\n\n"
-                f"{search_results}"
-            )
+        enriched_message = _worker_web_context_block(
+            user_message, search_query, search_results, web_trace
+        )
 
         runtime_identity = build_runtime_identity_block(
             getattr(self, "_runtime_info", {}),
@@ -3116,9 +3225,11 @@ class HoloChatEngine:
                 logger.warning("HoloChat 4DNA stream shadow trace failed: %s", exc)
         _add_timing(timings, "context_assembly_ms", context_timer)
 
-        # Signal search before tokens arrive so the UI can show the indicator
+        # Signal search before tokens arrive so the UI can show the indicator.
+        # The scope lets the UI pick a truthful contextual label (medical vs
+        # general current-fact) without exposing engine internals.
         if search_attempted:
-            yield {"searching": True}
+            yield {"searching": True, "scope": web_trace.get("risk_class") or "current"}
 
         # Stream from the provider internally, but do not release raw chunks to
         # the UI before deterministic visible-output admission.
@@ -3265,6 +3376,11 @@ class HoloChatEngine:
         response_text, web_citation_audit = admit_web_citations(
             response_text,
             session.web_evidence_bundle,
+        )
+        response_text = _annotate_unverified_links(
+            response_text,
+            search_attempted=search_attempted,
+            evidence_sources_present=bool((session.web_evidence_bundle or {}).get("sources")),
         )
         if response_text:
             yield response_text
@@ -5568,8 +5684,10 @@ def _build_worker_gov_turn_plan(
             "results_present": bool(search_results),
             "decision": web_trace.get("status"),
             "source": web_trace.get("source"),
+            "risk_class": web_trace.get("risk_class"),
             "evidence_source_ids": list(web_trace.get("evidence_source_ids") or []),
             "evidence_bundle_hash": web_trace.get("evidence_bundle_hash"),
+            "fallback_trace": list(web_trace.get("fallback_trace") or []),
         },
         voice_tone_constraints=[
             "No scolding, shame, gotcha, cold, curt, sterile, hostile, or prosecutorial posture.",

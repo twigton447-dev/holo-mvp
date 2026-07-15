@@ -94,6 +94,8 @@
     body.light .holo-body strong { color: #050505; text-shadow: 0 1px 0 rgba(255,255,255,0.85), 0 8px 18px rgba(91,122,229,0.13); }
     .holo-body em { font-style: italic; color: #c9c2b6; text-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 8px 20px rgba(0,0,0,0.16); }
     body.light .holo-body em { color: #4f5663; text-shadow: 0 1px 0 rgba(255,255,255,0.65), 0 8px 18px rgba(15,23,42,0.06); }
+    .holo-body .bubble a { color: var(--accent); text-decoration: underline; text-decoration-color: rgba(91,122,229,0.45); text-underline-offset: 3px; word-break: break-all; transition: text-decoration-color 0.15s ease; }
+    .holo-body .bubble a:hover { text-decoration-color: var(--accent); }
     .holo-body ul, .holo-body ol { margin: 12px 0 24px; padding-left: 0; }
     .holo-body ul { list-style: none; }
     .holo-body ol { list-style: none; counter-reset: holo-list; }
@@ -168,9 +170,27 @@
     .memory-actions button { border: 1px solid var(--border); background: var(--bg); color: var(--text2); border-radius: 7px; padding: 4px 8px; font-size: 11px; font-weight: 700; font-family: inherit; cursor: pointer; }
     .memory-actions button:hover { color: var(--text); border-color: var(--text3); }
 
-    /* Typing indicator */
-    @keyframes holoPulse { 0%,100%{opacity:0.3;transform:scale(0.85)} 50%{opacity:1;transform:scale(1.05)} }
-    .holo-thinking { animation: holoPulse 1.4s ease-in-out infinite; }
+    /* Typing indicator — quiet progress, not a second chat avatar. */
+    .holo-wait-mark { width: 28px; height: 28px; flex-shrink: 0; margin-top: 3px; position: relative; }
+    .holo-wait-mark::after { content: ""; position: absolute; left: 7px; top: 13px; width: 12px; height: 1px; border-radius: 1px; background: var(--accent); opacity: 0.42; transform-origin: center; animation: waitMark 1.8s ease-in-out infinite; }
+    @keyframes waitMark { 0%,100% { opacity: 0.22; transform: scaleX(0.6); } 50% { opacity: 0.7; transform: scaleX(1); } }
+
+    /* Wait label — calm left-to-right sheen while Holo works */
+    .wait-label {
+      display: inline-block;
+      color: var(--text3);
+      background: linear-gradient(90deg, var(--text3) 0%, var(--text3) 38%, var(--text) 50%, var(--text3) 62%, var(--text3) 100%);
+      background-size: 240% 100%;
+      background-position: 0 0;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: waitWipe 2.6s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+    }
+    @keyframes waitWipe { 0% { background-position: 0 0; } 72%, 100% { background-position: 100% 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .wait-label { animation: none; -webkit-text-fill-color: currentColor; background: none; }
+    }
 
     /* Thread meter */
     #thread-meter { display: inline-flex; align-items: center; gap: 5px; height: 32px; padding: 0 2px 0 4px; color: var(--text3); font-size: 10px; font-weight: 700; letter-spacing: 0.02em; flex-shrink: 0; user-select: none; }
@@ -2440,10 +2460,11 @@
             catch { throw new Error("Invalid stream event."); }
 
             if (evt.type === "searching") {
-              typingEl.querySelector(".bubble").textContent = "Searching the web…";
+              showSearchWaitLabel(typingEl, evt.scope);
             } else if (evt.type === "token") {
               if (!holoEl) {
                 stopAmbientBubbles();
+                clearInterval(_waitCycleTimer);
                 typingEl.remove();
                 holoEl   = createStreamingBubble();
                 bubbleEl = holoEl.querySelector(".bubble");
@@ -2460,6 +2481,7 @@
             }
           }
         }
+        clearInterval(_waitCycleTimer);
 
         // An EOF without a done event is not safe to replay.
         if (!doneData) {
@@ -2512,6 +2534,7 @@
 
     if (!streamOk) {
       stopAmbientBubbles();
+      clearInterval(_waitCycleTimer);
       if (typingEl.parentNode) typingEl.remove();
       document.querySelector(".msg.holo.streaming")?.remove();
       restoreDraft();
@@ -2719,12 +2742,76 @@
     }
   }
 
+  // Contextual wait labels — a search-specific sequence is used only after
+  // HoloGov has actually authorized retrieval for this turn.
+  const WAIT_LABELS = {
+    none: [
+      "Holo is thinking through the right answer…",
+      "Holo is tracing the important details…",
+      "Holo is shaping a clear response…",
+    ],
+    current: [
+      "Holo is searching current sources…",
+      "Holo is checking current sources…",
+      "Holo is connecting the evidence…",
+    ],
+    clinical_trials: [
+      "Holo is checking trusted medical sources…",
+      "Holo is checking current trial information…",
+      "Holo is synthesizing the evidence…",
+    ],
+    medical_current_evidence: [
+      "Holo is checking trusted medical sources…",
+      "Holo is checking current clinical guidance…",
+      "Holo is synthesizing the evidence…",
+    ],
+    legal_tax_rules_current: [
+      "Holo is searching current official guidance…",
+      "Holo is checking the governing details…",
+      "Holo is synthesizing the evidence…",
+    ],
+    housing_market_current: [
+      "Holo is searching current market data…",
+      "Holo is comparing the relevant signals…",
+      "Holo is synthesizing the evidence…",
+    ],
+    volatile_events_current: [
+      "Holo is searching the latest coverage…",
+      "Holo is checking what changed…",
+      "Holo is synthesizing the evidence…",
+    ],
+  };
+  let _waitCycleTimer = null;
+
+  function setWaitLabel(el, text) {
+    const bubble = el && el.querySelector(".bubble");
+    if (!bubble) return;
+    bubble.innerHTML = `<span class="wait-label">${escHtml(text)}</span>`;
+  }
+
+  function startWaitCycle(typingEl, labels) {
+    clearInterval(_waitCycleTimer);
+    let index = 0;
+    const show = () => {
+      if (!typingEl || !typingEl.isConnected) return clearInterval(_waitCycleTimer);
+      setWaitLabel(typingEl, labels[index % labels.length]);
+      index += 1;
+    };
+    show();
+    _waitCycleTimer = setInterval(show, 7000);
+  }
+
+  function showSearchWaitLabel(typingEl, scope) {
+    startWaitCycle(typingEl, WAIT_LABELS[scope] || WAIT_LABELS.current);
+  }
+
   function appendTyping() {
     const container = document.getElementById("messages");
     const el        = document.createElement("div");
     el.className    = "msg holo";
-    el.innerHTML    = `<div class="holo-icon holo-thinking">✦</div><div class="holo-body"><div class="bubble" style="color:var(--text3);font-size:14px">Thinking…</div></div>`;
+    el.innerHTML    = `<div class="holo-wait-mark" aria-hidden="true"></div><div class="holo-body"><div class="bubble" style="color:var(--text3);font-size:14px"></div></div>`;
     container.appendChild(el);
+    startWaitCycle(el, WAIT_LABELS.none);
     return el;
   }
 
@@ -2954,11 +3041,20 @@
     return escHtml(s).replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   }
 
+  // Backend web_status values that mean "we tried, the web layer was down".
+  const WEB_UNAVAILABLE_STATUSES = ["unavailable", "missing_config", "provider_error", "unsupported_provider"];
+  // Statuses where the check ran but nothing survived evidence admission.
+  const WEB_NO_USABLE_SOURCE_STATUSES = ["no_results", "all_rejected"];
+
   function renderWebCheckedIndicator(data) {
     if (!data) return "";
     if (data.searched !== true) {
-      if (data.web_status === "unavailable") {
-        return `<div class="trust-row"><span class="web-checked" title="Web search unavailable">Web: unavailable</span></div>`;
+      const status = String(data.web_status || "");
+      if (WEB_UNAVAILABLE_STATUSES.includes(status)) {
+        return `<div class="trust-row"><span class="web-checked" title="Web check attempted but unavailable (${escAttr(status)})">Web: unavailable</span></div>`;
+      }
+      if (WEB_NO_USABLE_SOURCE_STATUSES.includes(status)) {
+        return `<div class="trust-row"><span class="web-checked" title="Web checked, but no source passed evidence admission (${escAttr(status)})">Web checked · no usable sources</span></div>`;
       }
       return "";
     }
@@ -3263,11 +3359,30 @@
 
   function inlineMarkdown(text) {
     let s = escHtml(text);
+    // Protect inline code spans so URLs inside them stay literal
+    const codeSpans = [];
+    s = s.replace(/`([^`]+)`/g, (_, code) => {
+      codeSpans.push(code);
+      return `\x01${codeSpans.length - 1}\x01`;
+    });
     s = s.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>");
     s = s.replace(/\*\*(.+?)\*\*/g,     "<strong>$1</strong>");
     s = s.replace(/\*(.+?)\*/g,         "<em>$1</em>");
     s = s.replace(/_(.+?)_/g,           "<em>$1</em>");
-    s = s.replace(/`([^`]+)`/g,         "<code>$1</code>");
+    const LINK_ATTRS = 'target="_blank" rel="noopener noreferrer"';
+    // Markdown links, angle-wrapped target form first: [label](<https://…>)
+    s = s.replace(/\[([^\]]+)\]\(&lt;(https?:\/\/[^)\s]+?)&gt;\)/gi,
+      (_, label, url) => `<a href="${url}" ${LINK_ATTRS}>${label}</a>`);
+    // Markdown links: [label](https://…) — http(s) targets only
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/gi,
+      (_, label, url) => `<a href="${url}" ${LINK_ATTRS}>${label}</a>`);
+    // Bare URLs → clickable, trimming trailing punctuation
+    s = s.replace(/(^|[\s(])(https?:\/\/[^\s<>()\x01]+)/gi, (m, lead, url) => {
+      let target = url, trail = "";
+      while (/[.,;:!?'"]$/.test(target)) { trail = target.slice(-1) + trail; target = target.slice(0, -1); }
+      return `${lead}<a href="${target}" ${LINK_ATTRS}>${target}</a>${trail}`;
+    });
+    s = s.replace(/\x01(\d+)\x01/g, (_, i) => `<code>${codeSpans[i]}</code>`);
     return s;
   }
 

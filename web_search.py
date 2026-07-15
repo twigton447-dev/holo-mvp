@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import inspect
+import json
 import logging
 import os
 from time import perf_counter
@@ -19,6 +20,52 @@ from holochat_evidence import build_web_evidence_bundle, render_web_evidence
 
 
 logger = logging.getLogger("holo.search")
+
+DEFAULT_SEARCH_TIMEOUT_SECONDS = 50.0
+DEFAULT_SEARCH_MAX_OUTPUT_TOKENS = 1200
+DEFAULT_SEARCH_MAX_TOOL_CALLS = 3
+DEFAULT_SEARCH_REASONING_EFFORT = "low"
+
+
+def _search_timeout_seconds() -> float:
+    """Bound one backend attempt; broker fallback owns retries, not an SDK loop."""
+    try:
+        requested = float(os.getenv("HOLOCHAT_SEARCH_TIMEOUT_SECONDS", DEFAULT_SEARCH_TIMEOUT_SECONDS))
+    except (TypeError, ValueError):
+        requested = DEFAULT_SEARCH_TIMEOUT_SECONDS
+    return min(60.0, max(10.0, requested))
+
+
+def _search_max_output_tokens() -> int:
+    """Bound retrieval output plus reasoning before it reaches the worker."""
+    try:
+        requested = int(os.getenv(
+            "HOLOCHAT_SEARCH_MAX_OUTPUT_TOKENS",
+            str(DEFAULT_SEARCH_MAX_OUTPUT_TOKENS),
+        ))
+    except (TypeError, ValueError):
+        requested = DEFAULT_SEARCH_MAX_OUTPUT_TOKENS
+    return min(4096, max(256, requested))
+
+
+def _search_max_tool_calls() -> int:
+    """Limit total hosted tool calls within one broker request."""
+    try:
+        requested = int(os.getenv(
+            "HOLOCHAT_SEARCH_MAX_TOOL_CALLS",
+            str(DEFAULT_SEARCH_MAX_TOOL_CALLS),
+        ))
+    except (TypeError, ValueError):
+        requested = DEFAULT_SEARCH_MAX_TOOL_CALLS
+    return min(8, max(1, requested))
+
+
+def _search_reasoning_effort() -> str:
+    requested = str(os.getenv(
+        "HOLOCHAT_SEARCH_REASONING_EFFORT",
+        DEFAULT_SEARCH_REASONING_EFFORT,
+    ) or "").strip().lower()
+    return requested if requested in {"none", "minimal", "low", "medium", "high", "xhigh"} else DEFAULT_SEARCH_REASONING_EFFORT
 
 SEARCH_OUTCOMES = {
     "missing_config",
@@ -43,6 +90,9 @@ class SearchResult:
     snippet: str = ""
     score: float | None = None
     published_at: str | None = None
+    # Set only by a provider transport that returned a first-party URL
+    # citation without page text. It is admissible as a link, not a passage.
+    citation_only: bool = False
     provider_metadata: dict[str, Any] = field(default_factory=dict)
 
     def as_evidence_record(self) -> dict[str, Any]:
@@ -55,6 +105,8 @@ class SearchResult:
             record["score"] = self.score
         if self.published_at is not None:
             record["published_at"] = self.published_at
+        if self.citation_only:
+            record["citation_only"] = True
         return record
 
 
@@ -155,6 +207,147 @@ class TavilySearchAdapter:
         return results
 
 
+def _env_enabled(name: str) -> bool:
+    return str(os.getenv(name, "") or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _openclaw_gateway_is_private(url: str) -> bool:
+    hostname = (urlsplit(url).hostname or "").strip().lower()
+    if hostname in {"localhost", "::1"} or hostname.startswith("127."):
+        return True
+    if hostname.startswith("10.") or hostname.startswith("192.168."):
+        return True
+    if hostname.startswith("172."):
+        second = hostname.split(".", 2)[1:2]
+        return bool(second and second[0].isdigit() and 16 <= int(second[0]) <= 31)
+    return hostname.endswith(".internal") or hostname.endswith(".local")
+
+
+def _openclaw_result_records(payload: Any) -> list[dict[str, Any]]:
+    """Accept only structured OpenClaw web-search output as evidence input."""
+    if not isinstance(payload, Mapping) or payload.get("ok") is not True:
+        raise SearchPayloadError("OpenClaw gateway did not return an ok result")
+    result = payload.get("result")
+    candidates: Any = result
+    if isinstance(result, Mapping):
+        candidates = result.get("results") or result.get("items") or result.get("data") or result.get("content")
+    if isinstance(candidates, Mapping):
+        candidates = candidates.get("results") or candidates.get("items") or candidates.get("data")
+    if isinstance(candidates, str):
+        try:
+            candidates = json.loads(candidates)
+        except json.JSONDecodeError:
+            return []
+    if isinstance(candidates, Mapping):
+        candidates = candidates.get("results") or candidates.get("items") or candidates.get("data")
+    if not isinstance(candidates, Sequence) or isinstance(candidates, (str, bytes)):
+        return []
+
+    records: list[dict[str, Any]] = []
+    for item in candidates:
+        if not isinstance(item, Mapping):
+            continue
+        if isinstance(item.get("text"), str):
+            try:
+                decoded = json.loads(item["text"])
+            except json.JSONDecodeError:
+                continue
+            if isinstance(decoded, Mapping):
+                decoded = decoded.get("results") or decoded.get("items") or []
+            if isinstance(decoded, Sequence) and not isinstance(decoded, (str, bytes)):
+                records.extend(entry for entry in decoded if isinstance(entry, Mapping))
+            continue
+        records.append(dict(item))
+    return records
+
+
+class OpenClawSearchAdapter:
+    """Read-only search through an isolated OpenClaw gateway.
+
+    HoloGov authorizes the turn before this adapter runs. It refuses a general
+    purpose or remote gateway by default because a direct OpenClaw gateway
+    token is an operator credential, not a narrow end-user token.
+    """
+
+    provider = "openclaw_web_search"
+    limitations = (
+        "requires_dedicated_search_only_gateway",
+        "gateway_must_remain_private_by_default",
+        "openclaw_provider_costs_reported_by_gateway",
+    )
+
+    def __init__(
+        self,
+        *,
+        invoke: Callable[[dict[str, Any]], Any] | None = None,
+        gateway_url: str | None = None,
+        gateway_token: str | None = None,
+    ):
+        self._invoke = invoke
+        self._gateway_url = (gateway_url or os.getenv("HOLOCHAT_OPENCLAW_GATEWAY_URL", "")).rstrip("/")
+        self._gateway_token = gateway_token or os.getenv("HOLOCHAT_OPENCLAW_GATEWAY_TOKEN", "")
+
+    def is_configured(self) -> bool:
+        if self._invoke is not None:
+            return True
+        if not (
+            _env_enabled("HOLOCHAT_OPENCLAW_SEARCH_ENABLED")
+            and _env_enabled("HOLOCHAT_OPENCLAW_SEARCH_DEDICATED_GATEWAY")
+            and self._gateway_url
+            and self._gateway_token
+        ):
+            return False
+        return _openclaw_gateway_is_private(self._gateway_url) or _env_enabled(
+            "HOLOCHAT_OPENCLAW_ALLOW_REMOTE_GATEWAY"
+        )
+
+    def _post(self, payload: dict[str, Any]) -> Any:
+        if self._invoke is not None:
+            return self._invoke(payload)
+        if not self.is_configured():
+            raise RuntimeError("OpenClaw search gateway is not safely configured")
+        import requests
+
+        response = requests.post(
+            f"{self._gateway_url}/tools/invoke",
+            json=payload,
+            headers={
+                "Authorization": f"Bearer {self._gateway_token}",
+                "Content-Type": "application/json",
+                "User-Agent": "HoloChat-SearchBroker/1.0",
+            },
+            timeout=_search_timeout_seconds(),
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def search(
+        self, query: str, *, max_results: int, policy: SearchPolicy | None = None
+    ) -> Sequence[SearchResult]:
+        requested_results = max(1, int(max_results))
+        payload = {
+            "tool": "web_search",
+            "args": {"query": query, "count": requested_results},
+            "sessionKey": os.getenv("HOLOCHAT_OPENCLAW_SEARCH_SESSION_KEY", "holochat-search"),
+        }
+        records = _openclaw_result_records(self._post(payload))
+        normalized: list[SearchResult] = []
+        for item in records:
+            url = str(item.get("url") or item.get("link") or "").strip()
+            title = str(item.get("title") or item.get("name") or "").strip()
+            content = str(item.get("content") or item.get("snippet") or item.get("text") or "").strip()
+            if not url:
+                continue
+            normalized.append(SearchResult(
+                url=url,
+                title=title,
+                snippet=content,
+                citation_only=bool(title and not content),
+                provider_metadata={"source_surface": "openclaw.tools.invoke.web_search"},
+            ))
+        return _dedupe_search_results(normalized)[:requested_results]
+
+
 def _field(value: Any, name: str, default: Any = None) -> Any:
     if isinstance(value, Mapping):
         return value.get(name, default)
@@ -215,6 +408,7 @@ def _openai_response_sources(response: Any) -> list[SearchResult]:
                 url=str(_field(source, "url", "") or ""),
                 title=str(_field(source, "title", "") or ""),
                 snippet=str(_field(source, "snippet", "") or ""),
+                citation_only=not bool(str(_field(source, "snippet", "") or "").strip()),
                 provider_metadata={"source_surface": "web_search_call.action.sources"},
             ))
         for content in _items(_field(item, "content", []), "output.content"):
@@ -224,6 +418,7 @@ def _openai_response_sources(response: Any) -> list[SearchResult]:
                 results.append(SearchResult(
                     url=str(_field(annotation, "url", "") or ""),
                     title=str(_field(annotation, "title", "") or ""),
+                    citation_only=True,
                     provider_metadata={"source_surface": "message.annotation"},
                 ))
     return _dedupe_search_results(results)
@@ -246,7 +441,11 @@ class OpenAIWebSearchAdapter:
     def _get_client(self) -> Any:
         if self._client is None:
             from openai import OpenAI
-            self._client = OpenAI(api_key=self._api_key or os.getenv("OPENAI_API_KEY"))
+            self._client = OpenAI(
+                api_key=self._api_key or os.getenv("OPENAI_API_KEY"),
+                timeout=_search_timeout_seconds(),
+                max_retries=0,
+            )
         return self._client
 
     def search(
@@ -262,8 +461,17 @@ class OpenAIWebSearchAdapter:
         response = self._get_client().responses.create(
             model=self._model,
             input=query,
+            instructions=(
+                "You are HoloChat's retrieval broker, not the user-facing assistant. "
+                "Retrieve only the smallest set of authoritative sources needed for the query. "
+                "Do not draft an answer, explain your reasoning, or keep searching after you have "
+                "enough primary evidence; the visible worker will synthesize the admitted sources."
+            ),
             tools=[tool],
             include=["web_search_call.action.sources"],
+            max_output_tokens=_search_max_output_tokens(),
+            max_tool_calls=_search_max_tool_calls(),
+            reasoning={"effort": _search_reasoning_effort()},
         )
         return _openai_response_sources(response)[:max_results]
 
@@ -287,6 +495,8 @@ class XAIWebSearchAdapter(OpenAIWebSearchAdapter):
             input=query,
             tools=[tool],
             include=["web_search_call.action.sources"],
+            max_output_tokens=_search_max_output_tokens(),
+            max_tool_calls=_search_max_tool_calls(),
         )
         return _openai_response_sources(response)[:max_results]
 
@@ -302,6 +512,8 @@ class XAIWebSearchAdapter(OpenAIWebSearchAdapter):
             self._client = OpenAI(
                 api_key=self._api_key or os.getenv("XAI_API_KEY"),
                 base_url=os.getenv("XAI_BASE_URL", "https://api.x.ai/v1"),
+                timeout=_search_timeout_seconds(),
+                max_retries=0,
             )
         return self._client
 
@@ -393,8 +605,9 @@ class CustomFunctionSearchAdapter:
 
 def build_search_adapter(provider: str | None = None) -> SearchAdapter:
     """Resolve the configured search transport without making a provider call."""
-    selected = str(provider or os.getenv("HOLOCHAT_SEARCH_PROVIDER", "tavily")).strip().lower()
+    selected = str(provider or os.getenv("HOLOCHAT_SEARCH_PROVIDER", "openclaw")).strip().lower()
     factories: dict[str, Callable[[], SearchAdapter]] = {
+        "openclaw": OpenClawSearchAdapter,
         "tavily": TavilySearchAdapter,
         "openai": OpenAIWebSearchAdapter,
         "xai": XAIWebSearchAdapter,
@@ -434,6 +647,7 @@ class SearchRun:
     policy: SearchPolicy = field(default_factory=SearchPolicy)
     tool_call_count: int = 0
     provider_limitations: list[str] = field(default_factory=list)
+    fallback_trace: list[dict[str, Any]] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         self.policy = self.policy.normalized(self.query, self.policy.result_budget)
@@ -495,6 +709,7 @@ class SearchRun:
             "search_policy": self.policy.metadata(),
             "tool_call_count": self.tool_call_count,
             "provider_limitations": list(self.provider_limitations),
+            "fallback_trace": list(self.fallback_trace),
         }
 
     @classmethod
@@ -539,6 +754,8 @@ def _normalize_results(items: Sequence[SearchResult | dict[str, Any]]) -> list[S
                 snippet=str(item.get("content") or item.get("snippet") or ""),
                 score=normalized_score,
                 published_at=item.get("published_at") or item.get("published_date"),
+                citation_only=bool(item.get("citation_only")),
+                provider_metadata=dict(item.get("provider_metadata") or {}),
             )
         )
     return normalized
@@ -717,10 +934,125 @@ def run_search(
     )
 
 
+DEFAULT_SEARCH_PROVIDER_ORDER = ("openclaw", "openai", "xai", "gemini")
+DEFAULT_MAX_CONFIGURED_SEARCH_CALLS = 1
+
+
+def _max_configured_search_calls() -> int:
+    """Cap billable broker attempts for one governed search authorization.
+
+    An unavailable backend is free to skip. Once a configured transport is
+    invoked, however, a fallback can create a second paid request. One attempt
+    is the safe default; operators may raise it deliberately when they accept
+    the corresponding cost and latency tradeoff.
+    """
+    try:
+        requested = int(os.getenv(
+            "HOLOCHAT_SEARCH_MAX_PROVIDER_CALLS",
+            str(DEFAULT_MAX_CONFIGURED_SEARCH_CALLS),
+        ))
+    except (TypeError, ValueError):
+        requested = DEFAULT_MAX_CONFIGURED_SEARCH_CALLS
+    return min(4, max(1, requested))
+
+
+def resolve_search_provider_order() -> tuple[str, ...]:
+    """Ordered search backends, independent of whichever worker is speaking.
+
+    ``HOLOCHAT_SEARCH_PROVIDERS`` (comma-separated) wins verbatim. Otherwise a
+    legacy ``HOLOCHAT_SEARCH_PROVIDER`` pins the first slot and the default
+    order fills the remaining fallback slots.
+    """
+    explicit = str(os.getenv("HOLOCHAT_SEARCH_PROVIDERS", "") or "")
+    if explicit.strip():
+        return tuple(dict.fromkeys(
+            name for item in explicit.split(",") if (name := item.strip().lower())
+        ))
+    pinned = str(os.getenv("HOLOCHAT_SEARCH_PROVIDER", "") or "").strip().lower()
+    ordered = ((pinned,) if pinned else ()) + DEFAULT_SEARCH_PROVIDER_ORDER
+    return tuple(dict.fromkeys(name for name in ordered if name))
+
+
+def run_search_with_fallback(
+    query: str,
+    max_results: int = 5,
+    *,
+    policy: SearchPolicy | None = None,
+    adapters: Sequence[SearchAdapter] | None = None,
+) -> SearchRun:
+    """Try each configured search backend in order until one returns evidence.
+
+    HoloGov keeps authorization and policy authority; this function only owns
+    transport selection. Every attempt is recorded in ``fallback_trace`` so a
+    missing key is a visible outcome, never a silent skip.
+    """
+    # Legacy patch seam: tests and older callers monkeypatch ``run_search``
+    # with a single-argument fake. Honor that patch instead of fanning out.
+    if run_search is not _STRUCTURED_SEARCH_TRANSPORT:
+        return run_search(query)
+
+    attempts: list[dict[str, Any]] = []
+    last_run: SearchRun | None = None
+    if adapters is not None:
+        candidates: list[SearchAdapter | None] = list(adapters)
+        names = [str(getattr(item, "provider", "injected") or "injected") for item in candidates]
+    else:
+        candidates = []
+        names = []
+        for name in resolve_search_provider_order():
+            try:
+                candidates.append(build_search_adapter(name))
+            except ValueError:
+                candidates.append(None)
+            names.append(name)
+    configured_calls = 0
+    max_configured_calls = _max_configured_search_calls()
+    for index, (name, adapter) in enumerate(zip(names, candidates)):
+        if adapter is None:
+            attempts.append({"provider": name, "outcome": "unsupported_provider", "error_type": None})
+            continue
+        if adapter.is_configured() and configured_calls >= max_configured_calls:
+            attempts.extend({
+                "provider": str(getattr(skipped, "provider", skipped_name) or skipped_name),
+                "outcome": "skipped_cost_cap",
+                "error_type": None,
+            } for skipped_name, skipped in zip(names[index:], candidates[index:]))
+            break
+        if adapter.is_configured():
+            configured_calls += 1
+        run = run_search(query, max_results, adapter=adapter, policy=policy)
+        attempts.append({
+            "provider": run.provider,
+            "outcome": run.outcome,
+            "error_type": run.error_type,
+        })
+        last_run = run
+        if run.outcome == "checked":
+            break
+    if last_run is None:
+        last_run = run_search(query, max_results, adapter=_UnsupportedProviderSentinel(), policy=policy)
+    last_run.fallback_trace = attempts
+    return last_run
+
+
+class _UnsupportedProviderSentinel:
+    """Fail-closed transport used when no provider name in the order is known."""
+
+    provider = "none_configured"
+    limitations = ("no_supported_search_provider_configured",)
+
+    def is_configured(self) -> bool:
+        return False
+
+    def search(self, query: str, *, max_results: int, policy: SearchPolicy | None = None) -> Sequence[SearchResult]:
+        return []
+
+
 def search(query: str, max_results: int = 5) -> str | None:
     """Compatibility facade for callers that still expect formatted text."""
     return run_search(query, max_results=max_results).rendered_text or None
 
 
-# The engine uses this identity solely to recognize legacy test/caller patches.
+# The engine uses these identities solely to recognize legacy test/caller patches.
 _TEXT_SEARCH_WRAPPER = search
+_STRUCTURED_SEARCH_TRANSPORT = run_search

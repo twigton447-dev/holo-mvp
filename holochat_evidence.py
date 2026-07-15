@@ -84,6 +84,9 @@ class EvidenceSource(BaseModel):
     domain: str
     title: str
     snippet: str
+    # Hosted search APIs can return a title + URL citation without a retrieved
+    # page passage. It is a usable link reference, never quotable claim evidence.
+    citation_only: bool = False
     published_at: str | None = None
     retrieved_at: str
     relevance_score: float | None = None
@@ -337,7 +340,12 @@ def build_web_evidence_bundle(
             continue
         snippet = _compact(result.get("content") or result.get("snippet"), limit=1200)
         title = _compact(result.get("title") or parsed.netloc, limit=240)
-        if not snippet:
+        # Only a transport that has explicitly identified a hosted provider
+        # citation may enter without a page passage. A generic bare URL remains
+        # insufficient evidence, preserving the grounding invariant for other
+        # backends such as Gemini chunks with no support segment.
+        citation_only = bool(result.get("citation_only")) and not snippet
+        if not snippet and (not citation_only or not title):
             rejection_reasons.append("missing_evidence_text")
             continue
         serialized_candidate = json.dumps(result, ensure_ascii=True, sort_keys=True, default=str)
@@ -359,10 +367,15 @@ def build_web_evidence_bundle(
             domain=(parsed.hostname or parsed.netloc).lower(),
             title=title,
             snippet=snippet,
+            citation_only=citation_only,
             published_at=result.get("published_date") or result.get("published_at"),
             retrieved_at=now,
             relevance_score=relevance,
-            content_hash=stable_hash({"url": canonical_url, "title": title, "snippet": snippet}),
+            content_hash=stable_hash(
+                {"url": canonical_url, "title": title}
+                if citation_only
+                else {"url": canonical_url, "title": title, "snippet": snippet}
+            ),
         ))
     if status is None:
         resolved_status = "checked" if sources else ("all_rejected" if raw_results else "no_results")
@@ -393,19 +406,28 @@ def render_web_evidence(bundle: dict[str, Any] | None) -> str:
         f"Query: {bundle.get('query', '')}",
     ]
     for source in bundle.get("sources") or []:
+        citation_only = bool(source.get("citation_only"))
         source_record = {
             "title": source.get("title"),
             "url": source.get("url"),
             "domain": source.get("domain"),
-            "evidence": source.get("snippet"),
             "published_at": source.get("published_at"),
             "retrieved_at": source.get("retrieved_at"),
         }
+        if citation_only:
+            source_record["citation_only"] = True
+            source_record["citation_scope"] = "link/reference only; no retrieved passage supports factual claims"
+        else:
+            source_record["evidence"] = source.get("snippet")
         lines.append(
             f"[{source.get('source_id')}] "
             + json.dumps(source_record, ensure_ascii=True, sort_keys=True, default=str)
         )
-    lines.append("Use only these source IDs for web-derived claims. Never invent a citation.")
+    lines.append(
+        "Use only these source IDs for web-derived claims. Never invent a citation. "
+        "A citation_only source may be linked as a reference, but cannot support a factual claim "
+        "unless the answer separately states that no page passage was retrieved."
+    )
     return "\n".join(lines)
 
 
@@ -425,8 +447,22 @@ def audit_web_citations(response_text: str, bundle: dict[str, Any] | None) -> di
     source_by_id = {str(item.get("source_id") or ""): item for item in sources}
     support: dict[str, dict[str, Any]] = {}
     unsupported_ids: list[str] = []
+    citation_only_ids = [
+        source_id for source_id, source in source_by_id.items()
+        if bool(source.get("citation_only"))
+    ]
+    citation_only_cited_ids: list[str] = []
     for source_id in inline_cited_ids:
         source = source_by_id.get(source_id) or {}
+        if bool(source.get("citation_only")):
+            citation_only_cited_ids.append(source_id)
+            support[source_id] = {
+                "passed": True,
+                "mode": "citation_only_link_reference",
+                "shared_terms": [],
+                "context_hashes": [],
+            }
+            continue
         source_terms = query_terms(f"{source.get('title', '')} {source.get('snippet', '')}")
         contexts = [
             segment.strip()
@@ -454,7 +490,19 @@ def audit_web_citations(response_text: str, bundle: dict[str, Any] | None) -> di
         status = "unsupported_claims"
     else:
         status = "valid"
-    claim_support_verified = bool(inline_cited_ids) and not invalid_ids and not unsupported_ids
+    claim_support_verified = (
+        bool(inline_cited_ids)
+        and not invalid_ids
+        and not unsupported_ids
+        and bool(set(inline_cited_ids) - set(citation_only_cited_ids))
+    )
+    claim_support_status = (
+        "verified"
+        if claim_support_verified
+        else "citation_only"
+        if inline_cited_ids and not invalid_ids and not unsupported_ids and citation_only_cited_ids
+        else "not_verified"
+    )
     return {
         "status": status,
         "identifier_status": status,
@@ -466,11 +514,13 @@ def audit_web_citations(response_text: str, bundle: dict[str, Any] | None) -> di
         "bibliography_source_ids": bibliography_ids,
         "invalid_source_ids": invalid_ids,
         "unsupported_source_ids": unsupported_ids,
+        "citation_only_source_ids": citation_only_ids,
+        "citation_only_cited_source_ids": citation_only_cited_ids,
         "claim_support": support,
         "bundle_hash": (bundle or {}).get("bundle_hash"),
-        "support_scope": "deterministic_cited_sentence_to_admitted_passage",
+        "support_scope": "deterministic_cited_sentence_to_admitted_passage; citation_only sources are identifier/link citations only",
         "claim_support_verified": claim_support_verified,
-        "claim_support_status": "verified" if claim_support_verified else "not_verified",
+        "claim_support_status": claim_support_status,
         "claim_support_passed": claim_support_verified,
     }
 

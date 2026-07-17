@@ -2177,7 +2177,11 @@ class HoloChatEngine:
                 durable_owner = stored_session.get("scope_id") if scope_id else stored_session.get("capsule_id")
                 if durable_owner != (scope_id or capsule_id):
                     raise SessionOwnershipError("Durable chat session ownership mismatch")
-                prior = self._brain.load_chat_history(session_id, **({"scope_id": scope_id} if scope_id else {}))
+                prior = self._brain.load_chat_history(
+                    session_id,
+                    capsule_id=capsule_id,
+                    **({"scope_id": scope_id} if scope_id else {}),
+                )
             elif not callable(getattr(self._brain, "get_chat_session", None)):
                 # Backward-compatible no-provider test doubles predate durable
                 # session metadata. Production ProjectBrain always has this API.

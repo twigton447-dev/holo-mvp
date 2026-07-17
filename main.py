@@ -1574,7 +1574,11 @@ async def get_last_session(request: Request):
         session = _get_owned_engine_session(session_id, capsule["sub"], access_context)
         history = session.history
     else:
-        history = _capsule_brain.load_chat_history(session_id, **({"scope_id": scope_id} if scope_id else {})) or []
+        history = _capsule_brain.load_chat_history(
+            session_id,
+            capsule_id=capsule["sub"],
+            **({"scope_id": scope_id} if scope_id else {}),
+        ) or []
     return JSONResponse(content={"session_id": session_id, "history": history})
 
 
@@ -2406,7 +2410,11 @@ async def thread_summary(
     session = _get_owned_engine_session(session_id, capsule_id, access_context)
     history = session.history
     if not history:
-        history = _capsule_brain.load_chat_history(session_id, **({"scope_id": scope_id} if scope_id else {})) or []
+        history = _capsule_brain.load_chat_history(
+            session_id,
+            capsule_id=capsule_id,
+            **({"scope_id": scope_id} if scope_id else {}),
+        ) or []
     if not history:
         raise HTTPException(status_code=404, detail="Session not found.")
     summary = _chat_engine._captain.summarize_thread(history)

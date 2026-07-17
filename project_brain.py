@@ -1128,16 +1128,36 @@ class ProjectBrain:
 
     def session_belongs_to_capsule(self, capsule_id: str, session_id: str) -> bool:
         """Return whether a durable chat session is owned by exactly one capsule."""
-        if not capsule_id:
-            return False
-        session = self.get_chat_session(session_id)
-        return bool(session and session.get("capsule_id") == capsule_id)
+        return self._session_matches_owner(capsule_id, session_id)
 
     def session_belongs_to_scope(self, scope_id: str, session_id: str) -> bool:
         if not scope_id:
             return False
         session = self.get_chat_session(session_id)
         return bool(session and session.get("scope_id") == scope_id)
+
+    def _session_matches_owner(
+        self,
+        capsule_id: str,
+        session_id: str,
+        *,
+        scope_id: Optional[str] = None,
+    ) -> bool:
+        """Prove exact durable ownership before a session-bound read or write.
+
+        A session identifier is not authority. This remains a separate check at
+        the persistence boundary even when an HTTP route has already checked
+        the caller, so an overlooked future route cannot restore or append to
+        another capsule's transcript.
+        """
+        if not capsule_id or not session_id:
+            return False
+        session = self.get_chat_session(session_id)
+        return bool(
+            session
+            and session.get("capsule_id") == capsule_id
+            and (scope_id is None or session.get("scope_id") == scope_id)
+        )
 
     def save_chat_turn(
         self,
@@ -1158,12 +1178,13 @@ class ProjectBrain:
             return
         try:
             existing_session = self.get_chat_session(session_id)
-            if existing_session:
-                expected = existing_session.get("scope_id") if scope_id else existing_session.get("capsule_id")
-                actual = scope_id or capsule_id
-                if expected != actual:
-                    logger.warning("Refused chat persistence for session with a different scope owner.")
-                    return
+            if existing_session and not self._session_matches_owner(
+                capsule_id,
+                session_id,
+                scope_id=scope_id,
+            ):
+                logger.warning("Refused chat persistence for session with a different owner.")
+                return
             now = datetime.now(timezone.utc).isoformat()
 
             # Upsert session row — include capsule_id so threads are user-owned
@@ -1206,12 +1227,22 @@ class ProjectBrain:
         except Exception as e:
             logger.warning(f"HoloBrain.save_chat_turn failed: {e}")
 
-    def load_chat_history(self, session_id: str, *, scope_id: Optional[str] = None) -> Optional[List[Dict[str, Any]]]:
+    def load_chat_history(
+        self,
+        session_id: str,
+        *,
+        capsule_id: Optional[str] = None,
+        scope_id: Optional[str] = None,
+    ) -> Optional[List[Dict[str, Any]]]:
         """
         Load full message history for a session from Supabase.
         Returns list of {"role": ..., "content": ...} dicts, or None if not found.
         """
-        if not self._client:
+        if not self._client or not self._session_matches_owner(
+            str(capsule_id or ""),
+            session_id,
+            scope_id=scope_id,
+        ):
             return None
         for attempt in range(2):
             try:
@@ -1238,8 +1269,7 @@ class ProjectBrain:
         if not self._client or not capsule_id or not session_id:
             return False
         try:
-            owned = self.session_belongs_to_scope(scope_id, session_id) if scope_id else self.session_belongs_to_capsule(capsule_id, session_id)
-            if not owned:
+            if not self._session_matches_owner(capsule_id, session_id, scope_id=scope_id):
                 return False
             # Delete messages first, then session
             messages = self._client.table("holo_chat_messages").delete().eq("session_id", session_id)
@@ -1307,7 +1337,11 @@ class ProjectBrain:
 
     def save_consolidation(self, capsule_id: str, session_id: str, session_note: dict, *, scope_id: Optional[str] = None) -> None:
         """Persist the Captain's session-end note to holo_session_consolidations."""
-        if not self._client or not session_note:
+        if (
+            not self._client
+            or not session_note
+            or not self._session_matches_owner(capsule_id, session_id, scope_id=scope_id)
+        ):
             return
         try:
             self._client.table("holo_session_consolidations").insert({
@@ -1760,7 +1794,11 @@ class ProjectBrain:
         scope_id: Optional[str] = None,
     ) -> Optional[str]:
         """Save a generated artifact to holo_artifacts. Returns artifact_id or None."""
-        if not self._client or not content:
+        if (
+            not self._client
+            or not content
+            or not self._session_matches_owner(capsule_id, session_id, scope_id=scope_id)
+        ):
             return None
         try:
             resp = self._client.table("holo_artifacts").insert({

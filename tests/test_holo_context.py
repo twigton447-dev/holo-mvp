@@ -207,6 +207,24 @@ def test_context_memory_blocks_are_capped_and_do_not_include_sensitive_keys(monk
     assert packet.metadata["context_budget"]["largest_blocks"]
 
 
+def test_thread_display_metadata_never_enters_holobrain_working_memory():
+    state = HoloState(session_id="s")
+
+    packet = HoloContextBuilder().build(
+        base_system_prompt="base",
+        holo_state=state,
+        user_message="hello",
+        capsule_context={
+            "about_me": "Prefers precise, evidence-first help.",
+            "_holo_thread_metadata_v1": '{"session-1":{"title":"Private family reset plan","life_area":"marriage"}}',
+        },
+    )
+
+    assert "Prefers precise, evidence-first help." in packet.system_prompt
+    assert "Private family reset plan" not in packet.system_prompt
+    assert "_holo_thread_metadata_v1" not in packet.system_prompt
+
+
 def test_life_context_ranking_boosts_holochat_recovery_voice_anchors(monkeypatch):
     monkeypatch.setenv("HOLOCHAT_LIFE_CONTEXT_CHARS", "900")
     entries = [

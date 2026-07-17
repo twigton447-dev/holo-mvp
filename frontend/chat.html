@@ -692,8 +692,6 @@
     #thread-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
     .thread-item { padding: 9px 10px 9px 12px; border-radius: 8px; cursor: pointer; transition: background 0.12s; margin-bottom: 2px; border-left: 3px solid transparent; }
     .thread-item:hover { background: var(--bg2); }
-    .thread-item:hover .thread-delete-btn { opacity: 1 !important; }
-    .thread-delete-btn:hover { color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; }
     .thread-item.active { background: var(--bg2); border-left-color: var(--accent); }
     .thread-item.topic-work, .thread-item.topic-money, .thread-item.topic-health, .thread-item.topic-people, .thread-item.topic-creative, .thread-item.topic-tech, .thread-item.topic-ideas { border-left-color: var(--engine-brass); }
     .thread-item.active.topic-work, .thread-item.active.topic-money, .thread-item.active.topic-health, .thread-item.active.topic-people, .thread-item.active.topic-creative, .thread-item.active.topic-tech, .thread-item.active.topic-ideas { background: var(--engine-brass-wash); }
@@ -805,6 +803,10 @@
     #thread-panel-header { min-height: 58px; padding: 15px 16px 12px; }
     .rail-brand-lockup { display: inline-flex; align-items: baseline; gap: 7px; min-width: 0; }
     .rail-brand-name { display: inline-flex; align-items: baseline; color: var(--text); font-family: var(--rail-font); font-size: 16px !important; font-weight: 400; letter-spacing: 0 !important; }
+    .rail-header-actions { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; }
+    .rail-header-button { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--text3); cursor: pointer; padding: 0; transition: color .14s ease, background .14s ease, border-color .14s ease; }
+    .rail-header-button:hover { color: var(--text); background: var(--bg2); border-color: var(--border); }
+    .rail-header-button svg { width: 17px; height: 17px; stroke: currentColor; }
     #rail-space-switcher { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin: 10px 12px 8px; padding: 3px; border-radius: 11px; background: var(--bg3); }
     .rail-space-button { min-height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--text3); cursor: pointer; font-family: var(--rail-font); font-size: 12px; font-weight: 520; opacity: 0.48; transition: background .16s ease, color .16s ease, opacity .16s ease, box-shadow .16s ease; }
     .rail-space-button:hover { opacity: .76; }
@@ -820,7 +822,11 @@
     [data-tooltip] { position: relative; }
     [data-tooltip]::after { content: attr(data-tooltip); position: absolute; z-index: 120; top: calc(100% + 8px); right: 0; width: max-content; max-width: 188px; border-radius: 7px; background: #111318; color: #fffdf7; box-shadow: 0 8px 22px rgba(17,19,24,0.16); font-family: var(--ui-font); font-size: 11px; font-weight: 400; line-height: 1.3; opacity: 0; padding: 7px 9px; pointer-events: none; transform: translateY(-2px); transition: opacity 0.14s ease, transform 0.14s ease; }
     [data-tooltip]:hover::after, [data-tooltip]:focus-visible::after { opacity: 1; transform: translateY(0); }
-    #thread-search-wrap { position: relative; display: flex; align-items: center; margin: 10px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg2); box-shadow: 0 2px 8px rgba(31,41,55,0.035); }
+    #rail-actions { padding: 3px 12px 0; }
+    #rail-new-thread { width: 100%; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg2); color: var(--text); cursor: pointer; padding: 8px 12px; box-shadow: 0 3px 10px rgba(24,31,40,.045); font-family: var(--rail-font); font-size: 12px; font-weight: 650; transition: border-color .14s ease, background .14s ease, box-shadow .14s ease, transform .14s ease; }
+    #rail-new-thread:hover { border-color: var(--engine-brass); background: var(--engine-brass-wash); box-shadow: 0 6px 16px rgba(24,31,40,.08); transform: translateY(-1px); }
+    #rail-new-thread svg { width: 16px; height: 16px; stroke: currentColor; }
+    #thread-search-wrap { position: relative; display: flex; align-items: center; margin: 8px 12px 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg2); box-shadow: 0 2px 8px rgba(31,41,55,0.035); }
     #thread-search-wrap svg { width: 15px; height: 15px; margin-left: 10px; stroke: var(--text3); flex: 0 0 auto; }
     #thread-search { width: 100%; height: 34px; border: 0; outline: 0; background: transparent; color: var(--text); padding: 0 10px 0 8px; font: 12px/1.4 var(--rail-font); }
     #thread-search::placeholder { color: var(--text3); }
@@ -840,9 +846,6 @@
     .life-area-threads .thread-preview { font-family: var(--rail-font); font-size: 12px; }
     .life-area-threads .thread-time { font-size: 10px; }
     .life-area-empty { margin: 0; padding: 7px 8px 10px; color: var(--text3); font-family: var(--reader-font); font-size: 12px; line-height: 1.45; }
-    .life-area-new { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; margin: 5px 6px 2px auto; border: 1px solid transparent; border-radius: 7px; background: transparent; color: var(--text3); cursor: pointer; padding: 0; transition: color 0.14s, border-color 0.14s, background 0.14s, box-shadow 0.14s; }
-    .life-area-new:hover { color: var(--text); border-color: var(--engine-brass); background: var(--engine-brass-wash); box-shadow: 0 5px 12px rgba(31,41,55,0.06); }
-    .life-area-new svg { width: 15px; height: 15px; stroke: currentColor; }
     #thread-empty { padding: 26px 14px; }
     #thread-summary-tooltip { left: 324px; background: var(--rail-bg); box-shadow: var(--surface-shadow); }
 
@@ -857,8 +860,9 @@
     .rail-account-meta { overflow: hidden; color: var(--text3); font-size: 10px; line-height: 1.25; margin-top: 1px; text-overflow: ellipsis; white-space: nowrap; }
     .rail-account-gear { color: var(--text3); display: inline-flex; align-items: center; justify-content: center; }
     .rail-account-gear svg { width: 16px; height: 16px; stroke: currentColor; }
-    #rail-settings-menu { position: absolute; left: 10px; right: 10px; bottom: calc(100% + 7px); display: none; border: 1px solid var(--border); border-radius: 12px; background: var(--bg2); padding: 5px; box-shadow: var(--surface-shadow-strong); z-index: 5; }
+    #rail-settings-menu { position: absolute; left: 10px; right: 10px; bottom: calc(100% + 7px); display: none; border: 1px solid var(--border); border-radius: 12px; background: var(--bg2); padding: 5px; box-shadow: var(--surface-shadow-strong); z-index: 85; }
     #rail-settings-menu.open { display: block; }
+    #rail-settings-menu.top-open { position: fixed; top: 58px; left: 10px; right: auto; bottom: auto; width: min(266px, calc(100vw - 20px)); }
     .rail-settings-item { width: 100%; min-height: 35px; display: flex; align-items: center; gap: 9px; border: 0; border-radius: 8px; background: transparent; color: var(--text2); cursor: pointer; padding: 7px 9px; text-align: left; font-family: var(--ui-font); font-size: 12px; font-weight: 550; }
     .rail-settings-item:hover { background: var(--bg3); color: var(--text); }
     .rail-settings-item svg { width: 15px; height: 15px; flex: 0 0 auto; stroke: currentColor; }
@@ -866,6 +870,37 @@
     .rail-settings-rule { height: 1px; margin: 4px 6px; background: var(--hairline); }
     .rail-account-identity { padding: 9px 10px 8px; color: var(--text3); font-size: 10px; line-height: 1.55; overflow-wrap: anywhere; }
     .rail-account-identity strong { display: block; color: var(--text); font-size: 11px; font-weight: 650; }
+    #thread-context-menu { position: fixed; z-index: 130; display: none; min-width: 142px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg2); padding: 4px; box-shadow: var(--surface-shadow-strong); }
+    #thread-context-menu.open { display: block; }
+    .thread-context-action { width: 100%; display: flex; align-items: center; gap: 8px; border: 0; border-radius: 7px; background: transparent; color: var(--text2); cursor: pointer; padding: 8px 9px; text-align: left; font-family: var(--ui-font); font-size: 12px; font-weight: 550; }
+    .thread-context-action:hover { color: var(--text); background: var(--bg3); }
+    .thread-context-action.danger { color: #b85050; }
+    .thread-context-action.danger:hover { background: rgba(184,80,80,.08); }
+    .thread-context-action svg { width: 14px; height: 14px; flex: 0 0 auto; stroke: currentColor; }
+    .thread-more-btn { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 6px; background: transparent; color: var(--text3); cursor: pointer; opacity: 0; padding: 0; transition: opacity .14s ease, color .14s ease, background .14s ease; flex: 0 0 auto; }
+    .thread-item:hover .thread-more-btn, .thread-more-btn:focus-visible { opacity: 1; }
+    .thread-more-btn:hover { color: var(--text); background: var(--bg3); }
+    .thread-more-btn svg { width: 15px; height: 15px; fill: currentColor; }
+
+    #thread-dialog-overlay { position: fixed; inset: 0; z-index: 140; display: none; align-items: center; justify-content: center; background: rgba(12,16,21,.28); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); padding: 18px; }
+    #thread-dialog-overlay.open { display: flex; }
+    #thread-dialog { width: min(424px, 100%); border: 1px solid var(--border); border-radius: 16px; background: var(--bg2); box-shadow: 0 24px 70px rgba(12,16,21,.22); padding: 20px; }
+    .thread-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .thread-dialog-eyebrow { display: block; color: var(--text3); font-family: var(--ui-font); font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    #thread-dialog-title { margin: 4px 0 0; color: var(--text); font-family: var(--reader-font); font-size: 23px; font-weight: 500; line-height: 1.14; }
+    #thread-dialog-copy { margin: 8px 0 0; color: var(--text3); font-family: var(--ui-font); font-size: 12px; line-height: 1.5; }
+    .thread-dialog-close { width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text2); cursor: pointer; font-size: 20px; line-height: 1; }
+    .thread-dialog-close:hover { color: var(--text); background: var(--bg3); }
+    .thread-dialog-field { display: block; margin-top: 14px; }
+    .thread-dialog-field > span { display: block; margin: 0 0 6px; color: var(--text2); font-family: var(--ui-font); font-size: 11px; font-weight: 650; }
+    .thread-dialog-field input, .thread-dialog-field select { width: 100%; height: 42px; border: 1px solid var(--border); border-radius: 9px; outline: 0; background: var(--bg); color: var(--text); padding: 0 11px; font-family: var(--ui-font); font-size: 13px; }
+    .thread-dialog-field input:focus, .thread-dialog-field select:focus { border-color: var(--engine-brass); box-shadow: 0 0 0 3px var(--engine-brass-wash); }
+    .thread-dialog-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    .thread-dialog-secondary, .thread-dialog-primary { min-height: 36px; border-radius: 8px; cursor: pointer; padding: 7px 12px; font-family: var(--ui-font); font-size: 12px; font-weight: 650; }
+    .thread-dialog-secondary { border: 1px solid var(--border); background: transparent; color: var(--text2); }
+    .thread-dialog-secondary:hover { background: var(--bg3); color: var(--text); }
+    .thread-dialog-primary { border: 1px solid var(--text); background: var(--text); color: var(--bg); }
+    .thread-dialog-primary:hover { opacity: .88; }
 
     /* Wide screens use the rail as part of the workspace, not a drawer. */
     @media (min-width: 901px) {
@@ -979,8 +1014,8 @@
       <div class="signin-wordmark" aria-label="HoloChat">
         <span class="signin-wordmark-holo">Holo</span><span class="signin-wordmark-chat">Chat</span>
       </div>
-      <div class="signin-release" aria-label="HoloChat beta v3.47">
-		<span class="signin-beta">beta</span><span>v3.47</span>
+      <div class="signin-release" aria-label="HoloChat beta v3.48">
+		<span class="signin-beta">beta</span><span>v3.48</span>
       </div>
     </div>
     <nav class="signin-nav" aria-label="HoloChat overview">
@@ -1233,18 +1268,53 @@
 
 <!-- HoloChat rail — left sidebar for scoped conversations -->
 <div id="thread-backdrop" onclick="closeThreadPanel()"></div>
+<div id="thread-dialog-overlay" aria-hidden="true" onclick="if(event.target===this)closeThreadDialog()">
+  <form id="thread-dialog" role="dialog" aria-modal="true" aria-labelledby="thread-dialog-title" onsubmit="submitThreadDialog(event)">
+    <div class="thread-dialog-header">
+      <div>
+        <span class="thread-dialog-eyebrow" id="thread-dialog-eyebrow">New thread</span>
+        <h2 id="thread-dialog-title">Start a new thread</h2>
+        <p id="thread-dialog-copy">Choose a category so the work has a clear home from the start.</p>
+      </div>
+      <button class="thread-dialog-close" type="button" onclick="closeThreadDialog()" aria-label="Close">×</button>
+    </div>
+    <label class="thread-dialog-field" id="thread-dialog-category-row">
+      <span>Category</span>
+      <select id="thread-dialog-category" aria-label="Thread category"></select>
+    </label>
+    <label class="thread-dialog-field">
+      <span id="thread-dialog-name-label">Thread name</span>
+      <input id="thread-dialog-name" type="text" maxlength="80" placeholder="e.g. London trip plan" autocomplete="off" />
+    </label>
+    <div class="thread-dialog-footer">
+      <button class="thread-dialog-secondary" type="button" onclick="closeThreadDialog()">Cancel</button>
+      <button class="thread-dialog-primary" id="thread-dialog-submit" type="submit">Create thread</button>
+    </div>
+  </form>
+</div>
 <aside id="thread-panel" aria-label="HoloChat navigation">
   <div id="thread-panel-header">
     <div class="rail-brand-lockup" aria-label="HoloChat">
       <span class="rail-brand-name"><span class="brand-holo">Holo</span><span class="brand-chat">Chat</span></span>
     </div>
-    <button id="thread-panel-close" onclick="closeThreadPanel()" aria-label="Close sidebar" title="Close sidebar" data-tooltip="Close sidebar">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 8v8"/><path d="m15 9-3 3 3 3"/></svg>
-    </button>
+    <div class="rail-header-actions">
+      <button id="rail-top-menu-button" class="rail-header-button" type="button" onclick="toggleRailSettings(true)" data-rail-settings-trigger aria-label="Open settings" aria-expanded="false" data-tooltip="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1.25"/><circle cx="12" cy="12" r="1.25"/><circle cx="19" cy="12" r="1.25"/></svg>
+      </button>
+      <button id="thread-panel-close" onclick="closeThreadPanel()" aria-label="Close sidebar" title="Close sidebar" data-tooltip="Close sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 8v8"/><path d="m15 9-3 3 3 3"/></svg>
+      </button>
+    </div>
   </div>
   <div id="rail-space-switcher" aria-label="Choose Holo space">
     <button id="rail-space-personal" class="rail-space-button" type="button" onclick="switchHoloSpace('personal')">Personal</button>
     <button id="rail-space-enterprise" class="rail-space-button" type="button" onclick="switchHoloSpace('enterprise')">Enterprise</button>
+  </div>
+  <div id="rail-actions">
+    <button id="rail-new-thread" type="button" onclick="openNewThreadDialog()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      <span>New thread</span>
+    </button>
   </div>
   <label id="thread-search-wrap" aria-label="Search chats">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/></svg>
@@ -1259,6 +1329,7 @@
   </div>
   <div id="rail-account" aria-live="polite"></div>
 </aside>
+<div id="thread-context-menu" role="menu" aria-hidden="true"></div>
 
 <!-- Memory panel — user-owned saved context -->
 <div id="memory-panel">
@@ -1315,7 +1386,7 @@
     </div>
     <div id="space-label" aria-live="polite"></div>
     <div id="header-right">
-      <div id="header-release" aria-label="HoloChat beta v3.47"><span id="brand-beta" aria-label="Beta release">beta</span><span id="brand-sub">v3.47</span></div>
+      <div id="header-release" aria-label="HoloChat beta v3.48"><span id="brand-beta" aria-label="Beta release">beta</span><span id="brand-sub">v3.48</span></div>
       <button id="thread-toggle" class="header-btn header-icon-btn" onclick="toggleThreadPanel()" title="Open HoloChat" data-tooltip="Open navigation" aria-label="Open HoloChat">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>
       </button>
@@ -2704,7 +2775,7 @@ For each important item, write one short bullet with the fact or context, confid
     if (!host) return;
     if (!capsuleToken || !_currentUserName) {
       host.innerHTML = `
-        <button class="rail-account-trigger" type="button" onclick="showSignInOverlayFromHeader()" aria-label="Sign in">
+        <button class="rail-account-trigger" type="button" onclick="showSignInOverlayFromHeader()" data-rail-settings-trigger aria-label="Sign in">
           <span class="rail-account-avatar" aria-hidden="true">✦</span>
           <span class="rail-account-copy"><span class="rail-account-name">Sign in</span><span class="rail-account-meta">Save your conversations here</span></span>
           <span class="rail-account-gear" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06A1.7 1.7 0 0 0 15.74 18a1.7 1.7 0 0 0-1.1.5H14.5v3h-3v-3h-.14a1.7 1.7 0 0 0-1.1-.5 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 6.6 15a1.7 1.7 0 0 0-.5-1.1V13.5h-3v-3h3v-.14a1.7 1.7 0 0 0 .5-1.1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.12-2.12.06.06A1.7 1.7 0 0 0 10.26 5a1.7 1.7 0 0 0 1.1-.5h.14v-3h3v3h.14a1.7 1.7 0 0 0 1.1.5 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 .5 1.1h.1v3h-.1a1.7 1.7 0 0 0-.5 1.1Z"/></svg></span>
@@ -2746,7 +2817,7 @@ For each important item, write one short bullet with the fact or context, confid
         <button class="rail-settings-item" type="button" onclick="switchGoogleAccount()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>Switch account</button>
         <button class="rail-settings-item danger" type="button" onclick="signOut()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 19V5a2 2 0 0 0-2-2h-6"/></svg>Log out</button>
       </div>
-      <button class="rail-account-trigger" type="button" onclick="toggleRailSettings()" aria-label="Open account settings" aria-expanded="false">
+      <button class="rail-account-trigger" type="button" onclick="toggleRailSettings()" data-rail-settings-trigger aria-label="Open account settings" aria-expanded="false">
         <span class="rail-account-avatar">${initials}</span>
         <span class="rail-account-copy"><span class="rail-account-name">${name}</span><span class="rail-account-meta">Settings</span></span>
         <span class="rail-account-gear" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06A1.7 1.7 0 0 0 15.74 18a1.7 1.7 0 0 0-1.1.5H14.5v3h-3v-3h-.14a1.7 1.7 0 0 0-1.1-.5 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 6.6 15a1.7 1.7 0 0 0-.5-1.1V13.5h-3v-3h3v-.14a1.7 1.7 0 0 0 .5-1.1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.12-2.12.06.06A1.7 1.7 0 0 0 10.26 5a1.7 1.7 0 0 0 1.1-.5h.14v-3h3v3h.14a1.7 1.7 0 0 0 1.1.5 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 .5 1.1h.1v3h-.1a1.7 1.7 0 0 0-.5 1.1Z"/></svg></span>
@@ -2756,15 +2827,22 @@ For each important item, write one short bullet with the fact or context, confid
   function closeRailSettings() {
     const menu = document.getElementById("rail-settings-menu");
     menu?.classList.remove("open");
-    document.querySelector(".rail-account-trigger")?.setAttribute("aria-expanded", "false");
+    menu?.classList.remove("top-open");
+    document.querySelectorAll("[data-rail-settings-trigger]").forEach(button => button.setAttribute("aria-expanded", "false"));
   }
 
-  function toggleRailSettings() {
+  function toggleRailSettings(fromTop = false) {
     const menu = document.getElementById("rail-settings-menu");
     if (!menu) return;
-    const open = !menu.classList.contains("open");
+    const useTopPosition = Boolean(fromTop);
+    const samePosition = menu.classList.contains("top-open") === useTopPosition;
+    const open = !menu.classList.contains("open") || !samePosition;
     menu.classList.toggle("open", open);
-    document.querySelector(".rail-account-trigger")?.setAttribute("aria-expanded", String(open));
+    menu.classList.toggle("top-open", open && useTopPosition);
+    document.querySelectorAll("[data-rail-settings-trigger]").forEach(button => {
+      const isTopTrigger = button.id === "rail-top-menu-button";
+      button.setAttribute("aria-expanded", String(open && (useTopPosition ? isTopTrigger : !isTopTrigger)));
+    });
     if (open) setTimeout(() => document.addEventListener("click", closeRailSettings, { once: true }), 0);
   }
 
@@ -2965,8 +3043,12 @@ For each important item, write one short bullet with the fact or context, confid
   const LEGACY_AREA_REDIRECT = Object.freeze({ life: "parenting", learn: "research", finance: "money", relationships: "marriage", legal: "compliance", entertainment: "movies", md: "health", rx: "health" });
   const LIFE_AREA_STORAGE_KEY = "holo_thread_life_areas_v1";
   let _draftLifeArea = "";
+  let _draftThreadTitle = "";
   let _openLifeArea = "";
   let _threadSearch = "";
+  let _threadDialogMode = "new";
+  let _threadDialogSessionId = "";
+  let _threadMenuSessionId = "";
   // The initial mode render also renders the rail, so this must exist before boot.
   let _sessionList = [];
   let _threadLifeAreas = {};
@@ -2976,28 +3058,58 @@ For each important item, write one short bullet with the fact or context, confid
     try { localStorage.setItem(LIFE_AREA_STORAGE_KEY, JSON.stringify(_threadLifeAreas)); } catch {}
   }
 
-  function setThreadLifeArea(sessionId, topicKey) {
-    if (!sessionId || !LIFE_AREAS[topicKey]) return;
-    _threadLifeAreas[String(sessionId)] = topicKey;
-    persistThreadLifeAreas();
-    persistThreadLifeArea(sessionId, topicKey);
+  function normalizeThreadTitle(value) {
+    return String(value || "").replace(/\s+/g, " ").trim().slice(0, 80);
   }
 
-  async function persistThreadLifeArea(sessionId, topicKey) {
-    if (!capsuleToken || !sessionId || !LIFE_AREAS[topicKey]) return;
+  function setThreadMetadata(sessionId, patch = {}) {
+    const sid = String(sessionId || "");
+    if (!sid) return;
+    const metadata = {};
+    if (LIFE_AREAS[patch.life_area]) {
+      metadata.life_area = patch.life_area;
+      _threadLifeAreas[sid] = patch.life_area;
+      persistThreadLifeAreas();
+    }
+    const title = normalizeThreadTitle(patch.title);
+    if (title) {
+      metadata.title = title;
+      const session = _sessionList.find(item => String(item.id) === sid);
+      if (session) session.title = title;
+    }
+    if (!Object.keys(metadata).length) return;
+    persistThreadMetadata(sid, metadata);
+  }
+
+  async function persistThreadMetadata(sessionId, patch, attempt = 0) {
+    if (!capsuleToken || !sessionId || !patch || !Object.keys(patch).length) return;
     try {
-      const res = await fetch("/v1/capsule/thread-life-area", {
+      const res = await fetch("/v1/capsule/thread-metadata", {
         method: "POST",
         headers: authHeaders(),
-        body: JSON.stringify({ session_id: String(sessionId), life_area: topicKey }),
+        body: JSON.stringify({ session_id: String(sessionId), ...patch }),
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        // Session persistence finishes just after the first streamed response.
+        // A short retry keeps a freshly named thread from losing its metadata.
+        if (attempt < 3 && (res.status === 404 || res.status >= 500)) {
+          window.setTimeout(() => persistThreadMetadata(sessionId, patch, attempt + 1), 500 * (attempt + 1));
+        }
+        return;
+      }
       const saved = await res.json();
       if (saved?.session_id && LIFE_AREAS[saved.life_area]) {
         _threadLifeAreas[String(saved.session_id)] = saved.life_area;
         persistThreadLifeAreas();
       }
-    } catch (_) {}
+      if (saved?.title) {
+        const session = _sessionList.find(item => String(item.id) === String(saved.session_id));
+        if (session) session.title = saved.title;
+      }
+      renderThreadList();
+    } catch (_) {
+      if (attempt < 3) window.setTimeout(() => persistThreadMetadata(sessionId, patch, attempt + 1), 500 * (attempt + 1));
+    }
   }
 
   function lifeAreaForThread(session) {
@@ -3103,9 +3215,103 @@ For each important item, write one short bullet with the fact or context, confid
   }
 
   async function launchLifeTopic(topicKey) {
-    if (!LIFE_AREAS[String(topicKey || "")]) return;
+    openNewThreadDialog(topicKey);
+  }
+
+  function areaKeysForCurrentSpace() {
+    return (capsuleMode === "work" ? ENTERPRISE_AREA_ORDER : PERSONAL_AREA_ORDER)
+      .filter(key => LIFE_AREAS[key]);
+  }
+
+  function openNewThreadDialog(topicKey = "") {
+    const keys = areaKeysForCurrentSpace();
+    if (!keys.length) return;
+    const selectedKey = keys.includes(topicKey)
+      ? topicKey
+      : (keys.includes(_draftLifeArea) ? _draftLifeArea : keys[0]);
+    _threadDialogMode = "new";
+    _threadDialogSessionId = "";
+    const overlay = document.getElementById("thread-dialog-overlay");
+    const title = document.getElementById("thread-dialog-title");
+    const copy = document.getElementById("thread-dialog-copy");
+    const eyebrow = document.getElementById("thread-dialog-eyebrow");
+    const categoryRow = document.getElementById("thread-dialog-category-row");
+    const category = document.getElementById("thread-dialog-category");
+    const nameLabel = document.getElementById("thread-dialog-name-label");
+    const name = document.getElementById("thread-dialog-name");
+    const submit = document.getElementById("thread-dialog-submit");
+    if (!overlay || !title || !copy || !eyebrow || !categoryRow || !category || !nameLabel || !name || !submit) return;
+    eyebrow.textContent = capsuleMode === "work" ? "HoloEnterprise" : "HoloPersonal";
+    title.textContent = "Start a new thread";
+    copy.textContent = "Choose where it belongs, then give it a clear name. Its history stays tied to the thread, not the label.";
+    categoryRow.hidden = false;
+    category.innerHTML = keys.map(key => `<option value="${escAttr(key)}"${key === selectedKey ? " selected" : ""}>${escHtml(LIFE_AREAS[key].label)}</option>`).join("");
+    nameLabel.textContent = "Thread name (optional)";
+    name.value = "";
+    name.placeholder = `e.g. ${LIFE_AREAS[selectedKey].directions?.[0]?.[0] || "New plan"}`;
+    submit.textContent = "Create thread";
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    window.setTimeout(() => name.focus(), 0);
+  }
+
+  function openRenameThreadDialog(sessionId) {
+    const session = _sessionList.find(item => String(item.id) === String(sessionId));
+    if (!session) return;
+    closeThreadMenu();
+    _threadDialogMode = "rename";
+    _threadDialogSessionId = String(sessionId);
+    const overlay = document.getElementById("thread-dialog-overlay");
+    const title = document.getElementById("thread-dialog-title");
+    const copy = document.getElementById("thread-dialog-copy");
+    const eyebrow = document.getElementById("thread-dialog-eyebrow");
+    const categoryRow = document.getElementById("thread-dialog-category-row");
+    const nameLabel = document.getElementById("thread-dialog-name-label");
+    const name = document.getElementById("thread-dialog-name");
+    const submit = document.getElementById("thread-dialog-submit");
+    if (!overlay || !title || !copy || !eyebrow || !categoryRow || !nameLabel || !name || !submit) return;
+    eyebrow.textContent = "Thread";
+    title.textContent = "Rename thread";
+    copy.textContent = "This changes the visible label only. HoloBrain keeps the same thread history and durable identity.";
+    categoryRow.hidden = true;
+    nameLabel.textContent = "Thread name";
+    name.value = normalizeThreadTitle(session.title || session.preview || "");
+    name.placeholder = "Thread name";
+    submit.textContent = "Save name";
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    window.setTimeout(() => { name.focus(); name.select(); }, 0);
+  }
+
+  function closeThreadDialog() {
+    const overlay = document.getElementById("thread-dialog-overlay");
+    overlay?.classList.remove("open");
+    overlay?.setAttribute("aria-hidden", "true");
+    _threadDialogMode = "new";
+    _threadDialogSessionId = "";
+  }
+
+  async function submitThreadDialog(event) {
+    event.preventDefault();
+    const name = document.getElementById("thread-dialog-name");
+    const category = document.getElementById("thread-dialog-category");
+    const title = normalizeThreadTitle(name?.value);
+    if (_threadDialogMode === "rename") {
+      if (!title || !_threadDialogSessionId) {
+        name?.focus();
+        return;
+      }
+      const sessionIdForRename = _threadDialogSessionId;
+      closeThreadDialog();
+      setThreadMetadata(sessionIdForRename, { title });
+      renderThreadList();
+      return;
+    }
+    const topicKey = String(category?.value || "");
+    if (!LIFE_AREAS[topicKey]) return;
+    closeThreadDialog();
     if (!usesPersistentRail()) closeThreadPanel();
-    await newThread({ topicKey });
+    await newThread({ topicKey, title });
   }
 
   function selectedSpace(mode = capsuleMode) {
@@ -4596,6 +4802,7 @@ For each important item, write one short bullet with the fact or context, confid
     let fromHandoff = options.fromHandoff === true;
     let handoffTransition = options.handoffTransition || null;
     const topicKey = LIFE_AREAS[options.topicKey] ? options.topicKey : "";
+    const requestedTitle = normalizeThreadTitle(options.title);
     if (!fromHandoff) {
       try {
         handoffTransition = readHandoffTransition();
@@ -4605,9 +4812,14 @@ For each important item, write one short bullet with the fact or context, confid
     _activeHandoffTransition = fromHandoff ? (handoffTransition || null) : null;
     if (fromHandoff) {
       _draftLifeArea = "";
+      _draftThreadTitle = "";
       updateActiveLifeArea("");
       renderStarterSurface(handoffWelcomeHtml(handoffTransition || {}));
     } else {
+      // Keep the dialog's selected category through the first streamed turn.
+      // prependSession persists it only once HoloBrain has issued a session id.
+      _draftLifeArea = topicKey;
+      _draftThreadTitle = requestedTitle;
       renderEmptyThread(topicKey);
     }
     if (!fromHandoff) {
@@ -5195,13 +5407,53 @@ For each important item, write one short bullet with the fact or context, confid
     if (!document.hidden) scheduleSessionListRefresh(100);
   });
 
+  function closeThreadMenu() {
+    const menu = document.getElementById("thread-context-menu");
+    menu?.classList.remove("open");
+    menu?.setAttribute("aria-hidden", "true");
+    _threadMenuSessionId = "";
+  }
+
+  function toggleThreadMenu(event, sessionIdForMenu) {
+    event.stopPropagation();
+    const session = _sessionList.find(item => String(item.id) === String(sessionIdForMenu));
+    const menu = document.getElementById("thread-context-menu");
+    if (!session || !menu) return;
+    const sameSession = _threadMenuSessionId === String(sessionIdForMenu);
+    if (sameSession && menu.classList.contains("open")) {
+      closeThreadMenu();
+      return;
+    }
+    _threadMenuSessionId = String(sessionIdForMenu);
+    const sid = escAttr(sessionIdForMenu);
+    menu.innerHTML = `
+      <button class="thread-context-action" type="button" onclick="openRenameThreadDialog('${sid}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Rename
+      </button>
+      <button class="thread-context-action danger" type="button" onclick="closeThreadMenu();deleteThread('${sid}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 10v6M14 10v6"/></svg>
+        Delete
+      </button>`;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const width = 150;
+    const left = Math.min(window.innerWidth - width - 8, Math.max(8, rect.right - width));
+    menu.style.left = `${left}px`;
+    menu.style.top = `${Math.min(window.innerHeight - 92, rect.bottom + 5)}px`;
+    menu.classList.add("open");
+    menu.setAttribute("aria-hidden", "false");
+    window.setTimeout(() => document.addEventListener("click", closeThreadMenu, { once: true }), 0);
+  }
+
   function renderLifeThreadItem(session) {
     const label = displayThreadHeadline(session.title || session.preview || "Thread");
     const active = session.id === sessionId ? " active" : "";
     return `<div class="thread-item${active}" onclick="loadSession('${escHtml(session.id)}')" onmouseenter="threadTooltipShow(this,'${escHtml(session.id)}')" onmouseleave="threadTooltipHide()">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
         <div class="thread-preview" style="flex:1;min-width:0;">${escHtml(label)}</div>
-        <button onclick="event.stopPropagation();deleteThread('${escHtml(session.id)}')" title="Delete thread" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 4px;border-radius:4px;font-size:13px;opacity:0;transition:opacity 0.15s;flex-shrink:0;" class="thread-delete-btn">✕</button>
+        <button class="thread-more-btn" type="button" onclick="toggleThreadMenu(event,'${escAttr(session.id)}')" title="Thread options" aria-label="Thread options">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.45"/><circle cx="12" cy="12" r="1.45"/><circle cx="19" cy="12" r="1.45"/></svg>
+        </button>
       </div>
       <div class="thread-time">${timeAgo(session.at)}</div>
     </div>`;
@@ -5240,9 +5492,6 @@ For each important item, write one short bullet with the fact or context, confid
         </button>
         <div class="life-area-threads">
           ${sessionHtml}
-          <button class="life-area-new" type="button" onclick="launchLifeTopic('${escAttr(key)}')" title="New ${escHtml(area.label)} thread" aria-label="New ${escHtml(area.label)} thread">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          </button>
         </div>
       </section>`;
     }).join("");
@@ -5418,6 +5667,7 @@ For each important item, write one short bullet with the fact or context, confid
 
   async function deleteThread(sid) {
     if (!confirm("Delete this thread? This cannot be undone.")) return;
+    closeThreadMenu();
     try {
       const res = await fetch(`/v1/session/${sid}`, {
         method: "DELETE",
@@ -5425,6 +5675,8 @@ For each important item, write one short bullet with the fact or context, confid
       });
       if (!res.ok) throw new Error("Delete failed.");
       _sessionList = _sessionList.filter(s => s.id !== sid);
+      delete _threadLifeAreas[String(sid)];
+      persistThreadLifeAreas();
 	      if (sid === sessionId) {
 	        sessionId = null;
 	        _latestResearchDossierId = null;
@@ -5456,6 +5708,7 @@ For each important item, write one short bullet with the fact or context, confid
 
   async function loadSession(sid) {
     if (sid === sessionId || sid === _loadingSessionId) return;
+    closeThreadMenu();
     _loadingSessionId = sid;
     try {
       if (!(await checkpointCurrentThread("thread_open"))) return;
@@ -5486,12 +5739,15 @@ For each important item, write one short bullet with the fact or context, confid
   // Called after first turn so new session appears at top of list immediately
   function prependSession(sid, preview) {
     const topicKey = _draftLifeArea;
-    if (_draftLifeArea) {
-      setThreadLifeArea(sid, _draftLifeArea);
-      _draftLifeArea = "";
-    }
+    const title = _draftThreadTitle;
+    const metadata = {};
+    if (topicKey) metadata.life_area = topicKey;
+    if (title) metadata.title = title;
+    _draftLifeArea = "";
+    _draftThreadTitle = "";
     _sessionList = _sessionList.filter(s => s.id !== sid);
-    _sessionList.unshift({ id: sid, at: new Date().toISOString(), preview });
+    _sessionList.unshift({ id: sid, at: new Date().toISOString(), preview, title, life_area: topicKey });
+    if (Object.keys(metadata).length) setThreadMetadata(sid, metadata);
     updateActiveLifeArea(topicKey || lifeAreaForThread(_sessionList[0]));
     renderThreadList();
   }

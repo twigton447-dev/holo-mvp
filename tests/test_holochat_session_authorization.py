@@ -70,6 +70,38 @@ class FakeDatabase:
         return self.key_capsule_id
 
 
+class ThreadMetadataBrain:
+    def __init__(self, owner="capsule-a"):
+        self.owner = owner
+        self.context = {}
+        self.renamed = []
+
+    def get_chat_session(self, session_id):
+        return {"session_id": session_id, "capsule_id": self.owner}
+
+    def get_capsule_context(self, capsule_id, **kwargs):
+        return dict(self.context.get((capsule_id, kwargs.get("scope_id")), {}))
+
+    def set_capsule_context(self, capsule_id, key, value, **kwargs):
+        bucket = self.context.setdefault((capsule_id, kwargs.get("scope_id")), {})
+        bucket[key] = value
+
+    def update_session_name(self, capsule_id, session_id, name, **kwargs):
+        self.renamed.append((capsule_id, session_id, name, kwargs.get("scope_id")))
+        return True
+
+    def list_sessions(self, capsule_id, limit=200, **kwargs):
+        assert capsule_id == "capsule-a"
+        assert limit == 200
+        return [{
+            "session_id": "session-1",
+            "created_at": "2026-07-17T00:00:00Z",
+            "last_active": "2026-07-17T01:00:00Z",
+            "preview": "The long automatic preview should not win.",
+            "title": "Automatic title",
+        }]
+
+
 def _client(monkeypatch, *, owner="capsule-a", jwt_capsule="capsule-a", key_capsule=None):
     engine = FakeChatEngine()
     monkeypatch.setattr(main, "_chat_engine", engine)
@@ -81,6 +113,83 @@ def _client(monkeypatch, *, owner="capsule-a", jwt_capsule="capsule-a", key_caps
         lambda header: {"sub": jwt_capsule} if jwt_capsule else None,
     )
     return TestClient(main.app), engine
+
+
+def test_thread_title_and_category_are_persisted_without_changing_session_identity(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_HYBRID_SCOPES_ENABLED", raising=False)
+    brain = ThreadMetadataBrain()
+    monkeypatch.setattr(main, "_capsule_brain", brain)
+    monkeypatch.setattr(main, "get_capsule_from_request", lambda _header: {"sub": "capsule-a"})
+    client = TestClient(main.app)
+
+    saved = client.post(
+        "/v1/capsule/thread-metadata",
+        headers={"Authorization": "Bearer capsule-a"},
+        json={
+            "session_id": "session-1",
+            "life_area": "travel",
+            "title": "England trip decisions",
+        },
+    )
+
+    assert saved.status_code == 200
+    assert saved.json() == {
+        "session_id": "session-1",
+        "life_area": "travel",
+        "title": "England trip decisions",
+    }
+    assert brain.renamed == [("capsule-a", "session-1", "England trip decisions", None)]
+
+    listed = client.get("/v1/capsule/sessions", headers={"Authorization": "Bearer capsule-a"})
+    assert listed.status_code == 200
+    assert listed.json()["sessions"] == [{
+        "id": "session-1",
+        "at": "2026-07-17T01:00:00Z",
+        "preview": "The long automatic preview should not win.",
+        "title": "England trip decisions",
+        "life_area": "travel",
+    }]
+
+
+def test_thread_metadata_rejects_another_capsules_session(monkeypatch):
+    monkeypatch.delenv("HOLOCHAT_HYBRID_SCOPES_ENABLED", raising=False)
+    brain = ThreadMetadataBrain(owner="capsule-b")
+    monkeypatch.setattr(main, "_capsule_brain", brain)
+    monkeypatch.setattr(main, "get_capsule_from_request", lambda _header: {"sub": "capsule-a"})
+    client = TestClient(main.app)
+
+    response = client.post(
+        "/v1/capsule/thread-metadata",
+        headers={"Authorization": "Bearer capsule-a"},
+        json={"session_id": "session-1", "title": "Attempted takeover"},
+    )
+
+    assert response.status_code == 404
+    assert brain.context == {}
+    assert brain.renamed == []
+
+
+def test_thread_metadata_is_isolated_between_personal_and_enterprise_scopes(monkeypatch):
+    brain = ThreadMetadataBrain()
+    monkeypatch.setattr(main, "_capsule_brain", brain)
+
+    main._write_thread_metadata(
+        "capsule-a",
+        {"session-1": {"title": "Weekend reset", "life_area": "wellness"}},
+        scope_id="personal-scope",
+    )
+    main._write_thread_metadata(
+        "capsule-a",
+        {"session-1": {"title": "IC valuation memo", "life_area": "ic"}},
+        scope_id="enterprise-scope",
+    )
+
+    assert main._read_thread_metadata("capsule-a", scope_id="personal-scope") == {
+        "session-1": {"title": "Weekend reset", "life_area": "wellness"},
+    }
+    assert main._read_thread_metadata("capsule-a", scope_id="enterprise-scope") == {
+        "session-1": {"title": "IC valuation memo", "life_area": "ic"},
+    }
 
 
 def test_cross_capsule_chat_cannot_restore_or_reassign_session(monkeypatch):

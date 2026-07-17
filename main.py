@@ -401,6 +401,85 @@ def _require_session_ownership(
         raise HTTPException(status_code=404, detail="Session not found.")
 
 
+_THREAD_METADATA_CONTEXT_KEY = "_holo_thread_metadata_v1"
+_THREAD_METADATA_MAX_ENTRIES = 160
+
+
+def _clean_thread_life_area(value: Any) -> str:
+    """Accept only a compact category key, never arbitrary metadata."""
+    area = str(value or "").strip().lower()
+    if not area or len(area) > 40:
+        return ""
+    return area if all(char.isalnum() or char in {"-", "_"} for char in area) else ""
+
+
+def _clean_thread_title(value: Any) -> str:
+    """Normalize a user-facing title without changing the durable session ID."""
+    title = " ".join(str(value or "").split())
+    return title[:80]
+
+
+def _read_thread_metadata(capsule_id: str, *, scope_id: Optional[str] = None) -> dict[str, dict[str, str]]:
+    """Read scope-local, non-model-visible thread display metadata."""
+    try:
+        context = _capsule_brain.get_capsule_context(
+            capsule_id,
+            **({"scope_id": scope_id} if scope_id else {}),
+        ) or {}
+        raw = context.get(_THREAD_METADATA_CONTEXT_KEY, "")
+        decoded = json.loads(str(raw or "")) if raw else {}
+    except Exception:
+        return {}
+    if not isinstance(decoded, dict):
+        return {}
+
+    cleaned: dict[str, dict[str, str]] = {}
+    for session_id, value in decoded.items():
+        sid = str(session_id or "").strip()
+        if not sid or len(sid) > 160 or not isinstance(value, dict):
+            continue
+        entry: dict[str, str] = {}
+        area = _clean_thread_life_area(value.get("life_area"))
+        title = _clean_thread_title(value.get("title"))
+        if area:
+            entry["life_area"] = area
+        if title:
+            entry["title"] = title
+        if entry:
+            cleaned[sid] = entry
+    return cleaned
+
+
+def _write_thread_metadata(
+    capsule_id: str,
+    metadata: dict[str, dict[str, str]],
+    *,
+    scope_id: Optional[str] = None,
+) -> None:
+    """Persist only bounded display metadata in the caller's authorized scope."""
+    while len(metadata) > _THREAD_METADATA_MAX_ENTRIES:
+        metadata.pop(next(iter(metadata)))
+    _capsule_brain.set_capsule_context(
+        capsule_id,
+        _THREAD_METADATA_CONTEXT_KEY,
+        json.dumps(metadata, ensure_ascii=True, separators=(",", ":")),
+        **({"scope_id": scope_id} if scope_id else {}),
+    )
+
+
+def _remove_thread_metadata(
+    capsule_id: str,
+    session_id: str,
+    *,
+    scope_id: Optional[str] = None,
+) -> None:
+    metadata = _read_thread_metadata(capsule_id, scope_id=scope_id)
+    if str(session_id) not in metadata:
+        return
+    metadata.pop(str(session_id), None)
+    _write_thread_metadata(capsule_id, metadata, scope_id=scope_id)
+
+
 def _reject_durable_incognito_session(session_id: str) -> None:
     """Incognito threads never restore durable history, regardless of its owner."""
     if _capsule_brain.get_chat_session(session_id) is not None:
@@ -1354,17 +1433,77 @@ async def list_sessions(request: Request):
     access_context = _resolve_active_scope(request, capsule["sub"])
     scope_id = access_context.scope_id if access_context else None
     sessions = _capsule_brain.list_sessions(capsule["sub"], **({"scope_id": scope_id} if scope_id else {}))
+    metadata = _read_thread_metadata(capsule["sub"], scope_id=scope_id)
     # Map to the shape the frontend expects: {id, at, preview, title}
     mapped = [
         {
             "id":      s.get("session_id"),
             "at":      s.get("last_active") or s.get("created_at"),
             "preview": s.get("preview", ""),
-            "title":   s.get("title") or s.get("preview", ""),
+            # A human-selected title always wins over the automatic summary title.
+            "title":   metadata.get(str(s.get("session_id")), {}).get("title") or s.get("title") or s.get("preview", ""),
+            "life_area": metadata.get(str(s.get("session_id")), {}).get("life_area", ""),
         }
         for s in sessions
     ]
     return JSONResponse(content={"sessions": mapped})
+
+
+@app.post("/v1/capsule/thread-metadata")
+async def update_thread_metadata(request: Request):
+    """Save a scoped thread title and/or category after exact ownership checks."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON.")
+    if not isinstance(body, dict):
+        raise HTTPException(status_code=400, detail="Request body must be an object.")
+
+    session_id = str(body.get("session_id") or "").strip()
+    if not session_id or len(session_id) > 160:
+        raise HTTPException(status_code=400, detail="A valid session_id is required.")
+    if "life_area" not in body and "title" not in body:
+        raise HTTPException(status_code=400, detail="Provide a title or life_area.")
+
+    access_context = _resolve_active_scope(request, capsule["sub"], body)
+    access_context = _bind_session_access(request, access_context, session_id)
+    _require_session_ownership(session_id, capsule["sub"], access_context=access_context)
+    scope_id = access_context.scope_id if access_context else None
+
+    metadata = _read_thread_metadata(capsule["sub"], scope_id=scope_id)
+    entry = dict(metadata.get(session_id) or {})
+    if "life_area" in body:
+        life_area = _clean_thread_life_area(body.get("life_area"))
+        if not life_area:
+            raise HTTPException(status_code=400, detail="life_area is invalid.")
+        entry["life_area"] = life_area
+    if "title" in body:
+        title = _clean_thread_title(body.get("title"))
+        if not title:
+            raise HTTPException(status_code=400, detail="title is invalid.")
+        entry["title"] = title
+        # Keep the session table useful to existing exports without allowing the
+        # automatic title worker to replace the user's choice in the list API.
+        _capsule_brain.update_session_name(
+            capsule["sub"],
+            session_id,
+            title,
+            **({"scope_id": scope_id} if scope_id else {}),
+        )
+
+    metadata.pop(session_id, None)
+    metadata[session_id] = entry
+    _write_thread_metadata(capsule["sub"], metadata, scope_id=scope_id)
+    return JSONResponse(content={"session_id": session_id, **entry})
+
+
+@app.post("/v1/capsule/thread-life-area")
+async def update_thread_life_area(request: Request):
+    """Compatibility endpoint for clients released before thread metadata v1."""
+    return await update_thread_metadata(request)
 
 
 @app.get("/v1/artifacts")
@@ -2214,6 +2353,10 @@ async def delete_session(
     deleted = _capsule_brain.delete_session(capsule_id, session_id, **({"scope_id": scope_id} if scope_id else {}))
     if not deleted:
         raise HTTPException(status_code=404, detail="Session not found or access denied.")
+    try:
+        _remove_thread_metadata(capsule_id, session_id, scope_id=scope_id)
+    except Exception as exc:
+        logger.warning("HoloChat thread metadata cleanup failed: %s", exc)
     return JSONResponse(content={"deleted": True, "session_id": session_id})
 
 

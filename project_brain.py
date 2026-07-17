@@ -1255,7 +1255,7 @@ class ProjectBrain:
             logger.warning(f"HoloBrain.delete_session failed: {e}")
             return False
 
-    def list_sessions(self, capsule_id: str, limit: int = 40, *, scope_id: Optional[str] = None) -> list:
+    def list_sessions(self, capsule_id: str, limit: int = 200, *, scope_id: Optional[str] = None) -> list:
         """
         Return all chat sessions for a capsule, newest first.
         Each entry includes session_id, created_at, last_active, turn_count,
@@ -1732,16 +1732,18 @@ class ProjectBrain:
 
         return "\n\n".join(parts)
 
-    def update_session_name(self, capsule_id: str, session_id: str, name: str, *, scope_id: Optional[str] = None) -> None:
+    def update_session_name(self, capsule_id: str, session_id: str, name: str, *, scope_id: Optional[str] = None) -> bool:
         """Write the Captain-generated title directly to holo_chat_sessions."""
         if not self._client or not name:
-            return
+            return False
         try:
             query = self._client.table("holo_chat_sessions").update({"title": name}).eq("session_id", session_id)
             self._scope_filter(query, capsule_id, scope_id).execute()
             logger.info(f"HoloBrain: session {session_id[:8]} named '{name}'.")
+            return True
         except Exception as e:
             logger.warning(f"HoloBrain.update_session_name failed: {e}")
+            return False
 
     # ------------------------------------------------------------------
     # Artifact registry

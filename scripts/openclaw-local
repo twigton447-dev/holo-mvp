@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# Use the worktree-local OpenClaw runtime. It never modifies the system PATH.
+set -euo pipefail
+
+root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+node_bin="${root_dir}/.tools/node/bin"
+openclaw_bin="${root_dir}/.tools/openclaw/node_modules/.bin/openclaw"
+
+if [[ ! -x "${node_bin}/node" || ! -x "${openclaw_bin}" ]]; then
+  printf 'OpenClaw is not installed in this worktree. See docs/holochat_phone_message_integration_v0.md.\n' >&2
+  exit 1
+fi
+
+export PATH="${node_bin}:${PATH}"
+# Keep this integration's configuration, device pairings, and credentials in
+# the ignored worktree-local tool area. It must never inherit an unrelated
+# user's default ~/.openclaw state by accident.
+export OPENCLAW_STATE_DIR="${OPENCLAW_STATE_DIR:-${root_dir}/.tools/openclaw-state}"
+export OPENCLAW_CONFIG_PATH="${OPENCLAW_CONFIG_PATH:-${OPENCLAW_STATE_DIR}/openclaw.json}"
+exec "${openclaw_bin}" "$@"

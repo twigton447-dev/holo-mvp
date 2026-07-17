@@ -902,6 +902,57 @@
     .thread-dialog-primary { border: 1px solid var(--text); background: var(--text); color: var(--bg); }
     .thread-dialog-primary:hover { opacity: .88; }
 
+    #rail-connect-messages { width: 100%; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--text2); cursor: pointer; padding: 7px 10px; font-family: var(--rail-font); font-size: 12px; font-weight: 650; transition: border-color .14s ease, background .14s ease, color .14s ease; }
+    #rail-connect-messages:hover { border-color: var(--engine-brass); background: var(--engine-brass-wash); color: var(--text); }
+    #rail-connect-messages svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    body.holo-space-enterprise #rail-connect-messages { display: none; }
+
+    /* Personal device pairing is deliberate: the source is authorized on the
+       device, while HoloChat receives only bounded context signals. */
+    #message-connector-dialog-overlay { position: fixed; inset: 0; z-index: 145; display: none; align-items: center; justify-content: center; background: rgba(12,16,21,.32); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); padding: 18px; }
+    #message-connector-dialog-overlay.open { display: flex; }
+    #message-connector-dialog { width: min(540px, 100%); max-height: min(760px, calc(100vh - 36px)); overflow: auto; border: 1px solid var(--border); border-radius: 16px; background: var(--bg2); box-shadow: 0 24px 70px rgba(12,16,21,.22); padding: 20px; }
+    .message-connect-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .message-connect-eyebrow { display: block; color: var(--text3); font-family: var(--ui-font); font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .message-connect-header h2 { margin: 4px 0 0; color: var(--text); font-family: var(--reader-font); font-size: 23px; font-weight: 500; line-height: 1.14; }
+    .message-connect-copy { margin: 8px 0 0; color: var(--text3); font-family: var(--ui-font); font-size: 12px; line-height: 1.5; }
+    .message-connect-privacy { margin: 15px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text2); padding: 10px 11px; font-family: var(--ui-font); font-size: 11px; line-height: 1.48; }
+    .message-connect-privacy strong { color: var(--text); }
+    .message-provider-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .message-provider-card { min-height: 110px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--text2); cursor: pointer; padding: 11px; text-align: left; font-family: var(--ui-font); transition: border-color .14s ease, background .14s ease, color .14s ease; }
+    .message-provider-card:hover { border-color: var(--text3); background: var(--bg3); color: var(--text); }
+    .message-provider-card.active { border-color: var(--engine-brass); background: var(--engine-brass-wash); color: var(--text); }
+    .message-provider-card strong { display: block; font-size: 12px; font-weight: 700; }
+    .message-provider-card span { display: block; margin-top: 6px; color: var(--text3); font-size: 11px; line-height: 1.42; }
+    .message-connect-field { display: block; margin-top: 14px; }
+    .message-connect-field > span { display: block; margin: 0 0 6px; color: var(--text2); font-family: var(--ui-font); font-size: 11px; font-weight: 650; }
+    .message-connect-field input { width: 100%; height: 42px; border: 1px solid var(--border); border-radius: 9px; outline: 0; background: var(--bg); color: var(--text); padding: 0 11px; font-family: var(--ui-font); font-size: 13px; }
+    .message-connect-field input:focus { border-color: var(--engine-brass); box-shadow: 0 0 0 3px var(--engine-brass-wash); }
+    .message-connect-consent { display: flex; align-items: flex-start; gap: 8px; margin: 15px 0 0; color: var(--text2); font-family: var(--ui-font); font-size: 11px; line-height: 1.48; }
+    .message-connect-consent input { width: 15px; height: 15px; margin: 1px 0 0; accent-color: var(--engine-brass); flex: 0 0 auto; }
+    .message-connect-status { min-height: 18px; margin: 12px 0 0; color: var(--text3); font-family: var(--ui-font); font-size: 11px; line-height: 1.42; }
+    .message-connect-status.error { color: #b85050; }
+    .message-connect-status.success { color: #39704e; }
+    .message-connect-secret { display: none; margin-top: 12px; border: 1px solid rgba(167,121,54,.34); border-radius: 10px; background: var(--engine-brass-wash); padding: 10px; }
+    .message-connect-secret.visible { display: block; }
+    .message-connect-secret-label { display: block; color: var(--text); font-family: var(--ui-font); font-size: 11px; font-weight: 700; }
+    .message-connect-secret p { margin: 5px 0 9px; color: var(--text2); font-family: var(--ui-font); font-size: 11px; line-height: 1.42; }
+    .message-secret-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; }
+    .message-secret-row input { min-width: 0; height: 36px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg2); color: var(--text); padding: 0 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; }
+    .message-secret-row button, .message-connector-action { min-height: 32px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg2); color: var(--text2); cursor: pointer; padding: 5px 9px; font-family: var(--ui-font); font-size: 11px; font-weight: 650; }
+    .message-secret-row button:hover, .message-connector-action:hover { background: var(--bg3); color: var(--text); }
+    .message-connector-list { display: grid; gap: 7px; margin-top: 14px; }
+    .message-connector-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; border-top: 1px solid var(--hairline); padding-top: 10px; }
+    .message-connector-row strong { display: block; color: var(--text); font-family: var(--ui-font); font-size: 11px; }
+    .message-connector-row span { display: block; margin-top: 2px; color: var(--text3); font-family: var(--ui-font); font-size: 10px; }
+    .message-connector-actions { display: inline-flex; gap: 5px; }
+    .message-connector-action.danger { color: #b85050; }
+    @media (max-width: 560px) {
+      #message-connector-dialog { padding: 17px; border-radius: 14px; }
+      .message-provider-grid { grid-template-columns: 1fr; }
+      .message-provider-card { min-height: 76px; }
+    }
+
     /* Wide screens use the rail as part of the workspace, not a drawer. */
     @media (min-width: 901px) {
       #thread-backdrop { display: none !important; }
@@ -1292,6 +1343,46 @@
     </div>
   </form>
 </div>
+<div id="message-connector-dialog-overlay" aria-hidden="true" onclick="if(event.target===this)closeMessageConnectorDialog()">
+  <section id="message-connector-dialog" role="dialog" aria-modal="true" aria-labelledby="message-connector-title">
+    <div class="message-connect-header">
+      <div>
+        <span class="message-connect-eyebrow">Personal space only</span>
+        <h2 id="message-connector-title">Connect messages</h2>
+        <p class="message-connect-copy">Authorize a device, not a phone number. HoloChat stores bounded context signals for your Personal Holo, never raw messages or a Personal-to-Enterprise feed.</p>
+      </div>
+      <button class="thread-dialog-close" type="button" onclick="closeMessageConnectorDialog()" aria-label="Close">×</button>
+    </div>
+    <div class="message-connect-privacy"><strong>Your number is not the credential.</strong> iMessage uses this signed-in Mac and its Full Disk Access. Android uses a trusted device pairing and Android SMS permission. Both connections are read-only and can be paused or revoked here.</div>
+    <div class="message-provider-grid" role="radiogroup" aria-label="Choose a message source">
+      <button id="message-provider-imessage" class="message-provider-card active" type="button" role="radio" aria-checked="true" onclick="selectMessageConnectorProvider('openclaw_imessage')">
+        <strong>iPhone Messages</strong><span>Use the Messages account already signed in on this Mac.</span>
+      </button>
+      <button id="message-provider-android" class="message-provider-card" type="button" role="radio" aria-checked="false" onclick="selectMessageConnectorProvider('openclaw_android')">
+        <strong>Android Messages</strong><span>Pair a trusted Android device, then grant SMS read permission there.</span>
+      </button>
+    </div>
+    <label class="message-connect-field">
+      <span>Connection name</span>
+      <input id="message-connector-label" type="text" maxlength="100" autocomplete="off" value="Personal iPhone" />
+    </label>
+    <label class="message-connect-consent">
+      <input id="message-connector-consent" type="checkbox" />
+      <span>I authorize this Personal device to provide HoloChat with derived context only. I understand HoloChat will not accept raw message text, contact details, attachments, or share this connection with Enterprise.</span>
+    </label>
+    <div id="message-connect-status" class="message-connect-status" role="status" aria-live="polite"></div>
+    <div id="message-connect-secret" class="message-connect-secret" aria-live="polite">
+      <span class="message-connect-secret-label">One-time local pairing secret</span>
+      <p>Copy it now into the local, read-only bridge on the authorized device. HoloChat will not show this secret again.</p>
+      <div class="message-secret-row"><input id="message-connector-secret" type="text" readonly aria-label="One-time local pairing secret" /><button type="button" onclick="copyMessageConnectorSecret()">Copy</button></div>
+    </div>
+    <div id="message-connector-list" class="message-connector-list" aria-live="polite"></div>
+    <div class="thread-dialog-footer">
+      <button class="thread-dialog-secondary" type="button" onclick="closeMessageConnectorDialog()">Cancel</button>
+      <button id="message-connector-submit" class="thread-dialog-primary" type="button" onclick="prepareMessageConnector()">Prepare connection</button>
+    </div>
+  </section>
+</div>
 <aside id="thread-panel" aria-label="HoloChat navigation">
   <div id="thread-panel-header">
     <div class="rail-brand-lockup" aria-label="HoloChat">
@@ -1314,6 +1405,10 @@
     <button id="rail-new-thread" type="button" onclick="openNewThreadDialog()">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
       <span>New thread</span>
+    </button>
+    <button id="rail-connect-messages" type="button" onclick="openMessageConnectorDialog()" data-tooltip="Personal-only message connections">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 19H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-6l-4 3v-3H7Z"/><path d="M7 10h.01M11 10h.01M15 10h.01"/></svg>
+      <span id="rail-connect-messages-label">Connect messages</span>
     </button>
   </div>
   <label id="thread-search-wrap" aria-label="Search chats">
@@ -3452,6 +3547,201 @@ For each important item, write one short bullet with the fact or context, confid
     if (!host) return;
     const items = capsuleMode === "work" ? ["Bloomberg", "FactSet", "Excel"] : ["Gmail", "Edward Jones"];
     host.innerHTML = `<div class="rail-section-label">Integrations</div>${items.map(item => `<span class="rail-integration">${escHtml(item)}</span>`).join("")}<div class="rail-section-label">Recents</div>`;
+  }
+    renderMessageConnectorRailState();
+  }
+
+  let _messageConnectorProvider = "openclaw_imessage";
+  let _messageConnectorRecords = [];
+  let _messageConnectorSecret = "";
+
+  function messageConnectorProviderName(provider = _messageConnectorProvider) {
+    return provider === "openclaw_android" ? "Android Messages" : "iPhone Messages";
+  }
+
+  function renderMessageConnectorRailState() {
+    const button = document.getElementById("rail-connect-messages");
+    const label = document.getElementById("rail-connect-messages-label");
+    if (!button || !label) return;
+    const active = _messageConnectorRecords.find(record => record.status === "paired" || record.status === "pending");
+    label.textContent = active ? "Messages connected" : "Connect messages";
+    button.title = capsuleMode === "work"
+      ? "Message sources are Personal-only."
+      : active
+        ? `${active.label || messageConnectorProviderName(active.provider)} is ready to manage.`
+        : "Connect an iPhone or Android device to your Personal Holo.";
+  }
+
+  function setMessageConnectorStatus(message = "", tone = "") {
+    const status = document.getElementById("message-connect-status");
+    if (!status) return;
+    status.textContent = message;
+    status.classList.toggle("error", tone === "error");
+    status.classList.toggle("success", tone === "success");
+  }
+
+  function setMessageConnectorBusy(busy) {
+    const submit = document.getElementById("message-connector-submit");
+    if (!submit) return;
+    submit.disabled = busy;
+    submit.textContent = busy ? "Preparing…" : "Prepare connection";
+  }
+
+  function selectMessageConnectorProvider(provider) {
+    _messageConnectorProvider = provider === "openclaw_android" ? "openclaw_android" : "openclaw_imessage";
+    const imessage = document.getElementById("message-provider-imessage");
+    const android = document.getElementById("message-provider-android");
+    const isAndroid = _messageConnectorProvider === "openclaw_android";
+    imessage?.classList.toggle("active", !isAndroid);
+    android?.classList.toggle("active", isAndroid);
+    imessage?.setAttribute("aria-checked", String(!isAndroid));
+    android?.setAttribute("aria-checked", String(isAndroid));
+    const label = document.getElementById("message-connector-label");
+    if (label) label.value = isAndroid ? "Personal Android" : "Personal iPhone";
+    const secret = document.getElementById("message-connect-secret");
+    secret?.classList.remove("visible");
+    _messageConnectorSecret = "";
+    setMessageConnectorStatus("");
+  }
+
+  function closeMessageConnectorDialog() {
+    const overlay = document.getElementById("message-connector-dialog-overlay");
+    overlay?.classList.remove("open");
+    overlay?.setAttribute("aria-hidden", "true");
+    _messageConnectorSecret = "";
+  }
+
+  function openMessageConnectorDialog() {
+    if (capsuleMode !== "personal") {
+      setSpaceSwitchNotice("Messages can connect only to Personal. Enterprise never receives this source.");
+      return;
+    }
+    if (!capsuleToken || !activeScopeId) {
+      setSpaceSwitchNotice("Sign in to connect a Personal device.");
+      showSignInOverlayFromHeader();
+      return;
+    }
+    _messageConnectorSecret = "";
+    document.getElementById("message-connector-secret").value = "";
+    document.getElementById("message-connect-secret")?.classList.remove("visible");
+    document.getElementById("message-connector-consent").checked = false;
+    selectMessageConnectorProvider(_messageConnectorProvider);
+    const overlay = document.getElementById("message-connector-dialog-overlay");
+    overlay?.classList.add("open");
+    overlay?.setAttribute("aria-hidden", "false");
+    refreshMessageConnectors();
+  }
+
+  async function refreshMessageConnectors() {
+    if (!capsuleToken || !activeScopeId || capsuleMode !== "personal") return;
+    try {
+      const response = await fetch("/v1/capsule/message-connectors", {
+        headers: authHeaders(activeScopeId),
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error("Holo could not load your message connections.");
+      const payload = await response.json();
+      _messageConnectorRecords = Array.isArray(payload.connectors) ? payload.connectors : [];
+      renderMessageConnectorList();
+      renderMessageConnectorRailState();
+    } catch (error) {
+      setMessageConnectorStatus(error.message || "Holo could not load your message connections.", "error");
+    }
+  }
+
+  function renderMessageConnectorList() {
+    const host = document.getElementById("message-connector-list");
+    if (!host) return;
+    host.replaceChildren();
+    const visible = _messageConnectorRecords.filter(record => record.status !== "revoked");
+    if (!visible.length) return;
+    for (const record of visible) {
+      const row = document.createElement("div");
+      row.className = "message-connector-row";
+      const copy = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = record.label || messageConnectorProviderName(record.provider);
+      const meta = document.createElement("span");
+      meta.textContent = `${messageConnectorProviderName(record.provider)} · ${record.status}`;
+      copy.append(title, meta);
+      const actions = document.createElement("div");
+      actions.className = "message-connector-actions";
+      if (record.status === "paired" || record.status === "pending") {
+        const pause = document.createElement("button");
+        pause.className = "message-connector-action";
+        pause.type = "button";
+        pause.textContent = "Pause";
+        pause.onclick = () => updateMessageConnector(record.connector_id, "pause");
+        actions.append(pause);
+      }
+      const revoke = document.createElement("button");
+      revoke.className = "message-connector-action danger";
+      revoke.type = "button";
+      revoke.textContent = "Remove";
+      revoke.onclick = () => updateMessageConnector(record.connector_id, "revoke");
+      actions.append(revoke);
+      row.append(copy, actions);
+      host.append(row);
+    }
+  }
+
+  async function prepareMessageConnector() {
+    const consent = document.getElementById("message-connector-consent");
+    const label = document.getElementById("message-connector-label");
+    if (!consent?.checked) {
+      setMessageConnectorStatus("Confirm the Personal-only, derived-context consent before preparing a connection.", "error");
+      return;
+    }
+    setMessageConnectorBusy(true);
+    setMessageConnectorStatus("");
+    try {
+      const response = await fetch("/v1/capsule/message-connectors", {
+        method: "POST",
+        headers: authHeaders(activeScopeId),
+        body: JSON.stringify({ provider: _messageConnectorProvider, label: label?.value.trim() || messageConnectorProviderName() }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.detail || "Holo could not prepare this connection.");
+      _messageConnectorSecret = payload?.ingest?.connector_secret || "";
+      if (!_messageConnectorSecret) throw new Error("Holo could not prepare the local pairing secret.");
+      document.getElementById("message-connector-secret").value = _messageConnectorSecret;
+      document.getElementById("message-connect-secret")?.classList.add("visible");
+      setMessageConnectorStatus(`${messageConnectorProviderName()} is prepared. Complete pairing on the authorized device.`, "success");
+      await refreshMessageConnectors();
+    } catch (error) {
+      setMessageConnectorStatus(error.message || "Holo could not prepare this connection.", "error");
+    } finally {
+      setMessageConnectorBusy(false);
+    }
+  }
+
+  async function updateMessageConnector(connectorId, action) {
+    if (!connectorId || !["pause", "revoke"].includes(action)) return;
+    setMessageConnectorStatus("");
+    try {
+      const response = await fetch(`/v1/capsule/message-connectors/${encodeURIComponent(connectorId)}${action === "pause" ? "/pause" : ""}`, {
+        method: action === "pause" ? "POST" : "DELETE",
+        headers: authHeaders(activeScopeId),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.detail || "Holo could not update this connection.");
+      setMessageConnectorStatus(action === "pause" ? "Connection paused. No new context will be received." : "Connection removed.", "success");
+      await refreshMessageConnectors();
+    } catch (error) {
+      setMessageConnectorStatus(error.message || "Holo could not update this connection.", "error");
+    }
+  }
+
+  async function copyMessageConnectorSecret() {
+    if (!_messageConnectorSecret) return;
+    try {
+      await navigator.clipboard.writeText(_messageConnectorSecret);
+      setMessageConnectorStatus("Pairing secret copied. It remains visible only while this sheet stays open.", "success");
+    } catch (_) {
+      const input = document.getElementById("message-connector-secret");
+      input?.select();
+      setMessageConnectorStatus("Select and copy the pairing secret from the field above.");
+    }
   }
 
   updateModeUI(capsuleMode);

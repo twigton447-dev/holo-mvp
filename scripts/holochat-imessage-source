@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# Read-only HoloChat wrapper for the locally pinned imsg binary. This wrapper
+# deliberately rejects every command that can send, react, mutate, or inject
+# into Messages.app.
+set -euo pipefail
+
+root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+imsg_bin="${HOLOCHAT_IMSG_BIN:-${root_dir}/.tools/imsg/v0.13.1/unpacked/imsg}"
+
+if [[ ! -x "${imsg_bin}" ]]; then
+  printf 'The worktree-local imsg reader is not installed. See docs/holochat_phone_message_integration_v0.md.\n' >&2
+  exit 1
+fi
+
+if [[ $# -eq 0 ]]; then
+  printf 'Usage: %s <status|chats|group|history|watch|search|stats|scheduled> [arguments]\n' "$0" >&2
+  exit 2
+fi
+
+case "$1" in
+  --version|--help|status|chats|group|history|watch|search|stats|scheduled)
+    ;;
+  *)
+    printf 'Blocked: HoloChat iMessage access is read-only.\n' >&2
+    exit 2
+    ;;
+esac
+
+exec "${imsg_bin}" "$@"

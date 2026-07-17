@@ -71,6 +71,13 @@ if not os.path.exists(os.path.join(os.path.dirname(__file__), "context_governor.
 from context_governor import ContextGovernor
 from chat_engine import HoloChatEngine, SessionOwnershipError, _safe_handoff_transition
 from holochat_onboarding import build_onboarding_context_writes
+from holochat_message_connectors import (
+    HoloChatMessageConnectorStore,
+    MessageConnectorAuthenticationError,
+    MessageConnectorError,
+    normalize_connector_request,
+    normalize_message_event,
+)
 from holochat_scope import AccessContext, ScopeKind
 from holochat_scope_store import HoloChatScopeStore, ScopeResolutionError
 from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain
@@ -84,6 +91,7 @@ _db: Database | None = None
 # This means adapters are initialized once (SDK clients, auth, etc.).
 _governor: ContextGovernor | None = None
 _chat_engine: Optional[HoloChatEngine] = None
+_message_connector_store: HoloChatMessageConnectorStore | None = None
 
 
 @asynccontextmanager
@@ -362,6 +370,39 @@ def _resolve_active_scope(
         extra={"holochat_access": access_context.operator_metadata()},
     )
     return access_context
+
+
+def _message_connectors() -> HoloChatMessageConnectorStore:
+    """Return the server-owned connector store or fail closed."""
+    if _message_connector_store is not None:
+        return _message_connector_store
+    client = getattr(_capsule_brain, "_client", None)
+    if client is None:
+        raise HTTPException(status_code=503, detail="Message connections are unavailable.")
+    return HoloChatMessageConnectorStore(client)
+
+
+def _personal_external_connector_access(
+    request: Request,
+    capsule_id: str,
+    body: Optional[dict[str, Any]] = None,
+) -> AccessContext:
+    """Enforce durable Personal scope ownership for sensitive source connectors."""
+    if not _hybrid_scopes_enabled():
+        raise HTTPException(status_code=409, detail="Personal connections require scoped Personal storage.")
+    access_context = _resolve_active_scope(request, capsule_id, body)
+    if access_context is None or access_context.scope_kind is not ScopeKind.PERSONAL:
+        raise HTTPException(status_code=403, detail="Personal connections can only connect to HoloPersonal.")
+    return access_context
+
+
+def _personal_message_access(
+    request: Request,
+    capsule_id: str,
+    body: Optional[dict[str, Any]] = None,
+) -> AccessContext:
+    """Phone-message connectors require durable Personal scope enforcement."""
+    return _personal_external_connector_access(request, capsule_id, body)
 
 
 def _bind_session_access(
@@ -1065,6 +1106,123 @@ async def list_authorized_spaces(request: Request):
     except (ScopeResolutionError, TypeError, ValueError):
         raise HTTPException(status_code=403, detail="No authorized Personal space is available.")
     return JSONResponse(content={"hybrid_scopes_enabled": True, "spaces": spaces})
+
+
+@app.get("/v1/capsule/message-connectors")
+async def list_message_connectors(request: Request):
+    """List browser-safe Personal phone-message connector state."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    access_context = _personal_message_access(request, capsule["sub"])
+    return JSONResponse(content={"connectors": _message_connectors().list_for_scope(access_context.scope_id)})
+
+
+@app.post("/v1/capsule/message-connectors")
+async def prepare_message_connector(request: Request):
+    """Create a one-time secret for a read-only Personal message bridge.
+
+    The returned secret is shown once to the authenticated owner. It permits
+    normalized context-event ingestion only, never raw transcript upload or
+    cross-scope transfer.
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+    if not isinstance(body, dict):
+        raise HTTPException(status_code=400, detail="Request body must be an object.")
+    access_context = _personal_message_access(request, capsule["sub"], body)
+    try:
+        request_data = normalize_connector_request(body)
+        connector, secret = _message_connectors().create_pending(
+            scope_id=access_context.scope_id,
+            capsule_id=capsule["sub"],
+            provider=request_data["provider"],
+            label=request_data["label"],
+        )
+    except MessageConnectorError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.error("Message connector setup failed: %s", type(exc).__name__, exc_info=True)
+        raise HTTPException(status_code=500, detail="Message connection could not be prepared.") from exc
+
+    logger.info(
+        "Personal message connector prepared",
+        extra={"capsule": capsule["sub"][:8], "scope_id": access_context.scope_id, "provider": connector["provider"]},
+    )
+    return JSONResponse(content={
+        "connector": connector,
+        "ingest": {
+            "endpoint": "/v1/connectors/messages/events",
+            "connector_id": connector["connector_id"],
+            "connector_secret": secret,
+            "capability": "message_context_ingest",
+            "raw_messages_accepted": False,
+        },
+    }, status_code=201)
+
+
+@app.post("/v1/capsule/message-connectors/{connector_id}/pause")
+async def pause_message_connector(connector_id: str, request: Request):
+    """Stop future Personal message context intake without deleting its audit trail."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    access_context = _personal_message_access(request, capsule["sub"])
+    connector = _message_connectors().pause(scope_id=access_context.scope_id, connector_id=connector_id)
+    if connector is None:
+        raise HTTPException(status_code=404, detail="Active message connection not found.")
+    return JSONResponse(content={"connector": connector})
+
+
+@app.delete("/v1/capsule/message-connectors/{connector_id}")
+async def revoke_message_connector(connector_id: str, request: Request):
+    """Permanently revoke future ingestion from one Personal message connector."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    access_context = _personal_message_access(request, capsule["sub"])
+    connector = _message_connectors().revoke(scope_id=access_context.scope_id, connector_id=connector_id)
+    if connector is None:
+        raise HTTPException(status_code=404, detail="Message connection not found.")
+    return JSONResponse(content={"connector": connector})
+
+
+@app.post("/v1/connectors/messages/events")
+async def ingest_message_context_event(request: Request):
+    """Accept one normalized event from a paired local message bridge.
+
+    This endpoint does not accept a user JWT because it is called by a local
+    bridge. The connector's one-time secret, scoped connector record, and
+    restrictive payload contract provide the authentication boundary.
+    """
+    connector_id = str(request.headers.get("X-Holo-Connector-Id") or "").strip()
+    connector_secret = str(request.headers.get("X-Holo-Connector-Secret") or "").strip()
+    if not connector_id or not connector_secret:
+        raise HTTPException(status_code=401, detail="Connector credentials are required.")
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Request body must be valid JSON.")
+    try:
+        event = normalize_message_event(body)
+        result, duplicate = _message_connectors().ingest_event(
+            connector_id=connector_id,
+            secret=connector_secret,
+            event=event,
+        )
+    except MessageConnectorAuthenticationError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except MessageConnectorError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.error("Message context ingestion failed: %s", type(exc).__name__, exc_info=True)
+        raise HTTPException(status_code=500, detail="Message context could not be recorded.") from exc
+    return JSONResponse(content={**result, "duplicate": duplicate, "raw_messages_accepted": False})
 
 
 @app.get("/")

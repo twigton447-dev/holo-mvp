@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+# Read-only Android SMS wrapper for HoloChat. This script is intentionally
+# narrower than the OpenClaw node CLI: it can invoke only sms.search on a
+# paired device, never sms.send or another node command.
+set -euo pipefail
+
+root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+openclaw="${root_dir}/scripts/openclaw-local"
+node=""
+params=""
+gateway_url="${HOLOCHAT_OPENCLAW_GATEWAY_URL:-}"
+
+usage() {
+  cat >&2 <<'EOF'
+Usage: holochat-android-sms-source --node <paired-node> --params '<reviewed JSON>' [--gateway-url <wss-url>]
+
+Runs only OpenClaw's read-only sms.search command. The Android owner must have
+granted SMS permission, and the gateway must allow sms.search while denying
+sms.send. Supply a narrow, user-reviewed query; this wrapper does not default
+to a broad history search.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --node)
+      [[ $# -ge 2 ]] || { usage; exit 2; }
+      node="$2"
+      shift 2
+      ;;
+    --params)
+      [[ $# -ge 2 ]] || { usage; exit 2; }
+      params="$2"
+      shift 2
+      ;;
+    --gateway-url)
+      [[ $# -ge 2 ]] || { usage; exit 2; }
+      gateway_url="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'Blocked: unsupported argument %s\n' "$1" >&2
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+[[ -n "$node" && -n "$params" ]] || { usage; exit 2; }
+
+if [[ -n "$gateway_url" ]]; then
+  case "$gateway_url" in
+    wss://*|ws://127.0.0.1*|ws://localhost*)
+      ;;
+    *)
+      printf 'Blocked: remote Android gateways must use wss://.\n' >&2
+      exit 2
+      ;;
+  esac
+fi
+
+args=(nodes invoke --node "$node" --command sms.search --params "$params" --json)
+if [[ -n "$gateway_url" ]]; then
+  args+=(--url "$gateway_url")
+fi
+
+exec "$openclaw" "${args[@]}"

@@ -70,7 +70,8 @@ if not os.path.exists(os.path.join(os.path.dirname(__file__), "context_governor.
 
 from context_governor import ContextGovernor
 from chat_engine import HoloChatEngine, SessionOwnershipError, _safe_handoff_transition
-from holochat_scope import AccessContext
+from holochat_onboarding import build_onboarding_context_writes
+from holochat_scope import AccessContext, ScopeKind
 from holochat_scope_store import HoloChatScopeStore, ScopeResolutionError
 from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain
 from db import Database
@@ -935,7 +936,7 @@ async def revoke_key(key_prefix: str, request: Request):
 
 @app.post("/auth/mode")
 async def set_mode(request: Request):
-    """Switch the capsule between 'personal' and 'work' modes."""
+    """Switch the visible Holo space after server-side scope authorization."""
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
     if not capsule:
         raise HTTPException(status_code=401, detail="Invalid or missing capsule token.")
@@ -946,8 +947,45 @@ async def set_mode(request: Request):
     mode = body.get("mode", "")
     if mode not in ("personal", "work"):
         raise HTTPException(status_code=400, detail="mode must be 'personal' or 'work'")
+    access_context = None
+    if _hybrid_scopes_enabled():
+        access_context = _resolve_active_scope(request, capsule["sub"], body)
+        expected_kind = "enterprise" if mode == "work" else "personal"
+        if access_context.scope_kind.value != expected_kind:
+            raise HTTPException(status_code=403, detail="Selected space is not authorized for this mode.")
+    elif mode == "work":
+        raise HTTPException(status_code=409, detail="Enterprise access is not configured for this account.")
     _capsule_brain.set_capsule_mode(capsule["sub"], mode)
-    return JSONResponse(content={"capsule_id": capsule["sub"], "mode": mode})
+    return JSONResponse(content={
+        "capsule_id": capsule["sub"],
+        "mode": mode,
+        "scope_id": access_context.scope_id if access_context else None,
+    })
+
+
+@app.get("/auth/spaces")
+async def list_authorized_spaces(request: Request):
+    """Discover Personal plus currently authorized Enterprise spaces.
+
+    This endpoint is only a UI affordance. The scope resolver remains the
+    enforcement point for mode changes and every scoped request.
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Invalid or missing capsule token.")
+    if not _hybrid_scopes_enabled():
+        return JSONResponse(content={
+            "hybrid_scopes_enabled": False,
+            "spaces": [{"scope_id": None, "kind": "personal"}],
+        })
+    client = getattr(_capsule_brain, "_client", None)
+    if client is None:
+        raise HTTPException(status_code=503, detail="Scope authorization is unavailable.")
+    try:
+        spaces = HoloChatScopeStore(client).list_authorized_spaces(capsule["sub"])
+    except (ScopeResolutionError, TypeError, ValueError):
+        raise HTTPException(status_code=403, detail="No authorized Personal space is available.")
+    return JSONResponse(content={"hybrid_scopes_enabled": True, "spaces": spaces})
 
 
 @app.get("/")
@@ -2434,9 +2472,125 @@ async def get_capsule_context(request: Request):
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
     if not capsule:
         raise HTTPException(status_code=401, detail="Sign in required.")
-    ctx = _capsule_brain.get_capsule_context(capsule["sub"])
+    access_context = _resolve_active_scope(request, capsule["sub"])
+    scope_id = access_context.scope_id if access_context else None
+    ctx = _capsule_brain.get_capsule_context(
+        capsule["sub"],
+        **({"scope_id": scope_id} if scope_id else {}),
+    )
     public = {k: v for k, v in ctx.items() if not k.startswith("_") and k != "last_session_id"}
     return JSONResponse(content={"context": public})
+
+
+def _onboarding_scope(request: Request, capsule_id: str, body: Optional[dict[str, Any]] = None) -> Optional[str]:
+    access_context = _resolve_active_scope(request, capsule_id, body) if _hybrid_scopes_enabled() else None
+    if access_context and access_context.scope_kind is not ScopeKind.PERSONAL:
+        raise HTTPException(status_code=409, detail="Onboarding import targets HoloPersonal only.")
+    return access_context.scope_id if access_context else None
+
+
+def _read_onboarding_state(capsule_id: str, *, scope_id: Optional[str] = None) -> dict[str, Any]:
+    context = _capsule_brain.get_capsule_context(
+        capsule_id,
+        **({"scope_id": scope_id} if scope_id else {}),
+    )
+    raw = str((context or {}).get("holo_onboarding_state_v1") or "").strip()
+    try:
+        state = json.loads(raw) if raw else {}
+    except Exception:
+        state = {}
+    if not isinstance(state, dict):
+        state = {}
+    selected = state.get("selected_areas")
+    return {
+        "required": bool(state.get("required", False)),
+        "completed": bool(state.get("completed", False)),
+        "step": int(state.get("step") or 1) if str(state.get("step") or "1").isdigit() else 1,
+        "selected_areas": selected if isinstance(selected, list) else [],
+        "review_available": bool(state.get("review_available", True)),
+        "review_required": bool(state.get("review_required", False)),
+        "import_summary": state.get("import_summary") if isinstance(state.get("import_summary"), dict) else None,
+    }
+
+
+@app.get("/v1/capsule/onboarding")
+async def get_capsule_onboarding(request: Request):
+    """Return resumable first-run onboarding state for the authenticated capsule."""
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    scope_id = _onboarding_scope(request, capsule["sub"])
+    return JSONResponse(content=_read_onboarding_state(capsule["sub"], scope_id=scope_id))
+
+
+@app.post("/v1/capsule/onboarding")
+async def save_capsule_onboarding(request: Request):
+    """
+    Save resumable onboarding progress and deterministically admit a pasted
+    HoloBrain import packet into HoloPersonal.
+    """
+    capsule = get_capsule_from_request(request.headers.get("Authorization"))
+    if not capsule:
+        raise HTTPException(status_code=401, detail="Sign in required.")
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON.")
+    if not isinstance(body, dict):
+        raise HTTPException(status_code=400, detail="Request body must be an object.")
+
+    scope_id = _onboarding_scope(request, capsule["sub"], body)
+    scope_kwargs = {"scope_id": scope_id} if scope_id else {}
+    state = _read_onboarding_state(capsule["sub"], scope_id=scope_id)
+
+    selected_areas = body.get("selected_areas")
+    if selected_areas is not None and not isinstance(selected_areas, list):
+        raise HTTPException(status_code=400, detail="selected_areas must be a list.")
+    if isinstance(selected_areas, list):
+        state["selected_areas"] = [str(area).strip()[:40] for area in selected_areas if str(area).strip()][:12]
+
+    try:
+        state["step"] = min(4, max(1, int(body.get("step", state.get("step") or 1))))
+    except (TypeError, ValueError):
+        state["step"] = 1
+
+    imported_context = str(body.get("imported_context") or "").strip()
+    saved_keys: list[str] = []
+    if imported_context:
+        import_result = build_onboarding_context_writes(
+            imported_context,
+            selected_areas=state.get("selected_areas") or [],
+        )
+        for key, value in import_result.context_writes.items():
+            _capsule_brain.set_capsule_context(capsule["sub"], str(key)[:50], str(value)[:5000], **scope_kwargs)
+            saved_keys.append(str(key)[:50])
+        state["import_summary"] = import_result.summary()
+        state["review_available"] = import_result.review_available
+        state["review_required"] = import_result.review_required
+
+    if body.get("completed") is True:
+        state["completed"] = True
+        state["required"] = False
+    elif body.get("required") is not None:
+        state["required"] = bool(body.get("required"))
+
+    _capsule_brain.set_capsule_context(
+        capsule["sub"],
+        "holo_onboarding_state_v1",
+        json.dumps(state, ensure_ascii=True, separators=(",", ":"))[:5000],
+        **scope_kwargs,
+    )
+    logger.info(
+        "HoloChat onboarding saved",
+        extra={
+            "capsule": capsule["sub"][:8],
+            "scope_id": scope_id,
+            "step": state.get("step"),
+            "completed": state.get("completed"),
+            "saved_key_count": len(saved_keys),
+        },
+    )
+    return JSONResponse(content={**state, "saved_keys": saved_keys})
 
 
 @app.post("/v1/capsule/context")
@@ -2455,11 +2609,16 @@ async def seed_capsule_context(request: Request):
     context = body.get("context", {})
     if not isinstance(context, dict):
         raise HTTPException(status_code=400, detail="context must be a dict.")
+    access_context = _resolve_active_scope(request, capsule["sub"], body)
+    scope_id = access_context.scope_id if access_context else None
+    scope_kwargs = {"scope_id": scope_id} if scope_id else {}
     for key, value in context.items():
         if key and isinstance(value, str):
             key_str = str(key)[:50]
             value_limit = 3000 if key_str in {"holo_seed_personal_v1", "holo_seed_deep_v1"} else 500
-            _capsule_brain.set_capsule_context(capsule["sub"], key_str, str(value)[:value_limit])
+            _capsule_brain.set_capsule_context(
+                capsule["sub"], key_str, str(value)[:value_limit], **scope_kwargs
+            )
     logger.info(f"Capsule seeded for {capsule['sub'][:8]}: {list(context.keys())}")
     return JSONResponse(content={"seeded": list(context.keys())})
 
@@ -2473,7 +2632,11 @@ async def delete_capsule_context(key: str, request: Request):
     key = str(key or "").strip()[:50]
     if not key or key.startswith("_") or key == "last_session_id":
         raise HTTPException(status_code=400, detail="That memory entry cannot be deleted here.")
-    deleted = _capsule_brain.delete_capsule_context(capsule["sub"], key)
+    access_context = _resolve_active_scope(request, capsule["sub"])
+    scope_id = access_context.scope_id if access_context else None
+    deleted = _capsule_brain.delete_capsule_context(
+        capsule["sub"], key, **({"scope_id": scope_id} if scope_id else {})
+    )
     return JSONResponse(content={"deleted": bool(deleted), "key": key})
 
 

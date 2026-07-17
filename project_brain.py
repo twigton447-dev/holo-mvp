@@ -1016,15 +1016,50 @@ class ProjectBrain:
         except Exception as e:
             logger.warning(f"HoloBrain.set_capsule_mode failed: {e}")
 
-    @staticmethod
-    def _scope_filter(query, capsule_id: str, scope_id: Optional[str] = None):
-        return query.eq("scope_id", scope_id) if scope_id else query.eq("capsule_id", capsule_id)
+    def _effective_scope_id(self, capsule_id: str, scope_id: Optional[str] = None) -> Optional[str]:
+        """Return an explicit scope or the capsule's Personal scope in hybrid mode.
 
-    @staticmethod
-    def _scope_values(capsule_id: str, scope_id: Optional[str] = None) -> dict:
+        Pre-scope callers such as credential and reset-token handling cannot be
+        allowed to fall back to a capsule-wide query once Personal and Enterprise
+        context share the same durable tables. In hybrid mode, an omitted scope
+        therefore means the caller's Personal scope, never every scope owned by
+        the capsule.
+        """
+        requested = str(scope_id or "").strip()
+        if requested:
+            return requested
+        if not self._hybrid_scopes_enabled():
+            return None
+        if not self._client:
+            return None
+        try:
+            rows = (
+                self._client.table("holo_capsule_principals")
+                .select("personal_scope_id")
+                .eq("capsule_id", capsule_id)
+                .limit(1)
+                .execute()
+            ).data or []
+            personal_scope_id = str((rows[0] if rows else {}).get("personal_scope_id") or "").strip()
+            if personal_scope_id:
+                return personal_scope_id
+        except Exception as exc:
+            logger.warning("HoloBrain Personal scope lookup failed: %s", exc)
+        return None
+
+    def _scope_filter(self, query, capsule_id: str, scope_id: Optional[str] = None):
+        effective_scope_id = self._effective_scope_id(capsule_id, scope_id)
+        if self._hybrid_scopes_enabled() and not effective_scope_id:
+            raise ValueError("Personal scope is unavailable for this capsule")
+        return query.eq("scope_id", effective_scope_id) if effective_scope_id else query.eq("capsule_id", capsule_id)
+
+    def _scope_values(self, capsule_id: str, scope_id: Optional[str] = None) -> dict:
+        effective_scope_id = self._effective_scope_id(capsule_id, scope_id)
+        if self._hybrid_scopes_enabled() and not effective_scope_id:
+            raise ValueError("Personal scope is unavailable for this capsule")
         values = {"capsule_id": capsule_id}
-        if scope_id:
-            values["scope_id"] = scope_id
+        if effective_scope_id:
+            values["scope_id"] = effective_scope_id
         return values
 
     def get_capsule_context(self, capsule_id: str, *, scope_id: Optional[str] = None) -> dict:
@@ -1043,13 +1078,14 @@ class ProjectBrain:
         if not self._client:
             return
         try:
+            effective_scope_id = self._effective_scope_id(capsule_id, scope_id)
             record = {
-                **self._scope_values(capsule_id, scope_id),
+                **self._scope_values(capsule_id, effective_scope_id),
                 "key":        key,
                 "value":      value,
                 "updated_at": datetime.now(timezone.utc).isoformat(),
             }
-            conflict = "scope_id,key" if scope_id else "capsule_id,key"
+            conflict = "scope_id,key" if effective_scope_id else "capsule_id,key"
             self._client.table("holo_capsule_context").upsert(record, on_conflict=conflict).execute()
         except Exception as e:
             logger.warning(f"HoloBrain.set_capsule_context failed: {e}")

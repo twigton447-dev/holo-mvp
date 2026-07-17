@@ -13,6 +13,7 @@ class Query:
     def __init__(self, rows):
         self.rows = list(rows)
         self.filters = []
+        self.limit_count = None
 
     def select(self, columns):
         return self
@@ -22,11 +23,12 @@ class Query:
         return self
 
     def limit(self, count):
+        self.limit_count = count
         return self
 
     def execute(self):
         rows = [row for row in self.rows if all(row.get(key) == value for key, value in self.filters)]
-        return Result(rows[:1])
+        return Result(rows[:self.limit_count] if self.limit_count is not None else rows)
 
 
 class Client:
@@ -93,3 +95,13 @@ def test_malformed_membership_authority_is_denied():
 
     with pytest.raises(ScopeResolutionError, match="authority is invalid"):
         store.resolve("cap-a", "work-a")
+
+
+def test_authorized_space_listing_exposes_personal_and_active_enterprise_only():
+    assert _store().list_authorized_spaces("cap-a") == [
+        {"scope_id": "personal-a", "kind": "personal"},
+        {"scope_id": "work-a", "kind": "enterprise"},
+    ]
+    assert _store(active=False).list_authorized_spaces("cap-a") == [
+        {"scope_id": "personal-a", "kind": "personal"},
+    ]

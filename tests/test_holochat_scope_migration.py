@@ -2,6 +2,9 @@ from pathlib import Path
 
 
 MIGRATION = Path("migrations/20260714_holochat_hybrid_scopes.sql")
+PERSONAL_PROVISIONING_MIGRATION = Path(
+    "migrations/20260717_holochat_personal_space_provisioning.sql"
+)
 
 
 def test_hybrid_scope_migration_defines_identity_membership_and_transfer_ledger():
@@ -78,3 +81,17 @@ def test_migration_fails_closed_on_legacy_orphans_and_denies_direct_clients():
     assert "enable row level security" in sql
     assert "from anon, authenticated" in sql
     assert "service-role backend must" in sql
+
+
+def test_new_capsules_receive_personal_space_without_enterprise_access():
+    sql = PERSONAL_PROVISIONING_MIGRATION.read_text(encoding="utf-8").lower()
+
+    assert "create or replace function holo_provision_personal_scope_for_capsule" in sql
+    assert "after insert on holo_capsules" in sql
+    assert "create trigger provision_personal_scope_for_capsule" in sql
+    assert "insert into holo_principals" in sql
+    assert "insert into holo_scopes" in sql
+    assert "'personal'" in sql
+    assert "insert into holo_capsule_principals" in sql
+    assert "enterprise scopes are intentionally not created here" in sql
+    assert "holo_tenant_memberships" not in sql

@@ -439,3 +439,47 @@ def test_scope_selection_is_rejected_until_hybrid_schema_is_enabled(monkeypatch)
 
     assert response.status_code == 409
     assert engine.send_calls == []
+
+
+def test_enterprise_mode_is_refused_without_hybrid_authorization(monkeypatch):
+    client, _engine = _client(monkeypatch)
+    monkeypatch.delenv("HOLOCHAT_HYBRID_SCOPES_ENABLED", raising=False)
+
+    response = client.post(
+        "/auth/mode",
+        headers={"Authorization": "Bearer capsule-a"},
+        json={"mode": "work"},
+    )
+
+    assert response.status_code == 409
+    assert "Enterprise access is not configured" in response.json()["detail"]
+
+
+def test_authorized_spaces_are_discovered_server_side(monkeypatch):
+    client, _engine = _client(monkeypatch)
+    main._capsule_brain._client = object()
+    monkeypatch.setenv("HOLOCHAT_HYBRID_SCOPES_ENABLED", "1")
+
+    class Resolver:
+        def __init__(self, db_client):
+            assert db_client is main._capsule_brain._client
+
+        def list_authorized_spaces(self, capsule_id):
+            assert capsule_id == "capsule-a"
+            return [
+                {"scope_id": "personal-a", "kind": "personal"},
+                {"scope_id": "work-a", "kind": "enterprise"},
+            ]
+
+    monkeypatch.setattr(main, "HoloChatScopeStore", Resolver)
+
+    response = client.get("/auth/spaces", headers={"Authorization": "Bearer capsule-a"})
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "hybrid_scopes_enabled": True,
+        "spaces": [
+            {"scope_id": "personal-a", "kind": "personal"},
+            {"scope_id": "work-a", "kind": "enterprise"},
+        ],
+    }

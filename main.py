@@ -80,7 +80,7 @@ from holochat_message_connectors import (
 )
 from holochat_scope import AccessContext, ScopeKind
 from holochat_scope_store import HoloChatScopeStore, ScopeResolutionError
-from auth_capsule import handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain
+from auth_capsule import auth_configuration_errors, handle_google_signin, handle_email_signin, get_capsule_from_request, request_password_reset, reset_password, _brain as _capsule_brain
 from db import Database
 from billing import create_checkout_session, create_customer_portal_session, construct_webhook_event, PLANS
 
@@ -100,6 +100,21 @@ async def lifespan(app: FastAPI):
     global _governor
 
     logger.info("Holo API starting up...")
+
+    # Railway is a deployed environment. Never let a deployment silently run
+    # with a development JWT secret or legacy identity-to-capsule aliasing.
+    deployed_runtime = bool(
+        os.getenv("RAILWAY_ENVIRONMENT")
+        or os.getenv("RAILWAY_PROJECT_ID")
+        or os.getenv("HOLOCHAT_AUTH_STRICT_STARTUP")
+    )
+    auth_errors = auth_configuration_errors()
+    if auth_errors and deployed_runtime:
+        raise RuntimeError("Startup blocked by unsafe HoloChat auth configuration: " + "; ".join(auth_errors))
+    if auth_errors:
+        logger.warning("HoloChat auth configuration is not deployment-safe: %s", "; ".join(auth_errors))
+
+    _require_hybrid_scope_schema()
 
     # 0. Connect to Supabase for usage tracking (optional — won't block startup)
     global _db
@@ -266,6 +281,33 @@ def _private_runtime_metadata_enabled() -> bool:
     }
 
 
+def _require_identity_maintenance_clear() -> None:
+    """Reject public API traffic while identity reconciliation is locked.
+
+    The capsule-auth helper already checks this for bearer tokens. This guard
+    also covers API-key-only requests, which otherwise have no browser token to
+    revalidate. A control-store failure is deliberately treated as unavailable,
+    never as permission to continue.
+    """
+    if not getattr(_capsule_brain, "_client", None):
+        return
+    checker = getattr(_capsule_brain, "identity_maintenance_active", None)
+    if not callable(checker):
+        required = str(
+            os.getenv("HOLOCHAT_IDENTITY_MAINTENANCE_REQUIRED", "")
+        ).strip().lower() in {"1", "true", "yes", "on"}
+        if required:
+            raise HTTPException(status_code=503, detail="Identity authorization control is unavailable.")
+        return
+    try:
+        active = checker()
+    except Exception as exc:
+        logger.error("Identity maintenance guard failed: %s", exc)
+        raise HTTPException(status_code=503, detail="Identity authorization is temporarily unavailable.") from exc
+    if active:
+        raise HTTPException(status_code=503, detail="Identity maintenance is in progress. Please retry shortly.")
+
+
 def _public_stream_metadata(chunk: dict[str, Any]) -> dict[str, Any]:
     payload = {key: value for key, value in chunk.items() if key != "done" and not key.startswith("_")}
     if not _private_runtime_metadata_enabled():
@@ -279,6 +321,7 @@ def _verify_key(request: Request) -> str:
     API key validation. Checks per-user keys in Supabase first, then falls
     back to the HOLO_API_KEY env var for internal/admin use.
     """
+    _require_identity_maintenance_clear()
     provided = request.headers.get("x-api-key", "")
     if not provided:
         raise HTTPException(status_code=401, detail="Missing x-api-key header.")
@@ -327,6 +370,19 @@ def _chat_capsule_id(request: Request, api_key: str) -> Optional[str]:
         except Exception as exc:
             logger.warning("Unable to resolve API-key capsule binding: %s", exc)
 
+    if key_capsule_id:
+        active_lookup = getattr(_capsule_brain, "get_active_capsule", None)
+        if not callable(active_lookup):
+            raise HTTPException(status_code=503, detail="Capsule authorization is unavailable.")
+        try:
+            if not active_lookup(key_capsule_id):
+                raise HTTPException(status_code=401, detail="API key belongs to an inactive capsule.")
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.error("Unable to verify API-key capsule activity: %s", exc)
+            raise HTTPException(status_code=503, detail="Capsule authorization is temporarily unavailable.") from exc
+
     if token_capsule_id and key_capsule_id and token_capsule_id != key_capsule_id:
         raise HTTPException(status_code=403, detail="JWT and API key belong to different capsules.")
     return token_capsule_id or key_capsule_id
@@ -334,6 +390,21 @@ def _chat_capsule_id(request: Request, api_key: str) -> Optional[str]:
 
 def _hybrid_scopes_enabled() -> bool:
     return str(os.getenv("HOLOCHAT_HYBRID_SCOPES_ENABLED", "")).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _require_hybrid_scope_schema() -> None:
+    """Refuse a hybrid deployment until its durable scope tables exist."""
+    if not _hybrid_scopes_enabled():
+        return
+    client = getattr(_capsule_brain, "_client", None)
+    if client is None:
+        raise RuntimeError("Hybrid scopes require durable scope authorization storage.")
+    try:
+        client.table("holo_capsule_principals").select("capsule_id").limit(1).execute()
+    except Exception as exc:
+        raise RuntimeError(
+            "Hybrid scopes are enabled but the required scope migration is unavailable."
+        ) from exc
 
 
 def _requested_scope_id(request: Request, body: Optional[dict[str, Any]] = None) -> Optional[str]:
@@ -437,8 +508,12 @@ def _require_session_ownership(
     if session is None and allow_new_session:
         return
     scope_id = access_context.scope_id if access_context else None
-    durable_owner = session.get("scope_id") if session and scope_id else session.get("capsule_id") if session else None
-    if not session or not capsule_id or durable_owner != (scope_id or capsule_id):
+    if (
+        not session
+        or not capsule_id
+        or session.get("capsule_id") != capsule_id
+        or (scope_id is not None and session.get("scope_id") != scope_id)
+    ):
         raise HTTPException(status_code=404, detail="Session not found.")
 
 
@@ -694,6 +769,7 @@ def _verify_bearer(request: Request) -> str:
     Extract and validate a Bearer token from the Authorization header.
     Validates against Supabase api_keys table, falls back to HOLO_API_KEY env var.
     """
+    _require_identity_maintenance_clear()
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or malformed Authorization header. Expected: Bearer <token>")
@@ -859,8 +935,13 @@ async def google_signin(request: Request):
     try:
         result = handle_google_signin(credential)
     except ValueError as e:
-        if "account_cap_reached" in str(e):
-            raise HTTPException(status_code=503, detail="account_cap_reached")
+        detail = str(e)
+        if detail == "account_cap_reached":
+            raise HTTPException(status_code=503, detail=detail)
+        if detail in {"duplicate_email_identity", "duplicate_google_identity", "account_link_required"}:
+            raise HTTPException(status_code=409, detail=detail)
+        if detail in {"account_persistence_unavailable", "identity_maintenance_in_progress"}:
+            raise HTTPException(status_code=503, detail=detail)
         raise HTTPException(status_code=401, detail="Google sign-in failed.")
     if not result:
         raise HTTPException(status_code=401, detail="Google sign-in failed. Invalid credential.")
@@ -894,8 +975,13 @@ async def email_signin(request: Request):
     try:
         result = handle_email_signin(email, name, password, invite_code)
     except ValueError as e:
-        if "account_cap_reached" in str(e):
-            raise HTTPException(status_code=503, detail="account_cap_reached")
+        detail = str(e)
+        if detail == "account_cap_reached":
+            raise HTTPException(status_code=503, detail=detail)
+        if detail in {"duplicate_email_identity", "duplicate_google_identity", "account_link_required"}:
+            raise HTTPException(status_code=409, detail=detail)
+        if detail in {"account_persistence_unavailable", "identity_maintenance_in_progress"}:
+            raise HTTPException(status_code=503, detail=detail)
         raise HTTPException(status_code=403, detail="Invalid invite code.")
     if not result:
         raise HTTPException(status_code=401, detail="Incorrect password.")
@@ -942,39 +1028,21 @@ async def do_reset_password(request: Request):
 @app.get("/auth/me")
 async def get_me(request: Request):
     """
-    Return current capsule info. Also ensures the capsule row exists in Supabase
-    and re-issues a fresh token — heals ephemeral capsules from earlier sessions.
+    Return current capsule info.
+
+    A token may not create or revive durable state. Creating a capsule from a
+    stale browser JWT would let an archived identity return after a merge or
+    revocation, so a durable active capsule is required here.
     """
     capsule = get_capsule_from_request(request.headers.get("Authorization"))
     if not capsule:
         raise HTTPException(status_code=401, detail="Invalid or missing capsule token.")
 
-    # Ensure capsule row exists — creates it if the token was ephemeral
-    if _capsule_brain._client:
-        existing = _capsule_brain.get_capsule(capsule["sub"])
-        if not existing:
-            # Heal: create the capsule row using identity from the JWT
-            import uuid as _uuid
-            try:
-                from datetime import datetime, timezone
-                now = datetime.now(timezone.utc).isoformat()
-                email = capsule.get("email", "")
-                # Use a stable synthetic google_id derived from email
-                import hashlib
-                synthetic_id = "email:" + hashlib.sha256(email.encode()).hexdigest()[:32]
-                _capsule_brain._client.table("holo_capsules").upsert({
-                    "capsule_id":  capsule["sub"],
-                    "google_id":   synthetic_id or capsule["sub"],
-                    "email":       email,
-                    "name":        email.split("@")[0] if email else "User",
-                    "avatar_url":  "",
-                    "mode":        capsule.get("mode", "personal"),
-                    "created_at":  now,
-                    "last_active": now,
-                }, on_conflict="capsule_id").execute()
-                logger.info(f"Healed ephemeral capsule {capsule['sub'][:8]} → Supabase row created.")
-            except Exception as e:
-                logger.warning(f"Capsule heal failed: {e}")
+    if not _capsule_brain._client:
+        raise HTTPException(status_code=503, detail="Durable account storage is unavailable.")
+    existing = _capsule_brain.get_active_capsule(capsule["sub"])
+    if not existing:
+        raise HTTPException(status_code=401, detail="This account is no longer active. Please sign in again.")
 
     return JSONResponse(content=capsule)
 

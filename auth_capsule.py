@@ -28,13 +28,14 @@ import jwt
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
-from project_brain import ProjectBrain
+from project_brain import CapsuleIdentityConflict, CapsulePersistenceError, ProjectBrain
 
 logger = logging.getLogger("holo.auth")
 
 _brain = ProjectBrain()
 
-HOLO_JWT_SECRET  = os.getenv("HOLO_JWT_SECRET", "change-me-in-production")
+_DEVELOPMENT_JWT_SECRET = "change-me-in-production"
+HOLO_JWT_SECRET  = os.getenv("HOLO_JWT_SECRET", _DEVELOPMENT_JWT_SECRET)
 CAPSULE_TOKEN_TTL = 60 * 60 * 24 * 30   # 30 days
 
 
@@ -43,45 +44,78 @@ def _email_google_id(email: str) -> str:
     return "email:" + hashlib.sha256(email.encode()).hexdigest()[:32]
 
 
-def _account_aliases() -> dict[str, str]:
-    """
-    Parse env-configured email aliases.
-
-    Format:
-      HOLOCHAT_ACCOUNT_ALIASES=alias@example.com:canonical-capsule-id
-
-    Multiple mappings may be separated by commas, semicolons, or newlines.
-    Malformed entries are ignored so a bad non-matching entry cannot affect
-    normal sign-in; matching aliases still fail closed if their target is bad.
-    """
-    raw = os.getenv("HOLOCHAT_ACCOUNT_ALIASES", "").strip()
-    aliases: dict[str, str] = {}
-    if not raw:
-        return aliases
-
-    for entry in raw.replace("\n", ",").replace(";", ",").split(","):
-        entry = entry.strip()
-        if not entry or ":" not in entry:
-            if entry:
-                logger.warning("Ignoring malformed account alias entry.")
-            continue
-        alias_email, capsule_id = entry.split(":", 1)
-        alias_email = alias_email.strip().lower()
-        capsule_id = capsule_id.strip()
-        if not alias_email or "@" not in alias_email or not capsule_id:
-            logger.warning("Ignoring invalid account alias entry.")
-            continue
-        aliases[alias_email] = capsule_id
-    return aliases
-
-
-def _account_alias_target(email: str) -> Optional[str]:
-    return _account_aliases().get(email.strip().lower())
-
-
 def _email_auth_capsule_id(email: str) -> str:
     """Return the capsule id used for email password/reset state."""
-    return _account_alias_target(email) or _email_google_id(email.strip().lower())
+    return _email_google_id(email.strip().lower())
+
+
+def _ephemeral_capsules_allowed() -> bool:
+    """Keep non-durable identities out of deployed HoloChat environments."""
+    return str(os.getenv("HOLOCHAT_ALLOW_EPHEMERAL_AUTH", "")).strip().lower() in {
+        "1", "true", "yes", "on",
+    }
+
+
+def _deployed_runtime() -> bool:
+    """Return whether this process is serving a deployed HoloChat runtime."""
+    return bool(
+        os.getenv("RAILWAY_ENVIRONMENT")
+        or os.getenv("RAILWAY_PROJECT_ID")
+        or os.getenv("HOLOCHAT_AUTH_STRICT_STARTUP")
+    )
+
+
+def _identity_maintenance_control_required() -> bool:
+    return str(
+        os.getenv("HOLOCHAT_IDENTITY_MAINTENANCE_REQUIRED", "")
+    ).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _email_password_capsule(email: str) -> Optional[dict]:
+    """Resolve an email/password capsule without choosing an ambiguous row."""
+    if not _brain._client:
+        raise CapsulePersistenceError("capsule storage is unavailable")
+    direct = _brain.get_capsule_by_google_id(_email_google_id(email))
+    if direct:
+        return direct
+    lookup = getattr(_brain, "get_unique_capsule_by_email", None)
+    return lookup(email) if callable(lookup) else None
+
+
+def _assert_identity_signin_available() -> None:
+    """Honor a short operator maintenance window around identity surgery."""
+    checker = getattr(_brain, "assert_identity_signin_available", None)
+    if not callable(checker):
+        return
+    try:
+        checker()
+    except CapsuleIdentityConflict as exc:
+        raise ValueError(str(exc)) from exc
+    except CapsulePersistenceError as exc:
+        raise ValueError("account_persistence_unavailable") from exc
+
+
+def auth_configuration_errors() -> list[str]:
+    """Return unsafe authentication configuration without disclosing secrets.
+
+    Email-to-capsule aliases once existed as a convenience during early account
+    setup. They let one verified identity receive another capsule's token, so
+    they are deliberately unsupported now. Durable account migrations must be
+    explicit, audited, and bound to the verified Google subject instead.
+    """
+    errors: list[str] = []
+    secret = str(HOLO_JWT_SECRET or "")
+    if secret == _DEVELOPMENT_JWT_SECRET or len(secret.encode("utf-8")) < 32:
+        errors.append("HOLO_JWT_SECRET must be a unique value of at least 32 bytes")
+    if os.getenv("HOLOCHAT_ACCOUNT_ALIASES", "").strip():
+        errors.append("HOLOCHAT_ACCOUNT_ALIASES is unsupported and must be removed")
+    if _ephemeral_capsules_allowed():
+        errors.append("HOLOCHAT_ALLOW_EPHEMERAL_AUTH must be disabled in deployed environments")
+    if _deployed_runtime() and not _identity_maintenance_control_required():
+        errors.append(
+            "HOLOCHAT_IDENTITY_MAINTENANCE_REQUIRED must be enabled in deployed environments"
+        )
+    return errors
 
 
 # ---------------------------------------------------------------------------
@@ -158,32 +192,23 @@ def handle_google_signin(credential: str) -> Optional[dict]:
     name       = user_info.get("name", "")
     avatar_url = user_info.get("picture", "")
 
-    alias_capsule_id = _account_alias_target(email)
-    if alias_capsule_id:
-        if not _brain._client:
-            logger.warning("Mapped Google alias sign-in attempted without Supabase.")
-            return None
-        capsule = _brain.get_capsule(alias_capsule_id)
-        if not capsule:
-            logger.warning("Mapped Google alias target capsule was not found.")
-            return None
-        token = issue_capsule_token(capsule["capsule_id"], email, capsule.get("mode", "personal"))
-        return {
-            "capsule_token": token,
-            "capsule_id":    capsule["capsule_id"],
-            "email":         email,
-            "name":          name or capsule.get("name", ""),
-            "avatar_url":    avatar_url,
-            "mode":          capsule.get("mode", "personal"),
-        }
+    _assert_identity_signin_available()
 
     try:
         capsule = _brain.get_or_create_capsule(google_id, email, name, avatar_url)
+    except CapsuleIdentityConflict as e:
+        raise ValueError(str(e)) from e
+    except CapsulePersistenceError as e:
+        if not _ephemeral_capsules_allowed():
+            raise ValueError("account_persistence_unavailable") from e
+        capsule = None
     except ValueError as e:
         if "account_cap_reached" in str(e):
             raise
-        capsule = None
+        raise
     if not capsule:
+        if not _ephemeral_capsules_allowed():
+            raise ValueError("account_persistence_unavailable")
         # No Supabase — create an ephemeral capsule for this session
         import uuid
         capsule = {
@@ -195,6 +220,11 @@ def handle_google_signin(credential: str) -> Optional[dict]:
         }
         logger.warning("Capsule created without Supabase persistence.")
 
+    # Check a second time immediately before minting a browser token. A
+    # reconciliation can begin while Google verification or the account lookup
+    # is in flight; a source token issued after that point must never become a
+    # usable side channel.
+    _assert_identity_signin_available()
     token = issue_capsule_token(capsule["capsule_id"], email, capsule.get("mode", "personal"))
 
     return {
@@ -232,41 +262,14 @@ def handle_email_signin(email: str, name: str, password: str,
         logger.warning("Email sign-in attempted with no password.")
         return None
 
-    alias_capsule_id = _account_alias_target(email)
-    if alias_capsule_id:
-        if not _brain._client:
-            logger.warning("Mapped email alias sign-in attempted without Supabase.")
-            return None
+    _assert_identity_signin_available()
 
-        capsule = _brain.get_capsule(alias_capsule_id)
-        if not capsule:
-            logger.warning("Mapped email alias target capsule was not found.")
-            return None
-
-        real_id = capsule["capsule_id"]
-        ctx = _brain.get_capsule_context(real_id)
-        stored_hash = ctx.get("_password_hash")
-        if not stored_hash:
-            logger.warning("Mapped email alias target has no password hash.")
-            return None
-        if not bcrypt.checkpw(password.encode(), stored_hash.encode()):
-            logger.warning("Password mismatch for mapped email alias.")
-            return None
-
-        token = issue_capsule_token(real_id, email, capsule.get("mode", "personal"))
-        return {
-            "capsule_token": token,
-            "capsule_id":    real_id,
-            "email":         email,
-            "name":          name,
-            "avatar_url":    "",
-            "mode":          capsule.get("mode", "personal"),
-        }
-
-    synthetic_id = _email_google_id(email)
-
-    # Look up existing capsule first (without creating)
-    existing_capsule = _brain.get_capsule_by_google_id(synthetic_id) if _brain._client else None
+    try:
+        existing_capsule = _email_password_capsule(email)
+    except CapsuleIdentityConflict as e:
+        raise ValueError(str(e)) from e
+    except CapsulePersistenceError as e:
+        raise ValueError("account_persistence_unavailable") from e
 
     if existing_capsule:
         real_id = existing_capsule["capsule_id"]
@@ -280,20 +283,27 @@ def handle_email_signin(email: str, name: str, password: str,
                 return None
             capsule = existing_capsule
         else:
-            # Existing capsule but no hash (legacy account) — set password, no invite needed
-            hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-            _brain.set_capsule_context(real_id, "_password_hash", hashed)
-            capsule = existing_capsule
+            # A Google-only identity cannot be claimed by merely entering its
+            # mailbox address. It must be linked while already authenticated.
+            raise ValueError("account_link_required")
     else:
         # Brand new user — require invite code
         if not _valid_invite_code(invite_code):
             logger.warning(f"Invalid invite code '{invite_code}' for {email}")
             raise ValueError("invalid_invite_code")
-        capsule = _brain.get_or_create_capsule(synthetic_id, email, name, "")
+        try:
+            capsule = _brain.get_or_create_capsule(_email_google_id(email), email, name, "")
+        except CapsuleIdentityConflict as e:
+            raise ValueError(str(e)) from e
+        except CapsulePersistenceError as e:
+            raise ValueError("account_persistence_unavailable") from e
         if capsule:
+            _assert_identity_signin_available()
             hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
             _brain.set_capsule_context(capsule["capsule_id"], "_password_hash", hashed)
     if not capsule:
+        if not _ephemeral_capsules_allowed():
+            raise ValueError("account_persistence_unavailable")
         import uuid
         capsule = {
             "capsule_id": str(uuid.uuid4()),
@@ -304,6 +314,7 @@ def handle_email_signin(email: str, name: str, password: str,
         }
         logger.warning("Email capsule created without Supabase persistence.")
 
+    _assert_identity_signin_available()
     token = issue_capsule_token(capsule["capsule_id"], email, capsule.get("mode", "personal"))
 
     return {
@@ -325,16 +336,25 @@ def request_password_reset(email: str, base_url: str) -> bool:
     Returns True if email was sent, False if account not found or email failed.
     """
     email = email.strip().lower()
-    capsule_id = _email_auth_capsule_id(email)
 
     # Only allow reset for existing email-auth accounts
     if not _brain._client:
         return False
-    if _account_alias_target(email) and not _brain.get_capsule(capsule_id):
-        logger.info("Password reset requested for unknown mapped email target.")
+    try:
+        _assert_identity_signin_available()
+    except ValueError:
+        # Preserve the endpoint's anti-enumeration behavior during a brief
+        # maintenance window and do not write reset state.
         return True
+    try:
+        capsule = _email_password_capsule(email)
+    except (CapsuleIdentityConflict, CapsulePersistenceError):
+        return True
+    if not capsule:
+        return True
+    capsule_id = str(capsule["capsule_id"])
     ctx = _brain.get_capsule_context(capsule_id)
-    if not ctx.get("_password_hash") and not _account_alias_target(email):
+    if not ctx.get("_password_hash"):
         # Don't reveal whether the account exists — just return True silently
         logger.info(f"Password reset requested for unknown email: {email}")
         return True
@@ -384,10 +404,18 @@ def reset_password(email: str, token: str, new_password: str) -> bool:
     if not new_password or len(new_password) < 8:
         return False
 
-    capsule_id = _email_auth_capsule_id(email)
-    if _account_alias_target(email) and not _brain.get_capsule(capsule_id):
-        logger.warning("Password reset attempted for missing mapped email target.")
+    try:
+        _assert_identity_signin_available()
+    except ValueError:
         return False
+
+    try:
+        capsule = _email_password_capsule(email)
+    except (CapsuleIdentityConflict, CapsulePersistenceError):
+        return False
+    if not capsule:
+        return False
+    capsule_id = str(capsule["capsule_id"])
     ctx = _brain.get_capsule_context(capsule_id)
 
     stored_token  = ctx.get("_reset_token", "")
@@ -417,4 +445,34 @@ def get_capsule_from_request(auth_header: Optional[str]) -> Optional[dict]:
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
     token = auth_header[len("Bearer "):]
-    return decode_capsule_token(token)
+    payload = decode_capsule_token(token)
+    if not payload:
+        return None
+
+    # Capsule JWTs are deliberately not a permanent authorization grant. A
+    # durable identity can be merged, disabled, or revoked after issuance, so
+    # resolve the subject again before allowing it to touch any HoloBrain data.
+    # Local ephemeral auth is opt-in only and never permitted in deployment.
+    if not getattr(_brain, "_client", None):
+        return payload if _ephemeral_capsules_allowed() else None
+    try:
+        maintenance = getattr(_brain, "identity_maintenance_active", None)
+        if callable(maintenance) and maintenance():
+            return None
+        # A durable runtime must be able to prove that the capsule remains
+        # active. Falling back to ``get_capsule`` would let an older adapter
+        # revive an archived/merged account from a stale browser token.
+        lookup = getattr(_brain, "get_active_capsule", None)
+        if not callable(lookup):
+            logger.error("Durable HoloChat auth cannot verify capsule activity.")
+            return None
+        capsule = lookup(payload.get("sub"))
+    except (CapsuleIdentityConflict, CapsulePersistenceError):
+        return None
+    if not capsule:
+        return None
+    token_email = str(payload.get("email") or "").strip().lower()
+    durable_email = str(capsule.get("email") or "").strip().lower()
+    if token_email and durable_email and token_email != durable_email:
+        return None
+    return payload

@@ -1,0 +1,5 @@
+-- Compatibility marker only. This historical filename sorts before the
+-- preparation migration, so it must not create a dependency on a later file.
+-- Active-identity indexes are finalized by
+-- holo_finalize_capsule_identity_integrity() inside the maintenance window,
+-- after an operator has reconciled any legitimate legacy duplicates.

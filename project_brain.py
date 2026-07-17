@@ -391,6 +391,14 @@ from holochat_evidence import rank_episode_candidates
 
 logger = logging.getLogger("holo.brain")
 
+
+class CapsuleIdentityConflict(ValueError):
+    """A verified identity maps to an ambiguous or unsafe capsule state."""
+
+
+class CapsulePersistenceError(RuntimeError):
+    """Durable capsule storage is unavailable or rejected an identity write."""
+
 VENDOR_EVAL_LIMIT  = 5   # recent evaluations to surface per vendor
 VENDOR_FINDING_LIMIT = 10  # recent HIGH findings to surface per vendor
 
@@ -924,6 +932,119 @@ class ProjectBrain:
     # Capsule management
     # -------------------------------------------------------------------------
 
+    @staticmethod
+    def _normalize_capsule_email(email: str) -> str:
+        return str(email or "").strip().lower()
+
+    @staticmethod
+    def capsule_is_active(capsule: Optional[dict]) -> bool:
+        """Return whether a durable capsule may authenticate or serve context.
+
+        Legacy rows do not have ``identity_status`` until the identity
+        preparation migration is applied, so an omitted value is treated as
+        active. A reconciled source capsule is deliberately retained for audit
+        and recovery, but it must never remain a usable login target.
+        """
+        return str((capsule or {}).get("identity_status") or "active").strip().lower() == "active"
+
+    def identity_maintenance_active(self) -> bool:
+        """Return whether a short, operator-led identity maintenance window is active.
+
+        The control table is introduced by the identity-preparation migration.
+        Older environments simply do not have it yet, so they retain their
+        normal behavior until the reviewed migration is applied. Once the table
+        exists, an enabled row blocks both new sign-ins and durable-token use
+        while a capsule reconciliation is in progress.
+        """
+        if not self._client:
+            return False
+        maintenance_required = str(
+            os.getenv("HOLOCHAT_IDENTITY_MAINTENANCE_REQUIRED", "")
+        ).strip().lower() in {"1", "true", "yes", "on"}
+        try:
+            rows = (
+                self._client.table("holo_identity_maintenance")
+                .select("enabled")
+                .eq("singleton", True)
+                .limit(1)
+                .execute()
+            ).data or []
+        except Exception as exc:
+            # Before the reviewed preparation migration, the control table does
+            # not exist and normal deployments remain available. Once Railway
+            # has opted into the maintenance control, every lookup failure is a
+            # fail-closed condition: allowing a sign-in through an unavailable
+            # maintenance guard would race a reconciliation.
+            if maintenance_required:
+                logger.error("HoloBrain identity-maintenance lookup failed: %s", exc)
+                raise CapsulePersistenceError(
+                    "identity maintenance control is unavailable"
+                ) from exc
+            return False
+        if maintenance_required and not rows:
+            raise CapsulePersistenceError("identity maintenance control is unavailable")
+        return bool(rows and rows[0].get("enabled"))
+
+    def assert_identity_signin_available(self) -> None:
+        """Stop account writes while an identity reconciliation is underway."""
+        if self.identity_maintenance_active():
+            raise CapsuleIdentityConflict("identity_maintenance_in_progress")
+
+    def get_capsules_by_email(self, email: str, *, include_inactive: bool = False) -> list[dict]:
+        """Return durable capsules for an email without choosing one.
+
+        A caller must explicitly handle multiple rows. Choosing an arbitrary
+        match would let legacy duplicate identities split a person's HoloBrain
+        or bind a verified sign-in to the wrong durable record.
+        """
+        if not self._client:
+            raise CapsulePersistenceError("capsule storage is unavailable")
+        normalized = self._normalize_capsule_email(email)
+        if not normalized:
+            return []
+        try:
+            rows = (
+                self._client.table("holo_capsules")
+                .select("*")
+                # ``ilike`` treats '%' and '_' in an email as SQL patterns.
+                # Capsule identity must be an exact canonical mailbox match.
+                .eq("email", normalized)
+                .order("created_at")
+                .limit(20)
+                .execute()
+            ).data or []
+            normalized_rows = [dict(row) for row in rows]
+            return normalized_rows if include_inactive else [
+                row for row in normalized_rows if self.capsule_is_active(row)
+            ]
+        except Exception as exc:
+            logger.warning("HoloBrain capsule email lookup failed: %s", exc)
+            raise CapsulePersistenceError("capsule storage lookup failed") from exc
+
+    def get_unique_capsule_by_email(self, email: str) -> Optional[dict]:
+        rows = self.get_capsules_by_email(email)
+        if len(rows) > 1:
+            raise CapsuleIdentityConflict("duplicate_email_identity")
+        return rows[0] if rows else None
+
+    def _touch_capsule(self, capsule: dict, email: str, name: str, avatar_url: str) -> dict:
+        capsule_id = str(capsule.get("capsule_id") or "").strip()
+        if not capsule_id:
+            raise CapsulePersistenceError("capsule identity is invalid")
+        try:
+            self._client.table("holo_capsules").update({
+                "last_active": datetime.now(timezone.utc).isoformat(),
+                "email": self._normalize_capsule_email(email),
+                "name": name,
+                "avatar_url": avatar_url,
+            }).eq("capsule_id", capsule_id).execute()
+        except Exception as exc:
+            logger.warning("HoloBrain capsule profile update failed: %s", exc)
+            raise CapsulePersistenceError("capsule profile update failed") from exc
+        updated = dict(capsule)
+        updated.update({"email": self._normalize_capsule_email(email), "name": name, "avatar_url": avatar_url})
+        return updated
+
     def get_or_create_capsule(self, google_id: str, email: str,
                                name: str, avatar_url: str) -> Optional[dict]:
         """
@@ -931,23 +1052,37 @@ class ProjectBrain:
         Returns the capsule row dict, or None if DB unavailable.
         """
         if not self._client:
-            return None
+            raise CapsulePersistenceError("capsule storage is unavailable")
+        self.assert_identity_signin_available()
+        normalized_email = self._normalize_capsule_email(email)
+        normalized_google_id = str(google_id or "").strip()
+        if not normalized_google_id or not normalized_email:
+            raise CapsuleIdentityConflict("verified_identity_is_incomplete")
         try:
             rows = (
                 self._client.table("holo_capsules")
                 .select("*")
-                .eq("google_id", google_id)
-                .limit(1)
+                .eq("google_id", normalized_google_id)
+                .limit(20)
                 .execute()
             ).data or []
+            active_rows = [dict(row) for row in rows if self.capsule_is_active(dict(row))]
+            if len(active_rows) > 1:
+                raise CapsuleIdentityConflict("duplicate_google_identity")
+            if active_rows:
+                return self._touch_capsule(active_rows[0], normalized_email, name, avatar_url)
             if rows:
-                # Update last_active + name/avatar in case they changed
-                self._client.table("holo_capsules").update({
-                    "last_active": datetime.now(timezone.utc).isoformat(),
-                    "name":        name,
-                    "avatar_url":  avatar_url,
-                }).eq("google_id", google_id).execute()
-                return rows[0]
+                raise CapsuleIdentityConflict("identity_archived")
+
+            email_matches = self.get_capsules_by_email(normalized_email)
+            if len(email_matches) > 1:
+                raise CapsuleIdentityConflict("duplicate_email_identity")
+            if email_matches:
+                # A verified mailbox alone is not sufficient authorization to
+                # rebind a durable HoloBrain. Legacy and Google identities are
+                # linked only by the audited reconciliation path, never during
+                # an ordinary sign-in request.
+                raise CapsuleIdentityConflict("account_link_required")
 
             # First sign-in — check account cap before creating
             MAX_ACCOUNTS = int(os.getenv("MAX_ACCOUNTS", "100"))
@@ -960,8 +1095,8 @@ class ProjectBrain:
             capsule_id = str(uuid.uuid4())
             row = {
                 "capsule_id":  capsule_id,
-                "google_id":   google_id,
-                "email":       email,
+                "google_id":   normalized_google_id,
+                "email":       normalized_email,
                 "name":        name,
                 "avatar_url":  avatar_url,
                 "mode":        "personal",
@@ -971,24 +1106,32 @@ class ProjectBrain:
             self._client.table("holo_capsules").insert(row).execute()
             logger.info(f"HoloBrain: new capsule created for {email}.")
             return row
+        except (CapsuleIdentityConflict, ValueError):
+            raise
         except Exception as e:
             logger.warning(f"HoloBrain.get_or_create_capsule failed: {e}")
-            return None
+            raise CapsulePersistenceError("capsule persistence failed") from e
 
     def get_capsule_by_google_id(self, google_id: str) -> Optional[dict]:
         if not self._client:
-            return None
+            raise CapsulePersistenceError("capsule storage is unavailable")
         try:
             rows = (
                 self._client.table("holo_capsules")
                 .select("*")
                 .eq("google_id", google_id)
-                .limit(1)
+                .limit(20)
                 .execute()
             ).data or []
-            return rows[0] if rows else None
-        except Exception:
-            return None
+            active_rows = [dict(row) for row in rows if self.capsule_is_active(dict(row))]
+            if len(active_rows) > 1:
+                raise CapsuleIdentityConflict("duplicate_google_identity")
+            return active_rows[0] if active_rows else None
+        except CapsuleIdentityConflict:
+            raise
+        except Exception as exc:
+            logger.warning("HoloBrain capsule identity lookup failed: %s", exc)
+            raise CapsulePersistenceError("capsule identity lookup failed") from exc
 
     def get_capsule(self, capsule_id: str) -> Optional[dict]:
         if not self._client:

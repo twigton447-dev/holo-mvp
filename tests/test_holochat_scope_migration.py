@@ -49,29 +49,41 @@ def test_memory_checkpoint_schema_is_atomic_scoped_and_dependency_ordered():
     assert "grant execute on function holo_commit_memory_checkpoint" in sql
 
 
-def test_all_chat_and_holobrain_surfaces_gain_immutable_non_null_scope():
+def test_core_chat_and_holobrain_surfaces_gain_immutable_non_null_scope():
     sql = MIGRATION.read_text(encoding="utf-8").lower()
-    scoped_tables = (
+    core_scoped_tables = (
         "holo_chat_sessions",
         "holo_chat_messages",
         "holo_capsule_context",
         "holo_life_context",
         "holo_session_consolidations",
         "holo_artifacts",
-        "holo_integrations",
-        "holo_signals",
-        "holo_transcripts",
     )
 
-    for table in scoped_tables:
+    for table in core_scoped_tables:
         assert f"alter table {table} add column if not exists scope_id" in sql
-        assert f"alter table %i alter column scope_id set not null" in sql
     assert "create or replace function holo_reject_scope_reassignment" in sql
     assert "create trigger reject_scope_reassignment" in sql
     assert "create trigger enforce_session_scope" in sql
     assert "child record scope does not match chat session scope" in sql
     assert "create trigger validate_capsule_principal_scope" in sql
     assert "create an audited derivative transfer" in sql
+
+
+def test_optional_product_surfaces_are_guarded_without_relaxing_scope_controls():
+    sql = MIGRATION.read_text(encoding="utf-8").lower()
+
+    for table in ("holo_integrations", "holo_signals", "holo_transcripts"):
+        assert table in sql
+        assert f"to_regclass('public.' || table_name) is not null" in sql
+
+    assert "optional in older production environments" in sql
+    assert "alter table %i add column if not exists scope_id" in sql
+    assert "update %i r set scope_id = m.personal_scope_id" in sql
+    assert "alter table %i enable row level security" in sql
+    assert "revoke all on table %i from anon, authenticated" in sql
+    assert "alter table %i alter column scope_id set not null" in sql
+    assert "create trigger reject_scope_reassignment before update on %i" in sql
 
 
 def test_migration_fails_closed_on_legacy_orphans_and_denies_direct_clients():

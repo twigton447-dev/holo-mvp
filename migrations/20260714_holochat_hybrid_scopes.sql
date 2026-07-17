@@ -105,9 +105,26 @@ alter table holo_capsule_context add column if not exists scope_id uuid referenc
 alter table holo_life_context add column if not exists scope_id uuid references holo_scopes(scope_id);
 alter table holo_session_consolidations add column if not exists scope_id uuid references holo_scopes(scope_id);
 alter table holo_artifacts add column if not exists scope_id uuid references holo_scopes(scope_id);
-alter table holo_integrations add column if not exists scope_id uuid references holo_scopes(scope_id);
-alter table holo_signals add column if not exists scope_id uuid references holo_scopes(scope_id);
-alter table holo_transcripts add column if not exists scope_id uuid references holo_scopes(scope_id);
+
+-- These product surfaces are optional in older production environments. When a
+-- surface exists it receives the exact same scope, backfill, RLS, immutable
+-- scope, and non-null treatment as the core records below. When absent, no
+-- replacement table is invented and no data boundary is weakened.
+do $$
+declare table_name text;
+begin
+    foreach table_name in array array[
+        'holo_integrations', 'holo_signals', 'holo_transcripts'
+    ] loop
+        if to_regclass('public.' || table_name) is not null then
+            execute format(
+                'alter table %I add column if not exists scope_id uuid references holo_scopes(scope_id)',
+                table_name
+            );
+        end if;
+    end loop;
+end;
+$$;
 
 update holo_chat_sessions r set scope_id = m.personal_scope_id
 from holo_capsule_principals m where r.capsule_id = m.capsule_id and r.scope_id is null;
@@ -121,12 +138,24 @@ update holo_session_consolidations r set scope_id = m.personal_scope_id
 from holo_capsule_principals m where r.capsule_id = m.capsule_id and r.scope_id is null;
 update holo_artifacts r set scope_id = m.personal_scope_id
 from holo_capsule_principals m where r.capsule_id = m.capsule_id and r.scope_id is null;
-update holo_integrations r set scope_id = m.personal_scope_id
-from holo_capsule_principals m where r.capsule_id = m.capsule_id and r.scope_id is null;
-update holo_signals r set scope_id = m.personal_scope_id
-from holo_capsule_principals m where r.capsule_id = m.capsule_id and r.scope_id is null;
-update holo_transcripts r set scope_id = m.personal_scope_id
-from holo_capsule_principals m where r.capsule_id = m.capsule_id and r.scope_id is null;
+
+do $$
+declare table_name text;
+begin
+    foreach table_name in array array[
+        'holo_integrations', 'holo_signals', 'holo_transcripts'
+    ] loop
+        if to_regclass('public.' || table_name) is not null then
+            execute format(
+                'update %I r set scope_id = m.personal_scope_id '
+                'from holo_capsule_principals m '
+                'where r.capsule_id = m.capsule_id and r.scope_id is null',
+                table_name
+            );
+        end if;
+    end loop;
+end;
+$$;
 
 -- Capsule context is scope-owned after this migration. capsule_id remains
 -- provenance for the actor that last wrote the value, not the authority key.
@@ -142,10 +171,21 @@ create index if not exists holo_capsule_context_scope on holo_capsule_context(sc
 create index if not exists holo_life_context_scope on holo_life_context(scope_id);
 create index if not exists holo_consolidations_scope_time on holo_session_consolidations(scope_id, created_at desc);
 create index if not exists holo_artifacts_scope_time on holo_artifacts(scope_id, created_at desc);
-create index if not exists holo_integrations_scope on holo_integrations(scope_id, status);
-create index if not exists holo_signals_scope_time on holo_signals(scope_id, occurred_at desc);
-create index if not exists holo_transcripts_scope_time on holo_transcripts(scope_id, occurred_at desc);
 create unique index if not exists holo_chat_sessions_id_scope on holo_chat_sessions(session_id, scope_id);
+
+do $$
+begin
+    if to_regclass('public.holo_integrations') is not null then
+        execute 'create index if not exists holo_integrations_scope on holo_integrations(scope_id, status)';
+    end if;
+    if to_regclass('public.holo_signals') is not null then
+        execute 'create index if not exists holo_signals_scope_time on holo_signals(scope_id, occurred_at desc)';
+    end if;
+    if to_regclass('public.holo_transcripts') is not null then
+        execute 'create index if not exists holo_transcripts_scope_time on holo_transcripts(scope_id, occurred_at desc)';
+    end if;
+end;
+$$;
 
 -- Checkpoint storage depends on the scoped-session composite key above.
 create table if not exists holo_memory_checkpoints (
@@ -241,12 +281,14 @@ begin
         'holo_memory_checkpoints', 'holo_memory_entries', 'holo_memory_episodes',
         'holo_memory_revocations'
     ] loop
-        execute format('drop trigger if exists reject_scope_reassignment on %I', table_name);
-        execute format(
-            'create trigger reject_scope_reassignment before update on %I '
-            'for each row execute function holo_reject_scope_reassignment()',
-            table_name
-        );
+        if to_regclass('public.' || table_name) is not null then
+            execute format('drop trigger if exists reject_scope_reassignment on %I', table_name);
+            execute format(
+                'create trigger reject_scope_reassignment before update on %I '
+                'for each row execute function holo_reject_scope_reassignment()',
+                table_name
+            );
+        end if;
     end loop;
 end;
 $$;
@@ -362,24 +404,47 @@ alter table holo_capsule_context enable row level security;
 alter table holo_life_context enable row level security;
 alter table holo_session_consolidations enable row level security;
 alter table holo_artifacts enable row level security;
-alter table holo_integrations enable row level security;
-alter table holo_signals enable row level security;
-alter table holo_transcripts enable row level security;
 alter table holo_memory_checkpoints enable row level security;
 alter table holo_memory_entries enable row level security;
 alter table holo_memory_episodes enable row level security;
 alter table holo_memory_revocations enable row level security;
+
+do $$
+declare table_name text;
+begin
+    foreach table_name in array array[
+        'holo_integrations', 'holo_signals', 'holo_transcripts'
+    ] loop
+        if to_regclass('public.' || table_name) is not null then
+            execute format('alter table %I enable row level security', table_name);
+        end if;
+    end loop;
+end;
+$$;
 
 revoke all on holo_principals, holo_tenants, holo_scopes,
     holo_tenant_memberships, holo_capsule_principals, holo_scope_transfers
     from anon, authenticated;
 revoke all on holo_capsules, holo_chat_sessions, holo_chat_messages,
     holo_capsule_context, holo_life_context, holo_session_consolidations,
-    holo_artifacts, holo_integrations, holo_signals, holo_transcripts
+    holo_artifacts
     from anon, authenticated;
 revoke all on holo_memory_checkpoints, holo_memory_entries, holo_memory_episodes,
     holo_memory_revocations
     from anon, authenticated;
+
+do $$
+declare table_name text;
+begin
+    foreach table_name in array array[
+        'holo_integrations', 'holo_signals', 'holo_transcripts'
+    ] loop
+        if to_regclass('public.' || table_name) is not null then
+            execute format('revoke all on table %I from anon, authenticated', table_name);
+        end if;
+    end loop;
+end;
+$$;
 
 create or replace function holo_commit_memory_checkpoint(
     p_capsule_id text,
@@ -550,11 +615,13 @@ begin
         'holo_life_context', 'holo_session_consolidations', 'holo_artifacts',
         'holo_integrations', 'holo_signals', 'holo_transcripts'
     ] loop
-        execute format('select count(*) from %I where scope_id is null', table_name) into orphan_count;
-        if orphan_count > 0 then
-            raise exception 'scope migration blocked: % has % orphaned rows', table_name, orphan_count;
+        if to_regclass('public.' || table_name) is not null then
+            execute format('select count(*) from %I where scope_id is null', table_name) into orphan_count;
+            if orphan_count > 0 then
+                raise exception 'scope migration blocked: % has % orphaned rows', table_name, orphan_count;
+            end if;
+            execute format('alter table %I alter column scope_id set not null', table_name);
         end if;
-        execute format('alter table %I alter column scope_id set not null', table_name);
     end loop;
 end;
 $$;

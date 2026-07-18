@@ -224,22 +224,25 @@
     .memory-actions button { border: 1px solid var(--border); background: var(--bg); color: var(--text2); border-radius: 7px; padding: 4px 8px; font-size: 11px; font-weight: 700; font-family: inherit; cursor: pointer; }
     .memory-actions button:hover { color: var(--text); border-color: var(--text3); }
 
-    /* A quiet, centered status line while Holo prepares a response. */
+    /* Centered status line while Holo prepares a response. */
     .holo-progress { width: min(620px, 100%); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 0 12px; font-family: var(--ui-font); }
-    .holo-sprockets { width: 54px; height: 36px; position: relative; display: inline-block; flex: 0 0 auto; }
+    .holo-sprockets { width: 72px; height: 44px; position: relative; display: inline-block; flex: 0 0 auto; contain: layout paint; }
     .holo-sprocket {
       position: absolute;
       display: block;
       overflow: visible;
+      transform: translateZ(0);
     }
     .holo-sprocket-rotor {
       position: absolute;
       inset: 0;
-      clip-path: polygon(50% 0%, 59% 6%, 69% 3%, 73% 13%, 83% 13%, 83% 23%, 93% 29%, 89% 39%, 100% 50%, 89% 61%, 93% 71%, 83% 77%, 83% 87%, 73% 87%, 69% 97%, 59% 94%, 50% 100%, 41% 94%, 31% 97%, 27% 87%, 17% 87%, 17% 77%, 7% 71%, 11% 61%, 0% 50%, 11% 39%, 7% 29%, 17% 23%, 17% 13%, 27% 13%, 31% 3%, 41% 6%);
+      clip-path: polygon(50% 0%, 57% 7%, 66% 3%, 71% 12%, 81% 12%, 84% 22%, 94% 27%, 91% 38%, 100% 50%, 91% 62%, 94% 73%, 84% 78%, 81% 88%, 71% 88%, 66% 97%, 57% 93%, 50% 100%, 43% 93%, 34% 97%, 29% 88%, 19% 88%, 16% 78%, 6% 73%, 9% 62%, 0% 50%, 9% 38%, 6% 27%, 16% 22%, 19% 12%, 29% 12%, 34% 3%, 43% 7%);
       background: linear-gradient(135deg, #2d3034 0%, #090b0f 44%, #1d2025 100%);
-      box-shadow: inset 0 0 0 1px rgba(243, 211, 154, 0.92), inset 0 0 0 3px rgba(183, 138, 70, 0.22), 0 3px 9px rgba(13, 15, 19, 0.20);
-      filter: drop-shadow(0 1px 1px rgba(14, 16, 21, 0.20));
-      will-change: transform, filter;
+      box-shadow: inset 0 0 0 1px rgba(243, 211, 154, 0.88), inset 0 0 0 3px rgba(183, 138, 70, 0.20), 0 3px 9px rgba(13, 15, 19, 0.18);
+      filter: drop-shadow(0 1px 1px rgba(14, 16, 21, 0.16));
+      transform-origin: 50% 50%;
+      backface-visibility: hidden;
+      will-change: transform;
     }
     .holo-sprocket-rotor::before {
       content: "";
@@ -263,18 +266,19 @@
       box-shadow: 0 0 0 2px rgba(183, 138, 70, 0.18);
       transform: translate(-50%, -50%);
     }
-    .holo-sprocket--large { width: 32px; height: 32px; left: 0; top: 2px; }
-    .holo-sprocket--small { width: 24px; height: 24px; left: 27px; top: 7px; }
+    .holo-sprocket--large { width: 34px; height: 34px; left: 0; top: 4px; }
+    .holo-sprocket--medium { width: 27px; height: 27px; left: 30px; top: 0; }
+    .holo-sprocket--small { width: 21px; height: 21px; left: 51px; top: 20px; }
     /* One continuous motion loop preserves rotor angle between spool, cruise, and brake. */
     .holo-sprockets.is-spooling .holo-sprocket-rotor { filter: drop-shadow(0 1px 1px rgba(14, 16, 21, 0.18)); }
-    .holo-sprockets.is-at-speed .holo-sprocket-rotor { filter: drop-shadow(0 1px 1px rgba(14, 16, 21, 0.16)) blur(0.08px); }
+    .holo-sprockets.is-at-speed .holo-sprocket-rotor { filter: drop-shadow(0 1px 1px rgba(14, 16, 21, 0.15)); }
     .holo-sprockets.is-braking .holo-sprocket-rotor { filter: drop-shadow(0 1px 1px rgba(14, 16, 21, 0.17)); }
     .holo-progress-label,
     .wait-label {
       display: inline-block;
       color: var(--text3);
-      background: linear-gradient(90deg, var(--text3) 0%, var(--text3) 38%, var(--text) 50%, var(--text3) 62%, var(--text3) 100%);
-      background-size: 240% 100%;
+      background: linear-gradient(90deg, var(--text3) 0%, var(--text3) 36%, rgba(255,255,255,0.96) 48%, var(--text) 54%, var(--text3) 66%, var(--text3) 100%);
+      background-size: 260% 100%;
       background-position: 0 0;
       -webkit-background-clip: text;
       background-clip: text;
@@ -282,7 +286,7 @@
       font-size: 13px;
       font-weight: 500;
       line-height: 1.4;
-      animation: waitWipe 2.6s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+      animation: waitWipe 2.35s cubic-bezier(0.45, 0, 0.25, 1) infinite;
     }
     @keyframes waitWipe { 0% { background-position: 0 0; } 72%, 100% { background-position: 100% 0; } }
     @media (prefers-reduced-motion: reduce) {
@@ -4003,7 +4007,7 @@ For each important item, write one short bullet with the fact or context, confid
 
     const imagePreviewUrls = attachedFiles.filter(isImageFile).map(f => URL.createObjectURL(f));
     appendMessage("user", text, imagePreviewUrls);
-    const typingEl = appendTyping();
+    const typingEl = appendTyping(text);
     scrollToBottom();
     // Keep the waiting state tied to real runtime phases rather than random
     // floating copy that can feel like an invented system signal.
@@ -4722,82 +4726,184 @@ For each important item, write one short bullet with the fact or context, confid
 
   // Contextual wait labels only switch to a web-specific sequence once
   // HoloGov has actually authorized retrieval for this turn.
-  const WAIT_LABELS = {
-    none: [
-      "Holo is reading your request and the selected context…",
-      "Holo is deciding which details matter for this answer…",
-      "Holo is checking the response for missing constraints…",
-      "Holo is preparing the answer for you…",
-    ],
+  const WAIT_LABEL_POOL = [
+    "HoloGov is checking which context is allowed for this turn…",
+    "Holo is reading your request against the active space…",
+    "Holo is separating saved context from the message you just sent…",
+    "Holo is checking whether this needs current sources…",
+    "Holo is building the response plan before writing…",
+    "Holo is weighing the constraints you named…",
+    "Holo is choosing what to answer first…",
+    "Holo is looking for the practical next step…",
+    "Holo is checking for missing assumptions…",
+    "Holo is keeping Personal and Enterprise boundaries separate…",
+    "Holo is testing the answer against the thread context…",
+    "Holo is checking whether a direct answer is safer than a broad one…",
+    "Holo is matching tone to the stakes of the request…",
+    "Holo is keeping unsupported claims out of the answer…",
+    "Holo is preparing the clearest version of the response…",
+    "Holo is checking whether the answer should include dates or timing…",
+    "Holo is checking if this should become a plan, a decision, or a draft…",
+    "Holo is making sure private context stays scoped to this space…",
+    "Holo is reducing the answer to what you can actually use…",
+    "Holo is assembling the final answer now…",
+  ];
+
+  const WAIT_TOPIC_LABELS = {
     current: [
-      "HoloGov approved a check for current sources…",
+      "HoloGov approved current-source retrieval for this turn…",
       "Holo is reading the sources it found…",
       "Holo is checking whether the sources support the answer…",
       "Holo is separating confirmed facts from uncertainty…",
-      "Holo is preparing the cited answer…",
+      "Holo is preparing the cited answer from admitted sources…",
     ],
+    schedule: [
+      "Holo is checking the timing pressure inside your request…",
+      "Holo is turning dates and commitments into a clean sequence…",
+      "Holo is looking for conflicts, dependencies, and slack time…",
+      "Holo is separating urgent timing from optional follow-up…",
+    ],
+    messages: [
+      "Holo is checking whether this needs message context…",
+      "Holo is separating raw message detail from usable context…",
+      "Holo is looking for who needs a reply, a decision, or a follow-up…",
+      "Holo is keeping message access inside the consent boundary…",
+    ],
+    memory: [
+      "Holo is checking the active Personal memory boundary…",
+      "Holo is separating remembered context from this new request…",
+      "Holo is checking whether this answer should admit prior context…",
+      "Holo is avoiding unverified memory claims…",
+    ],
+    enterprise: [
+      "Holo is checking Enterprise scope before using work context…",
+      "Holo is separating company facts from Personal context…",
+      "Holo is checking whether the request needs a work-safe summary…",
+      "Holo is keeping regulated details inside the authorized space…",
+    ],
+    health: [
+      "Holo is checking the health context boundary before answering…",
+      "Holo is separating personal context from medical claims…",
+      "Holo is checking what should be framed as support, not advice…",
+      "Holo is keeping uncertainty visible in the answer…",
+    ],
+    legal: [
+      "Holo is checking the governing-source boundary before answering…",
+      "Holo is separating rules, risks, and open questions…",
+      "Holo is keeping legal uncertainty explicit…",
+      "Holo is preparing a practical answer without pretending to certify it…",
+    ],
+    plan: [
+      "Holo is turning the request into steps, tradeoffs, and next actions…",
+      "Holo is finding the smallest useful first move…",
+      "Holo is separating the decision from the execution plan…",
+      "Holo is checking what can move now and what needs more context…",
+    ],
+  };
+
+  const WAIT_LABELS = {
+    none: WAIT_LABEL_POOL,
+    current: WAIT_TOPIC_LABELS.current,
     clinical_trials: [
-      "Holo is carefully locating current trial sources…",
-      "Holo is rigorously checking eligibility details…",
-      "Holo is thoughtfully separating evidence from uncertainty…",
-      "Holo is gently synthesizing the practical choices…",
-      "Holo is preparing the answer from the verified details…",
+      "HoloGov approved trial-source retrieval for this turn…",
+      "Holo is locating current trial sources…",
+      "Holo is checking eligibility details against the source text…",
+      "Holo is separating trial evidence from uncertainty…",
+      "Holo is preparing the answer from verified trial details…",
     ],
     medical_current_evidence: [
-      "Holo is carefully locating trusted clinical sources…",
-      "Holo is rigorously checking what the evidence supports…",
-      "Holo is thoughtfully separating facts from uncertainty…",
-      "Holo is gently synthesizing the practical meaning…",
-      "Holo is preparing the answer from the verified details…",
+      "HoloGov approved clinical-source retrieval for this turn…",
+      "Holo is locating trusted clinical sources…",
+      "Holo is checking what the evidence supports…",
+      "Holo is separating clinical facts from uncertainty…",
+      "Holo is preparing the answer from verified health details…",
     ],
     legal_tax_rules_current: [
-      "Holo is carefully locating current governing sources…",
-      "Holo is precisely checking the operative details…",
+      "HoloGov approved governing-source retrieval for this turn…",
+      "Holo is locating current governing sources…",
+      "Holo is checking the operative details…",
       "Holo is checking the relevant constraints…",
       "Holo is separating the rules that apply from open questions…",
       "Holo is preparing the answer from the governing sources…",
     ],
     housing_market_current: [
-      "Holo is actively locating current market signals…",
-      "Holo is carefully comparing the relevant numbers…",
-      "Holo is thoughtfully quantifying the tradeoffs…",
+      "HoloGov approved current market retrieval for this turn…",
+      "Holo is locating current market signals…",
+      "Holo is comparing the relevant numbers…",
+      "Holo is quantifying the tradeoffs…",
       "Holo is separating the useful signal from the noise…",
       "Holo is preparing the answer from the current data…",
     ],
     travel_fares_current: [
-      "Holo is actively locating current fare signals…",
-      "Holo is carefully comparing the route options…",
-      "Holo is thoughtfully quantifying the tradeoffs…",
+      "HoloGov approved current fare retrieval for this turn…",
+      "Holo is locating current fare signals…",
+      "Holo is comparing the route options…",
+      "Holo is quantifying the tradeoffs…",
       "Holo is separating flexible options from expensive dates…",
       "Holo is preparing the answer from the current fare data…",
     ],
     volatile_events_current: [
-      "Holo is actively locating the latest reporting…",
-      "Holo is carefully checking what changed…",
-      "Holo is thoughtfully separating signal from noise…",
+      "HoloGov approved latest-reporting retrieval for this turn…",
+      "Holo is locating the latest reporting…",
+      "Holo is checking what changed…",
+      "Holo is separating signal from noise…",
       "Holo is separating confirmed developments from early reporting…",
       "Holo is preparing the answer from the current reporting…",
     ],
   };
   let _waitCycleTimer = null;
 
+  function shuffledWaitLabels(labels) {
+    const copy = Array.from(new Set((labels || []).filter(Boolean)));
+    for (let i = copy.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function inferWaitTopics(message) {
+    const text = String(message || "").toLowerCase();
+    const topics = [];
+    if (/\b(today|tomorrow|tonight|calendar|schedule|meeting|deadline|date|time|next week|morning|evening)\b/.test(text)) topics.push("schedule");
+    if (/\b(message|messages|imessage|android|sms|text|reply|slack|gmail|email|inbox)\b/.test(text)) topics.push("messages");
+    if (/\b(remember|memory|about me|know me|personal context|holo brain|holobrain)\b/.test(text)) topics.push("memory");
+    if (/\b(enterprise|work|company|client|board|brief|regulated|confidential|contract)\b/.test(text)) topics.push("enterprise");
+    if (/\b(doctor|medical|health|symptom|migraine|medicine|diagnosis|trial|clinical)\b/.test(text)) topics.push("health");
+    if (/\b(legal|law|tax|rule|policy|compliance|regulation|liability)\b/.test(text)) topics.push("legal");
+    if (/\b(plan|strategy|priority|priorities|roadmap|next step|decide|decision|build|demo)\b/.test(text)) topics.push("plan");
+    if (/\b(latest|current|recent|today's|price|prices|news|web|search|source|sources|research)\b/.test(text)) topics.push("current");
+    return topics;
+  }
+
+  function buildWaitLabelsForMessage(message) {
+    const labels = [];
+    for (const topic of inferWaitTopics(message)) labels.push(...(WAIT_TOPIC_LABELS[topic] || []));
+    labels.push(...WAIT_LABEL_POOL);
+    return shuffledWaitLabels(labels).slice(0, 20);
+  }
+
   function setWaitLabel(el, text) {
     const label = el && el.querySelector("[data-work-label]");
-    if (label) label.textContent = text;
+    if (label) {
+      label.textContent = text;
+      label.style.animation = "none";
+      void label.offsetWidth;
+      label.style.animation = "";
+    }
   }
 
   function startWaitProgress(typingEl, labels) {
     clearInterval(_waitCycleTimer);
+    const cycleLabels = shuffledWaitLabels(labels && labels.length ? labels : WAIT_LABEL_POOL);
     let index = 0;
     const show = () => {
       if (!typingEl || !typingEl.isConnected) return clearInterval(_waitCycleTimer);
-      const progressIndex = Math.min(index, labels.length - 1);
-      setWaitLabel(typingEl, labels[progressIndex]);
+      setWaitLabel(typingEl, cycleLabels[index % cycleLabels.length]);
       index += 1;
-      if (progressIndex === labels.length - 1) clearInterval(_waitCycleTimer);
     };
     show();
-    _waitCycleTimer = setInterval(show, 7000);
+    _waitCycleTimer = setInterval(show, 4600);
   }
 
   function showSearchWaitLabel(typingEl, scope) {
@@ -4817,40 +4923,40 @@ For each important item, write one short bullet with the fact or context, confid
   function startSprocketMotion(typingEl) {
     const sprockets = typingEl && typingEl.querySelector(".holo-sprockets");
     const rotors = sprockets && Array.from(sprockets.querySelectorAll(".holo-sprocket-rotor"));
-    if (!sprockets || !rotors || rotors.length !== 2) return;
+    if (!sprockets || !rotors || rotors.length < 3) return;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     stopSprocketMotion(typingEl);
+    const gearRatios = [0.72, -1.04, 1.34];
     const motion = {
       frame: 0,
       spoolTimer: 0,
       brakeTimer: 0,
       lastFrame: performance.now(),
       speed: 0,
-      targetSpeed: 960,
-      largeAngle: 0,
-      smallAngle: 0,
+      targetSpeed: 360,
+      angles: rotors.map(() => 0),
       phase: "spooling",
       resolveBrake: null,
     };
     typingEl._sprocketMotion = motion;
 
     const render = () => {
-      rotors[0].style.transform = `rotate(${motion.largeAngle.toFixed(2)}deg)`;
-      rotors[1].style.transform = `rotate(${motion.smallAngle.toFixed(2)}deg)`;
+      rotors.forEach((rotor, idx) => {
+        rotor.style.transform = `translateZ(0) rotate(${motion.angles[idx]}deg)`;
+      });
     };
     const tick = (now) => {
       if (typingEl._sprocketMotion !== motion || !typingEl.isConnected) return stopSprocketMotion(typingEl);
       const elapsed = Math.min(0.05, Math.max(0.001, (now - motion.lastFrame) / 1000));
       motion.lastFrame = now;
       const target = motion.phase === "braking" ? 0 : motion.targetSpeed;
-      const response = motion.phase === "braking" ? 16 : 4.25;
+      const response = motion.phase === "braking" ? 12 : 3.2;
       motion.speed += (target - motion.speed) * (1 - Math.exp(-response * elapsed));
-      motion.largeAngle += motion.speed * elapsed;
-      motion.smallAngle -= motion.speed * 1.33 * elapsed;
+      motion.angles = motion.angles.map((angle, idx) => angle + motion.speed * (gearRatios[idx] || 1) * elapsed);
       render();
 
-      if (motion.phase === "braking" && motion.speed < 5) return stopSprocketMotion(typingEl);
+      if (motion.phase === "braking" && motion.speed < 2) return stopSprocketMotion(typingEl);
       motion.frame = requestAnimationFrame(tick);
     };
 
@@ -4886,19 +4992,19 @@ For each important item, write one short bullet with the fact or context, confid
     if (typingEl && typingEl.parentNode) typingEl.remove();
   }
 
-  function appendTyping() {
+  function appendTyping(messageText = "") {
     const container = document.getElementById("messages");
     const el        = document.createElement("div");
     el.className    = "msg holo";
     el.innerHTML    = `
       <div class="holo-body">
         <div class="holo-progress" role="status" aria-live="polite">
-          <span class="holo-sprockets is-spooling" aria-hidden="true"><span class="holo-sprocket holo-sprocket--large"><span class="holo-sprocket-rotor"></span></span><span class="holo-sprocket holo-sprocket--small"><span class="holo-sprocket-rotor"></span></span></span>
-          <span class="holo-progress-label wait-label" data-work-label>Holo is reading your request and the selected context…</span>
+          <span class="holo-sprockets is-spooling" aria-hidden="true"><span class="holo-sprocket holo-sprocket--large"><span class="holo-sprocket-rotor"></span></span><span class="holo-sprocket holo-sprocket--medium"><span class="holo-sprocket-rotor"></span></span><span class="holo-sprocket holo-sprocket--small"><span class="holo-sprocket-rotor"></span></span></span>
+          <span class="holo-progress-label wait-label" data-work-label>HoloGov is checking which context is allowed for this turn…</span>
         </div>
       </div>`;
     container.appendChild(el);
-    startWaitProgress(el, WAIT_LABELS.none);
+    startWaitProgress(el, buildWaitLabelsForMessage(messageText));
     startSprocketMotion(el);
     return el;
   }

@@ -1058,10 +1058,12 @@ def test_frontend_and_stream_surface_contextual_search_trust_signals():
     assert "Web checked · no usable sources" in html
     assert "function showSearchWaitLabel" in html
     assert "showSearchWaitLabel(typingEl, evt.scope)" in html
-    assert "Holo is checking trusted medical sources…" in html
-    assert "Holo is checking current sources…" in html
-    assert "Holo is thinking through the right answer…" in html
-    assert "Holo is connecting the evidence…" in html
+    assert "WAIT_LABEL_POOL" in html
+    assert "HoloGov approved clinical-source retrieval for this turn…" in html
+    assert "HoloGov approved current-source retrieval for this turn…" in html
+    assert "Holo is matching tone to the stakes of the request…" in html
+    assert "Holo is keeping unsupported claims out of the answer…" in html
+    assert "holo-sprocket--medium" in html
     assert "@keyframes waitWipe" in html
     assert "prefers-reduced-motion" in html
     assert "const LINK_ATTRS = 'target=\"_blank\" rel=\"noopener noreferrer\"'" in html

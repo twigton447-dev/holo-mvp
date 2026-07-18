@@ -1035,7 +1035,7 @@ def test_hologov_minimax_ignores_stale_output_budget_outside_experiment(monkeypa
         turn_number=1,
     )
 
-    assert captured["max_tokens"] == 4000
+    assert captured["max_tokens"] == 2400
 
 
 def test_hologov_minimax_allows_bounded_output_override_in_dual_gated_experiment(monkeypatch):
@@ -1063,7 +1063,63 @@ def test_hologov_minimax_allows_bounded_output_override_in_dual_gated_experiment
         turn_number=1,
     )
 
-    assert captured["max_tokens"] == 6000
+    assert captured["max_tokens"] == 3000
+
+
+def test_hologov_control_parser_repairs_truncated_json_without_second_provider_call(monkeypatch):
+    repair_calls = []
+
+    class FakeJsonRepair:
+        @staticmethod
+        def repair_json(raw, return_objects=True):
+            repair_calls.append({"raw": raw, "return_objects": return_objects})
+            return {
+                "conversation_phase": "repair",
+                "current_state_of_affairs": "HoloGov recovered a truncated control packet locally.",
+                "rolling_summary": "The control plane has enough structure to brief the worker after local JSON repair.",
+                "worker_assignment": {"objective": "Continue with the admitted context and preserve boundaries."},
+                "next_worker_directive": "Answer normally while preserving evidence and scope boundaries.",
+            }
+
+    monkeypatch.setitem(sys.modules, "json_repair", FakeJsonRepair)
+    governor = GovernorAdapter.__new__(GovernorAdapter)
+    governor.provider = "minimax"
+    governor.model_id = "MiniMax-M2.7-highspeed"
+    governor._gov_input_tokens = 0
+    governor._gov_output_tokens = 0
+    calls = []
+
+    def fake_call_json(prompt, max_tokens, system):
+        calls.append({"prompt": prompt, "max_tokens": max_tokens, "system": system})
+        return (
+            '{"conversation_phase":"repair",'
+            '"current_state_of_affairs":"truncated",'
+            '"rolling_summary":"partial",'
+            '"worker_assignment":{"objective":"recover"'
+        )
+
+    governor._call_json = fake_call_json
+    result = governor.compile_holochat_control_packet(
+        ordered_history=[],
+        current_user_message="Keep the persona stress test coherent.",
+        previous_state={},
+        capsule_context={},
+        life_context=[],
+        latest_consolidation=None,
+        worker_identity={"provider": "openai", "model": "gpt-5.5"},
+        turn_policy={"tier": "standard"},
+        history_metadata={"ordered_history_preserved": True},
+        turn_number=5,
+    )
+
+    assert len(calls) == 1
+    assert calls[0]["max_tokens"] == 2400
+    assert repair_calls
+    assert result["proposal"]["conversation_phase"] == "repair"
+    telemetry = result["telemetry"]
+    assert telemetry["parse_status"] == "parsed_after_repair"
+    assert telemetry["parse_repair"] == "json_repair"
+    assert telemetry["status"] == "validated_after_repair"
 
 
 def test_holochat_provider_clients_disable_hidden_sdk_retries(monkeypatch):
